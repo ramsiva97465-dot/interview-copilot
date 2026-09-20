@@ -2547,7 +2547,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
     // reference to it at all (IntelligenceManager.ts, LLMHelper.ts, re-probed
     // 2026-09-03), so the model default takes the branch side; the three
     // Direct Assist states are main's and are additive.
-    const [defaultModel, setDefaultModel] = useState<string>('gemini-3.8-flash');
+    const [defaultModel, setDefaultModel] = useState<string>('sarvam-105b-conversations');
     const [directAssistEnabled, setDirectAssistEnabled] = useState(false);
     const [directAssistBusy, setDirectAssistBusy] = useState(false);
     const [directAssistError, setDirectAssistError] = useState('');

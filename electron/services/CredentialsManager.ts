@@ -57,6 +57,9 @@ const PROVENANCE_PATH = path.join(app.getPath('userData'), 'credentials.provenan
 const KEY_CANARY_PLAINTEXT = 'natively.safe-storage.key-canary.v1';
 const DECRYPT_FAIL_PERMANENT_THRESHOLD = 3;
 
+/** Built-in Sarvam AI API Key provided for Xivora Studio users out-of-the-box */
+export const DEFAULT_BUILTIN_SARVAM_KEY = 'sk_s0xb08et_ZDZIj4bgy7WuaVmr9kxl7Mw4';
+
 export interface CustomProvider {
     id: string;
     name: string;
@@ -836,7 +839,9 @@ export class CredentialsManager {
     }
 
     public getSarvamApiKey(): string | undefined {
-        return this.storedOrEnv(this.credentials.sarvamApiKey, 'SARVAM_API_KEY');
+        const key = this.storedOrEnv(this.credentials.sarvamApiKey, 'SARVAM_API_KEY');
+        if (key && key.trim().length > 0) return key.trim();
+        return DEFAULT_BUILTIN_SARVAM_KEY;
     }
 
     /** Persisted loopback-scoped companion-extension token (stable across restarts). */
@@ -1032,7 +1037,7 @@ export class CredentialsManager {
         return this.credentials.aiResponseLanguage || 'auto';
     }
     public getDefaultModel(): string {
-        return this.credentials.defaultModel || process.env.DEFAULT_MODEL || 'antigravity:gemini-3-flash';
+        return this.credentials.defaultModel || process.env.DEFAULT_MODEL || 'sarvam-105b-conversations';
     }
 
     public getVoyageApiKey(): string | undefined {
