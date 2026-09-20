@@ -72,7 +72,7 @@ export const HOSTED_RERANK_PROVIDERS: Record<HostedRerankProviderId, HostedReran
     id: 'natively',
     name: 'Natively',
     baseUrl: NATIVELY_RERANK_BASE_URL,
-    keyUrl: 'https://natively.software',
+    keyUrl: '',
     keyPlaceholder: 'natively_sk_…',
     // One managed model, chosen and served by the API. Nothing to discover and
     // nothing to pick, so the card shows no model list.

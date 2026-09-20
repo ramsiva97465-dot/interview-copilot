@@ -221,8 +221,8 @@ export class OpenRouterReranker implements RerankSeamPort {
             Authorization: `Bearer ${apiKey}`,
             // OpenRouter attributes traffic with these. Other providers ignore
             // them, so they are harmless to send unconditionally.
-            'HTTP-Referer': 'https://natively.software',
-            'X-Title': 'Natively',
+            'HTTP-Referer': 'https://xivorastudio.com',
+            'X-Title': 'Xivora Studio',
           },
           // ONLY the query and the candidate text. No file paths, no chunk ids,
           // no metadata — the mapping back to candidates is done locally, by index.

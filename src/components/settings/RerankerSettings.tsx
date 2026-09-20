@@ -596,7 +596,7 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
             // discovery degrades, and the managed reranker is the one a customer
             // can use without going and getting a second account.
             id: 'natively', name: 'Natively',
-            keyUrl: 'https://natively.software', keyPlaceholder: 'natively_sk_…',
+            keyUrl: '', keyPlaceholder: 'natively_sk_…',
             staticCatalogue: true, hasApiKey: false, models: [],
         }, {
             id: 'openrouter', name: 'OpenRouter',

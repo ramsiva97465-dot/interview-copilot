@@ -156,8 +156,8 @@ const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 // they are NOT auth and carry nothing about the user. Sent as constants so a
 // request can never leak a real page URL or document title from the overlay.
 const OPENROUTER_ATTRIBUTION_HEADERS = {
-  "HTTP-Referer": "https://natively.software",
-  "X-OpenRouter-Title": "Natively",
+  "HTTP-Referer": "https://xivorastudio.com",
+  "X-OpenRouter-Title": "Xivora Studio",
 }
 // Fluxion AI is an aggregator gateway that speaks BOTH wire protocols, and the
 // one it accepts is fixed by the group the user's key belongs to — a property

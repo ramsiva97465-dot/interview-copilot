@@ -57,8 +57,8 @@ export interface OpenRouterRerankListOptions {
 
 function headers(apiKey?: string): Record<string, string> {
   const h: Record<string, string> = {
-    'HTTP-Referer': 'https://natively.software',
-    'X-Title': 'Natively',
+    'HTTP-Referer': 'https://xivorastudio.com',
+    'X-Title': 'Xivora Studio',
   };
   if (apiKey) h.Authorization = `Bearer ${apiKey}`;
   return h;

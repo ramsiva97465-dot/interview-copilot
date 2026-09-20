@@ -1463,13 +1463,13 @@ export const HelpSettings: React.FC<{ onNavigate?: (tab: string) => void }> = ({
 
                                 <div className="p-4 rounded-xl border bg-accent-subtle border-border-subtle">
                                     <h4 className="font-semibold text-sm mb-2 text-text-primary flex items-center gap-2">
-                                        <CreditCard className="w-4 h-4 text-accent-primary" /> Pro Requirement
+                                        <CreditCard className="w-4 h-4 text-accent-primary" /> Setup Requirement
                                     </h4>
                                     <p className="text-[11px] text-text-secondary mb-2">
-                                        This is a Natively Pro feature.
+                                        To enable Resume &amp; JD context:
                                     </p>
                                     <ol className="text-[11px] text-text-secondary space-y-1 list-decimal pl-4 mb-0">
-                                        <li>Get a License at <button onClick={() => { (window as any).electronAPI?.openExternal('https://natively.software/') }} className="text-accent-primary hover:underline font-semibold">natively.software</button></li>
+                                        <li>Configure your AI Provider API key in Settings.</li>
                                         <li>Drop your Resume PDF in the UI to activate injection.</li>
                                     </ol>
                                 </div>

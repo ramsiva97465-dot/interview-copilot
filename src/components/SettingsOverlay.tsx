@@ -2295,7 +2295,7 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
                                                         <div>
                                                             <h3 className="text-sm font-bold text-text-primary">{isUndetectable ? t('Undetectable') : t('Detectable')}</h3>
                                                             <p className="text-xs text-text-secondary mt-0.5">
-                                                                {isUndetectable ? t('Xivora Studio is currently undetectable by screen-sharing.') : t('Xivora Studio is currently detectable by screen-sharing.')} <button onClick={() => window.electronAPI?.openExternal?.('https://natively.software/supportedapps')} className="text-accent-primary hover:underline">{t('Supported apps here')}</button>
+                                                                {isUndetectable ? t('Xivora Studio is undetectable by screen-sharing (Zoom, MS Teams, Google Meet).') : t('Xivora Studio is visible during screen-sharing.')}
                                                             </p>
                                                         </div>
                                                     </div>

@@ -177,7 +177,7 @@ export class UsageOutbox {
      * therefore costs no data, which is why one lever is enough.
      */
     public isEnabled(): boolean {
-        return usageFlagEnabled(process.env.NATIVELY_USAGE_OUTBOX_ENABLED);
+        return false;
     }
 
     /**
