@@ -23,7 +23,10 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package*.json .npmrc* ./
+
+# Prevent onnxruntime-node from attempting CUDA/GPU binary installation on CPU cloud instances
+ENV ONNXRUNTIME_NODE_INSTALL_CUDA=skip
 
 RUN npm install
 
