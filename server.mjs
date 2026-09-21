@@ -34,6 +34,15 @@ function handleRequest(req, res) {
         const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
         let pathname = decodeURIComponent(parsedUrl.pathname);
 
+        // Direct installer download redirect
+        if (pathname === '/download' || pathname === '/download/windows' || pathname.endsWith('.exe')) {
+            res.writeHead(302, {
+                'Location': 'https://github.com/ramsiva97465-dot/interview-copilot/releases/latest/download/MeetFloo-Setup-2.9.0.exe'
+            });
+            res.end();
+            return;
+        }
+
         // Security: prevent directory traversal
         let safePath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
         let filePath = path.join(DIST_DIR, safePath);

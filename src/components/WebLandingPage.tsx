@@ -38,7 +38,7 @@ export const WebLandingPage: React.FC = () => {
         }
     }, []);
 
-    const downloadUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/latest/download/Xivora.Studio-Setup-2.9.0.exe';
+    const downloadUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/latest/download/MeetFloo-Setup-2.9.0.exe';
 
     const handleDownload = () => {
         setDownloading(true);

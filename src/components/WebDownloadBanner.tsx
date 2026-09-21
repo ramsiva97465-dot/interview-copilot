@@ -11,7 +11,7 @@ export const WebDownloadBanner: React.FC = () => {
 
     const handleDownload = () => {
         // Direct download URL for the Windows Desktop Installer (.exe)
-        const downloadUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/latest/download/Xivora.Studio-Setup-2.9.0.exe';
+        const downloadUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/latest/download/MeetFloo-Setup-2.9.0.exe';
         
         // Trigger download
         const a = document.createElement('a');
