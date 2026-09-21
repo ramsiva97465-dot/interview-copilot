@@ -114,7 +114,7 @@ export const OrchestratedToasterHost: React.FC = () => {
       );
 
     case 'browser_extension':
-      return <BrowserExtensionToaster isOpen={true} onDismiss={onDismiss('browser_extension')} onSkip={onSkip('browser_extension')} />;
+      return null;
 
     case 'profile_intelligence':
       // Profile intelligence is rendered by Launcher's popover when triggered

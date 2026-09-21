@@ -446,6 +446,7 @@ const App: React.FC = () => {
   // mounted.
   useEffect(() => {
     if (!isLauncherWindow && !isDefault) return;
+    if (!isElectron) return; // Do not run onboarding orchestrator on web landing page
     // A/B KILL-SWITCH (2026-07-10): ?noorch=1 (set by WindowHelper when
     // NATIVELY_DISABLE_ONBOARDING_ORCH=1) skips the onboarding orchestrator
     // entirely — no drain loop, no toasters. Lets the same build A/B the
@@ -1325,7 +1326,7 @@ const App: React.FC = () => {
         {!isolateGlobalSurfaces && <NativelyQuotaBanner />}
 
         {/* Orchestrated onboarding toasters (single-slot, controlled by OnboardingOrchestrator) */}
-        {!isolateOnboarding && (
+        {!isolateOnboarding && isElectron && (
           <OrchestratorProvider>
             <OrchestratedToasterHost />
           </OrchestratorProvider>

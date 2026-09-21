@@ -128,10 +128,8 @@ export const BrowserExtensionToaster: React.FC<Props> = ({ isOpen, onDismiss, on
     }
   };
 
-  // Pure presentational: visibility is driven by orchestrator's isOpen prop
-  // (or the ?extToaster=force test hook).
-  const visible = isOpen || testForceShow;
-  if (!visible) return null;
+  // Disabled / removed per request
+  return null;
 
   return (
     <AnimatePresence>
