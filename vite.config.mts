@@ -47,6 +47,11 @@ export default defineConfig({
         // both a source and a stale/stub sibling always resolves to the real source.
         extensions: ['.mts', '.ts', '.tsx', '.mjs', '.js', '.jsx', '.json'],
     },
+    preview: {
+        host: '0.0.0.0',
+        port: 5180,
+        allowedHosts: true,
+    },
     server: {
         // Windows often resolves `localhost` to ::1 while Vite binds IPv6-only,
         // which leaves wait-on and Electron unable to connect. Pin IPv4 loopback

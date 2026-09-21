@@ -36,4 +36,4 @@ RUN npm run build
 
 EXPOSE 5180
 
-CMD ["sh", "-c", "npx vite preview --host 0.0.0.0 --port ${PORT:-5180}"]
+CMD ["sh", "-c", "npx serve -s dist -l ${PORT:-5180}"]
