@@ -558,7 +558,7 @@ export const PhoneMirrorSettings: React.FC = () => {
                       Waiting for extension
                     </div>
                     <div className="text-text-secondary text-[11px] mt-0.5 leading-snug">
-                      Click <span className="text-accent-primary">Connect to Natively</span> in the browser popup.
+                      Click <span className="text-accent-primary">Connect to Xivora Studio</span> in the browser popup.
                     </div>
                   </div>
                 </div>

@@ -45,17 +45,17 @@ const RU: Record<string, string> = {
     'Intelligence': 'Интеллект',
     'Setup & Help': 'Настройка и помощь',
     'About': 'О программе',
-    'Quit Natively': 'Выйти из Natively',
+    'Quit Natively': 'Quit Xivora Studio',
     'Close': 'Закрыть',
     'Settings': 'Настройки',
     'Language': 'Язык',
     'English': 'Английский',
     'Russian': 'Русский',
-    'Interface language for Natively': 'Язык интерфейса Natively',
+    'Interface language for Natively': 'Язык интерфейса Xivora Studio',
 
     // ── Launcher (home) ──
-    'My Natively': 'Мой Natively',
-    'Start Natively': 'Запустить Natively',
+    'My Natively': 'My Xivora Studio',
+    'Start Natively': 'Start Xivora Studio',
     'Detectable': 'Виден при захвате экрана',
     'Undetectable': 'Скрыт от захвата',
     'Today': 'Сегодня',
@@ -155,16 +155,16 @@ const RU: Record<string, string> = {
     'Theme': 'Тема',
     'Meeting Interface Style': 'Стиль интерфейса встречи',
     'Disguise Natively as another application to prevent detection during screen sharing.':
-        'Маскирует Natively под другое приложение, чтобы избежать обнаружения при демонстрации экрана.',
+        'Disguise Xivora Studio as another application to prevent detection during screen sharing.',
 
     // ── About ──
-    'About Natively': 'О программе Natively',
-    'Designed to be invisible, intelligent, and trusted.': 'Создано быть незаметным, умным и надёжным.',
+    'About Natively': 'About Xivora Studio',
+    'Designed to be invisible, intelligent, and trusted.': 'Designed to be invisible, intelligent, and trusted.',
     // Version-free stem: the version is appended at the call site, so this key
     // survives every release instead of going stale (and orphaning itself) the
     // way "What's New in v2.8" / "What's New in 2.8" both did.
-    "What's New in": 'Что нового в',
-    'How Natively Works': 'Как работает Natively',
+    "What's New in": "What's New in",
+    'How Natively Works': 'How Xivora Studio Works',
     'Privacy & Data': 'Приватность и данные',
     'Stealth & Control': 'Скрытность и контроль',
     'No Recording': 'Без записи',
@@ -201,7 +201,7 @@ const RU: Record<string, string> = {
     'Language & Regional Accents': 'Язык и региональные акценты',
     'Settings > Privacy > Microphone': 'Параметры > Конфиденциальность > Микрофон',
     'Natively can capture both what you say and what you hear globally. At the top of the Audio Settings, use the Dropdowns to explicitly select your hardware Input (e.g. your physical microphone) and Output capture (what the speakers play). By default, Natively uses the System Default, so audio routing automatically follows your OS preferences.':
-        'Natively может захватывать и то, что вы говорите, и то, что вы слышите. В верхней части настроек звука в выпадающих списках явно выберите аппаратный вход (например, ваш микрофон) и захват вывода (то, что играют динамики). По умолчанию используется «Системный по умолчанию», поэтому маршрутизация звука следует настройкам ОС.',
+        'Xivora Studio может захватывать и то, что вы говорите, и то, что вы слышите. В верхней части настроек звука в выпадающих списках явно выберите аппаратный вход (например, ваш микрофон) и захват вывода (то, что играют динамики). По умолчанию используется «Системный по умолчанию», поэтому маршрутизация звука следует настройкам ОС.',
     "The recommended backend for macOS 13.0+. Uses Apple's modern, highly optimized internal framework for 0-latency loopback speaker capture securely.":
         'Рекомендуемый бэкенд для macOS 13.0+. Использует современный оптимизированный фреймворк Apple для безопасного захвата звука динамиков с нулевой задержкой.',
     'Fallback engine for older hardware. Relies on internal device aggregation to trap output audio. Only use this if SCK repeatedly drops speaker packets.':
@@ -211,7 +211,7 @@ const RU: Record<string, string> = {
     'Required to capture what you say during meetings. Windows prompts the first time you start a meeting.':
         'Нужно для захвата вашей речи во время встреч. Windows запросит доступ при первом запуске встречи.',
     'Natively supports over 8 different Audio engines to transcribe what you hear and say. From the Audio tab in settings, use the overarching dropdown to switch the active engine.':
-        'Natively поддерживает более 8 движков распознавания того, что вы слышите и говорите. На вкладке «Звук» переключайте активный движок через основной выпадающий список.',
+        'Xivora Studio поддерживает более 8 движков распознавания того, что вы слышите и говорите. На вкладке «Звук» переключайте активный движок через основной выпадающий список.',
     'We strongly recommend testing connections before jumping into a live meeting. The system shows successful pings or explicit errors if credits/permissions fail.':
         'Настоятельно рекомендуем проверить соединение перед реальной встречей. Система покажет успешный отклик или явную ошибку, если не хватает кредитов/прав.',
 
