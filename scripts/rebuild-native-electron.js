@@ -54,6 +54,11 @@ function getElectronVersion(root) {
 function main() {
   const root = path.resolve(__dirname, '..');
 
+  if (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_STATIC_URL || process.env.SKIP_ELECTRON_REBUILD) {
+    console.warn('[rebuild-native] Cloud deployment environment detected — skipping electron native rebuild.');
+    return;
+  }
+
   // Only Electron+native concerns on macOS/your dev+CI matrix; on other
   // platforms electron-rebuild's own process.arch is already correct.
   const arch = detectHardwareArch();
@@ -97,8 +102,12 @@ function main() {
   const cmd = useArchWrapper ? 'arch' : process.execPath;
   const cmdArgs = useArchWrapper ? [`-${arch === 'x64' ? 'x86_64' : arch}`, process.execPath, ...args] : args;
 
-  execFileSync(cmd, cmdArgs, { stdio: 'inherit', cwd: root });
-  console.log('[rebuild-native] Rebuild complete.');
+  try {
+    execFileSync(cmd, cmdArgs, { stdio: 'inherit', cwd: root });
+    console.log('[rebuild-native] Rebuild complete.');
+  } catch (err) {
+    console.warn('[rebuild-native] Native electron rebuild failed (non-fatal for cloud builds):', err.message);
+  }
 }
 
 main();
