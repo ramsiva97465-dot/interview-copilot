@@ -186,6 +186,7 @@ interface ElectronAPI {
   setDisabledProviders: (providers: string[]) => Promise<{ success: boolean; error?: string }>;
   setCloudEnabledModels: (provider: string, models: string[]) => Promise<{ success: boolean; error?: string }>;
   setNativelyApiKey: (apiKey: string) => Promise<{ success: boolean; error?: string }>;
+  setAppApiKey: (apiKey: string) => Promise<{ success: boolean; error?: string }>;
   // ── In-app review / testimonial prompt ─────────────────────────────────
   reviewGetPromptState: () => Promise<{
     ok: boolean;
@@ -1622,6 +1623,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setDisabledProviders: (providers: string[]) => ipcRenderer.invoke('set-disabled-providers', providers),
   setCloudEnabledModels: (provider: string, models: string[]) => ipcRenderer.invoke('set-cloud-enabled-models', provider, models),
   setNativelyApiKey: (apiKey: string) => ipcRenderer.invoke('set-natively-api-key', apiKey),
+  setAppApiKey: (apiKey: string) => ipcRenderer.invoke('set-natively-api-key', apiKey),
 
   // ── In-app review / testimonial prompt ─────────────────────────────────
   reviewGetPromptState: () => ipcRenderer.invoke('review:get-prompt-state'),

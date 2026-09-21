@@ -116,6 +116,7 @@ export interface StoredCredentials {
     customProviders?: CustomProvider[];
     curlProviders?: CurlProvider[];
     defaultModel?: string;
+    appApiKey?: string;
     nativelyApiKey?: string;
     /**
      * Optional bearer token for a user-hosted OpenAI-compatible embedding
@@ -1181,8 +1182,12 @@ export class CredentialsManager {
         return true;
     }
 
+    public getAppApiKey(): string | undefined {
+        return this.credentials.appApiKey || this.credentials.nativelyApiKey;
+    }
+
     public getNativelyApiKey(): string | undefined {
-        return this.credentials.nativelyApiKey;
+        return this.getAppApiKey();
     }
 
     public getDisabledProviders(): string[] {
@@ -1720,6 +1725,10 @@ export class CredentialsManager {
         // would write the credentials file for a change that is not in it.
         if (changed.defaultModel || changed.sttProvider) this.saveCredentials();
         return changed;
+    }
+
+    public setAppApiKey(key: string): void {
+        this.setNativelyApiKey(key);
     }
 
     public setNativelyApiKey(key: string): void {
