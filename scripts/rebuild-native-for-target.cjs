@@ -107,6 +107,10 @@ module.exports = async function beforePack(context) {
       cwd: root,
     });
   } catch (err) {
+    if (process.platform === 'win32') {
+      console.warn(`[beforePack] Native rebuild for ${archName} failed on Windows (Visual Studio C++ build tools missing). Proceeding with precompiled native binaries.`);
+      return;
+    }
     // Surface an actionable cause: cross-arch compilation needs the Xcode
     // Command Line Tools (node-gyp → clang). Rethrow so electron-builder aborts
     // the build rather than continuing toward a wrong-arch pack.
