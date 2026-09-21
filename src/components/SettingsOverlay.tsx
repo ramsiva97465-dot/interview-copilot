@@ -2576,7 +2576,7 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
                                                         <div>
                                                             <h3 className="text-sm font-bold text-text-primary">{t('Version')}</h3>
                                                             <p className="text-xs text-text-secondary mt-0.5">
-                                                                {t('You are currently using Natively version')} {packageJson.version}
+                                                                {t('You are currently using Xivora Studio version')} {packageJson.version}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -3711,7 +3711,7 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
                                                                 />
                                                             </div>
                                                             <p className="text-[11px] text-text-secondary mt-2">
-                                                                {t('macOS is fetching this language. You can keep using Natively; the download continues in the background.')}
+                                                                {t('macOS is fetching this language. You can keep using Xivora Studio; the download continues in the background.')}
                                                             </p>
                                                         </>
                                                     ) : (
