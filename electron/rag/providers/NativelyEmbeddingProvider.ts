@@ -104,7 +104,7 @@ export class NativelyEmbeddingProvider implements IEmbeddingProvider {
   private readonly trialToken?: string;
 
   constructor(private apiKey: string, opts: NativelyEmbeddingOptions = {}) {
-    this.baseUrl = (opts.baseUrl || process.env.NATIVELY_API_URL || 'https://api.natively.software').replace(/\/+$/, '');
+    this.baseUrl = (opts.baseUrl || process.env.APP_API_URL || 'https://api.xivorastudio.com').replace(/\/+$/, '');
     this.trialToken = opts.trialToken;
     // Deliberately NOT the same space key as the direct-Gemini provider, even
     // though the server runs the same model at the same dimensionality. The two

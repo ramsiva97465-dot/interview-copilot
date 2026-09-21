@@ -88,7 +88,8 @@ export interface ResolveRelaySessionOpts {
 }
 
 const DEFAULT_TIMEOUT_MS = 4000;
-const HARDCODED_RAILWAY_URL = 'wss://api.natively.software/v1/transcribe';
+const API_BASE = (process.env.APP_API_URL || 'https://api.xivorastudio.com').replace(/\/+$/, '');
+const HARDCODED_RAILWAY_URL = `${API_BASE.replace(/^http/, 'ws')}/v1/transcribe`;
 
 // ── Resolver ───────────────────────────────────────────────────────────────
 

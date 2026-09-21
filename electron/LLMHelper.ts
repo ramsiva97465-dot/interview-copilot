@@ -81,7 +81,7 @@ import type {
   DirectAssistSelection,
 } from './direct-assist/types';
 const execAsync = promisify(exec);
-const NATIVELY_API_URL = (process.env.NATIVELY_API_URL || 'https://api.natively.software').replace(/\/+$/, '');
+const XIVORA_API_URL = (process.env.APP_API_URL || 'https://api.xivorastudio.com').replace(/\/+$/, '');
 
 function nowMs(): number {
   try {
@@ -4796,7 +4796,7 @@ let isMultimodal = !!(imagePaths?.length);
     }
     if (!nativelyKey && !e2eLocalToken) throw new Error('Natively API key not set');
 
-    const endpointUrl = `${NATIVELY_API_URL}/v1/chat`;
+    const endpointUrl = `${XIVORA_API_URL}/v1/chat`;
     const requestId = makeRequestId('nat_json');
     const requestStartedAt = nowMs();
     // When the key is the trial sentinel, authenticate with the real trial token
@@ -9355,7 +9355,7 @@ let isMultimodal = !!(imagePaths?.length);
       } catch { return connectTimeoutMs; }
     })();
 
-    const endpointUrl = `${NATIVELY_API_URL}/v1/chat`;
+    const endpointUrl = `${XIVORA_API_URL}/v1/chat`;
     const requestId = makeRequestId('nat_stream');
     const streamStartedAt = nowMs();
     let responseStartedAt = 0;

@@ -20,7 +20,7 @@ import fs from "fs"
 import path from "path"
 import { loadNativeModule } from "../audio/nativeModuleLoader"
 
-const NATIVELY_API_URL = (process.env.NATIVELY_API_URL || "https://api.natively.software").replace(/\/+$/, "")
+const XIVORA_API_URL = (process.env.APP_API_URL || "https://api.xivorastudio.com").replace(/\/+$/, "")
 const REVIEW_STATE_FILE = "review-state.json"
 
 // Pure eligibility logic is in ReviewPromptLogic.ts (testable without Electron),

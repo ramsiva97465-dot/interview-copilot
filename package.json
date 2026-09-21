@@ -262,8 +262,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "Natively-AI-assistant",
-        "repo": "natively-cluely-ai-assistant",
+        "owner": "SnapServe-AI",
+        "repo": "Meeting-bot",
         "releaseType": "release"
       }
     ],
@@ -272,7 +272,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "Proprietary",
   "devDependencies": {
     "@electron/notarize": "^3.1.1",
     "@electron/rebuild": "^4.0.3",

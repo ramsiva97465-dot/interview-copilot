@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Natively logomark — "N" letterform inscribed in a circle.
+ * Xivora logomark — "X" letterform inscribed in a circle.
  * Rendered as inline SVG so it inherits `color` (currentColor) and
  * can be styled freely with className.
  */
@@ -27,36 +27,19 @@ export const NativelyLogoMark: React.FC<{
             strokeWidth="5"
         />
 
-        {/*
-          The "N" lettermark — three strokes:
-            Left vertical bar
-            Diagonal stroke (top-left → bottom-right)
-            Right vertical bar
-          All strokes use round caps and joins to keep it crisp at small sizes.
-        */}
-
-        {/* Left vertical bar */}
+        {/* Diagonal 1: Top-Left to Bottom-Right */}
         <line
-            x1="26" y1="22"
-            x2="26" y2="78"
+            x1="28" y1="28"
+            x2="72" y2="72"
             stroke="currentColor"
             strokeWidth="9"
             strokeLinecap="round"
         />
 
-        {/* Diagonal */}
+        {/* Diagonal 2: Top-Right to Bottom-Left */}
         <line
-            x1="26" y1="22"
-            x2="74" y2="78"
-            stroke="currentColor"
-            strokeWidth="9"
-            strokeLinecap="round"
-        />
-
-        {/* Right vertical bar */}
-        <line
-            x1="74" y1="22"
-            x2="74" y2="78"
+            x1="72" y1="28"
+            x2="28" y2="72"
             stroke="currentColor"
             strokeWidth="9"
             strokeLinecap="round"

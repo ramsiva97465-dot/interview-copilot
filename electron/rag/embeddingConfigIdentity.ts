@@ -190,7 +190,7 @@ export function resolveEmbeddingCredentials(
     customEmbeddingKey,
     openrouterKey,
     voyageKey,
-    nativelyApiUrl: overrides.nativelyApiUrl ?? process.env.NATIVELY_API_URL,
+    nativelyApiUrl: overrides.nativelyApiUrl ?? process.env.APP_API_URL,
     providerDataScopes: overrides.providerDataScopes,
     explicitKeyManagement,
   });

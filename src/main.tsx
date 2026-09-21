@@ -23,7 +23,20 @@ window.addEventListener('unhandledrejection', (event) => {
 // Positive "the bundle reached main.tsx" marker — distinguishes "JS never ran"
 // (missing asset / CSP block) from "JS ran but hung later".
 // eslint-disable-next-line no-console
-console.log('[renderer] main.tsx evaluating');
+// Add a safe fallback for window.electronAPI in web browser environments to prevent crashes
+if (typeof window !== 'undefined' && !window.electronAPI) {
+  (window as any).electronAPI = new Proxy({ isMock: true }, {
+    get: (_target, prop: string) => {
+      if (prop === 'isMock') return true;
+      if (prop === 'platform') return 'win32';
+      const isEventListener = prop.length > 2 && prop.startsWith('on') && prop[2] === prop[2].toUpperCase() && !prop.startsWith('onboarding');
+      if (isEventListener || prop.startsWith('off')) {
+        return () => () => {};
+      }
+      return () => Promise.resolve({});
+    }
+  });
+}
 
 const THEME_CACHE_KEY = 'natively_resolved_theme';
 const launcherIsolation = new URLSearchParams(window.location.search).get('isolate');

@@ -4870,7 +4870,7 @@ const NativelyInterface: React.FC<NativelyInterfaceProps> = ({
     }
 
     if (isExpanded) {
-      window.electronAPI.showWindow(isStealthRef.current);
+      window.electronAPI?.showWindow?.(isStealthRef.current);
       isStealthRef.current = false; // Reset back to default
       // Force a re-measure after re-expand. While hidden, reportShellSize is
       // suppressed (see its !isExpandedRef guard) AND the ResizeObserver does

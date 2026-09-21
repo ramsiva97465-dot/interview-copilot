@@ -17,6 +17,7 @@ import type { TrialUsage, TrialLimits } from './types/nativelyUsage';
 import { FreeTrialModal }       from "./components/trial/FreeTrialModal"
 import { OrchestratorProvider, OrchestratedToasterHost, setUserState as setOrchestratorUserState, emitOrchestratorEvent } from "./components/onboarding/OrchestratedToasterHost"
 import ReviewPromptHost from "./components/ReviewPromptHost"
+import { AdminDashboard } from "./components/admin/AdminDashboard"
 // NOTE: explicit `.ts` extension is load-bearing. Vite's default resolver
 // tries `.mjs` before `.ts` (see DEFAULT_EXTENSIONS in vite/dist/node/constants.js),
 // and this directory also has an `orchestrator.mjs` companion (kept for
@@ -114,6 +115,16 @@ const App: React.FC = () => {
   const isOverlayWindow = new URLSearchParams(window.location.search).get('window') === 'overlay';
   const isModelSelectorWindow = new URLSearchParams(window.location.search).get('window') === 'model-selector';
   const isCropperWindow = new URLSearchParams(window.location.search).get('window') === 'cropper';
+  const isElectron = typeof window !== 'undefined' && (
+    !!(window as any).electronAPI && !(window as any).electronAPI.isMock
+  );
+
+  // Admin panel is ONLY accessible via website URL (?page=admin or /admin or #admin) in a web browser, never inside Desktop app
+  const isAdminWebPage = !isElectron && typeof window !== 'undefined' && (
+    new URLSearchParams(window.location.search).get('page') === 'admin' ||
+    window.location.pathname.startsWith('/admin') ||
+    window.location.hash.includes('admin')
+  );
   // Overlay aux windows: the TopPill and the resize toggle live in their own
   // tiny BrowserWindows so the main overlay window can hug the shell card
   // exactly (no transparent-but-interactive regions).
@@ -999,6 +1010,21 @@ const App: React.FC = () => {
   const interfaceThemeAttribute = meetingInterfaceTheme === 'default' ? undefined : meetingInterfaceTheme;
 
   // Render Logic
+  if (isAdminWebPage) {
+    return (
+      <ErrorBoundary context="AdminDashboard">
+        <div className="w-full min-h-screen bg-zinc-950 text-white p-4 sm:p-8">
+          <QueryClientProvider client={queryClient}>
+            <ToastProvider>
+              <AdminDashboard />
+              <ToastViewport />
+            </ToastProvider>
+          </QueryClientProvider>
+        </div>
+      </ErrorBoundary>
+    );
+  }
+
   if (isCropperWindow) {
     return (
       <React.Suspense fallback={<div className="w-screen h-screen bg-transparent" />}>

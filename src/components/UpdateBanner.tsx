@@ -33,6 +33,7 @@ const UpdateBanner: React.FC = () => {
     const userDismissedRef = useRef(false);
 
     useEffect(() => {
+        if (!window.electronAPI) return;
         let cancelled = false;
         window.electronAPI.getCanAutoUpdate?.()
             .then(({ canAutoUpdate }) => { if (!cancelled) setCanAutoUpdate(canAutoUpdate); })
@@ -45,8 +46,9 @@ const UpdateBanner: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        if (!window.electronAPI) return;
         // Listen for update available
-        const unsubAvailable = window.electronAPI.onUpdateAvailable((info: UpdateInfo) => {
+        const unsubAvailable = window.electronAPI.onUpdateAvailable?.((info: UpdateInfo) => {
             console.log('[UpdateBanner] Update available:', info);
             setUpdateInfo(info);
             setErrorMessage(null);
@@ -61,7 +63,7 @@ const UpdateBanner: React.FC = () => {
         });
 
         // Listen for download progress
-        const unsubProgress = window.electronAPI.onDownloadProgress((progressObj) => {
+        const unsubProgress = window.electronAPI.onDownloadProgress?.((progressObj) => {
             // Re-show toast only if user hasn't explicitly dismissed it
             if (!userDismissedRef.current) {
                 setIsVisible(true);
@@ -71,7 +73,7 @@ const UpdateBanner: React.FC = () => {
         });
 
         // Listen for update-downloaded event
-        const unsubDownloaded = window.electronAPI.onUpdateDownloaded((info) => {
+        const unsubDownloaded = window.electronAPI.onUpdateDownloaded?.((info) => {
             console.log('[UpdateBanner] Update downloaded:', info);
             setUpdateInfo(info); // Update info again just in case
             if (info.parsedNotes) setParsedNotes(info.parsedNotes);
@@ -89,17 +91,17 @@ const UpdateBanner: React.FC = () => {
         });
 
         // Listen for update errors
-        const unsubError = window.electronAPI.onUpdateError((err: string) => {
+        const unsubError = window.electronAPI.onUpdateError?.((err: string) => {
             console.error('[UpdateBanner] Update error:', err);
             setStatus('error');
             setErrorMessage(err);
         });
 
         return () => {
-            unsubAvailable();
-            unsubProgress();
-            unsubDownloaded();
-            unsubError();
+            unsubAvailable?.();
+            unsubProgress?.();
+            unsubDownloaded?.();
+            unsubError?.();
         };
     }, []);
 
@@ -111,7 +113,7 @@ const UpdateBanner: React.FC = () => {
             if (e.metaKey && !e.shiftKey && e.key.toLowerCase() === 'i') {
                 e.preventDefault();
                 console.log("[UpdateBanner] Cmd+I pressed: Triggering Test Release Fetch...");
-                window.electronAPI.testReleaseFetch().catch(console.error);
+                window.electronAPI?.testReleaseFetch?.().catch(console.error);
             }
             
             if (e.metaKey && !e.shiftKey && e.key.toLowerCase() === 'j') {

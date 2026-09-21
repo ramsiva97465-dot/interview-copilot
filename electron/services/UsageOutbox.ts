@@ -72,7 +72,7 @@ function installId(): string | undefined {
     }
 }
 
-const NATIVELY_API_URL = (process.env.NATIVELY_API_URL || 'https://api.natively.software').replace(/\/+$/, '');
+const XIVORA_API_URL = (process.env.APP_API_URL || 'https://api.xivorastudio.com').replace(/\/+$/, '');
 
 const DISPATCH_INTERVAL_MS = 30_000;
 const BATCH_SIZE = 100;
@@ -306,7 +306,7 @@ export class UsageOutbox {
             const ids = live.map((b) => b.event_id);
             let res: Response;
             try {
-                res = await fetch(`${NATIVELY_API_URL}/v1/usage/audit`, {
+                res = await fetch(`${XIVORA_API_URL}/v1/usage/audit`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'x-natively-key': apiKey },
                     body: JSON.stringify({ events: live.map((b) => b.payload) }),

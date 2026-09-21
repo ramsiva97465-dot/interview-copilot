@@ -9954,13 +9954,8 @@ export function initializeIpcHandlers(appState: AppState): void {
   // ── Usage cache (60-second TTL, keyed by API key) ──────────────────────────
   const _usageCache = new Map<string, { data: any; ts: number }>();
   const USAGE_CACHE_TTL_MS = 60_000;
-  // The Natively API host. LLMHelper has honoured NATIVELY_API_URL since the
-  // chat endpoint was added; these seven call sites each hardcoded the
-  // production host instead, so the billing and trial surface was the one part
-  // of the app that could not be pointed at a local server. That is exactly the
-  // surface where "does the UI show what the server enforces?" needs answering
-  // before a release, not after.
-  const NATIVELY_API_BASE = (process.env.NATIVELY_API_URL || 'https://api.natively.software').replace(/\/+$/, '');
+  // The API host.
+  const APP_API_BASE = (process.env.APP_API_URL || 'https://api.xivorastudio.com').replace(/\/+$/, '');
   // The plan catalog. Unauthenticated and identical for every user, so it is
   // cached per PROCESS rather than per key, and for far longer than usage —
   // allowances change on a deploy, not on a request.
@@ -10152,7 +10147,7 @@ export function initializeIpcHandlers(appState: AppState): void {
       const cached = _plansCache.get('plans');
       if (cached && Date.now() - cached.ts < PLANS_CACHE_TTL_MS) return cached.data;
 
-      const res = await fetch(`${NATIVELY_API_BASE}/v1/plans`, {
+      const res = await fetch(`${APP_API_BASE}/v1/plans`, {
         signal: AbortSignal.timeout(8000),
       });
       if (!res.ok) {
@@ -10191,7 +10186,7 @@ export function initializeIpcHandlers(appState: AppState): void {
         return cached.data;
       }
 
-      const res = await fetch(`${NATIVELY_API_BASE}/v1/usage`, {
+      const res = await fetch(`${APP_API_BASE}/v1/usage`, {
         headers: { 'x-natively-key': key },
         signal: AbortSignal.timeout(8000),
       });
@@ -10254,7 +10249,7 @@ export function initializeIpcHandlers(appState: AppState): void {
         return { ok: false, error: 'hardware_id_unavailable' };
       }
 
-      const res = await fetch(`${NATIVELY_API_BASE}/v1/trial/start`, {
+      const res = await fetch(`${APP_API_BASE}/v1/trial/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ hwid }),
@@ -10306,7 +10301,7 @@ export function initializeIpcHandlers(appState: AppState): void {
       const token = CredentialsManager.getInstance().getTrialToken();
       if (!token) return { ok: false, error: 'no_trial_token' };
 
-      const res = await fetch(`${NATIVELY_API_BASE}/v1/trial/status`, {
+      const res = await fetch(`${APP_API_BASE}/v1/trial/status`, {
         headers: { 'x-trial-token': token },
         signal: AbortSignal.timeout(8_000),
       });
@@ -10350,7 +10345,7 @@ export function initializeIpcHandlers(appState: AppState): void {
       const token = CredentialsManager.getInstance().getTrialToken();
       if (!token) return { ok: true }; // no token to report
 
-      await fetch(`${NATIVELY_API_BASE}/v1/trial/convert`, {
+      await fetch(`${APP_API_BASE}/v1/trial/convert`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-trial-token': token },
         body: JSON.stringify({ choice }),
@@ -10538,7 +10533,7 @@ export function initializeIpcHandlers(appState: AppState): void {
       // 1. Fire-and-forget analytics (non-blocking)
       const token = cm.getTrialToken();
       if (token) {
-        fetch(`${NATIVELY_API_BASE}/v1/trial/convert`, {
+        fetch(`${APP_API_BASE}/v1/trial/convert`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-trial-token': token },
           body: JSON.stringify({ choice: 'byok' }),
