@@ -167,7 +167,7 @@ export interface TrialLimits {
  */
 export const TRIAL_FALLBACK_LIMITS: Pick<TrialLimits, 'ai_tokens' | 'stt_minutes' | 'search_requests'> = {
   ai_tokens: 60_000,
-  stt_minutes: 30,
+  stt_minutes: 10,
   search_requests: 3,
 };
 

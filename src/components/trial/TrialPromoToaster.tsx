@@ -159,7 +159,7 @@ export const TrialPromoToaster: React.FC<Props> = ({
               {/* Header */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px', paddingBottom: '16px' }}>
                 <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: t3 }}>
-                  Natively Trial
+                  Xivora Studio Trial
                 </span>
                 <button onClick={handleDismiss} aria-label="Dismiss"
                   style={{ 
@@ -185,7 +185,7 @@ export const TrialPromoToaster: React.FC<Props> = ({
                         ? `0 0 48px rgba(124,58,237,0.18)`
                         : `0 0 64px rgba(139,92,246,0.3), 0 0 120px rgba(139,92,246,0.1)`,
                     }}>
-                      30
+                      10
                     </span>
                     {/* Stacked label column — tight stack at bottom */}
                     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: '3px', paddingBottom: '6px' }}>
@@ -198,7 +198,7 @@ export const TrialPromoToaster: React.FC<Props> = ({
                     Try everything. No card needed.
                   </h2>
                   <p style={{ fontSize: '13px', lineHeight: 1.66, color: t3, margin: '0 auto', maxWidth: '330px' }}>
-                    Full Natively API access — AI chat, meeting transcription, and company research — free for 30 minutes. Bound to this device. No sign-in.
+                    Full Xivora Studio access — AI chat, meeting transcription, and company research — free for 10 minutes. Bound to this device. No sign-in.
                   </p>
                 </motion.div>
 
