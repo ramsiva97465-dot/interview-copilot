@@ -77,11 +77,10 @@ export const FreeTrialBanner: React.FC<TrialBannerProps> = ({ expiresAt, usage, 
         transition={{ duration: 0.25 }}
         className={`
                     mx-3 mb-2 rounded-xl border px-3 py-2
-                    ${
-                      isWarning || expired
-                        ? 'bg-amber-500/10 border-amber-500/30'
-                        : 'bg-bg-item-surface border-border-subtle'
-                    }
+                    ${isWarning || expired
+            ? 'bg-amber-500/10 border-amber-500/30'
+            : 'bg-bg-item-surface border-border-subtle'
+          }
                 `}
       >
         <div className="flex items-center justify-between gap-3">
@@ -93,9 +92,8 @@ export const FreeTrialBanner: React.FC<TrialBannerProps> = ({ expiresAt, usage, 
               className={isWarning || expired ? 'text-amber-400' : 'text-text-tertiary'}
             />
             <span
-              className={`text-[12px] font-mono font-semibold tabular-nums ${
-                isWarning || expired ? 'text-amber-400' : 'text-text-secondary'
-              }`}
+              className={`text-[12px] font-mono font-semibold tabular-nums ${isWarning || expired ? 'text-amber-400' : 'text-text-secondary'
+                }`}
             >
               {expired ? 'Trial ended' : fmt(remaining)}
             </span>
@@ -146,9 +144,8 @@ function UsagePip({
       />
       <div className="h-[3px] w-12 bg-bg-input rounded-full overflow-hidden shrink-0">
         <div
-          className={`h-full rounded-full transition-all duration-700 ${
-            isHigh ? 'bg-amber-400' : 'bg-violet-500/60'
-          }`}
+          className={`h-full rounded-full transition-all duration-700 ${isHigh ? 'bg-amber-400' : 'bg-violet-500/60'
+            }`}
           style={{ width: `${pct}%` }}
         />
       </div>

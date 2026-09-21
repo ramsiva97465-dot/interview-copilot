@@ -1475,6 +1475,7 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
     const [hasStoredIbmWatsonKey, setHasStoredIbmWatsonKey] = useState(false);
     const [sttSonioxKey, setSttSonioxKey] = useState('');
     const [hasStoredSonioxKey, setHasStoredSonioxKey] = useState(false);
+    const [isSttDropdownOpen, setIsSttDropdownOpen] = useState(false);
     const [sttDropdownRef] = useState(() => React.createRef<HTMLDivElement>());
 
     // Google User Account State

@@ -13,7 +13,7 @@ import { BEAT, EASE_ENTER, EASE_LEAVE, INK, SETTLE } from '../../lib/plansMotion
 const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1];
 const EASE_OUT_CSS = 'cubic-bezier(0.23, 1, 0.32, 1)';
 
-// EASE_ENTER / EASE_LEAVE now live in ../../lib/plansMotion — NativelyApiSettings
+// EASE_ENTER / EASE_LEAVE now live in ../../lib/plansMotion — MeetFlooApiSettings
 // needs the same pair, and one settings component importing motion constants
 // from a sibling settings component is the wrong dependency direction.
 
@@ -26,13 +26,13 @@ function Card({ children, className = '' }: { children: React.ReactNode; classNa
     );
 }
 
-// InteractiveCard now lives in ../ui/InteractiveCard so the Natively API
+// InteractiveCard now lives in ../ui/InteractiveCard so the MeetFloo API
 // tier card can share the exact same hover (cursor-tracked spotlight +
 // press-scale), instead of a CSS-only imitation of it.
 
 // ─── Pro poster: ONE overlay drawing, TWO scenes ───────────────────────────
 //
-// WHAT IS ON THE CARDS. Both cards draw the Natively overlay doing the only
+// WHAT IS ON THE CARDS. Both cards draw the MeetFloo overlay doing the only
 // thing the app does: hearing a question and answering it live, on top of
 // whatever is already on screen. A dim plate behind (the call or the doc you
 // are actually in), the overlay panel in front of it, a level meter (it is
@@ -367,7 +367,7 @@ function ProOverlayPoster({
     );
 }
 
-interface NativelyProSettingsProps {
+interface MeetFlooProSettingsProps {
     initialIsPremium?: boolean | null;
     /**
      * When true (the caller's user is not already Pro), the Yearly/Lifetime
@@ -412,7 +412,7 @@ interface NativelyProSettingsProps {
     onDeactivatePhase?: (phase: 'idle' | 'pending' | 'exiting') => void;
 }
 
-export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
+export const MeetFlooProSettings: React.FC<MeetFlooProSettingsProps> = ({
     initialIsPremium = null,
     collapsePricing = false,
     justActivated = false,
@@ -438,7 +438,7 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
 
     // Surfaced under the Deactivate button — deactivation is the only action
     // this component still owns (license-key *entry* moved to the unified
-    // "Natively key" card in NativelyApiSettings.tsx).
+    // "MeetFloo key" card in MeetFlooApiSettings.tsx).
     const [errorMessage, setErrorMessage] = useState('');
     // Whether the Yearly/Lifetime grid is revealed. Only consulted when
     // `collapsePricing` is set; otherwise the grid is always shown.
@@ -454,8 +454,8 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
     const [isPremium, setIsPremium] = useState<boolean | null>(
         initialIsPremium ?? getLicenseSnapshot()?.isPremium ?? null,
     );
-    // Distinguishes a Pro entitlement bundled with a Natively API plan
-    // ('natively_api' — server-validated per request, stored with hwid: '',
+    // Distinguishes a Pro entitlement bundled with a MeetFloo API plan
+    // ('MeetFloo_api' — server-validated per request, stored with hwid: '',
     // not device-slot-limited) from a standalone device license
     // ('dodo'/'gumroad' — HWID-bound, where deactivating frees a real
     // activation slot). The deactivate caption below is only true for the
@@ -625,8 +625,8 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
 
     const openExternal = (url: string) => { (window.electronAPI as any)?.openExternal?.(url); };
     // Literals, because they always were. These sat behind a
-    // getNativelyPricing fetch whose /v1/pricing route exists in no version of
-    // natively-api — added 2026-05-29 in a commit named "partial" and never
+    // getMeetFlooPricing fetch whose /v1/pricing route exists in no version of
+    // MeetFloo-api — added 2026-05-29 in a commit named "partial" and never
     // finished on the server — so the `||` right side won every render for
     // three months. Both links verified live on 2026-09-08. Changing a price
     // or a checkout link is an app release; that was already the case.
@@ -736,7 +736,7 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
         return <div className="p-8 flex justify-center"><div className="w-5 h-5 border-2 border-white/40 border-t-transparent rounded-full animate-spin" /></div>;
     }
 
-    // Pro that came bundled with a Natively API plan: render nothing at all.
+    // Pro that came bundled with a MeetFloo API plan: render nothing at all.
     //
     // This whole section is the APP-ONLY licence, i.e. the alternative to
     // subscribing. Someone already on an API plan has Pro through it, so the
@@ -755,7 +755,7 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
     // standalone-licence branch, which is the safe direction: showing a
     // deactivate control to someone who might need it beats hiding one from an
     // owner who does.
-    if (isPremium && licenseProvider === 'natively_api') {
+    if (isPremium && licenseProvider === 'MeetFloo_api') {
         return null;
     }
 
@@ -843,9 +843,9 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: INK.in, ease: EASE_ENTER, delay: BEAT }}
                 >
-                <Card className="pro-active-card">
-                    <div className="flex items-center gap-3.5 px-4 py-3.5">
-                        {/* No frosted plate around the glyph. The old 36px
+                    <Card className="pro-active-card">
+                        <div className="flex items-center gap-3.5 px-4 py-3.5">
+                            {/* No frosted plate around the glyph. The old 36px
                             tinted-fill + hairline-border badge was the
                             liquid-glass vocabulary being dropped, and on a
                             saturated slab a boxed icon is redundant anyway —
@@ -853,88 +853,88 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
                             Wrapped in a span rather than making CheckCircle a
                             motion component: lucide's SVG components do not
                             reliably forward motion props. */}
-                        <motion.span
-                            className="shrink-0 inline-flex"
-                            initial={celebrate && !prefersReducedMotion ? { scale: 0.6, opacity: 0 } : false}
-                            animate={celebrate && !prefersReducedMotion ? { scale: [0.6, 1.12, 1], opacity: [0, 1, 1] } : undefined}
-                            transition={{ duration: 0.42, delay: 0.30, times: [0, 0.62, 1], ease: EASE_ENTER }}
-                        >
-                            <CheckCircle size={18} className="pro-active-check" strokeWidth={2.2} />
-                        </motion.span>
-                        {/* min-w-0 so the label truncates instead of shoving the
+                            <motion.span
+                                className="shrink-0 inline-flex"
+                                initial={celebrate && !prefersReducedMotion ? { scale: 0.6, opacity: 0 } : false}
+                                animate={celebrate && !prefersReducedMotion ? { scale: [0.6, 1.12, 1], opacity: [0, 1, 1] } : undefined}
+                                transition={{ duration: 0.42, delay: 0.30, times: [0, 0.62, 1], ease: EASE_ENTER }}
+                            >
+                                <CheckCircle size={18} className="pro-active-check" strokeWidth={2.2} />
+                            </motion.span>
+                            {/* min-w-0 so the label truncates instead of shoving the
                             button off the row at narrow modal widths. */}
-                        <div className="min-w-0 flex-1">
-                            <h2 className="pro-active-ink text-[13.5px] font-semibold tracking-[-0.01em]">Pro License Active</h2>
-                            {/* Only the standalone, device-bound licence reaches this
+                            <div className="min-w-0 flex-1">
+                                <h2 className="pro-active-ink text-[13.5px] font-semibold tracking-[-0.01em]">Pro License Active</h2>
+                                {/* Only the standalone, device-bound licence reaches this
                                 card now (the API-bundled case returns null above), so
                                 this no longer branches on provider. The consequence of
                                 deactivating used to be a separate footnote below the
                                 button; folded in here because it is the only thing the
                                 user actually needs to know before pressing it, and it
                                 reads better as context than as fine print. */}
-                            <p className="pro-active-sub text-[11.5px] leading-snug mt-0.5">
-                                Unlocked on this device. Deactivate to free it for another computer.
-                            </p>
-                        </div>
-                        {/* Jelly clay, the same construction as the Activate CTA on
-                            the Natively key plaque. Neutral at rest because a
+                                <p className="pro-active-sub text-[11.5px] leading-snug mt-0.5">
+                                    Unlocked on this device. Deactivate to free it for another computer.
+                                </p>
+                            </div>
+                            {/* Jelly clay, the same construction as the Activate CTA on
+                            the MeetFloo key plaque. Neutral at rest because a
                             destructive control should not outrank the state it is
                             attached to; the danger colour arrives as a full fill on
                             hover, once the pointer is committed. Paint lives in
                             `.pro-deactivate-cta` (index.css) — the transition and
                             press states are declared there, so no inline `style`
                             here to be outranked by it. */}
-                        <button
-                            onClick={handleDeactivate}
-                            disabled={deactivatePhase !== 'idle'}
-                            data-phase={deactivatePhase}
-                            aria-busy={deactivatePhase === 'pending'}
-                            className="pro-deactivate-cta shrink-0 px-3.5 py-1.5 text-[12px] font-medium flex items-center justify-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B2B22]"
-                        >
-                            {/* No crossfade on the label swap. The change is
+                            <button
+                                onClick={handleDeactivate}
+                                disabled={deactivatePhase !== 'idle'}
+                                data-phase={deactivatePhase}
+                                aria-busy={deactivatePhase === 'pending'}
+                                className="pro-deactivate-cta shrink-0 px-3.5 py-1.5 text-[12px] font-medium flex items-center justify-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B2B22]"
+                            >
+                                {/* No crossfade on the label swap. The change is
                                 instantaneous and user-caused, the press already
                                 acknowledged it, and a 12px label dissolving
                                 inside a pill reads as a flicker rather than as
                                 a transition. */}
-                            {deactivatePhase === 'idle' ? (
-                                <><X size={13} /> Deactivate</>
-                            ) : (
-                                <><span className="pro-deactivate-spinner" aria-hidden /> Deactivating…</>
-                            )}
-                        </button>
-                    </div>
-                    {/* Ink and edge are lifted off the slab rather than pulled
+                                {deactivatePhase === 'idle' ? (
+                                    <><X size={13} /> Deactivate</>
+                                ) : (
+                                    <><span className="pro-deactivate-spinner" aria-hidden /> Deactivating…</>
+                                )}
+                            </button>
+                        </div>
+                        {/* Ink and edge are lifted off the slab rather than pulled
                         from the red-500 token, which is tuned for a neutral card
                         and goes muddy on saturated green.
                         The margins live on the INNER div: a wrapper that
                         collapses to height 0 must not carry margin of its own,
                         or it leaves the gap behind. */}
-                    <AnimatePresence>
-                        {errorMessage && (
-                            /* The one deliberate height animation left in this
-                               tab. Everything page-level is FLIP (see
-                               ../../lib/plansMotion), but this is a ~40px row
-                               INSIDE a card that already has `contain: layout`,
-                               it only exists on a failed deactivation, and a row
-                               sliding open is the correct read for an error
-                               appearing in place. FLIP would be machinery for
-                               nothing here. Do not use it as precedent for a
-                               page region. */
-                            <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.26, ease: EASE_ENTER }}
-                                style={{ overflow: 'hidden' }}
-                                className="relative z-[3]"
-                            >
-                                <div className="mx-4 mb-3.5 flex items-center gap-2 px-3 py-2 bg-[rgba(60,6,6,0.42)] border border-[rgba(255,180,180,0.34)] rounded-lg text-[12px] text-[#FFD9D9] font-medium">
-                                    <AlertCircle size={14} className="shrink-0" /> {errorMessage}
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </Card>
+                        <AnimatePresence>
+                            {errorMessage && (
+                                /* The one deliberate height animation left in this
+                                   tab. Everything page-level is FLIP (see
+                                   ../../lib/plansMotion), but this is a ~40px row
+                                   INSIDE a card that already has `contain: layout`,
+                                   it only exists on a failed deactivation, and a row
+                                   sliding open is the correct read for an error
+                                   appearing in place. FLIP would be machinery for
+                                   nothing here. Do not use it as precedent for a
+                                   page region. */
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.26, ease: EASE_ENTER }}
+                                    style={{ overflow: 'hidden' }}
+                                    className="relative z-[3]"
+                                >
+                                    <div className="mx-4 mb-3.5 flex items-center gap-2 px-3 py-2 bg-[rgba(60,6,6,0.42)] border border-[rgba(255,180,180,0.34)] rounded-lg text-[12px] text-[#FFD9D9] font-medium">
+                                        <AlertCircle size={14} className="shrink-0" /> {errorMessage}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </Card>
                 </motion.div>
             ) : (
                 <motion.div
@@ -964,7 +964,7 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
                             type="button"
                             onClick={() => setPricingOpen((o) => !o)}
                             aria-expanded={pricingOpen}
-                            aria-controls="natively-pro-pricing"
+                            aria-controls="MeetFloo-pro-pricing"
                             className="pro-teaser group relative w-full overflow-hidden text-left flex items-center gap-4 px-5 py-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                         >
                             <span className="relative z-[3] min-w-0 flex-1 block">
@@ -992,30 +992,30 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
 
                     {/* ── Choose-your-plan hero ────────────────────────────── */}
                     <Disclosure open={collapsePricing ? pricingOpen : true}>
-                    {/* No top padding here: the parent's `space-y-4` already
+                        {/* No top padding here: the parent's `space-y-4` already
                         supplies the gap, and it only exists while the disclosure
                         is mounted, so a collapsed teaser has no dead space
                         hanging off its bottom edge. */}
-                    <div className="space-y-3" id="natively-pro-pricing">
+                        <div className="space-y-3" id="MeetFloo-pro-pricing">
 
-                        {/* Two-card pricing grid. Lifetime is the recommended
+                            {/* Two-card pricing grid. Lifetime is the recommended
                             option: it carries the "Best value" pill, the price
                             anchor, and the concrete savings line. */}
-                        <div className="grid grid-cols-2 gap-3 items-stretch">
-                            {/* ── Left: Pro · Yearly (pale ice-blue jelly) ───── */}
-                            <InteractiveCard
-                                className="pricing-card-yearly group relative overflow-hidden px-6 py-5 flex flex-col"
-                                data-active="false"
-                                style={{ minHeight: 200, transformStyle: 'preserve-3d' }}
-                                glowColor="rgba(59, 130, 246, 0.28)"
-                            >
-                                <div className="relative flex items-center justify-between" style={{ transformStyle: 'preserve-3d', transform: 'translateZ(12px)' }}>
-                                    <span className="badge-tier-label inline-flex items-center px-2 py-0.5 rounded-full text-text-primary text-[10px] font-semibold" style={{ letterSpacing: '0.02em' }}>
-                                        Pro · Yearly
-                                    </span>
-                                </div>
+                            <div className="grid grid-cols-2 gap-3 items-stretch">
+                                {/* ── Left: Pro · Yearly (pale ice-blue jelly) ───── */}
+                                <InteractiveCard
+                                    className="pricing-card-yearly group relative overflow-hidden px-6 py-5 flex flex-col"
+                                    data-active="false"
+                                    style={{ minHeight: 200, transformStyle: 'preserve-3d' }}
+                                    glowColor="rgba(59, 130, 246, 0.28)"
+                                >
+                                    <div className="relative flex items-center justify-between" style={{ transformStyle: 'preserve-3d', transform: 'translateZ(12px)' }}>
+                                        <span className="badge-tier-label inline-flex items-center px-2 py-0.5 rounded-full text-text-primary text-[10px] font-semibold" style={{ letterSpacing: '0.02em' }}>
+                                            Pro · Yearly
+                                        </span>
+                                    </div>
 
-                                {/* Price block. No strikethrough anchor here on
+                                    {/* Price block. No strikethrough anchor here on
                                     purpose. `yearlyOriginalText` is synthesized by
                                     dividing the real price by 0.8, which only ever
                                     meant anything while the INSIDER20 coupon chip
@@ -1029,27 +1029,27 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
                                     surviving anchor is Lifetime's, where 3 x yearly
                                     is honest arithmetic and the line under the CTA
                                     says so. */}
-                                <div className="relative mt-4 flex items-baseline gap-2 flex-wrap" style={{ transformStyle: 'preserve-3d', transform: 'translateZ(20px)' }}>
-                                    <span
-                                        className="pricing-card-price text-[44px] font-bold leading-none text-text-primary"
-                                        style={{
-                                            display: 'inline-block',
-                                            fontVariantNumeric: 'tabular-nums',
-                                            fontFeatureSettings: '"tnum"',
-                                            letterSpacing: '-0.035em',
-                                        }}
-                                    >
-                                        {yearlyPriceText}
-                                    </span>
-                                </div>
-                                <p className="relative mt-1 text-[11px] font-medium text-text-secondary" style={{ transform: 'translateZ(10px)' }}>
-                                    per year · billed annually
-                                </p>
+                                    <div className="relative mt-4 flex items-baseline gap-2 flex-wrap" style={{ transformStyle: 'preserve-3d', transform: 'translateZ(20px)' }}>
+                                        <span
+                                            className="pricing-card-price text-[44px] font-bold leading-none text-text-primary"
+                                            style={{
+                                                display: 'inline-block',
+                                                fontVariantNumeric: 'tabular-nums',
+                                                fontFeatureSettings: '"tnum"',
+                                                letterSpacing: '-0.035em',
+                                            }}
+                                        >
+                                            {yearlyPriceText}
+                                        </span>
+                                    </div>
+                                    <p className="relative mt-1 text-[11px] font-medium text-text-secondary" style={{ transform: 'translateZ(10px)' }}>
+                                        per year · billed annually
+                                    </p>
 
-                                {/* Crisp gradient hairline divider */}
-                                <div className="relative h-px my-2 pricing-card-divider" style={{ transform: 'translateZ(8px)' }} />
+                                    {/* Crisp gradient hairline divider */}
+                                    <div className="relative h-px my-2 pricing-card-divider" style={{ transform: 'translateZ(8px)' }} />
 
-                                {/* The `live` scene: the overlay hearing a
+                                    {/* The `live` scene: the overlay hearing a
                                     question and answering it. The `translateZ(18px)`
                                     is load-bearing, not decoration — it is the
                                     1.0183 magnification that makes the 236-unit
@@ -1059,87 +1059,87 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
                                     render at the same scale. `flex-1` keeps the
                                     two CTAs on one line if the cards ever
                                     differ in height. */}
-                                <div className="relative flex-1 min-h-0 flex items-center" style={{ transformStyle: 'preserve-3d', transform: 'translateZ(18px)' }}>
-                                    <ProOverlayPoster variant="yearly" scene="live" animate={!prefersReducedMotion} />
-                                </div>
+                                    <div className="relative flex-1 min-h-0 flex items-center" style={{ transformStyle: 'preserve-3d', transform: 'translateZ(18px)' }}>
+                                        <ProOverlayPoster variant="yearly" scene="live" animate={!prefersReducedMotion} />
+                                    </div>
 
-                                {/* CTA — neutral-bright jelly, dark text */}
-                                <button
-                                    onClick={() => openExternal(yearlyUrl)}
-                                    className="pricing-cta-yearly relative mt-4 h-11 rounded-full text-[13px] font-semibold flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-                                    style={{ letterSpacing: '-0.005em', transform: 'translateZ(28px)' }}
+                                    {/* CTA — neutral-bright jelly, dark text */}
+                                    <button
+                                        onClick={() => openExternal(yearlyUrl)}
+                                        className="pricing-cta-yearly relative mt-4 h-11 rounded-full text-[13px] font-semibold flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                                        style={{ letterSpacing: '-0.005em', transform: 'translateZ(28px)' }}
+                                    >
+                                        Get Pro
+                                    </button>
+                                    <p className="relative mt-2 text-center text-[10px] leading-snug text-text-secondary" style={{ transform: 'translateZ(6px)' }}>
+                                        Cancels anytime. Renews at {yearlyPriceText}/yr.
+                                    </p>
+                                </InteractiveCard>
+
+                                {/* ── Right: Pro · Lifetime (deeper indigo-violet jelly) ── */}
+                                <InteractiveCard
+                                    className="pricing-card-lifetime group relative overflow-hidden px-6 py-5 flex flex-col"
+                                    data-active="true"
+                                    style={{ minHeight: 200, transformStyle: 'preserve-3d' }}
+                                    glowColor="rgba(139, 92, 246, 0.32)"
                                 >
-                                    Get Pro
-                                </button>
-                                <p className="relative mt-2 text-center text-[10px] leading-snug text-text-secondary" style={{ transform: 'translateZ(6px)' }}>
-                                    Cancels anytime. Renews at {yearlyPriceText}/yr.
-                                </p>
-                            </InteractiveCard>
-
-                            {/* ── Right: Pro · Lifetime (deeper indigo-violet jelly) ── */}
-                            <InteractiveCard
-                                className="pricing-card-lifetime group relative overflow-hidden px-6 py-5 flex flex-col"
-                                data-active="true"
-                                style={{ minHeight: 200, transformStyle: 'preserve-3d' }}
-                                glowColor="rgba(139, 92, 246, 0.32)"
-                            >
-                                {/* Label row: Pro · Lifetime + the recommendation.
+                                    {/* Label row: Pro · Lifetime + the recommendation.
                                     Without this the two cards read as equally
                                     weighted alternatives, which pushes the choice
                                     back onto the visitor. `.badge-best-value` was
                                     already defined in index.css and unused. */}
-                                <div className="relative flex items-center justify-between gap-2" style={{ transformStyle: 'preserve-3d', transform: 'translateZ(12px)' }}>
-                                    <span className="badge-tier-label inline-flex items-center px-2 py-0.5 rounded-full text-text-primary text-[10px] font-semibold" style={{ letterSpacing: '0.02em' }}>
-                                        Pro · Lifetime
-                                    </span>
-                                    <span className="badge-best-value inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-bold shrink-0" style={{ letterSpacing: '0.06em' }}>
-                                        BEST VALUE
-                                    </span>
-                                </div>
+                                    <div className="relative flex items-center justify-between gap-2" style={{ transformStyle: 'preserve-3d', transform: 'translateZ(12px)' }}>
+                                        <span className="badge-tier-label inline-flex items-center px-2 py-0.5 rounded-full text-text-primary text-[10px] font-semibold" style={{ letterSpacing: '0.02em' }}>
+                                            Pro · Lifetime
+                                        </span>
+                                        <span className="badge-best-value inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-bold shrink-0" style={{ letterSpacing: '0.06em' }}>
+                                            BEST VALUE
+                                        </span>
+                                    </div>
 
-                                {/* Price block: anchor (3y) + current */}
-                                <div className="relative mt-4 flex items-baseline gap-2 flex-wrap" style={{ transformStyle: 'preserve-3d', transform: 'translateZ(20px)' }}>
-                                    {yearlyPrice !== null && lifetimePrice !== null && (
+                                    {/* Price block: anchor (3y) + current */}
+                                    <div className="relative mt-4 flex items-baseline gap-2 flex-wrap" style={{ transformStyle: 'preserve-3d', transform: 'translateZ(20px)' }}>
+                                        {yearlyPrice !== null && lifetimePrice !== null && (
+                                            <span
+                                                className="pricing-card-original-price text-[17px] font-normal"
+                                                style={{
+                                                    textDecoration: 'line-through',
+                                                    textDecorationThickness: '1px',
+                                                    fontVariantNumeric: 'tabular-nums',
+                                                    fontFeatureSettings: '"tnum"',
+                                                    letterSpacing: '-0.02em',
+                                                }}
+                                            >
+                                                ${yearlyPrice * 3}
+                                            </span>
+                                        )}
                                         <span
-                                            className="pricing-card-original-price text-[17px] font-normal"
+                                            className="pricing-card-price text-[44px] font-bold leading-none text-text-primary"
                                             style={{
-                                                textDecoration: 'line-through',
-                                                textDecorationThickness: '1px',
+                                                display: 'inline-block',
                                                 fontVariantNumeric: 'tabular-nums',
                                                 fontFeatureSettings: '"tnum"',
-                                                letterSpacing: '-0.02em',
+                                                letterSpacing: '-0.035em',
                                             }}
                                         >
-                                            ${yearlyPrice * 3}
+                                            {lifetimePriceText}
                                         </span>
-                                    )}
-                                    <span
-                                        className="pricing-card-price text-[44px] font-bold leading-none text-text-primary"
-                                        style={{
-                                            display: 'inline-block',
-                                            fontVariantNumeric: 'tabular-nums',
-                                            fontFeatureSettings: '"tnum"',
-                                            letterSpacing: '-0.035em',
-                                        }}
-                                    >
-                                        {lifetimePriceText}
-                                    </span>
-                                    {/* No "Save N%" chip alongside. The strikethrough
+                                        {/* No "Save N%" chip alongside. The strikethrough
                                         anchor, the chip and the line under the CTA
                                         were three renderings of one fact. The
                                         anchor plus the concrete dollar line survive,
                                         because dollars anchor harder than a percent
                                         and the line is what explains where the
                                         crossed-out figure comes from. */}
-                                </div>
-                                <p className="relative mt-1 text-[11px] font-medium text-text-secondary" style={{ transform: 'translateZ(10px)' }}>
-                                    One-time payment. Yours forever.
-                                </p>
+                                    </div>
+                                    <p className="relative mt-1 text-[11px] font-medium text-text-secondary" style={{ transform: 'translateZ(10px)' }}>
+                                        One-time payment. Yours forever.
+                                    </p>
 
-                                {/* Crisp divider */}
-                                <div className="relative h-px my-2 pricing-card-divider" style={{ transform: 'translateZ(8px)' }} />
+                                    {/* Crisp divider */}
+                                    <div className="relative h-px my-2 pricing-card-divider" style={{ transform: 'translateZ(8px)' }} />
 
-                                {/* The `grounded` scene: the SAME overlay, the
+                                    {/* The `grounded` scene: the SAME overlay, the
                                     same meter, the same heard question, the
                                     same answer and the same caret as the Yearly
                                     card (the runs are shorter only because the
@@ -1154,31 +1154,31 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
                                     anchor, "Yours forever"), and that is the only
                                     place it should live. Same wrapper transform
                                     as Yearly, so both scenes draw at 1:1. */}
-                                <div className="relative flex-1 min-h-0 flex items-center" style={{ transformStyle: 'preserve-3d', transform: 'translateZ(18px)' }}>
-                                    <ProOverlayPoster variant="lifetime" scene="grounded" animate={!prefersReducedMotion} />
-                                </div>
+                                    <div className="relative flex-1 min-h-0 flex items-center" style={{ transformStyle: 'preserve-3d', transform: 'translateZ(18px)' }}>
+                                        <ProOverlayPoster variant="lifetime" scene="grounded" animate={!prefersReducedMotion} />
+                                    </div>
 
-                                {/* CTA — tinted jelly, light text, brighter specular crown */}
-                                <button
-                                    onClick={() => openExternal(lifetimeUrl)}
-                                    className="pricing-cta-lifetime relative mt-4 h-11 rounded-full text-[13px] font-semibold flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-                                    style={{ letterSpacing: '-0.005em', transform: 'translateZ(28px)' }}
-                                >
-                                    Lock in lifetime
-                                </button>
-                                {lifetimeSavingsAbs !== null ? (
-                                    <p className="relative mt-2 text-center text-[10px] leading-snug text-text-secondary" style={{ transform: 'translateZ(6px)' }}>
-                                        Save ${lifetimeSavingsAbs} vs 3 years of yearly.
-                                    </p>
-                                ) : (
-                                    <p className="relative mt-2 text-center text-[10px] leading-snug text-text-secondary" style={{ transform: 'translateZ(6px)' }}>
-                                        Pay once. Never renew.
-                                    </p>
-                                )}
-                            </InteractiveCard>
-                        </div>
+                                    {/* CTA — tinted jelly, light text, brighter specular crown */}
+                                    <button
+                                        onClick={() => openExternal(lifetimeUrl)}
+                                        className="pricing-cta-lifetime relative mt-4 h-11 rounded-full text-[13px] font-semibold flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                                        style={{ letterSpacing: '-0.005em', transform: 'translateZ(28px)' }}
+                                    >
+                                        Lock in lifetime
+                                    </button>
+                                    {lifetimeSavingsAbs !== null ? (
+                                        <p className="relative mt-2 text-center text-[10px] leading-snug text-text-secondary" style={{ transform: 'translateZ(6px)' }}>
+                                            Save ${lifetimeSavingsAbs} vs 3 years of yearly.
+                                        </p>
+                                    ) : (
+                                        <p className="relative mt-2 text-center text-[10px] leading-snug text-text-secondary" style={{ transform: 'translateZ(6px)' }}>
+                                            Pay once. Never renew.
+                                        </p>
+                                    )}
+                                </InteractiveCard>
+                            </div>
 
-                        {/* The detail that used to sit in the collapsed accordion
+                            {/* The detail that used to sit in the collapsed accordion
                             header, where it was unreadable weight above the fold.
                             It belongs here: past the point where someone has
                             already asked to see pricing, and reading as a caption
@@ -1210,20 +1210,20 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
 
                             The second line is the bring-your-own-key
                             compatibility fact: the reason an app-only license is
-                            usable at all without a Natively API plan. */}
-                        <div className="px-1 pt-1 space-y-1">
-                            <p className="text-[11px] leading-relaxed text-text-tertiary">
-                                {t('Both plans include the full Pro feature set: expert persona modes, the Profile Engine, job description intelligence, and company research.')}
-                            </p>
-                            <p className="text-[11px] leading-relaxed text-text-tertiary">
-                                {t('Works with OpenAI, Gemini, Claude, Groq, DeepSeek, or a local model.')}
-                            </p>
+                            usable at all without a MeetFloo API plan. */}
+                            <div className="px-1 pt-1 space-y-1">
+                                <p className="text-[11px] leading-relaxed text-text-tertiary">
+                                    {t('Both plans include the full Pro feature set: expert persona modes, the Profile Engine, job description intelligence, and company research.')}
+                                </p>
+                                <p className="text-[11px] leading-relaxed text-text-tertiary">
+                                    {t('Works with OpenAI, Gemini, Claude, Groq, DeepSeek, or a local model.')}
+                                </p>
+                            </div>
                         </div>
-                    </div>
                     </Disclosure>
 
                     {/* "Already purchased? Enter your license key" card intentionally
-                        removed — the Natively key card (NativelyApiSettings.tsx,
+                        removed — the MeetFloo key card (MeetFlooApiSettings.tsx,
                         rendered above this component in PlansSettings.tsx) accepts
                         either credential type in one box and routes by prefix, so a
                         second license-key input here is a redundant entry point. */}
@@ -1232,7 +1232,7 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
 
             {/* Refund Policy — intentionally NOT duplicated here. It lives once,
                 covering both purchase types (24-hour API subscription window vs
-                1-hour Pro pre-activation window), in NativelyApiSettings.tsx's
+                1-hour Pro pre-activation window), in MeetFlooApiSettings.tsx's
                 "How it works & refund policy" accordion, which renders above this
                 component in PlansSettings.tsx. */}
 
@@ -1240,7 +1240,7 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
                 Removed at the product owner's request — it was a 64-char hash
                 shown to every user, and nothing in the current UI asks them to
                 supply it (license activation happens through the unified
-                "Natively key" box, which needs no device identifier). */}
+                "MeetFloo key" box, which needs no device identifier). */}
         </motion.div>
     );
 };

@@ -4,7 +4,7 @@
 //
 // Premium Apple-inspired trial offer card.
 // Shows 5 seconds after launcher is visible on non-first launches,
-// when no Natively API key is stored and no trial is active.
+// when no MeetFloo API key is stored and no trial is active.
 // Violet/purple accent — consistent with the trial brand throughout the app.
 
 import React, { useState, useEffect } from 'react';
@@ -13,12 +13,12 @@ import { X, ArrowRight, MessageSquareCode, AudioLines, Compass } from 'lucide-re
 import { useResolvedTheme } from '../../hooks/useResolvedTheme';
 import { TRIAL_FALLBACK_LIMITS, formatCompact } from '../../types/nativelyUsage';
 
-const PERMS_KEY        = 'natively_perms_shown_v1';
+const PERMS_KEY = 'MeetFloo_perms_shown_v1';
 
 // ─── Design tokens ────────────────────────────────────────────
 const T = {
-  font:    '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif',
-  violet:  '#8B5CF6',
+  font: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif',
+  violet: '#8B5CF6',
   violetB: '#7C3AED',
   violetD: '#5B21B6',
   violetG: 'rgba(139,92,246,0.35)',
@@ -26,26 +26,26 @@ const T = {
 };
 
 const STAGGER = { hidden: {}, show: { transition: { staggerChildren: 0.07, delayChildren: 0.12 } } };
-const ITEM    = {
+const ITEM = {
   hidden: { opacity: 0, y: 14, filter: 'blur(4px)' },
-  show:   { opacity: 1, y: 0,  filter: 'blur(0px)', transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as any } },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as any } },
 };
 
 interface Props {
-  isOpen:         boolean;
-  hasNativelyKey: boolean;
-  hasTrialToken:  boolean;
-  onDismiss:      () => void;
-  onStartTrial:   () => Promise<void>;
-  onManualSetup:  () => void;   // dismiss + open settings
+  isOpen: boolean;
+  hasMeetFlooKey: boolean;
+  hasTrialToken: boolean;
+  onDismiss: () => void;
+  onStartTrial: () => Promise<void>;
+  onManualSetup: () => void;   // dismiss + open settings
 }
 
 export const TrialPromoToaster: React.FC<Props> = ({
-  isOpen, hasNativelyKey: _hasNativelyKey, hasTrialToken: _hasTrialToken, onDismiss, onStartTrial, onManualSetup,
+  isOpen, hasMeetFlooKey: _hasMeetFlooKey, hasTrialToken: _hasTrialToken, onDismiss, onStartTrial, onManualSetup,
 }) => {
-  const [visible,  setVisible]  = useState(false);
+  const [visible, setVisible] = useState(false);
   const [starting, setStarting] = useState(false);
-  const [error,    setError]    = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const reduced = useReducedMotion() ?? false;
   const isLight = useResolvedTheme() === 'light';
 
@@ -57,7 +57,7 @@ export const TrialPromoToaster: React.FC<Props> = ({
   const glass = isLight ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)';
 
   const GT: React.CSSProperties = {
-    background: isLight 
+    background: isLight
       ? 'linear-gradient(140deg, #111111 20%, #7C3AED 100%)'
       : 'linear-gradient(140deg, #FFFFFF 20%, #C4B5FD 100%)',
     WebkitBackgroundClip: 'text',
@@ -106,7 +106,7 @@ export const TrialPromoToaster: React.FC<Props> = ({
         style={{
           position: 'fixed', inset: 0, zIndex: 9998,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: isLight 
+          background: isLight
             ? 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(139,92,246,0.04) 0%, rgba(0,0,0,0.3) 100%)'
             : 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(139,92,246,0.08) 0%, rgba(0,0,0,0.84) 100%)',
         } as React.CSSProperties}
@@ -116,12 +116,12 @@ export const TrialPromoToaster: React.FC<Props> = ({
         <motion.div
           key="trial-card"
           initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.93, y: 22, filter: 'blur(10px)' }}
-          animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1,    y: 0,  filter: 'blur(0px)' }}
-          exit={   reduced ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 14, filter: 'blur(4px)' }}
+          animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+          exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 14, filter: 'blur(4px)' }}
           transition={{ type: 'spring', stiffness: 290, damping: 25, mass: 0.82 }}
-          style={{ 
-            padding: '0px', 
-            borderRadius: '28px', 
+          style={{
+            padding: '0px',
+            borderRadius: '28px',
             background: 'none',
             border: 'none',
             boxShadow: isLight
@@ -132,7 +132,7 @@ export const TrialPromoToaster: React.FC<Props> = ({
           {/* Inner Core Enclosure */}
           <div style={{
             position: 'relative', width: '468px', borderRadius: '22px', overflow: 'hidden',
-            background: isLight 
+            background: isLight
               ? 'linear-gradient(155deg, #FAF9F6 0%, #FFFFFF 100%)'
               : 'linear-gradient(155deg, #1E1E24 0%, #121215 100%)',
             border: 'none',
@@ -162,10 +162,10 @@ export const TrialPromoToaster: React.FC<Props> = ({
                   MeetFloo Trial
                 </span>
                 <button onClick={handleDismiss} aria-label="Dismiss"
-                  style={{ 
-                    background: 'none', border: 'none', cursor: 'pointer', width: '26px', height: '26px', 
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', 
-                    opacity: 0.35, padding: 0, transition: 'opacity 150ms, background 150ms' 
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', width: '26px', height: '26px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%',
+                    opacity: 0.35, padding: 0, transition: 'opacity 150ms, background 150ms'
                   }}
                   onMouseEnter={e => { e.currentTarget.style.opacity = '0.8'; e.currentTarget.style.background = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.08)'; }}
                   onMouseLeave={e => { e.currentTarget.style.opacity = '0.35'; e.currentTarget.style.background = 'transparent'; }}>
@@ -206,11 +206,11 @@ export const TrialPromoToaster: React.FC<Props> = ({
                 <motion.div variants={ITEM}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
                     {[
-                      { icon: MessageSquareCode, label: 'AI Chat',       sub: `${formatCompact(TRIAL_FALLBACK_LIMITS.ai_tokens)} AI tokens` },
-                      { icon: AudioLines,        label: 'Transcription', sub: `${TRIAL_FALLBACK_LIMITS.stt_minutes} min STT` },
-                      { icon: Compass,           label: 'Research',      sub: `${TRIAL_FALLBACK_LIMITS.search_requests} searches` },
+                      { icon: MessageSquareCode, label: 'AI Chat', sub: `${formatCompact(TRIAL_FALLBACK_LIMITS.ai_tokens)} AI tokens` },
+                      { icon: AudioLines, label: 'Transcription', sub: `${TRIAL_FALLBACK_LIMITS.stt_minutes} min STT` },
+                      { icon: Compass, label: 'Research', sub: `${TRIAL_FALLBACK_LIMITS.search_requests} searches` },
                     ].map(({ icon: Icon, label, sub }) => (
-                      <motion.div 
+                      <motion.div
                         key={label}
                         whileHover={reduced ? {} : { scale: 1.03, y: -2 }}
                         whileTap={reduced ? {} : { scale: 0.97 }}
@@ -235,11 +235,11 @@ export const TrialPromoToaster: React.FC<Props> = ({
                         }}
                       >
                         {/* Specular Gloss Sheen Overlay */}
-                        <span style={{ 
+                        <span style={{
                           position: 'absolute', inset: 0, borderRadius: 'inherit',
                           background: isLight
                             ? 'linear-gradient(135deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.01) 45%, rgba(0,0,0,0.01) 100%)'
-                            : 'linear-gradient(135deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.01) 45%, rgba(0,0,0,0.06) 100%)', 
+                            : 'linear-gradient(135deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.01) 45%, rgba(0,0,0,0.06) 100%)',
                           pointerEvents: 'none', zIndex: 10,
                         }} />
 
@@ -281,9 +281,9 @@ export const TrialPromoToaster: React.FC<Props> = ({
                     </p>
                   )}
                   <button onClick={handleManual}
-                    style={{ 
-                      background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: t4, 
-                      fontFamily: T.font, padding: '4px 0', width: '100%', textAlign: 'center', transition: 'color 150ms' 
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: t4,
+                      fontFamily: T.font, padding: '4px 0', width: '100%', textAlign: 'center', transition: 'color 150ms'
                     }}
                     onMouseEnter={e => (e.currentTarget.style.color = t3)}
                     onMouseLeave={e => (e.currentTarget.style.color = t4)}
@@ -320,8 +320,8 @@ const VioletCTA: React.FC<{ label: string; onClick: () => void; disabled: boolea
         background: disabled
           ? 'rgba(139,92,246,0.3)'
           : 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%)',
-        boxShadow: disabled 
-          ? 'none' 
+        boxShadow: disabled
+          ? 'none'
           : isLight
             ? `inset 0 4px 5px rgba(255, 255, 255, 0.6), inset 0 -4px 5px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(124, 58, 237, 0.25)`
             : `inset 0 4px 5px rgba(255, 255, 255, 0.25), inset 0 -5px 6px rgba(0, 0, 0, 0.45), 0 10px 32px rgba(139, 92, 246, 0.38)`,
@@ -331,9 +331,9 @@ const VioletCTA: React.FC<{ label: string; onClick: () => void; disabled: boolea
     >
       {/* 3D Jelly Gloss Highlight overlay */}
       {!disabled && (
-        <span style={{ 
-          position: 'absolute', top: '2px', left: '8px', right: '8px', height: '35%', 
-          borderRadius: '9999px', background: 'linear-gradient(180deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.05) 100%)', 
+        <span style={{
+          position: 'absolute', top: '2px', left: '8px', right: '8px', height: '35%',
+          borderRadius: '9999px', background: 'linear-gradient(180deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.05) 100%)',
           filter: 'blur(0.3px)', pointerEvents: 'none', zIndex: 4
         }} />
       )}
@@ -354,7 +354,7 @@ const VioletCTA: React.FC<{ label: string; onClick: () => void; disabled: boolea
       <span style={{ position: 'relative', zIndex: 3, fontSize: '13.5px', fontWeight: 750, color: '#fff', letterSpacing: '-0.015em' }}>
         {label}
       </span>
-      
+
       {/* Trailing Icon (Button-in-Button Pattern) */}
       {!disabled && (
         <div style={{

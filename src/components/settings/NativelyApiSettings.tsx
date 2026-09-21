@@ -24,15 +24,15 @@ import { getMeetingInterfaceTheme, type MeetingInterfaceTheme } from '../../lib/
 import { BEAT, EASE_ENTER, EASE_LEAVE, INK, SETTLE } from '../../lib/plansMotion';
 // Painted as a CSS mask, not rendered as an <img>: the asset is a white
 // monochrome glyph, so on the light theme's pale plaque an <img> would be
-// invisible. See `.natively-key-mark` in index.css.
-import nativelyLogo from '../../assets/logo.webp';
+// invisible. See `.MeetFloo-key-mark` in index.css.
+import MeetFlooLogo from '../../assets/logo.webp';
 import {
   formatCompact, formatMeter, formatUsd, normalizeQuota, TRIAL_FALLBACK_LIMITS,
-  type NativelyQuota, type NativelyPlanLimits, type TrialUsage, type TrialLimits, type UsageMeter,
+  type MeetFlooQuota, type MeetFlooPlanLimits, type TrialUsage, type TrialLimits, type UsageMeter,
 } from '../../types/nativelyUsage';
 
 // ─── Types ───────────────────────────────────────────────────
-// Shapes come from src/types/nativelyUsage.ts, which the preload bridge shares.
+// Shapes come from src/types/MeetFlooUsage.ts, which the preload bridge shares.
 // This file used to declare its own QuotaBucket/UsageData pair describing three
 // request-counted buckets; the product now meters five resources and shows four
 // categories, and a second local description of that is how the panel and the
@@ -40,16 +40,16 @@ import {
 interface UsageData {
   plan: string;
   member_since: string;
-  quota: NativelyQuota;
+  quota: MeetFlooQuota;
   /** The plan row the server enforced. Absent on a cache written by an older build. */
-  limits?: NativelyPlanLimits;
+  limits?: MeetFlooPlanLimits;
 }
 
 const PLAN_STANDARD_URL = 'https://checkout.dodopayments.com/buy/pdt_0NbFixGmD8CSeawb5qvVl';
 const PLAN_PRO_URL = 'https://checkout.dodopayments.com/buy/pdt_0NcM6Aw0IWdspbsgUeCLA';
 const PLAN_MAX_URL = 'https://checkout.dodopayments.com/buy/pdt_0NcM7JElX4Af6LNVFS1Yf';
 const PLAN_ULTRA_URL = 'https://checkout.dodopayments.com/buy/pdt_0NcM7rC2kAb69TFKsZnUU';
-const MASKED_NATIVELY_KEY = '•'.repeat(24);
+const MASKED_MEETFLOO_KEY = '•'.repeat(24);
 
 // Last-known usage, remembered across tab switches AND app restarts.
 //
@@ -67,7 +67,7 @@ const MASKED_NATIVELY_KEY = '•'.repeat(24);
 // rolled over: those bars would show last period's consumption against this
 // period's allowance. `resets_at` makes that detectable, so an expired entry is
 // dropped rather than displayed.
-const USAGE_STORAGE_KEY = 'natively_api_usage_v1';
+const USAGE_STORAGE_KEY = 'MeetFloo_api_usage_v1';
 
 function readUsageCache(): UsageData | null {
   try {
@@ -129,7 +129,7 @@ const TIER_GLOW = {
 // and allowances in this file to drift away from the ones actually charged.
 const PLANS = [
   {
-    id: 'natively_api_standard_monthly',
+    id: 'MeetFloo_api_standard_monthly',
     name: 'Standard',
     planKey: 'standard',
     price: '$8',
@@ -137,7 +137,7 @@ const PLANS = [
     badgeText: 'Basic',
     includesPro: false,
     description: 'Essential transcription and AI requests for light, everyday use.',
-    note: 'Does not include Natively Pro desktop app license. Custom API key usage is supported.',
+    note: 'Does not include MeetFloo Pro desktop app license. Custom API key usage is supported.',
     // The qualitative ladder (light -> regular -> high -> continuous) stays: it
     // is what a buyer skims. The EXACT allowances now render underneath it from
     // GET /v1/plans — see PlanAllowances.
@@ -155,24 +155,24 @@ const PLANS = [
     ],
   },
   {
-    id: 'natively_api_pro_monthly',
+    id: 'MeetFloo_api_pro_monthly',
     name: 'Pro',
     planKey: 'pro',
     price: '$15',
     url: PLAN_PRO_URL,
     badgeText: 'Recommended',
     includesPro: true,
-    description: 'The full Natively Pro app plus API usage for daily work.',
-    note: 'Includes a full Natively Pro desktop app license for the duration of subscription.',
+    description: 'The full MeetFloo Pro app plus API usage for daily work.',
+    note: 'Includes a full MeetFloo Pro desktop app license for the duration of subscription.',
     features: [
       'Daily professional AI usage',
       'Regular meeting transcription',
       'Frequent web searches',
-      'Full Natively Pro app features included',
+      'Full MeetFloo Pro app features included',
     ],
   },
   {
-    id: 'natively_api_max_monthly',
+    id: 'MeetFloo_api_max_monthly',
     name: 'Max',
     planKey: 'max',
     price: '$25',
@@ -180,16 +180,16 @@ const PLANS = [
     badgeText: 'Best Value',
     includesPro: true,
     description: 'Higher volume for developers and teams doing more each month.',
-    note: 'Includes a full Natively Pro desktop app license for the duration of subscription.',
+    note: 'Includes a full MeetFloo Pro desktop app license for the duration of subscription.',
     features: [
       'High-volume AI usage',
       'Heavy meeting transcription',
       'High-volume web searches',
-      'Full Natively Pro app features included',
+      'Full MeetFloo Pro app features included',
     ],
   },
   {
-    id: 'natively_api_ultra_monthly',
+    id: 'MeetFloo_api_ultra_monthly',
     name: 'Ultra',
     planKey: 'ultra',
     price: '$35',
@@ -197,12 +197,12 @@ const PLANS = [
     badgeText: 'Heavy Users',
     includesPro: true,
     description: 'For continuous recording and the heaviest daily usage.',
-    note: 'Includes a full Natively Pro desktop app license for the duration of subscription.',
+    note: 'Includes a full MeetFloo Pro desktop app license for the duration of subscription.',
     features: [
       'Maximum AI usage, all-day',
       'Continuous recording & transcription',
       'Maximum web searches',
-      'Full Natively Pro app features included',
+      'Full MeetFloo Pro app features included',
     ],
   },
 ] as const;
@@ -213,11 +213,11 @@ const PLANS = [
 // bulleted list. This is presentation only — it classifies the existing
 // PLANS[].features strings and asserts nothing they do not already say.
 function pickFeatureIcon(feature: string) {
-    const f = feature.toLowerCase();
-    if (f.includes('transcription') || f.includes('recording')) return Mic;
-    if (f.includes('search')) return Search;
-    if (f.includes('pro app')) return Layers;
-    return Sparkles; // the AI-usage rows
+  const f = feature.toLowerCase();
+  if (f.includes('transcription') || f.includes('recording')) return Mic;
+  if (f.includes('search')) return Search;
+  if (f.includes('pro app')) return Layers;
+  return Sparkles; // the AI-usage rows
 }
 
 // cardSlideLeftVariants / cardSlideRightVariants / cardCtaVariants were removed
@@ -307,9 +307,8 @@ function ResourceMeter({
           <span className={`${sub ? 'text-[11px]' : 'text-[12px]'} text-text-secondary truncate`}>{label}</span>
         </div>
         <span
-          className={`${sub ? 'text-[11px]' : 'text-[12px]'} tabular-nums shrink-0 ${
-            isHigh ? 'text-amber-500 font-medium' : 'text-text-tertiary'
-          }`}
+          className={`${sub ? 'text-[11px]' : 'text-[12px]'} tabular-nums shrink-0 ${isHigh ? 'text-amber-500 font-medium' : 'text-text-tertiary'
+            }`}
         >
           {/* An unmetered resource has no percentage to show, so it says
               "Unlimited" in both readings rather than rendering an empty slot
@@ -326,15 +325,14 @@ function ResourceMeter({
           )}
         </span>
       </div>
-      {/* `natively-meter-*` carries the material (see index.css). The colour
+      {/* `MeetFloo-meter-*` carries the material (see index.css). The colour
           is a modifier rather than a Tailwind fill, because the hue drives the
           specular's bloom as well as the body and the three have to move
           together. */}
-      <div className={`${sub ? 'h-[2px]' : 'h-[3px]'} natively-meter-track`}>
+      <div className={`${sub ? 'h-[2px]' : 'h-[3px]'} MeetFloo-meter-track`}>
         <div
-          className={`natively-meter-fill transition-[width] duration-700 ease-out motion-reduce:transition-none ${
-            isOver ? 'natively-meter-fill--over' : isHigh ? 'natively-meter-fill--high' : ''
-          }`}
+          className={`MeetFloo-meter-fill transition-[width] duration-700 ease-out motion-reduce:transition-none ${isOver ? 'MeetFloo-meter-fill--over' : isHigh ? 'MeetFloo-meter-fill--high' : ''
+            }`}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -361,7 +359,7 @@ function ResourceMeter({
  * promoting both to peers of "AI Usage" implies four independent things to
  * budget instead of three.
  */
-function KnowledgeUsage({ knowledge, percentOnly = false }: { knowledge: NativelyQuota['knowledge'] | undefined; percentOnly?: boolean }) {
+function KnowledgeUsage({ knowledge, percentOnly = false }: { knowledge: MeetFlooQuota['knowledge'] | undefined; percentOnly?: boolean }) {
   const [open, setOpen] = useState(false);
   if (!knowledge) return null;
   const pct = Number.isFinite(knowledge.percent) ? knowledge.percent : 0;
@@ -400,11 +398,10 @@ function KnowledgeUsage({ knowledge, percentOnly = false }: { knowledge: Nativel
           {Math.round(pct)}%
         </span>
       </div>
-      <div className="h-[3px] natively-meter-track">
+      <div className="h-[3px] MeetFloo-meter-track">
         <div
-          className={`natively-meter-fill transition-[width] duration-700 ease-out motion-reduce:transition-none ${
-            worstHalf > 100 ? 'natively-meter-fill--over' : isHigh ? 'natively-meter-fill--high' : ''
-          }`}
+          className={`MeetFloo-meter-fill transition-[width] duration-700 ease-out motion-reduce:transition-none ${worstHalf > 100 ? 'MeetFloo-meter-fill--over' : isHigh ? 'MeetFloo-meter-fill--high' : ''
+            }`}
           style={{ width: `${Math.min(100, Math.max(0, knowledge.visual_percent ?? 0))}%` }}
         />
       </div>
@@ -442,7 +439,7 @@ function KnowledgeUsage({ knowledge, percentOnly = false }: { knowledge: Nativel
  * different units of work with different quotas, and "4M embedding + 10M
  * reranker" is information a buyer can act on where a summed number is not.
  */
-function PlanAllowances({ limits }: { limits: NativelyPlanLimits | undefined }) {
+function PlanAllowances({ limits }: { limits: MeetFlooPlanLimits | undefined }) {
   if (!limits) return null;
   const rows: Array<[string, string]> = [
     ['AI', `${formatCompact(limits.ai_tokens)} tokens`],
@@ -452,12 +449,12 @@ function PlanAllowances({ limits }: { limits: NativelyPlanLimits | undefined }) 
   ];
   return (
     <div className="mt-3">
-      <div className="natively-api-body-rule h-px mb-2.5" />
+      <div className="MeetFloo-api-body-rule h-px mb-2.5" />
       <dl className="grid grid-cols-2 gap-x-3 gap-y-1.5">
         {rows.map(([label, value]) => (
           <React.Fragment key={label}>
-            <dt className="natively-api-on-fill-dim text-[10px] leading-snug opacity-80">{label}</dt>
-            <dd className="natively-api-on-fill-dim text-[10px] leading-snug tabular-nums text-right">{value}</dd>
+            <dt className="MeetFloo-api-on-fill-dim text-[10px] leading-snug opacity-80">{label}</dt>
+            <dd className="MeetFloo-api-on-fill-dim text-[10px] leading-snug tabular-nums text-right">{value}</dd>
           </React.Fragment>
         ))}
       </dl>
@@ -507,14 +504,14 @@ function useTrialRemaining(expiresAt: string) {
 // label and become the sentence the card is actually there to say.
 //
 // Anatomy is the offer card's, deliberately: one line of text on the left, one
-// compact control on the right, on the `natively-key-card` plaque. Two states
+// compact control on the right, on the `MeetFloo-key-card` plaque. Two states
 // of one feature should not be two different shapes.
 function ActiveTrialCard({ expiresAt, onOptions }: { expiresAt: string; onOptions: () => void }) {
   const { clock, ended, isWarning } = useTrialRemaining(expiresAt);
   return (
     <div>
       <SectionLabel>Free trial active</SectionLabel>
-      <Card className="natively-key-card">
+      <Card className="MeetFloo-key-card">
         <div className="px-4 py-4">
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
@@ -545,7 +542,7 @@ function ActiveTrialCard({ expiresAt, onOptions }: { expiresAt: string; onOption
             {/* Same control as Activate and as Start free trial, in its
                 `secondary` state: an achromatic ghost at rest that takes the
                 READY material on hover — the periwinkle clay, the specular
-                inset, the lift and the glow (see .natively-key-cta in
+                inset, the lift and the glow (see .MeetFloo-key-cta in
                 index.css, where `secondary` joins the ready:hover selector
                 list rather than getting a copy of it).
                 Ghost at rest is deliberate: the plan list below is the primary
@@ -554,7 +551,7 @@ function ActiveTrialCard({ expiresAt, onOptions }: { expiresAt: string; onOption
             <button
               onClick={onOptions}
               data-state="secondary"
-              className="natively-key-cta shrink-0 h-9 px-5 flex items-center justify-center gap-1.5 text-[13px] font-medium select-none cursor-pointer"
+              className="MeetFloo-key-cta shrink-0 h-9 px-5 flex items-center justify-center gap-1.5 text-[13px] font-medium select-none cursor-pointer"
             >
               See your options
               <ArrowUpRight size={14} strokeWidth={2.2} />
@@ -636,10 +633,10 @@ function Price({ amount, period }: { amount: string; period: string }) {
 }
 
 // ─── Component ───────────────────────────────────────────────
-interface NativelyApiSettingsProps {
+interface MeetFlooApiSettingsProps {
   initialIsSaved?: boolean;
   /**
-   * Rendered between the Natively key card and the plan chooser. A slot exists
+   * Rendered between the MeetFloo key card and the plan chooser. A slot exists
    * because that seam is INSIDE this component, so a parent cannot reach it by
    * reordering siblings. Used by PlansSettings to place the "Pro License
    * Active" receipt directly under the credential box it relates to, rather
@@ -648,11 +645,11 @@ interface NativelyApiSettingsProps {
   afterKeySection?: React.ReactNode;
 }
 
-export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initialIsSaved = false, afterKeySection }) => {
+export const MeetFlooApiSettings: React.FC<MeetFlooApiSettingsProps> = ({ initialIsSaved = false, afterKeySection }) => {
   const prefersReducedMotion = useReducedMotion();
   const t = useT();
   // `initialIsSaved` arrives ASYNCHRONOUSLY. SettingsOverlay seeds its own
-  // `hasNativelyKey` to false and only flips it after `getStoredCredentials()`
+  // `hasMeetFlooKey` to false and only flips it after `getStoredCredentials()`
   // resolves, so on every open of this tab the first render says "no key" even
   // for a subscriber. That is what made the Usage section flash: `usageData`
   // was correctly restored from `usageCache` on the very first render, but the
@@ -666,7 +663,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
   // So seeding these three from the cache is sound, and it makes the first
   // paint of a revisit identical to the last paint of the previous visit.
   const cachedKeyKnown = !!usageCache;
-  const [apiKey, setApiKey] = useState(() => (initialIsSaved || cachedKeyKnown ? MASKED_NATIVELY_KEY : ''));
+  const [apiKey, setApiKey] = useState(() => (initialIsSaved || cachedKeyKnown ? MASKED_MEETFLOO_KEY : ''));
   const [isSaved, setIsSaved] = useState(initialIsSaved || cachedKeyKnown);
   const [isLoading, setIsLoading] = useState(!(initialIsSaved || cachedKeyKnown));
   const [isSaving, setIsSaving] = useState(false);
@@ -679,9 +676,9 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
   const [justActivatedPro, setJustActivatedPro] = useState(false);
   const [usageData, setUsageData] = useState<UsageData | null>(() => usageCache);
   const [isLoadingUsage, setIsLoadingUsage] = useState(false);
-  const [planCatalog, setPlanCatalog] = useState<Record<string, NativelyPlanLimits> | null>(null);
-  const [selectedPlanId, setSelectedPlanId] = useState<string>('natively_api_pro_monthly');
-  const [prevPlanId, setPrevPlanId] = useState<string>('natively_api_pro_monthly');
+  const [planCatalog, setPlanCatalog] = useState<Record<string, MeetFlooPlanLimits> | null>(null);
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('MeetFloo_api_pro_monthly');
+  const [prevPlanId, setPrevPlanId] = useState<string>('MeetFloo_api_pro_monthly');
   // Selection is purely manual now — the tier selector used to auto-rotate
   // through Standard/Pro/Max/Ultra every 4.5s via setInterval, which reads
   // fine as a marketing carousel but fights a "calm once loaded" settings
@@ -700,13 +697,13 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
     if (usageData?.plan) {
       const planName = usageData.plan.toLowerCase();
       if (planName === 'starter' || planName === 'standard') {
-        selectPlan('natively_api_standard_monthly');
+        selectPlan('MeetFloo_api_standard_monthly');
       } else if (planName === 'pro') {
-        selectPlan('natively_api_pro_monthly');
+        selectPlan('MeetFloo_api_pro_monthly');
       } else if (planName === 'max') {
-        selectPlan('natively_api_max_monthly');
+        selectPlan('MeetFloo_api_max_monthly');
       } else if (planName === 'ultra') {
-        selectPlan('natively_api_ultra_monthly');
+        selectPlan('MeetFloo_api_ultra_monthly');
       }
     }
   }, [usageData, selectPlan]);
@@ -747,8 +744,8 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
     (async () => {
       try {
         const creds = await window.electronAPI.getStoredCredentials();
-        if (creds.hasNativelyKey) {
-          setApiKey(MASKED_NATIVELY_KEY);
+        if (creds.hasMeetFlooKey) {
+          setApiKey(MASKED_MEETFLOO_KEY);
           setIsSaved(true);
         } else {
           setApiKey('');
@@ -757,7 +754,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
           setUsageData(null);
         }
       } catch (e) {
-        console.error('[NativelyApi]', e);
+        console.error('[MeetFlooApi]', e);
         // Unknown is not saved. `isSaved` now starts optimistically true when a
         // persisted usage entry exists, so without this a keychain read failure
         // would leave a masked key in the field with no way out: `handleSave`
@@ -784,7 +781,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
     const { force = false, silent = false } = opts;
     if (!silent) setIsLoadingUsage(true);
     try {
-      const r = await window.electronAPI.getNativelyUsage(force);
+      const r = await window.electronAPI.getMeetFlooUsage(force);
       // Normalized at the boundary, once, so every component below reads one
       // shape — including when the server is a build older than this one.
       const quota = r.ok ? normalizeQuota(r.quota) : null;
@@ -816,7 +813,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
   // cheap and runs whether or not a key is saved: the person who most needs to
   // see what each tier includes is the one who has not bought yet.
   useEffect(() => {
-    window.electronAPI?.getNativelyPlans?.()
+    window.electronAPI?.getMeetFlooPlans?.()
       .then((res) => {
         if (res?.ok && res.plans) setPlanCatalog(res.plans);
       })
@@ -828,7 +825,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
     const res = await window.electronAPI?.getTrialStatus?.();
     if (!res?.ok) return;
 
-    localStorage.setItem('natively_trial_claimed', 'true');
+    localStorage.setItem('MeetFloo_trial_claimed', 'true');
 
     setTrialState({
       active: !(res.expired ?? false),
@@ -858,11 +855,11 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
       try {
         const local = await window.electronAPI?.getLocalTrial?.();
         if (!local?.hasToken) {
-          if (local?.trialClaimed) localStorage.setItem('natively_trial_claimed', 'true');
+          if (local?.trialClaimed) localStorage.setItem('MeetFloo_trial_claimed', 'true');
           return;
         }
 
-        localStorage.setItem('natively_trial_claimed', 'true');
+        localStorage.setItem('MeetFloo_trial_claimed', 'true');
 
         if (local.expired) {
           // Token exists but expired locally — show modal immediately, confirm via server
@@ -921,7 +918,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
       }
       if (!res?.ok) {
         if (res?.error === 'trial_ip_limit' || res?.error === 'trial_start_rate_limited') {
-          localStorage.setItem('natively_trial_claimed', 'true');
+          localStorage.setItem('MeetFloo_trial_claimed', 'true');
           setTrialState({
             active: false,
             expired: true,
@@ -943,7 +940,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
         return;
       }
 
-      localStorage.setItem('natively_trial_claimed', 'true');
+      localStorage.setItem('MeetFloo_trial_claimed', 'true');
 
       if (res.already_used && res.expired) {
         setTrialState({
@@ -982,9 +979,9 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
     setShowTrialModal(false);
   };
 
-  // Single box, two credential types. A Natively API key (`natively_sk_...`)
+  // Single box, two credential types. A MeetFloo API key (`MeetFloo_sk_...`)
   // is saved via CredentialsManager and already auto-activates Pro server-side
-  // when the plan qualifies (ipcHandlers.ts `set-natively-api-key`). Anything
+  // when the plan qualifies (ipcHandlers.ts `set-MeetFloo-api-key`). Anything
   // else is treated as a Dodo/Gumroad Pro license key and goes through
   // licenseActivate instead — that path activates Pro but does NOT write an
   // API credential, so it must stay on its own success state, never isSaved.
@@ -996,22 +993,22 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
   const handleSave = async () => {
     const trimmed = apiKey.trim();
     if (!trimmed || apiKey.includes('•')) return;
-    if (!trimmed.startsWith('natively_sk_')) {
+    if (!trimmed.startsWith('MeetFloo_sk_')) {
       return activateProLicense(trimmed);
     }
     setIsSaving(true);
     setError(null);
     try {
-      const r = await window.electronAPI.setNativelyApiKey(trimmed);
+      const r = await window.electronAPI.setMeetFlooApiKey(trimmed);
       if (r.success) {
         setApiKey('•'.repeat(24));
         setIsSaved(true);
         setJustSaved(true);
         setTimeout(() => setJustSaved(false), 2500);
-        // NOTE: do NOT also call setDefaultModel('natively') / setSttProvider('natively')
-        // here. The main-process `set-natively-api-key` handler already auto-promotes
+        // NOTE: do NOT also call setDefaultModel('MeetFloo') / setSttProvider('MeetFloo')
+        // here. The main-process `set-MeetFloo-api-key` handler already auto-promotes
         // both the default model and the STT provider server-side (see
-        // CredentialsManager.setNativelyApiKey) and runs reconfigureSttProvider once.
+        // CredentialsManager.setMeetFlooApiKey) and runs reconfigureSttProvider once.
         // Firing those extra IPCs raced a SECOND audio-pipeline rebuild against the
         // first, which deadlocked/crashed the native audio stack right after a key
         // save (the "app hangs after entering the key" bug, macOS + Windows).
@@ -1099,7 +1096,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
     setError(null);
     setUsageCache(null);
     try {
-      await window.electronAPI.setNativelyApiKey('');
+      await window.electronAPI.setMeetFlooApiKey('');
     } catch (e: any) {
       // The entrance/exit are declarative on `isSaved`, so the rollback animates
       // back in on the same curves without any extra work.
@@ -1137,10 +1134,10 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
     // rotation is gone (it made the panel look like it was glitching
     // mid-transition), so there is nothing left to pause.
     <div className="space-y-3">
-      {/* Header. The "Pro, Max & Ultra include Natively Pro app" note that used
+      {/* Header. The "Pro, Max & Ultra include MeetFloo Pro app" note that used
           to sit opposite this label is gone: the tab header above the whole
           section already states it, and each qualifying tier lists "Full
-          Natively Pro app features included" in its own feature rows. */}
+          MeetFloo Pro app features included" in its own feature rows. */}
       <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">
         Choose a Plan
       </p>
@@ -1148,44 +1145,42 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
       {/* Segmented control selector tab bar */}
       <div
         role="tablist"
-        aria-label="Natively API plan tier"
-        className="natively-api-selector-bar grid grid-cols-4 relative p-1 bg-black/10 dark:bg-white/5 border border-white/5 rounded-2xl overflow-hidden"
+        aria-label="MeetFloo API plan tier"
+        className="MeetFloo-api-selector-bar grid grid-cols-4 relative p-1 bg-black/10 dark:bg-white/5 border border-white/5 rounded-2xl overflow-hidden"
       >
         {/* Active sliding pill */}
         <div
           aria-hidden="true"
-          className="natively-api-selector-pill-track absolute top-0 bottom-0 left-0 w-1/4 p-1 transition-transform duration-220 ease-[cubic-bezier(0.23,1,0.32,1)] will-change-transform"
+          className="MeetFloo-api-selector-pill-track absolute top-0 bottom-0 left-0 w-1/4 p-1 transition-transform duration-220 ease-[cubic-bezier(0.23,1,0.32,1)] will-change-transform"
           style={{
-            transform: `translate3d(${
-              selectedPlanId === 'natively_api_standard_monthly' ? '0%' :
-              selectedPlanId === 'natively_api_pro_monthly' ? '100%' :
-              selectedPlanId === 'natively_api_max_monthly' ? '200%' :
-              '300%'
-            }, 0, 0)`
+            transform: `translate3d(${selectedPlanId === 'MeetFloo_api_standard_monthly' ? '0%' :
+              selectedPlanId === 'MeetFloo_api_pro_monthly' ? '100%' :
+                selectedPlanId === 'MeetFloo_api_max_monthly' ? '200%' :
+                  '300%'
+              }, 0, 0)`
           }}
         >
           {/* No `transition-all` here: the fill/shadow crossfade is declared
               in index.css against the exact properties that change, so a
               tier switch never animates layout-affecting ones. The slide is
               on the track wrapper above and is untouched. */}
-          <div className={`w-full h-full natively-api-selector-pill rounded-xl ${
-            selectedPlanId === 'natively_api_standard_monthly' ? 'natively-api-selector-pill-standard' :
-            selectedPlanId === 'natively_api_pro_monthly' ? 'natively-api-selector-pill-pro' :
-            selectedPlanId === 'natively_api_max_monthly' ? 'natively-api-selector-pill-max' :
-            'natively-api-selector-pill-ultra'
-          }`} />
+          <div className={`w-full h-full MeetFloo-api-selector-pill rounded-xl ${selectedPlanId === 'MeetFloo_api_standard_monthly' ? 'MeetFloo-api-selector-pill-standard' :
+            selectedPlanId === 'MeetFloo_api_pro_monthly' ? 'MeetFloo-api-selector-pill-pro' :
+              selectedPlanId === 'MeetFloo_api_max_monthly' ? 'MeetFloo-api-selector-pill-max' :
+                'MeetFloo-api-selector-pill-ultra'
+            }`} />
         </div>
         {(
           [
-            { id: 'natively_api_standard_monthly', name: 'Standard', price: '$8/mo' },
-            { id: 'natively_api_pro_monthly', name: 'Pro', price: '$15/mo' },
-            { id: 'natively_api_max_monthly', name: 'Max', price: '$25/mo' },
-            { id: 'natively_api_ultra_monthly', name: 'Ultra', price: '$35/mo' },
+            { id: 'MeetFloo_api_standard_monthly', name: 'Standard', price: '$8/mo' },
+            { id: 'MeetFloo_api_pro_monthly', name: 'Pro', price: '$15/mo' },
+            { id: 'MeetFloo_api_max_monthly', name: 'Max', price: '$25/mo' },
+            { id: 'MeetFloo_api_ultra_monthly', name: 'Ultra', price: '$35/mo' },
           ] as const
         ).map((tab) => {
           const isSel = selectedPlanId === tab.id;
           // The price is the literal above, full stop. It used to prefer a
-          // `formattedPrice` from getNativelyPricing, whose /v1/pricing route
+          // `formattedPrice` from getMeetFlooPricing, whose /v1/pricing route
           // was never built on the server — three months of a call that always
           // 404'd and a fallback that always won. /v1/plans (planCatalog) is
           // the live source that does exist, and it agrees with these figures.
@@ -1195,14 +1190,14 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
               key={tab.id}
               type="button"
               role="tab"
-              id={`natively-api-tab-${tab.id}`}
+              id={`MeetFloo-api-tab-${tab.id}`}
               aria-selected={isSel}
-              aria-controls="natively-api-tabpanel"
+              aria-controls="MeetFloo-api-tabpanel"
               tabIndex={isSel ? 0 : -1}
               onClick={() => {
                 selectPlan(tab.id);
               }}
-              className={`natively-api-selector-tab ${isSel ? 'active' : ''}`}
+              className={`MeetFloo-api-selector-tab ${isSel ? 'active' : ''}`}
             >
               <span className="tab-name">{tab.name}</span>
               <span className="tab-price">{displayPrice}</span>
@@ -1214,10 +1209,10 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
       {/* Selected Plan Details Container (Double-Bezel Architecture) */}
       {(() => {
         const planOrder = [
-          'natively_api_standard_monthly',
-          'natively_api_pro_monthly',
-          'natively_api_max_monthly',
-          'natively_api_ultra_monthly',
+          'MeetFloo_api_standard_monthly',
+          'MeetFloo_api_pro_monthly',
+          'MeetFloo_api_max_monthly',
+          'MeetFloo_api_ultra_monthly',
         ];
         const prevIndex = planOrder.indexOf(prevPlanId);
         const currentIndex = planOrder.indexOf(selectedPlanId);
@@ -1227,7 +1222,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
         const limits = planCatalog?.[plan.planKey];
         const price = plan.price;
         // A verified-live Dodo link (all four checked 2026-09-08). These were
-        // the fallback behind getNativelyPricing; with that call removed they
+        // the fallback behind getMeetFlooPricing; with that call removed they
         // are simply the source, and changing a checkout link is now an app
         // release. That was already the truth — it just looked otherwise.
         const checkoutUrl = plan.url;
@@ -1239,25 +1234,25 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
 
         return (
           <div
-            className="natively-api-details-wrapper relative w-full"
+            className="MeetFloo-api-details-wrapper relative w-full"
             role="tabpanel"
-            id="natively-api-tabpanel"
-            aria-labelledby={`natively-api-tab-${plan.id}`}
+            id="MeetFloo-api-tabpanel"
+            aria-labelledby={`MeetFloo-api-tab-${plan.id}`}
           >
             <InteractiveCard
-              className={`natively-api-detail-card group h-full w-full relative overflow-hidden natively-api-detail-card-${plan.name.toLowerCase()}`}
+              className={`MeetFloo-api-detail-card group h-full w-full relative overflow-hidden MeetFloo-api-detail-card-${plan.name.toLowerCase()}`}
               glowColor={TIER_GLOW[plan.name as keyof typeof TIER_GLOW]}
               data-active={isActive ? "true" : "false"}
-              // No inline `transition` here on purpose. index.css already
-              // declares `transition: transform/box-shadow/border-color 180ms`
-              // with `!important` on `.natively-api-detail-card`, and an author
-              // !important declaration outranks a style-attribute one, so any
-              // inline transition string on this element is dead weight. It
-              // silently was for a long time: a 280ms value sat here doing
-              // nothing while the 180ms from CSS is what actually ran.
-              // Note `background` is NOT in that list, so the tier-fill swap is
-              // instantaneous; the crossfade you see comes from the
-              // AnimatePresence child below, which is a different element.
+            // No inline `transition` here on purpose. index.css already
+            // declares `transition: transform/box-shadow/border-color 180ms`
+            // with `!important` on `.MeetFloo-api-detail-card`, and an author
+            // !important declaration outranks a style-attribute one, so any
+            // inline transition string on this element is dead weight. It
+            // silently was for a long time: a 280ms value sat here doing
+            // nothing while the 180ms from CSS is what actually ran.
+            // Note `background` is NOT in that list, so the tier-fill swap is
+            // instantaneous; the crossfade you see comes from the
+            // AnimatePresence child below, which is a different element.
             >
               <AnimatePresence custom={direction}>
                 <motion.div
@@ -1281,16 +1276,16 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1.5 h-5">
                         {plan.badgeText && (
-                          <span className="natively-api-fill-pill inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-semibold uppercase tracking-wider">
+                          <span className="MeetFloo-api-fill-pill inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-semibold uppercase tracking-wider">
                             {plan.badgeText}
                           </span>
                         )}
                       </div>
 
-                      <h4 className="natively-api-on-fill mt-2.5 text-[17px] font-bold tracking-tight leading-none">
+                      <h4 className="MeetFloo-api-on-fill mt-2.5 text-[17px] font-bold tracking-tight leading-none">
                         {plan.name}
                       </h4>
-                      <p className="natively-api-on-fill-dim text-[11px] mt-1.5 leading-snug">
+                      <p className="MeetFloo-api-on-fill-dim text-[11px] mt-1.5 leading-snug">
                         {plan.description}
                       </p>
 
@@ -1298,17 +1293,17 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
                           colour — that lives in the corner glow and the CTA. */}
                       <div className="mt-3 flex items-baseline gap-1.5">
                         <span
-                          className="natively-api-on-fill text-[38px] font-bold leading-none"
+                          className="MeetFloo-api-on-fill text-[38px] font-bold leading-none"
                           style={{ fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.04em' }}
                         >
                           {price}
                         </span>
-                        <span className="natively-api-on-fill-dim text-[12px] font-medium">/ month</span>
+                        <span className="MeetFloo-api-on-fill-dim text-[12px] font-medium">/ month</span>
                       </div>
 
                       <div className="mt-auto pt-3">
                         {isActive ? (
-                          <div className="w-full natively-api-active-tag text-center rounded-full text-[12.5px] font-semibold select-none flex items-center justify-center">
+                          <div className="w-full MeetFloo-api-active-tag text-center rounded-full text-[12.5px] font-semibold select-none flex items-center justify-center">
                             Active Plan
                           </div>
                         ) : (
@@ -1316,15 +1311,14 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
                             onClick={() => {
                               openExternal(checkoutUrl);
                             }}
-                            className={`natively-api-pricing-cta ${
-                              plan.name === 'Pro'
-                                ? 'natively-api-pricing-cta-pro'
-                                : plan.name === 'Max'
-                                  ? 'natively-api-pricing-cta-max'
-                                  : plan.name === 'Ultra'
-                                    ? 'natively-api-pricing-cta-ultra'
-                                    : 'natively-api-pricing-cta-neutral'
-                            }`}
+                            className={`MeetFloo-api-pricing-cta ${plan.name === 'Pro'
+                              ? 'MeetFloo-api-pricing-cta-pro'
+                              : plan.name === 'Max'
+                                ? 'MeetFloo-api-pricing-cta-max'
+                                : plan.name === 'Ultra'
+                                  ? 'MeetFloo-api-pricing-cta-ultra'
+                                  : 'MeetFloo-api-pricing-cta-neutral'
+                              }`}
                           >
                             Get Started with {plan.name} <ArrowUpRight size={14} strokeWidth={2.5} />
                           </button>
@@ -1334,16 +1328,16 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
 
                     {/* Right: what you get, all in low-contrast gray */}
                     <div className="flex flex-col min-w-0">
-                      <p className="natively-api-on-fill-dim text-[9px] font-semibold uppercase tracking-[0.14em]">
+                      <p className="MeetFloo-api-on-fill-dim text-[9px] font-semibold uppercase tracking-[0.14em]">
                         What's included
                       </p>
-                      <div className="natively-api-body-rule h-px mt-2 mb-2.5" />
+                      <div className="MeetFloo-api-body-rule h-px mt-2 mb-2.5" />
                       <ul className="space-y-2">
                         {plan.features.map((feature, i) => {
                           const FeatureIcon = pickFeatureIcon(feature);
                           return (
-                            <li key={i} className="natively-api-on-fill-dim flex items-center gap-2 text-[11px] leading-snug">
-                              <span className="natively-api-feature-badge shrink-0 w-[18px] h-[18px] rounded-full flex items-center justify-center">
+                            <li key={i} className="MeetFloo-api-on-fill-dim flex items-center gap-2 text-[11px] leading-snug">
+                              <span className="MeetFloo-api-feature-badge shrink-0 w-[18px] h-[18px] rounded-full flex items-center justify-center">
                                 <FeatureIcon size={10} strokeWidth={2.2} />
                               </span>
                               <span className="min-w-0">{feature}</span>
@@ -1351,7 +1345,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
                           );
                         })}
                       </ul>
-                      <p className="natively-api-on-fill-dim mt-auto pt-3 text-[10px] leading-snug opacity-80">
+                      <p className="MeetFloo-api-on-fill-dim mt-auto pt-3 text-[10px] leading-snug opacity-80">
                         {plan.note}
                       </p>
                     </div>
@@ -1370,60 +1364,60 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
     // LayoutGroup so the three regions below share one layout pass. See
     // ../../lib/plansMotion for why this whole tab is FLIP rather than resizing.
     <LayoutGroup>
-    <div className="space-y-6 animated fadeIn" data-interface-theme={interfaceTheme}>
-      {/* Page title intentionally omitted here — PlansSettings.tsx (the parent
+      <div className="space-y-6 animated fadeIn" data-interface-theme={interfaceTheme}>
+        {/* Page title intentionally omitted here — PlansSettings.tsx (the parent
           tab wrapper) already renders "Plans & Billing" as the section header.
-          A second "Natively API / Managed transcription, AI & search" title
+          A second "MeetFloo API / Managed transcription, AI & search" title
           directly beneath it read as two stacked, near-duplicate headers.
           The "Connected"/plan-name badge that used to live here moved down
-          into the "Natively key" card header, where it stays visible in
+          into the "MeetFloo key" card header, where it stays visible in
           both the saved and unsaved states without its own header row. */}
 
-      {/* ── Free Trial Modal (post-trial) ─────────────── */}
-      {showTrialModal && trialState && (
-        <FreeTrialModal usage={trialState.usage} onByok={handleByok} onDone={handleTrialDone} />
-      )}
+        {/* ── Free Trial Modal (post-trial) ─────────────── */}
+        {showTrialModal && trialState && (
+          <FreeTrialModal usage={trialState.usage} onByok={handleByok} onDone={handleTrialDone} />
+        )}
 
-      {/* ── Active trial status card ──────────────────── */}
-      {trialState?.active && (
-        <ActiveTrialCard
-          expiresAt={trialState.expiresAt}
-          onOptions={() => setShowTrialModal(true)}
-        />
-      )}
+        {/* ── Active trial status card ──────────────────── */}
+        {trialState?.active && (
+          <ActiveTrialCard
+            expiresAt={trialState.expiresAt}
+            onOptions={() => setShowTrialModal(true)}
+          />
+        )}
 
-      {/* ── Free trial start card (no key, no active trial) ── */}
-      {!isLoading &&
-        !isSaved &&
-        !isCheckingTrial &&
-        (!trialState || (trialState.expired && !trialState.active)) &&
-        (() => {
-          const isClaimed =
-            trialState?.expired === true ||
-            localStorage.getItem('natively_trial_claimed') === 'true';
+        {/* ── Free trial start card (no key, no active trial) ── */}
+        {!isLoading &&
+          !isSaved &&
+          !isCheckingTrial &&
+          (!trialState || (trialState.expired && !trialState.active)) &&
+          (() => {
+            const isClaimed =
+              trialState?.expired === true ||
+              localStorage.getItem('MeetFloo_trial_claimed') === 'true';
 
-          if (isClaimed) {
-            return null;
-          }
+            if (isClaimed) {
+              return null;
+            }
 
-          return (
-            /* Built from this tab's OWN parts, not its own set. It used to be
-               the one container here with no section label, on a plain Card,
-               with a small right-aligned pill in flat `bg-accent-primary` —
-               the only unmaterialised saturated control on a screen where
-               every other CTA is clay (specular inset, darkened foot, lift on
-               hover). Beside the key plaque below and the pricing cards under
-               that, it read as a different product's component.
-               Now it is the key card's structure exactly: section label as the
-               heading, `natively-key-card` material, the brand mark on a 12px
-               explainer line, and one full-width `natively-key-cta`. Its own
-               ACTIVE state ("Free trial active", ~line 1301) already had this
-               shape; the two halves of one feature no longer disagree. */
-            <div>
-              <SectionLabel>Free trial</SectionLabel>
-              <Card className="natively-key-card">
-                <div className="px-4 py-4 space-y-3">
-                  {/* The ORIGINAL shape: offer on the left, one compact action
+            return (
+              /* Built from this tab's OWN parts, not its own set. It used to be
+                 the one container here with no section label, on a plain Card,
+                 with a small right-aligned pill in flat `bg-accent-primary` —
+                 the only unmaterialised saturated control on a screen where
+                 every other CTA is clay (specular inset, darkened foot, lift on
+                 hover). Beside the key plaque below and the pricing cards under
+                 that, it read as a different product's component.
+                 Now it is the key card's structure exactly: section label as the
+                 heading, `MeetFloo-key-card` material, the brand mark on a 12px
+                 explainer line, and one full-width `MeetFloo-key-cta`. Its own
+                 ACTIVE state ("Free trial active", ~line 1301) already had this
+                 shape; the two halves of one feature no longer disagree. */
+              <div>
+                <SectionLabel>Free trial</SectionLabel>
+                <Card className="MeetFloo-key-card">
+                  <div className="px-4 py-4 space-y-3">
+                    {/* The ORIGINAL shape: offer on the left, one compact action
                       on the right, a single row. It reads as an offer rather
                       than as a form, and it keeps the card to the height of its
                       own text — a full-width CTA under two short lines made a
@@ -1434,21 +1428,21 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
                       `items-center` because the button is the visual anchor of
                       the row; `min-w-0 flex-1` on the text so a long
                       translation wraps instead of shoving the button off. */}
-                  {/* No mark. The key card earns one — it is the card you go
-                      to to hand Natively a credential, and the logo is what
+                    {/* No mark. The key card earns one — it is the card you go
+                      to to hand MeetFloo a credential, and the logo is what
                       tells you WHOSE key it wants. This card is an offer, its
                       section label already says FREE TRIAL, and a second copy of
                       the same logo two rows apart just repeated the brand at
                       the reader. Losing it also puts the offer back on the
                       card's own left edge, which is the shape this had
                       originally. */}
-                  <div className="flex items-center gap-3">
-                    <div className="min-w-0 flex-1">
-                      {/* The OFFER, at title weight. This line spent one
-                          revision as `natively-key-sub` — the 12px muted role
+                    <div className="flex items-center gap-3">
+                      <div className="min-w-0 flex-1">
+                        {/* The OFFER, at title weight. This line spent one
+                          revision as `MeetFloo-key-sub` — the 12px muted role
                           the key card uses for an explainer — which is right
                           for "Activate with a key or a license" (a caption
-                          under a section label that already says NATIVELY KEY)
+                          under a section label that already says MEETFLOO KEY)
                           and wrong here: FREE TRIAL does not tell you what you
                           get, so this line is the heading, not a footnote, and
                           it was disappearing.
@@ -1457,149 +1451,148 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
                           /v1/trial/status once a trial EXISTS — there is
                           nothing to read before you start one. Same reason the
                           allowances come from TRIAL_FALLBACK_LIMITS. */}
-                      <p className="text-[15px] font-medium text-text-primary tracking-[-0.01em]">
-                        Try the MeetFloo API free for 30 minutes
-                      </p>
-                      {/* Allowances at the description weight the rest of this
+                        <p className="text-[15px] font-medium text-text-primary tracking-[-0.01em]">
+                          Try the MeetFloo API free for 30 minutes
+                        </p>
+                        {/* Allowances at the description weight the rest of this
                           tab uses for a card's second line, not the 11px
                           tertiary of a footnote — they are what the reader
                           compares against the plans below. Tabular figures so
                           the digits line up with the usage and price rows. */}
-                      <p className="text-[12px] text-text-secondary mt-1 leading-snug tabular-nums">
-                        {formatCompact(TRIAL_FALLBACK_LIMITS.ai_tokens)} AI tokens
-                        {' · '}{TRIAL_FALLBACK_LIMITS.stt_minutes} min voice
-                        {/* "research", not "searches": that is what the usage
+                        <p className="text-[12px] text-text-secondary mt-1 leading-snug tabular-nums">
+                          {formatCompact(TRIAL_FALLBACK_LIMITS.ai_tokens)} AI tokens
+                          {' · '}{TRIAL_FALLBACK_LIMITS.stt_minutes} min voice
+                          {/* "research", not "searches": that is what the usage
                             pill, the usage table and the plan copy all call
                             this meter. One name per meter. */}
-                        {' · '}{TRIAL_FALLBACK_LIMITS.search_requests} research
-                      </p>
-                    </div>
+                          {' · '}{TRIAL_FALLBACK_LIMITS.search_requests} research
+                        </p>
+                      </div>
 
-                    {/* Same control as Activate — same class, same states on the
+                      {/* Same control as Activate — same class, same states on the
                         same `data-state` attribute — just sized to its label
                         instead of the card. `ready` is saturated only because
                         Activate is idle until you type: one primary on screen,
                         which is the rule this section already follows. */}
-                    <button
-                      onClick={handleStartTrial}
-                      disabled={trialLoading || isClaimed}
-                      data-state={trialLoading ? 'saving' : isClaimed ? 'idle' : 'ready'}
-                      className={`natively-key-cta shrink-0 h-9 px-5 text-[13px] font-medium select-none flex items-center justify-center gap-2 ${
-                        trialLoading ? 'cursor-wait' : isClaimed ? 'cursor-not-allowed' : 'cursor-pointer'
-                      }`}
-                    >
-                    {trialLoading ? (
-                      <>
-                        <Loader2 size={13} className="animate-spin" /> Starting…
-                      </>
-                    ) : isClaimed ? (
-                      'Already claimed'
-                    ) : (
-                      'Start free trial'
-                    )}
-                    </button>
-                  </div>
-
-                  {/* Error Handling */}
-                  {trialError && !isClaimed && (
-                    <div className="flex items-center gap-2">
-                      <AlertCircle size={13} className="text-[var(--text-danger)] shrink-0" strokeWidth={2} />
-                      <p className="text-[12px] text-[var(--text-danger)]">{trialError}</p>
+                      <button
+                        onClick={handleStartTrial}
+                        disabled={trialLoading || isClaimed}
+                        data-state={trialLoading ? 'saving' : isClaimed ? 'idle' : 'ready'}
+                        className={`MeetFloo-key-cta shrink-0 h-9 px-5 text-[13px] font-medium select-none flex items-center justify-center gap-2 ${trialLoading ? 'cursor-wait' : isClaimed ? 'cursor-not-allowed' : 'cursor-pointer'
+                          }`}
+                      >
+                        {trialLoading ? (
+                          <>
+                            <Loader2 size={13} className="animate-spin" /> Starting…
+                          </>
+                        ) : isClaimed ? (
+                          'Already claimed'
+                        ) : (
+                          'Start free trial'
+                        )}
+                      </button>
                     </div>
-                  )}
-                </div>
-              </Card>
-            </div>
-          );
-        })()}
 
-      {/* ── Natively key card — one box for either credential type ────── */}
-      <div>
-        <SectionLabel
-          aside={
-            !isLoading && isSaved ? (
-              <div className="flex items-center gap-3 shrink-0">
-                <span className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-500">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  {planLabel ?? 'Connected'}
-                </span>
-                <button
-                  onClick={handleClear}
-                  className="flex items-center gap-1 text-[11px] text-text-tertiary hover:text-[var(--text-danger)] transition-colors duration-150 cursor-pointer motion-reduce:transition-none"
-                >
-                  <Trash2 size={11} strokeWidth={2} />
-                  Remove
-                </button>
+                    {/* Error Handling */}
+                    {trialError && !isClaimed && (
+                      <div className="flex items-center gap-2">
+                        <AlertCircle size={13} className="text-[var(--text-danger)] shrink-0" strokeWidth={2} />
+                        <p className="text-[12px] text-[var(--text-danger)]">{trialError}</p>
+                      </div>
+                    )}
+                  </div>
+                </Card>
               </div>
-            ) : undefined
-          }
-        >
-          MeetFloo key
-        </SectionLabel>
+            );
+          })()}
 
-        {/* `natively-key-card` gives the flat box the same MATERIAL as the
+        {/* ── MeetFloo key card — one box for either credential type ────── */}
+        <div>
+          <SectionLabel
+            aside={
+              !isLoading && isSaved ? (
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-500">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    {planLabel ?? 'Connected'}
+                  </span>
+                  <button
+                    onClick={handleClear}
+                    className="flex items-center gap-1 text-[11px] text-text-tertiary hover:text-[var(--text-danger)] transition-colors duration-150 cursor-pointer motion-reduce:transition-none"
+                  >
+                    <Trash2 size={11} strokeWidth={2} />
+                    Remove
+                  </button>
+                </div>
+              ) : undefined
+            }
+          >
+            MeetFloo key
+          </SectionLabel>
+
+          {/* `MeetFloo-key-card` gives the flat box the same MATERIAL as the
             rest of this tab — layered fill, specular top hairline, 24px
             blueprint grid, raised floor shadow — without its COLOUR. The
             plaque and its well are achromatic; the Activate button is the only
             saturated thing in the section, and only once it has something to
             act on. See the "tactile credential plaque" block in index.css. */}
-        <Card className="natively-key-card">
-          <div className="px-4 py-4 space-y-3">
-            {/* Says the quiet part out loud: one box, EITHER credential. The
+          <Card className="MeetFloo-key-card">
+            <div className="px-4 py-4 space-y-3">
+              {/* Says the quiet part out loud: one box, EITHER credential. The
                 placeholder alone was carrying that, and a placeholder
                 disappears the moment you type.
 
                 The mark sits ON this line rather than in a header of its own:
                 no squircle, no tinted well, no title + sub-label block. The
                 section label above is still the heading. */}
-            <div className="flex items-center gap-2.5">
-              <span
-                aria-hidden="true"
-                className="natively-key-mark"
-                style={{ ['--natively-key-mark-src' as string]: `url(${nativelyLogo})` } as React.CSSProperties}
-              />
-              <p className="natively-key-sub text-[12px] leading-snug">
-                Activate with a MeetFloo API key or a MeetFloo Pro license.
-              </p>
-            </div>
+              <div className="flex items-center gap-2.5">
+                <span
+                  aria-hidden="true"
+                  className="MeetFloo-key-mark"
+                  style={{ ['--MeetFloo-key-mark-src' as string]: `url(${MeetFlooLogo})` } as React.CSSProperties}
+                />
+                <p className="MeetFloo-key-sub text-[12px] leading-snug">
+                  Activate with a MeetFloo API key or a MeetFloo Pro license.
+                </p>
+              </div>
 
-            {/* The input is the subject of this card. It's now a pressed-in
+              {/* The input is the subject of this card. It's now a pressed-in
                 well rather than a hairline box — same inset vocabulary as the
                 jelly controls, and it gives the credential somewhere to sit.
 
                 The placeholder names the two credential types instead of
-                showing the raw `natively_sk_` prefix. That prefix is real —
+                showing the raw `MeetFloo_sk_` prefix. That prefix is real —
                 handleSave routes on it — but it is an implementation detail
                 the user has no reason to recognise, and pairing a literal
                 token against the plain-English "or your Pro license key" made
                 the two halves read as different KINDS of thing rather than as
                 two options for the same box. */}
-            <input
-              type="text"
-              value={apiKey}
-              onChange={(e) => {
-                setApiKey(e.target.value);
-                setIsSaved(false);
-                setError(null);
-              }}
-              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-              placeholder="MeetFloo API key or MeetFloo Pro license"
-              spellCheck={false}
-              autoComplete="off"
-              data-invalid={error ? 'true' : 'false'}
-              className="natively-key-input w-full px-3.5 h-11 text-[13px] font-mono text-text-primary
+              <input
+                type="text"
+                value={apiKey}
+                onChange={(e) => {
+                  setApiKey(e.target.value);
+                  setIsSaved(false);
+                  setError(null);
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                placeholder="MeetFloo API key or MeetFloo Pro license"
+                spellCheck={false}
+                autoComplete="off"
+                data-invalid={error ? 'true' : 'false'}
+                className="MeetFloo-key-input w-full px-3.5 h-11 text-[13px] font-mono text-text-primary
                             placeholder:text-text-tertiary placeholder:font-sans"
-            />
+              />
 
-            {/* Error */}
-            {error && (
-              <div className="flex items-center gap-2 text-[12px] text-[var(--text-danger)]">
-                <AlertCircle size={13} className="shrink-0" />
-                {error}
-              </div>
-            )}
+              {/* Error */}
+              {error && (
+                <div className="flex items-center gap-2 text-[12px] text-[var(--text-danger)]">
+                  <AlertCircle size={13} className="shrink-0" />
+                  {error}
+                </div>
+              )}
 
-            {/* Save / Activate button. The disabled state used to be a
+              {/* Save / Activate button. The disabled state used to be a
                 full-width saturated slab (`bg-legacy-action-disabled-bg`),
                 which made a control you cannot press the loudest element on
                 the card. It now recedes until there's something to submit.
@@ -1607,114 +1600,113 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
                 `data-state` attribute so the paint (jelly clay on the accent
                 accent when ready, ghost when not, tinted chip on success)
                 lives in index.css next to the rest of the tab's material. */}
-            <button
-              onClick={handleSave}
-              disabled={isSaving || !isDirty}
-              data-state={
-                isSaving ? 'saving' : justSaved || justActivatedPro ? 'done' : !isDirty ? 'idle' : 'ready'
-              }
-              className={`natively-key-cta w-full h-10 text-[13px] font-medium select-none ${
-                isSaving
+              <button
+                onClick={handleSave}
+                disabled={isSaving || !isDirty}
+                data-state={
+                  isSaving ? 'saving' : justSaved || justActivatedPro ? 'done' : !isDirty ? 'idle' : 'ready'
+                }
+                className={`MeetFloo-key-cta w-full h-10 text-[13px] font-medium select-none ${isSaving
                   ? 'cursor-wait'
                   : justSaved || justActivatedPro
                     ? 'cursor-pointer'
                     : !isDirty
                       ? 'cursor-default'
                       : 'cursor-pointer'
-              }`}
-            >
-              {isSaving ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Loader2 size={13} className="animate-spin" />
-                  Activating…
-                </span>
-              ) : justSaved ? (
-                <span className="flex items-center justify-center gap-2">
-                  <CheckCircle size={13} />
-                  Saved
-                </span>
-              ) : justActivatedPro ? (
-                <span className="flex items-center justify-center gap-2">
-                  <CheckCircle size={13} />
-                  Pro activated
-                </span>
-              ) : (
-                'Activate'
-              )}
-            </button>
-          </div>
-        </Card>
+                  }`}
+              >
+                {isSaving ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 size={13} className="animate-spin" />
+                    Activating…
+                  </span>
+                ) : justSaved ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <CheckCircle size={13} />
+                    Saved
+                  </span>
+                ) : justActivatedPro ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <CheckCircle size={13} />
+                    Pro activated
+                  </span>
+                ) : (
+                  'Activate'
+                )}
+              </button>
+            </div>
+          </Card>
 
-        {/* T&C footnote under the card. The "Don't have a key? Subscribe to get
+          {/* T&C footnote under the card. The "Don't have a key? Subscribe to get
             one" prompt that used to lead this line is gone — the plan chooser
             directly below is the same call to action, stated better. */}
-        <p className="text-[11px] text-text-tertiary leading-relaxed mt-2.5 px-1 text-center">
-          By activating, you agree to our{' '}
-          <span
-            onClick={() => openExternal('https://natively.software/nativelyapi/t&c')}
-            className="text-text-secondary hover:text-text-primary underline decoration-border-muted underline-offset-[3px] cursor-pointer transition-colors duration-150 motion-reduce:transition-none"
-          >
-            Terms &amp; Conditions
-          </span>
-          .
-        </p>
-      </div>
+          <p className="text-[11px] text-text-tertiary leading-relaxed mt-2.5 px-1 text-center">
+            By activating, you agree to our{' '}
+            <span
+              onClick={() => openExternal('https://MeetFloo.software/MeetFlooapi/t&c')}
+              className="text-text-secondary hover:text-text-primary underline decoration-border-muted underline-offset-[3px] cursor-pointer transition-colors duration-150 motion-reduce:transition-none"
+            >
+              Terms &amp; Conditions
+            </span>
+            .
+          </p>
+        </div>
 
-      {afterKeySection}
+        {afterKeySection}
 
-      {/* ── Plans ──────────────────────────────────────────
+        {/* ── Plans ──────────────────────────────────────────
           Leads the arrival sequence on key removal: it takes over the region
           the Usage card and the "Change plan" accordion just vacated, so it is
           the thing that answers "what replaced what I removed".
           `y: -8` — it descends from the key card above that caused the change. */}
-      <AnimatePresence mode="popLayout" initial={false}>
-        {!isSaved && (
-          <motion.div
-            key="api-plans"
-            layout="position"
-            // width:100% is REQUIRED, not cosmetic: mode="popLayout" sets
-            // position:absolute on the exiting child, and without an explicit
-            // width it collapses to content width the instant it pops — a
-            // visible horizontal snap before the fade.
-            // `contain: layout` (never `paint` — these cards' 12-32px shadows
-            // paint outside their box and would be clipped) confines the
-            // invalidation of the two commit-pass layouts.
-            style={{ width: '100%', contain: 'layout' }}
-            // No `y` and no `height`. FLIP owns every pixel of vertical motion;
-            // a `y` on top of it composites a second translation, and a `height`
-            // is what made this choppy in the first place.
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 0.985 }}
-            transition={
-              prefersReducedMotion
-                ? { duration: INK.in, delay: BEAT }
-                : {
-                  // `layout` defaults to a SPRING — name it or the house curves
-                  // are silently discarded.
-                  layout: { duration: SETTLE.activate, ease: EASE_ENTER },
-                  opacity: { duration: INK.in, ease: EASE_ENTER, delay: BEAT },
-                  default: { duration: INK.out, ease: EASE_LEAVE },
-                }
-            }
-          >
-            {PlansCard}
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <AnimatePresence mode="popLayout" initial={false}>
+          {!isSaved && (
+            <motion.div
+              key="api-plans"
+              layout="position"
+              // width:100% is REQUIRED, not cosmetic: mode="popLayout" sets
+              // position:absolute on the exiting child, and without an explicit
+              // width it collapses to content width the instant it pops — a
+              // visible horizontal snap before the fade.
+              // `contain: layout` (never `paint` — these cards' 12-32px shadows
+              // paint outside their box and would be clipped) confines the
+              // invalidation of the two commit-pass layouts.
+              style={{ width: '100%', contain: 'layout' }}
+              // No `y` and no `height`. FLIP owns every pixel of vertical motion;
+              // a `y` on top of it composites a second translation, and a `height`
+              // is what made this choppy in the first place.
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, scale: 0.985 }}
+              transition={
+                prefersReducedMotion
+                  ? { duration: INK.in, delay: BEAT }
+                  : {
+                    // `layout` defaults to a SPRING — name it or the house curves
+                    // are silently discarded.
+                    layout: { duration: SETTLE.activate, ease: EASE_ENTER },
+                    opacity: { duration: INK.in, ease: EASE_ENTER, delay: BEAT },
+                    default: { duration: INK.out, ease: EASE_LEAVE },
+                  }
+              }
+            >
+              {PlansCard}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* ── Usage card — only for a Natively API key with a confirmed  ── */}
-      {/* valid plan (usageData populated by a successful quota fetch). */}
-      {/* isSaved alone isn't enough: a saved-but-invalid/inactive key   */}
-      {/* has nothing usage-shaped to show, so the section stays hidden */}
-      {/* entirely rather than surfacing a card with an error in it.    */}
-      {/* Presence is gated on `isSaved` ALONE, and `usageData` is cleared from
+        {/* ── Usage card — only for a MeetFloo API key with a confirmed  ── */}
+        {/* valid plan (usageData populated by a successful quota fetch). */}
+        {/* isSaved alone isn't enough: a saved-but-invalid/inactive key   */}
+        {/* has nothing usage-shaped to show, so the section stays hidden */}
+        {/* entirely rather than surfacing a card with an error in it.    */}
+        {/* Presence is gated on `isSaved` ALONE, and `usageData` is cleared from
           this wrapper's onExitComplete rather than in handleClear. AnimatePresence
           cannot play an exit for a child whose data has already vanished — nulling
           both in the same tick made this unmount instantly no matter what it was
           wrapped in. The inner guard keeps the null-safety for the case where a
           saved key simply has no valid plan. */}
-      {/* ── Usage, for a TRIAL ────────────────────────────────────
+        {/* ── Usage, for a TRIAL ────────────────────────────────────
           A trial user never reached the section below: it is gated on
           `usageData`, which comes from /v1/usage authenticated with a real
           key, and a trial authenticates with `x-trial-token` against the
@@ -1726,87 +1718,87 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
           Same ResourceMeter rows as the paid table, so the two read
           identically. "this trial", not "this month": a trial does not
           reset, it ends — the countdown for that is on the card above. */}
-      {trialState?.active && !trialState.expired && (
-        <div>
-          <SectionLabel>Usage this trial</SectionLabel>
-          <Card>
-            <div className="px-4 py-4 space-y-4">
-              <ResourceMeter label="AI Usage" icon={Brain} meter={trialMeter(trialState.usage.ai_tokens ?? 0, trialState.limits?.ai_tokens ?? TRIAL_FALLBACK_LIMITS.ai_tokens, 'tokens')} />
-              <ResourceMeter label="Voice Usage" icon={Mic} meter={trialMeter(Math.round(trialState.usage.stt_seconds / 60), trialState.limits?.stt_minutes ?? TRIAL_FALLBACK_LIMITS.stt_minutes, 'minutes')} />
-              <ResourceMeter label="Research" icon={Search} meter={trialMeter(trialState.usage.search, trialState.limits?.search_requests ?? TRIAL_FALLBACK_LIMITS.search_requests, 'requests')} />
-              {/* Knowledge only when the server actually reported it: an
+        {trialState?.active && !trialState.expired && (
+          <div>
+            <SectionLabel>Usage this trial</SectionLabel>
+            <Card>
+              <div className="px-4 py-4 space-y-4">
+                <ResourceMeter label="AI Usage" icon={Brain} meter={trialMeter(trialState.usage.ai_tokens ?? 0, trialState.limits?.ai_tokens ?? TRIAL_FALLBACK_LIMITS.ai_tokens, 'tokens')} />
+                <ResourceMeter label="Voice Usage" icon={Mic} meter={trialMeter(Math.round(trialState.usage.stt_seconds / 60), trialState.limits?.stt_minutes ?? TRIAL_FALLBACK_LIMITS.stt_minutes, 'minutes')} />
+                <ResourceMeter label="Research" icon={Search} meter={trialMeter(trialState.usage.search, trialState.limits?.search_requests ?? TRIAL_FALLBACK_LIMITS.search_requests, 'requests')} />
+                {/* Knowledge only when the server actually reported it: an
                   absent counter is an older API, not zero usage, and
                   ResourceMeter's own rule is to render nothing rather than a
                   confident 0%. */}
-              {trialState.usage.embedding_tokens !== undefined && trialState.limits?.embedding_tokens ? (
-                <ResourceMeter label="Knowledge Usage" icon={Layers} meter={trialMeter(trialState.usage.embedding_tokens, trialState.limits.embedding_tokens, 'tokens')} />
-              ) : null}
-            </div>
-          </Card>
-        </div>
-      )}
+                {trialState.usage.embedding_tokens !== undefined && trialState.limits?.embedding_tokens ? (
+                  <ResourceMeter label="Knowledge Usage" icon={Layers} meter={trialMeter(trialState.usage.embedding_tokens, trialState.limits.embedding_tokens, 'tokens')} />
+                ) : null}
+              </div>
+            </Card>
+          </div>
+        )}
 
-      <AnimatePresence mode="popLayout" initial={false} onExitComplete={() => setUsageData(null)}>
-      {isSaved && usageData && (
-        <motion.div
-          key="api-usage"
-          layout="position"
-          // width:100% is REQUIRED, not cosmetic: mode="popLayout" sets
-          // position:absolute on the exiting child, and without an explicit
-          // width it collapses to content width the instant it pops — a
-          // visible horizontal snap before the fade.
-          // `contain: layout` (never `paint` — these cards' 12-32px shadows
-          // paint outside their box and would be clipped) confines the
-          // invalidation of the two commit-pass layouts.
-          style={{ width: '100%', contain: 'layout' }}
-          // No `y` and no `height`. FLIP owns every pixel of vertical motion;
-          // a `y` on top of it composites a second translation, and a `height`
-          // is what made this choppy in the first place.
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 0.985 }}
-          transition={
-            prefersReducedMotion
-              ? { duration: INK.in, delay: usageDelay(BEAT) }
-              : {
-                // `layout` defaults to a SPRING — name it or the house curves
-                // are silently discarded.
-                layout: { duration: SETTLE.activate, ease: EASE_ENTER },
-                opacity: { duration: INK.in, ease: EASE_ENTER, delay: usageDelay(BEAT) },
-                default: { duration: INK.out, ease: EASE_LEAVE },
+        <AnimatePresence mode="popLayout" initial={false} onExitComplete={() => setUsageData(null)}>
+          {isSaved && usageData && (
+            <motion.div
+              key="api-usage"
+              layout="position"
+              // width:100% is REQUIRED, not cosmetic: mode="popLayout" sets
+              // position:absolute on the exiting child, and without an explicit
+              // width it collapses to content width the instant it pops — a
+              // visible horizontal snap before the fade.
+              // `contain: layout` (never `paint` — these cards' 12-32px shadows
+              // paint outside their box and would be clipped) confines the
+              // invalidation of the two commit-pass layouts.
+              style={{ width: '100%', contain: 'layout' }}
+              // No `y` and no `height`. FLIP owns every pixel of vertical motion;
+              // a `y` on top of it composites a second translation, and a `height`
+              // is what made this choppy in the first place.
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, scale: 0.985 }}
+              transition={
+                prefersReducedMotion
+                  ? { duration: INK.in, delay: usageDelay(BEAT) }
+                  : {
+                    // `layout` defaults to a SPRING — name it or the house curves
+                    // are silently discarded.
+                    layout: { duration: SETTLE.activate, ease: EASE_ENTER },
+                    opacity: { duration: INK.in, ease: EASE_ENTER, delay: usageDelay(BEAT) },
+                    default: { duration: INK.out, ease: EASE_LEAVE },
+                  }
               }
-          }
-        >
-          <SectionLabel
-            aside={
-              <span className="flex items-center gap-2 shrink-0">
-                <span className="text-[11px] text-text-tertiary">
-                  Resets {fmtDate(usageData.quota.resets_at)}
-                </span>
-                <button
-                  onClick={() => fetchUsage({ force: true })}
-                  disabled={isLoadingUsage}
-                  title="Refresh"
-                  aria-label="Refresh usage"
-                  className="flex items-center justify-center w-5 h-5 rounded-md text-text-tertiary
+            >
+              <SectionLabel
+                aside={
+                  <span className="flex items-center gap-2 shrink-0">
+                    <span className="text-[11px] text-text-tertiary">
+                      Resets {fmtDate(usageData.quota.resets_at)}
+                    </span>
+                    <button
+                      onClick={() => fetchUsage({ force: true })}
+                      disabled={isLoadingUsage}
+                      title="Refresh"
+                      aria-label="Refresh usage"
+                      className="flex items-center justify-center w-5 h-5 rounded-md text-text-tertiary
                                 hover:text-text-secondary transition-colors duration-150 motion-reduce:transition-none
                                 disabled:opacity-40 cursor-pointer shrink-0"
-                >
-                  <RefreshCw
-                    size={11}
-                    className={isLoadingUsage ? 'animate-spin' : ''}
-                    strokeWidth={2}
-                  />
-                </button>
-              </span>
-            }
-          >
-            Usage this month
-          </SectionLabel>
+                    >
+                      <RefreshCw
+                        size={11}
+                        className={isLoadingUsage ? 'animate-spin' : ''}
+                        strokeWidth={2}
+                      />
+                    </button>
+                  </span>
+                }
+              >
+                Usage this month
+              </SectionLabel>
 
-          <Card>
-            <div className="px-4 py-4 space-y-4">
-              {/* The four product categories, in the order they cost money.
+              <Card>
+                <div className="px-4 py-4 space-y-4">
+                  {/* The four product categories, in the order they cost money.
                   Names are the customer's, not the implementation's: "Voice
                   Usage" rather than STT, "Research" rather than web searches.
                   Every figure comes from the server response, so there is
@@ -1815,63 +1807,63 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
                   percentOnly: the monthly panel reports how much of the
                   allowance is gone, not what the allowance IS. See ResourceMeter
                   for why the trial panel above still shows the pair. */}
-              <ResourceMeter label="AI Usage" icon={Brain} meter={usageData.quota.ai} percentOnly />
-              <KnowledgeUsage knowledge={usageData.quota.knowledge} percentOnly />
-              <ResourceMeter label="Voice Usage" icon={Mic} meter={usageData.quota.voice} percentOnly />
-              <ResourceMeter label="Research" icon={Search} meter={usageData.quota.research} percentOnly />
-            </div>
-          </Card>
-        </motion.div>
-      )}
-      </AnimatePresence>
+                  <ResourceMeter label="AI Usage" icon={Brain} meter={usageData.quota.ai} percentOnly />
+                  <KnowledgeUsage knowledge={usageData.quota.knowledge} percentOnly />
+                  <ResourceMeter label="Voice Usage" icon={Mic} meter={usageData.quota.voice} percentOnly />
+                  <ResourceMeter label="Research" icon={Search} meter={usageData.quota.research} percentOnly />
+                </div>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* ── Plans — already-subscribed users have already chosen a plan; ── */}
-      {/* collapse the chooser behind "Change plan" instead of always showing */}
-      {/* the full pricing selector at equal weight to Usage above it.        */}
-      <AnimatePresence mode="popLayout" initial={false}>
-        {isSaved && (
-          <motion.div
-            key="api-change-plan"
-            layout="position"
-            // width:100% is REQUIRED, not cosmetic: mode="popLayout" sets
-            // position:absolute on the exiting child, and without an explicit
-            // width it collapses to content width the instant it pops — a
-            // visible horizontal snap before the fade.
-            // `contain: layout` (never `paint` — these cards' 12-32px shadows
-            // paint outside their box and would be clipped) confines the
-            // invalidation of the two commit-pass layouts.
-            style={{ width: '100%', contain: 'layout' }}
-            // No `y` and no `height`. FLIP owns every pixel of vertical motion;
-            // a `y` on top of it composites a second translation, and a `height`
-            // is what made this choppy in the first place.
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 0.985 }}
-            transition={
-              prefersReducedMotion
-                ? { duration: INK.in, delay: BEAT }
-                : {
-                  // `layout` defaults to a SPRING — name it or the house curves
-                  // are silently discarded.
-                  layout: { duration: SETTLE.activate, ease: EASE_ENTER },
-                  opacity: { duration: INK.in, ease: EASE_ENTER, delay: BEAT },
-                  default: { duration: INK.out, ease: EASE_LEAVE },
-                }
-            }
-          >
-            <AccordionSection
-              title="Change plan"
-              className="bg-bg-item-surface rounded-2xl border-border-subtle !mb-0"
+        {/* ── Plans — already-subscribed users have already chosen a plan; ── */}
+        {/* collapse the chooser behind "Change plan" instead of always showing */}
+        {/* the full pricing selector at equal weight to Usage above it.        */}
+        <AnimatePresence mode="popLayout" initial={false}>
+          {isSaved && (
+            <motion.div
+              key="api-change-plan"
+              layout="position"
+              // width:100% is REQUIRED, not cosmetic: mode="popLayout" sets
+              // position:absolute on the exiting child, and without an explicit
+              // width it collapses to content width the instant it pops — a
+              // visible horizontal snap before the fade.
+              // `contain: layout` (never `paint` — these cards' 12-32px shadows
+              // paint outside their box and would be clipped) confines the
+              // invalidation of the two commit-pass layouts.
+              style={{ width: '100%', contain: 'layout' }}
+              // No `y` and no `height`. FLIP owns every pixel of vertical motion;
+              // a `y` on top of it composites a second translation, and a `height`
+              // is what made this choppy in the first place.
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, scale: 0.985 }}
+              transition={
+                prefersReducedMotion
+                  ? { duration: INK.in, delay: BEAT }
+                  : {
+                    // `layout` defaults to a SPRING — name it or the house curves
+                    // are silently discarded.
+                    layout: { duration: SETTLE.activate, ease: EASE_ENTER },
+                    opacity: { duration: INK.in, ease: EASE_ENTER, delay: BEAT },
+                    default: { duration: INK.out, ease: EASE_LEAVE },
+                  }
+              }
             >
-              {PlansCard}
-            </AccordionSection>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <AccordionSection
+                title="Change plan"
+                className="bg-bg-item-surface rounded-2xl border-border-subtle !mb-0"
+              >
+                {PlansCard}
+              </AccordionSection>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* ── How it works + Refund Policy — collapsed by default, this is ── */}
-      {/* reference material, not something read on every settings visit.  */}
-    </div>
+        {/* ── How it works + Refund Policy — collapsed by default, this is ── */}
+        {/* reference material, not something read on every settings visit.  */}
+      </div>
     </LayoutGroup>
   );
 };

@@ -4,7 +4,7 @@
 // input is index.html alone, so this never ships).
 //
 // WHY this exists rather than "just look at the app": the card renders only for
-// a user with NO Natively key, and CredentialsManager reads the macOS keychain,
+// a user with NO MeetFloo key, and CredentialsManager reads the macOS keychain,
 // which is per-USER — not per-userData-dir. So even a throwaway
 // `--user-data-dir` profile picks up a real saved key on a developer machine and
 // the `!isSaved` gate correctly hides the very card you are trying to look at.
@@ -15,7 +15,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import '../index.css';
-import { NativelyApiSettings } from '../components/settings/NativelyApiSettings';
+import { MeetFlooApiSettings } from '../components/settings/NativelyApiSettings';
 
 const params = new URLSearchParams(location.search);
 const CLAIMED = params.get('claimed') === '1';
@@ -41,8 +41,8 @@ const noop = async () => ([] as any);
 
 const OVERRIDES: Record<string, () => Promise<any>> = {
   // No key saved: `isSaved` false is half of what puts the card on screen.
-  getStoredCredentials: async () => ({ hasNativelyKey: false }),
-  getNativelyApiKey: async () => null,
+  getStoredCredentials: async () => ({ hasMeetFlooKey: false }),
+  getMeetFlooApiKey: async () => null,
   // The other half: no trial token, and never claimed.
   getLocalTrial: async () => (ACTIVE
     ? { hasToken: true, trialClaimed: true, expiresAt, startedAt, expired: false }
@@ -69,8 +69,8 @@ const OVERRIDES: Record<string, () => Promise<any>> = {
       },
     }
     : { ok: false }),
-  getNativelyUsage: async () => null,
-  getNativelyPlans: async () => null,
+  getMeetFlooUsage: async () => null,
+  getMeetFlooPlans: async () => null,
   getLicenseDetails: async () => ({ isPremium: false }),
 };
 
@@ -97,7 +97,7 @@ function Harness() {
         background: LIGHT ? '#fafafa' : '#1E1E21',
       }}
     >
-      <NativelyApiSettings />
+      <MeetFlooApiSettings />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 // DEV-ONLY visual harness for the streaming code-block fix (see
-// StreamingHighlightedCode / CodeStreamLine in NativelyInterface.tsx).
+// StreamingHighlightedCode / CodeStreamLine in MeetFlooInterface.tsx).
 //
 // Not part of the shipped app — served only via harness.html, which is not
 // referenced from index.html or vite.config.mts's rollup entry, so it is
@@ -113,7 +113,7 @@ function Harness() {
         setTickLog((log) => [
           ...log,
           `DONE: revealed ${ANSWER.length} chars in ${elapsed.toFixed(0)}ms ` +
-            `(~${(ANSWER.length / (elapsed / 1000)).toFixed(1)} chars/sec — cap is 120/sec)`,
+          `(~${(ANSWER.length / (elapsed / 1000)).toFixed(1)} chars/sec — cap is 120/sec)`,
         ]);
       }
       raf = requestAnimationFrame(tick);
@@ -125,7 +125,7 @@ function Harness() {
   // Extract the still-open fence's code-so-far, the same way
   // renderMessageText does: split on the fence regex, find the fence part,
   // strip the ```lang\n marker — WITHOUT trimming (see the .trim() bug fix
-  // comment at the real call site in NativelyInterface.tsx).
+  // comment at the real call site in MeetFlooInterface.tsx).
   const parts = text.split(/(```[\s\S]*?(?:```|$))/g);
   const fencePart = parts.find((p) => p.startsWith('```'));
   const match = fencePart?.match(/```([\w+#-]*)\s+([\s\S]*?)(?:```|$)/);
