@@ -976,6 +976,7 @@ interface Meeting {
         items?: string[];
     }>;
     summaryStatus?: MeetingSummaryStatus;
+    recordingPath?: string;
 }
 
 // Mirrors SummaryStatus in electron/services/meeting/MeetingSummaryV3.ts. The
@@ -1896,6 +1897,42 @@ ${meeting.detailedSummary.keyPoints?.map(item => `- ${item}`).join('\n') || 'Non
                         {/* Moved Actions: Follow-up & Share (REMOVED per user request) */}
                         {/* <div className="flex items-center gap-2 mt-1"> ... </div> */}
                     </div>
+
+                    {/* Audio Recording Banner */}
+                    {meeting.recordingPath && (
+                        <div className={`mb-4 p-3 rounded-xl border flex items-center justify-between gap-3 ${isLight ? 'bg-amber-500/10 border-amber-500/20' : 'bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-transparent border-amber-500/30'}`}>
+                            <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                                    <Play size={15} className="ml-0.5 fill-current" />
+                                </div>
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-semibold text-text-primary tracking-tight">{t('Meeting Audio Recording')}</span>
+                                        <span className="text-[10px] font-medium px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">16kHz WAV</span>
+                                    </div>
+                                    <p className="text-[11px] text-text-tertiary truncate max-w-md">{meeting.recordingPath}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={() => (window.electronAPI as any)?.playRecording?.(meeting.recordingPath)}
+                                    className="h-7 px-3 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                                >
+                                    <Play size={12} className="fill-current" />
+                                    <span>{t('Play')}</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => (window.electronAPI as any)?.openRecordingFolder?.(meeting.recordingPath)}
+                                    className="h-7 px-2.5 rounded-md bg-white/[0.06] hover:bg-white/[0.1] text-text-secondary hover:text-text-primary text-xs font-medium transition-colors cursor-pointer"
+                                    title={t('Show in folder')}
+                                >
+                                    {t('Folder')}
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Tabs */}
                     {/* Designing Tabs to match reference 1:1 (Dark Pill Container) */}

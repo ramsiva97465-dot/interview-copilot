@@ -61,6 +61,7 @@ export interface Meeting {
     source?: 'manual' | 'calendar';
     isProcessed?: boolean;
     summaryStatus?: SummaryStatus;
+    recordingPath?: string;
 }
 
 /**
@@ -103,7 +104,7 @@ export class DatabaseManager {
         }
         try { fs.mkdirSync(userDataPath, { recursive: true }); } catch { /* best effort */ }
         this.dbPath = path.join(userDataPath, 'natively.db');
-        // Auto-migration from legacy data directories (Snapserve.ai / snapserve-ai / natively) to Xivora Studio
+        // Auto-migration from legacy data directories (Snapserve.ai / snapserve-ai / natively) to MeetFloo
         if (!fs.existsSync(this.dbPath)) {
             const legacyCandidates = ['Snapserve.ai', 'snapserve-ai', 'natively'];
             const parentDir = path.dirname(userDataPath);
@@ -3018,7 +3019,8 @@ export class DatabaseManager {
 
         const summaryJson = JSON.stringify({
             legacySummary: meeting.summary,
-            detailedSummary: meeting.detailedSummary
+            detailedSummary: meeting.detailedSummary,
+            recordingPath: (meeting as any).recordingPath
         });
 
         const runTransaction = this.db.transaction(() => {
@@ -3378,6 +3380,7 @@ export class DatabaseManager {
             duration: durationStr,
             summary: summaryData.legacySummary || '',
             detailedSummary: summaryData.detailedSummary,
+            recordingPath: summaryData.recordingPath,
             calendarEventId: meetingRow.calendar_event_id,
             source: meetingRow.source,
             summaryStatus: meetingRow.summary_status as SummaryStatus | undefined,

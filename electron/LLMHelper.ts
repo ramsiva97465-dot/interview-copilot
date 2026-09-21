@@ -81,7 +81,7 @@ import type {
   DirectAssistSelection,
 } from './direct-assist/types';
 const execAsync = promisify(exec);
-const XIVORA_API_URL = (process.env.APP_API_URL || 'https://api.xivorastudio.com').replace(/\/+$/, '');
+const MEETFLOO_API_URL = (process.env.APP_API_URL || 'https://api.meetfloo.com').replace(/\/+$/, '');
 
 function nowMs(): number {
   try {
@@ -156,8 +156,8 @@ const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 // they are NOT auth and carry nothing about the user. Sent as constants so a
 // request can never leak a real page URL or document title from the overlay.
 const OPENROUTER_ATTRIBUTION_HEADERS = {
-  "HTTP-Referer": "https://xivorastudio.com",
-  "X-OpenRouter-Title": "Xivora Studio",
+  "HTTP-Referer": "https://meetfloo.com",
+  "X-OpenRouter-Title": "MeetFloo",
 }
 // Fluxion AI is an aggregator gateway that speaks BOTH wire protocols, and the
 // one it accepts is fixed by the group the user's key belongs to — a property
@@ -4796,7 +4796,7 @@ let isMultimodal = !!(imagePaths?.length);
     }
     if (!nativelyKey && !e2eLocalToken) throw new Error('Natively API key not set');
 
-    const endpointUrl = `${XIVORA_API_URL}/v1/chat`;
+    const endpointUrl = `${MEETFLOO_API_URL}/v1/chat`;
     const requestId = makeRequestId('nat_json');
     const requestStartedAt = nowMs();
     // When the key is the trial sentinel, authenticate with the real trial token
@@ -9356,7 +9356,7 @@ let isMultimodal = !!(imagePaths?.length);
       } catch { return connectTimeoutMs; }
     })();
 
-    const endpointUrl = `${XIVORA_API_URL}/v1/chat`;
+    const endpointUrl = `${MEETFLOO_API_URL}/v1/chat`;
     const requestId = makeRequestId('nat_stream');
     const streamStartedAt = nowMs();
     let responseStartedAt = 0;

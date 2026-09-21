@@ -12,6 +12,7 @@ import GlobalChatOverlay from './GlobalChatOverlay';
 import { motion, AnimatePresence, useReducedMotion, type TargetAndTransition, type Variants } from 'framer-motion';
 import { FeatureSpotlight } from './FeatureSpotlight';
 import { ModeSelectionCards } from './ModeSelectionCards';
+import { CustomModeModal } from './CustomModeModal';
 import { analytics } from '../lib/analytics/analytics.service'; // Added analytics import
 import { useShortcuts } from '../hooks/useShortcuts';
 import { useResolvedTheme } from '../hooks/useResolvedTheme';
@@ -45,10 +46,16 @@ interface Meeting {
     }>;
     active?: boolean; // UI state
     time?: string; // Optional for compatibility
+    recordingPath?: string;
 }
 
 interface LauncherProps {
-    onStartMeeting: () => void;
+    onStartMeeting: (options?: {
+        recordAudio?: boolean;
+        generateSummary?: boolean;
+        customRole?: string;
+        userName?: string;
+    }) => void;
     onOpenSettings: (tab?: string) => void;
     onOpenProfile?: () => void;
     onOpenModes?: () => void;
@@ -97,6 +104,7 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
     // Global search state (for AI chat overlay)
     const [isGlobalChatOpen, setIsGlobalChatOpen] = useState(false);
     const [submittedGlobalQuery, setSubmittedGlobalQuery] = useState('');
+    const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
 
     const [showModesOnboarding, setShowModesOnboarding] = useState(false);
     const [showProfileOnboarding, setShowProfileOnboarding] = useState(false);
@@ -1119,6 +1127,10 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
                                             <ModeSelectionCards
                                                 isLight={isLight}
                                                 onSelectMode={async (modeKey) => {
+                                                    if (modeKey === 'general') {
+                                                        setIsCustomModalOpen(true);
+                                                        return;
+                                                    }
                                                     try {
                                                         const modes = await (window.electronAPI as any)?.modesGetAll?.();
                                                         const matched = Array.isArray(modes) ? modes.find((m: any) => m.id === modeKey || m.templateType === modeKey) : null;
@@ -1321,6 +1333,18 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
                     setSubmittedGlobalQuery('');
                 }}
                 initialQuery={submittedGlobalQuery}
+            />
+
+            {/* Custom Mode Modal */}
+            <CustomModeModal
+                isOpen={isCustomModalOpen}
+                onClose={() => setIsCustomModalOpen(false)}
+                onStartMeeting={(opts) => {
+                    emitOrchestratorEvent({ type: 'turn:done', surface: 'meeting' });
+                    onStartMeeting(opts);
+                    analytics.trackCommandExecuted('start_mode_custom');
+                }}
+                isLight={isLight}
             />
         </div >
     );

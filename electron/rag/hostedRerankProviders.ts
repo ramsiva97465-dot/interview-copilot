@@ -54,7 +54,7 @@ export interface HostedRerankProvider {
  * silently bills production.
  */
 const NATIVELY_RERANK_BASE_URL =
-  `${(process.env.APP_API_URL || 'https://api.xivorastudio.com').replace(/\/+$/, '')}/v1`;
+  `${(process.env.APP_API_URL || 'https://api.MeetFloo.com').replace(/\/+$/, '')}/v1`;
 
 export const HOSTED_RERANK_PROVIDERS: Record<HostedRerankProviderId, HostedRerankProvider> = {
   /**

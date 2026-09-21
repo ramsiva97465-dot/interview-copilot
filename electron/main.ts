@@ -18,6 +18,7 @@ import { SystemAudioHealthClassifier } from "./audio/systemAudioHealthClassifier
 import { FatalMainProcessCoordinator } from "./utils/fatalMainProcess"
 import { installResilientDnsLookup } from "./utils/resilientDnsLookup"
 import { MeetingLifecycleQueue, type MeetingLifecycleState } from "./audio/meetingLifecycleQueue"
+import { MeetingAudioRecorder } from "./audio/MeetingAudioRecorder"
 import { autoUpdater } from "electron-updater"
 
 import {
@@ -3990,6 +3991,7 @@ export class AppState {
       // transcript (F-102).
       if (this.systemAudioCapture === capture) {
         this.googleSTT?.write(chunk);
+        MeetingAudioRecorder.getInstance().writeChunk(chunk);
         // Smart Turn ring buffer (256 KB, interviewer channel only). Cheap
         // int16 copy; skipped entirely while Auto Answer is off.
       }
@@ -4182,6 +4184,7 @@ export class AppState {
       // feed the user STT socket.
       if (this.microphoneCapture === capture) {
         this.googleSTT_User?.write(chunk);
+        MeetingAudioRecorder.getInstance().writeChunk(chunk);
       }
     });
     capture.on('sample_rate_changed', (rate: number) => {
@@ -6339,6 +6342,13 @@ export class AppState {
     this.broadcastMeetingState()
     if (metadata) {
       this.intelligenceManager.setMeetingMetadata(metadata);
+      if (metadata.recordAudio) {
+        try {
+          MeetingAudioRecorder.getInstance().start();
+        } catch (err) {
+          console.warn('[Main] MeetingAudioRecorder failed to start:', err);
+        }
+      }
     }
 
     // Phase 3 — bind dynamic action engine to this meeting + active mode.
@@ -6784,6 +6794,21 @@ export class AppState {
         // 2. Tear down STT sockets now that finals have arrived.
         this.googleSTT?.stop();
         this.googleSTT_User?.stop();
+
+        // 2.5 Stop audio recording if active and record recordingPath into metadata
+        try {
+          const recordingPath = await MeetingAudioRecorder.getInstance().stop();
+          if (recordingPath) {
+            const currentMeta = this.intelligenceManager.getMeetingMetadata() || {};
+            this.intelligenceManager.setMeetingMetadata({
+              ...currentMeta,
+              recordingPath,
+            });
+            console.log('[Main] Audio recording saved to:', recordingPath);
+          }
+        } catch (recStopErr) {
+          console.warn('[Main] Failed to stop/save audio recording:', recStopErr);
+        }
 
         // 3. Snapshot transcript + persist placeholder + queue title/summary LLM.
         //    intelligenceManager.stopMeeting itself runs LLM in background.

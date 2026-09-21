@@ -25,8 +25,8 @@ export interface OpenRouterListOptions {
 
 function headers(apiKey?: string): Record<string, string> {
   const h: Record<string, string> = {
-    'HTTP-Referer': 'https://xivorastudio.com',
-    'X-Title': 'Xivora Studio',
+    'HTTP-Referer': 'https://meetfloo.com',
+    'X-Title': 'MeetFloo',
   };
   if (apiKey) h.Authorization = `Bearer ${apiKey}`;
   return h;

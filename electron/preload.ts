@@ -1195,7 +1195,10 @@ interface ElectronAPI {
   >;
   modesUploadReferenceFile: (
     modeId: string,
+    directFilePath?: string,
   ) => Promise<{ success: boolean; cancelled?: boolean; file?: any; error?: string }>;
+  openRecordingFolder: (filePath: string) => Promise<{ success: boolean; error?: string }>;
+  playRecording: (filePath: string) => Promise<{ success: boolean; error?: string }>;
   modesDeleteReferenceFile: (id: string) => Promise<{ success: boolean; error?: string }>;
   modesGetReferenceFileStatus: (
     modeId: string,
@@ -3043,8 +3046,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   modesSetActive: (id: string | null) => ipcRenderer.invoke('modes:set-active', id),
   modesGetReferenceFiles: (modeId: string) =>
     ipcRenderer.invoke('modes:get-reference-files', modeId),
-  modesUploadReferenceFile: (modeId: string) =>
-    ipcRenderer.invoke('modes:upload-reference-file', modeId),
+  modesUploadReferenceFile: (modeId: string, directFilePath?: string) =>
+    ipcRenderer.invoke('modes:upload-reference-file', modeId, directFilePath),
+  openRecordingFolder: (filePath: string) => ipcRenderer.invoke('open-recording-folder', filePath),
+  playRecording: (filePath: string) => ipcRenderer.invoke('play-recording', filePath),
   modesDeleteReferenceFile: (id: string) => ipcRenderer.invoke('modes:delete-reference-file', id),
   modesGetReferenceFileStatus: (modeId: string) =>
     ipcRenderer.invoke('modes:get-reference-file-status', modeId),

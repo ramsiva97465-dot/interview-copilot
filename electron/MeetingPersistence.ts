@@ -376,8 +376,9 @@ export class MeetingPersistence {
             transcript: snapshot.transcript,
             usage: snapshot.usage,
             isProcessed: false,
-            summaryStatus: 'queued'
-        };
+            summaryStatus: 'queued',
+            recordingPath: (metadataSnapshot as any)?.recordingPath
+        } as any;
 
         try {
             DatabaseManager.getInstance().saveMeeting(placeholder, snapshot.startTime, durationMs);
@@ -458,7 +459,8 @@ export class MeetingPersistence {
                 usage: data.usage,
                 isProcessed: true,
                 summaryStatus: 'completed',
-            };
+                recordingPath: (metadata as any)?.recordingPath
+            } as any;
             try {
                 DatabaseManager.getInstance().saveMeeting(finalMeeting, data.startTime, data.durationMs);
                 const wins = require('electron').BrowserWindow.getAllWindows();
@@ -502,6 +504,15 @@ export class MeetingPersistence {
             const scopePolicy = SettingsManager.getInstance().get('providerDataScopes') as ProviderDataScopePolicy | undefined;
             postCallSummaryAllowed = scopePolicy?.post_call_summary !== false;
         } catch { /* settings unavailable → keep existing default */ }
+
+        if ((metadata as any)?.generateSummary === false) {
+            postCallSummaryAllowed = false;
+            summaryData = {
+                overview: 'Summary generation was skipped as requested.',
+                keyPoints: [],
+                actionItems: []
+            };
+        }
 
         try {
             // Title generation (Task 9) moves to AFTER the notes exist — see
@@ -894,8 +905,9 @@ Return ONLY valid JSON (no markdown code blocks):
                 calendarEventId: calendarEventId,
                 source: source,
                 isProcessed: true,
-                summaryStatus: generationSucceeded || data.transcript.length <= 2 ? 'completed' : 'failed'
-            };
+                summaryStatus: generationSucceeded || (metadata as any)?.generateSummary === false || data.transcript.length <= 2 ? 'completed' : 'failed',
+                recordingPath: (metadata as any)?.recordingPath
+            } as any;
 
             DatabaseManager.getInstance().saveMeeting(meetingData, data.startTime, data.durationMs);
             meetingSaved = true;

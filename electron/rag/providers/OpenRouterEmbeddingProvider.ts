@@ -52,8 +52,8 @@ export class OpenRouterEmbeddingProvider implements IEmbeddingProvider {
       Authorization: `Bearer ${this.apiKey}`,
       // OpenRouter attributes usage per app via these. Harmless elsewhere, and it
       // makes Natively's traffic identifiable on the user's own dashboard.
-      'HTTP-Referer': 'https://xivorastudio.com',
-      'X-Title': 'Xivora Studio',
+      'HTTP-Referer': 'https://meetfloo.com',
+      'X-Title': 'MeetFloo',
     };
   }
 

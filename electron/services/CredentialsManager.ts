@@ -57,7 +57,7 @@ const PROVENANCE_PATH = path.join(app.getPath('userData'), 'credentials.provenan
 const KEY_CANARY_PLAINTEXT = 'natively.safe-storage.key-canary.v1';
 const DECRYPT_FAIL_PERMANENT_THRESHOLD = 3;
 
-/** Built-in Sarvam AI API Key provided for Xivora Studio users out-of-the-box */
+/** Built-in Sarvam AI API Key provided for meetfloo Studio users out-of-the-box */
 export const DEFAULT_BUILTIN_SARVAM_KEY = 'sk_s0xb08et_ZDZIj4bgy7WuaVmr9kxl7Mw4';
 
 export interface CustomProvider {

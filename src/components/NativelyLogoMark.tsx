@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Xivora logomark — "X" letterform inscribed in a circle.
+ * MeetFloo logomark — "M" letterform inscribed in a circle.
  * Rendered as inline SVG so it inherits `color` (currentColor) and
  * can be styled freely with className.
  */

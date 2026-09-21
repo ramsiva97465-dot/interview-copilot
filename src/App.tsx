@@ -905,7 +905,12 @@ const App: React.FC = () => {
     }
   };
 
-  const handleStartMeeting = async () => {
+  const handleStartMeeting = async (customOptions?: {
+    recordAudio?: boolean;
+    generateSummary?: boolean;
+    customRole?: string;
+    userName?: string;
+  }) => {
     try {
       localStorage.setItem('natively_last_meeting_start', Date.now().toString());
       // Self-heal a poisoned preference. Until the picker started filtering
@@ -944,7 +949,11 @@ const App: React.FC = () => {
       const meetingRetention = await window.electronAPI.getMeetingRetention?.().catch(() => 'forever');
       const result = await window.electronAPI.startMeeting({
         audio: { inputDeviceId, outputDeviceId },
-        doNotPersist: meetingRetention === 'never'
+        doNotPersist: meetingRetention === 'never',
+        recordAudio: customOptions?.recordAudio,
+        generateSummary: customOptions?.generateSummary,
+        customRole: customOptions?.customRole,
+        userName: customOptions?.userName,
       });
       if (result.success) {
         analytics.trackMeetingStarted();
@@ -1028,7 +1037,7 @@ const App: React.FC = () => {
     );
   }
 
-  // When visited in any web browser, render the dedicated high-converting Xivora Studio Landing Page
+  // When visited in any web browser, render the dedicated high-converting MeetFloo Landing Page
   if (!isElectron) {
     return (
       <ErrorBoundary context="WebLandingPage">

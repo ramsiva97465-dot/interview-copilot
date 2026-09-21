@@ -9955,7 +9955,7 @@ export function initializeIpcHandlers(appState: AppState): void {
   const _usageCache = new Map<string, { data: any; ts: number }>();
   const USAGE_CACHE_TTL_MS = 60_000;
   // The API host.
-  const APP_API_BASE = (process.env.APP_API_URL || 'https://api.xivorastudio.com').replace(/\/+$/, '');
+  const APP_API_BASE = (process.env.APP_API_URL || 'https://api.meetfloo.com').replace(/\/+$/, '');
   // The plan catalog. Unauthenticated and identical for every user, so it is
   // cached per PROCESS rather than per key, and for far longer than usage —
   // allowances change on a deploy, not on a request.
@@ -16111,7 +16111,7 @@ export function initializeIpcHandlers(appState: AppState): void {
     }
   });
 
-  safeHandle('modes:upload-reference-file', async (_, modeId: string) => {
+  safeHandle('modes:upload-reference-file', async (_, modeId: string, directFilePath?: string) => {
     // Bug fix 2026-07-28 (code review): the .doc friendly-message check
     // below used to read the thrown error's own path field, but the Error
     // thrown by SafeDocumentTextExtractor's extension whitelist never sets
@@ -16121,17 +16121,21 @@ export function initializeIpcHandlers(appState: AppState): void {
     let selectedPath: string | undefined;
     try {
       if (!isProOrTrialActive()) return { success: false, error: 'pro_required' };
-      const result: any = await dialog.showOpenDialog({
-        properties: ['openFile'],
-        filters: [
-          // One source of truth with the extractor: a hand-copied list here
-          // refused every source/config file the extractor accepts (2026-09-10).
-          { name: 'Text, Documents & Code', extensions: [...SAFE_DOCUMENT_EXTENSIONS].map(extension => extension.slice(1)) },
-          { name: 'All Files', extensions: ['*'] },
-        ],
-      });
-      if (result.canceled || !result.filePaths?.[0]) return { success: false, cancelled: true };
-      selectedPath = result.filePaths[0];
+      if (directFilePath && typeof directFilePath === 'string' && fs.existsSync(directFilePath)) {
+        selectedPath = directFilePath;
+      } else {
+        const result: any = await dialog.showOpenDialog({
+          properties: ['openFile'],
+          filters: [
+            // One source of truth with the extractor: a hand-copied list here
+            // refused every source/config file the extractor accepts (2026-09-10).
+            { name: 'Text, Documents & Code', extensions: [...SAFE_DOCUMENT_EXTENSIONS].map(extension => extension.slice(1)) },
+            { name: 'All Files', extensions: ['*'] },
+          ],
+        });
+        if (result.canceled || !result.filePaths?.[0]) return { success: false, cancelled: true };
+        selectedPath = result.filePaths[0];
+      }
       const { ingestModeReferenceFile } = require('./services/ModeReferenceFileIngestion') as typeof import('./services/ModeReferenceFileIngestion');
       const file = await ingestModeReferenceFile({
         modeId,
@@ -16150,6 +16154,30 @@ export function initializeIpcHandlers(appState: AppState): void {
       }
       console.error('[IPC] modes:upload-reference-file error:', error?.message || error);
       return { success: false, error: 'Could not parse the selected file. It may be corrupt, password-protected, unsupported, or too large.' };
+    }
+  });
+
+  safeHandle('open-recording-folder', async (_, filePath: string) => {
+    try {
+      if (filePath && fs.existsSync(filePath)) {
+        shell.showItemInFolder(filePath);
+        return { success: true };
+      }
+      return { success: false, error: 'File not found' };
+    } catch (e: any) {
+      return { success: false, error: e?.message || e };
+    }
+  });
+
+  safeHandle('play-recording', async (_, filePath: string) => {
+    try {
+      if (filePath && fs.existsSync(filePath)) {
+        await shell.openPath(filePath);
+        return { success: true };
+      }
+      return { success: false, error: 'File not found' };
+    } catch (e: any) {
+      return { success: false, error: e?.message || e };
     }
   });
 
