@@ -132,10 +132,12 @@ export const useShortcuts = () => {
         setShortcuts(prev => {
             const newShortcuts: any = { ...prev };
 
-            backendKeybinds.forEach(kb => {
-                const action = BACKEND_ID_TO_ACTION[kb.id];
-                if (action) newShortcuts[action] = acceleratorToKeys(kb.accelerator);
-            });
+            if (Array.isArray(backendKeybinds)) {
+                backendKeybinds.forEach(kb => {
+                    const action = BACKEND_ID_TO_ACTION[kb.id];
+                    if (action) newShortcuts[action] = acceleratorToKeys(kb.accelerator);
+                });
+            }
 
             return newShortcuts;
         });
@@ -204,13 +206,15 @@ export const useShortcuts = () => {
                 setConflicts(prev => {
                     const next = new Set(prev);
                     let changed = false;
-                    failures.forEach(({ id }) => {
-                        const action = BACKEND_ID_TO_ACTION[id];
-                        // A live event already has the last word for this action.
-                        if (!action || pushSettledRef.current.has(action) || next.has(action)) return;
-                        next.add(action);
-                        changed = true;
-                    });
+                    if (Array.isArray(failures)) {
+                        failures.forEach(({ id }) => {
+                            const action = BACKEND_ID_TO_ACTION[id];
+                            // A live event already has the last word for this action.
+                            if (!action || pushSettledRef.current.has(action) || next.has(action)) return;
+                            next.add(action);
+                            changed = true;
+                        });
+                    }
                     return changed ? next : prev;
                 });
             } catch (error) {

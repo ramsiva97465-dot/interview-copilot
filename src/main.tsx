@@ -33,7 +33,15 @@ if (typeof window !== 'undefined' && !window.electronAPI) {
       if (isEventListener || prop.startsWith('off')) {
         return () => () => {};
       }
-      return () => Promise.resolve({});
+      return () => {
+        const mockArr: any = [];
+        mockArr.success = true;
+        mockArr.ok = true;
+        mockArr.isPremium = false;
+        mockArr.hasProfile = false;
+        mockArr.plan = 'free';
+        return Promise.resolve(mockArr);
+      };
     }
   });
 }
