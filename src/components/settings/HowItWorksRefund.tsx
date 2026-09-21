@@ -39,13 +39,13 @@ export const HowItWorksRefund: React.FC = () => {
         <div className="space-y-5">
           <div>
             <p className="text-[13px] font-medium text-text-primary mb-2.5">
-              Natively API (managed subscription)
+              MeetFloo API (managed subscription)
             </p>
             <div className="space-y-2.5">
               {[
                 { step: '1', text: 'Subscribe above and complete checkout on Dodo Payments.' },
                 { step: '2', text: 'Your API key is emailed instantly to your inbox.' },
-                { step: '3', text: 'Paste it into the Natively key box below. Usage, model access, and (on Pro/Max/Ultra) your Pro license all activate automatically.' },
+                { step: '3', text: 'Paste it into the MeetFloo key box below. Usage, model access, and (on Pro/Max/Ultra) your Pro license all activate automatically.' },
               ].map(({ step, text }) => (
                 <div key={step} className="flex items-start gap-3">
                   <span className="text-[12px] tabular-nums text-text-tertiary shrink-0 w-3">
@@ -59,13 +59,13 @@ export const HowItWorksRefund: React.FC = () => {
 
           <div>
             <p className="text-[13px] font-medium text-text-primary mb-2.5">
-              Natively Pro (app-only license)
+              MeetFloo Pro (app-only license)
             </p>
             <div className="space-y-2.5">
               {[
                 { step: '1', text: 'Prefer to bring your own AI keys instead of managed API usage? Buy a Yearly or Lifetime Pro license below.' },
                 { step: '2', text: 'Your license key is emailed instantly to your inbox.' },
-                { step: '3', text: 'Paste it into the same Natively key box. Natively recognizes it\'s a license key (not an API key) and activates Pro on this device.' },
+                { step: '3', text: 'Paste it into the same MeetFloo key box. MeetFloo recognizes it\'s a license key (not an API key) and activates Pro on this device.' },
               ].map(({ step, text }) => (
                 <div key={step} className="flex items-start gap-3">
                   <span className="text-[12px] tabular-nums text-text-tertiary shrink-0 w-3">
@@ -94,7 +94,7 @@ export const HowItWorksRefund: React.FC = () => {
           <div>
             <p className="text-[12px] text-text-secondary leading-relaxed">
               <strong className="text-text-primary font-semibold">A quick heads-up:</strong>{' '}
-              Natively is built and maintained by a single developer and integrates a lot of
+              MeetFloo is built and maintained by a single developer and integrates a lot of
               third-party services: AI providers, transcription engines, search APIs, payments,
               OS-level audio &amp; screen capture. That gives the app a lot of capability, but the
               surface area is wider than a typical closed-source product, and once in a while
@@ -112,13 +112,13 @@ export const HowItWorksRefund: React.FC = () => {
               two rows that a plain bold lead-in distinguishes just as well. */}
           <div className="space-y-2.5">
             <p className="text-[12px] text-text-secondary leading-relaxed">
-              <strong className="text-text-primary font-medium">Natively API</strong> subscriptions
+              <strong className="text-text-primary font-medium">MeetFloo API</strong> subscriptions
               (Standard/Pro/Max/Ultra) have a{' '}
               <strong className="text-text-primary font-medium">24-hour refund window</strong>{' '}
               from purchase.
             </p>
             <p className="text-[12px] text-text-secondary leading-relaxed">
-              <strong className="text-text-primary font-medium">Natively Pro</strong>, the
+              <strong className="text-text-primary font-medium">MeetFloo Pro</strong>, the
               app-only license (Yearly/Lifetime, BYOK), has a shorter{' '}
               <strong className="text-text-primary font-medium">1-hour pre-activation window</strong>{' '}
               instead. Try the free trial first if you're unsure it's for you.
@@ -165,7 +165,7 @@ export const HowItWorksRefund: React.FC = () => {
               a friendly note, and yet another hue. It's a paragraph. */}
           <p className="text-[12px] text-text-secondary leading-relaxed">
             <strong className="text-text-primary font-medium">A personal note:</strong>{' '}
-            Natively is built, maintained, and supported entirely by one person, in their free time.
+            MeetFloo is built, maintained, and supported entirely by one person, in their free time.
             Email replies may take a few days, and weekends (Sat &amp; Sun) are offline.
             Your patience is genuinely appreciated.
           </p>

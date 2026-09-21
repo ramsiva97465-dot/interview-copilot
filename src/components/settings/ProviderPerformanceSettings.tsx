@@ -187,7 +187,7 @@ const ProviderPerformanceSettings: React.FC = () => {
                             <Gauge size={15} /> {t('Provider performance')}
                         </h3>
                         <p className="mt-1 max-w-xl text-xs leading-relaxed text-text-secondary">
-                            {t('Natively measures how each provider behaves on your network and adjusts its own timeouts to match. This happens while you use it — normal answers are the measurements, so nothing extra is billed.')}
+                            {t('MeetFloo measures how each provider behaves on your network and adjusts its own timeouts to match. This happens while you use it — normal answers are the measurements, so nothing extra is billed.')}
                         </p>
                     </div>
                     <button
@@ -219,7 +219,7 @@ const ProviderPerformanceSettings: React.FC = () => {
 
             {!loading && profiles.length === 0 ? (
                 <p className="rounded-lg border border-border-subtle bg-bg-input/40 px-3 py-3 text-xs leading-relaxed text-text-secondary">
-                    {t('Nothing measured yet. Ask a question and Natively will start learning how your provider behaves.')}
+                    {t('Nothing measured yet. Ask a question and MeetFloo will start learning how your provider behaves.')}
                 </p>
             ) : null}
 
@@ -275,7 +275,7 @@ const ProviderPerformanceSettings: React.FC = () => {
                         costs money. Phase 21's rule is that nothing is spent silently;
                         the honest way to honour it in the UI is to state the cost
                         before the button, not after. */}
-                    {t('You can also send a few small test requests to measure large-context speed and check image support directly. These use your API key. Most people do not need this — normal use already teaches Natively everything here.')}
+                    {t('You can also send a few small test requests to measure large-context speed and check image support directly. These use your API key. Most people do not need this — normal use already teaches MeetFloo everything here.')}
                 </p>
                 <button
                     type="button"

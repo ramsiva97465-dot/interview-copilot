@@ -251,7 +251,7 @@ function ChooseState({ usage, plans, error, reduced, onPro, onMax, onUltra, onSt
       {/* ── Header ─── */}
       <div style={{display:'flex',alignItems:'center',gap:'10px',paddingBottom:'12px',borderBottom:`1px solid ${C.div}`}}>
         <div style={{width:'34px',height:'34px',borderRadius:'10px',background:'rgba(139,92,246,.13)',border:'1px solid rgba(139,92,246,.22)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-          <img src={nativelyLogo} alt="Natively" style={{width:'16px',height:'16px',objectFit:'contain'}} draggable={false} />
+          <img src={nativelyLogo} alt="MeetFloo" style={{width:'16px',height:'16px',objectFit:'contain'}} draggable={false} />
         </div>
         <div>
           <div style={{fontSize:'14px',fontWeight:650,color:C.t1,letterSpacing:'-.02em',lineHeight:1.2}}>Keep the momentum going</div>
@@ -265,7 +265,7 @@ function ChooseState({ usage, plans, error, reduced, onPro, onMax, onUltra, onSt
       <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
 
         <HeroCard
-          title="Natively Pro" price="$15" period="/mo" icon={Zap}
+          title="MeetFloo Pro" price="$15" period="/mo" icon={Zap}
           spec="1,000 AI answers · 500 min live STT · 100 searches · Pro App included"
           accent="violet" reduced={reduced} onClick={onPro}
         />
@@ -540,7 +540,7 @@ function ByokRow({ onClick }: { onClick:()=>void }) {
             <span style={{fontSize:'7.5px',fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:C.t4,border:`1px solid rgba(255,255,255,0.12)`,padding:'1.5px 4px',borderRadius:'3px'}}>free</span>
           </div>
           <div style={{fontSize:'10.5px',color:C.t4,marginTop:'1px'}}>
-            Natively API disabled · No Pro features
+            MeetFloo API disabled · No Pro features
           </div>
         </div>
         <ArrowRight size={11} strokeWidth={2} color={hov ? C.t2 : C.t3} style={{flexShrink:0,transition:`color 180ms ${EASE}`}} />

@@ -983,7 +983,7 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
                                         <section className="space-y-1.5">
                                             <header className="flex items-baseline justify-between gap-3 px-1">
                                                 <h5 className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--aip-secondary)' }}>
-                                                    {t('Bundled with Natively')}
+                                                    {t('Bundled with MeetFloo')}
                                                 </h5>
                                                 <span className="text-[10px] tabular-nums" style={{ color: 'var(--aip-tertiary)' }}>1/1</span>
                                             </header>
@@ -1391,7 +1391,7 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
                                 ? `${activeModelDetails.dims} dimensions · ${t('Changing model re-indexes your project')}`
                                 : active.configured
                                     ? `${t('Configured')} · ${t('Changing model re-indexes your project')}`
-                                    : t('Natively could not resolve an embedding provider.')}
+                                    : t('MeetFloo could not resolve an embedding provider.')}
                         </p>
                     </div>
 

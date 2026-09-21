@@ -1458,7 +1458,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
                           nothing to read before you start one. Same reason the
                           allowances come from TRIAL_FALLBACK_LIMITS. */}
                       <p className="text-[15px] font-medium text-text-primary tracking-[-0.01em]">
-                        Try the Natively API free for 30 minutes
+                        Try the MeetFloo API free for 30 minutes
                       </p>
                       {/* Allowances at the description weight the rest of this
                           tab uses for a card's second line, not the 11px
@@ -1534,7 +1534,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
             ) : undefined
           }
         >
-          Natively key
+          MeetFloo key
         </SectionLabel>
 
         {/* `natively-key-card` gives the flat box the same MATERIAL as the
@@ -1559,7 +1559,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
                 style={{ ['--natively-key-mark-src' as string]: `url(${nativelyLogo})` } as React.CSSProperties}
               />
               <p className="natively-key-sub text-[12px] leading-snug">
-                Activate with a Natively API key or a Natively Pro license.
+                Activate with a MeetFloo API key or a MeetFloo Pro license.
               </p>
             </div>
 
@@ -1583,7 +1583,7 @@ export const NativelyApiSettings: React.FC<NativelyApiSettingsProps> = ({ initia
                 setError(null);
               }}
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-              placeholder="Natively API key or Natively Pro license"
+              placeholder="MeetFloo API key or MeetFloo Pro license"
               spellCheck={false}
               autoComplete="off"
               data-invalid={error ? 'true' : 'false'}

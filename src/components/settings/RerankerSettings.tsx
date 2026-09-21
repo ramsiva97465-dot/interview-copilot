@@ -595,7 +595,7 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
             // provider out of THIS list is what makes its card vanish when
             // discovery degrades, and the managed reranker is the one a customer
             // can use without going and getting a second account.
-            id: 'natively', name: 'Natively',
+            id: 'natively', name: 'MeetFloo',
             keyUrl: '', keyPlaceholder: 'natively_sk_…',
             staticCatalogue: true, hasApiKey: false, models: [],
         }, {
@@ -769,7 +769,7 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
             // repeated here — the Natively provider card below already states
             // it, and on the combined Retrieval page this line sits directly
             // above that card.
-            parts.push(t('Hosted'), t('Document text is sent to Natively'));
+            parts.push(t('Hosted'), t('Document text is sent to MeetFloo'));
             if (status.lastTest?.ok) parts.push(`${Math.round(status.lastTest.latencyMs)} ms ${t('last test')}`);
         } else if (status.effective.kind === 'openrouter') {
             parts.push(t('Hosted'), t('Document text is sent to OpenRouter'));
@@ -779,7 +779,7 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
         } else {
             const selected = catalogModels.find(m => m.selected);
             parts.push(t('On-device'));
-            parts.push(selected ? humanBytes(selected.bytesOnDisk || selected.bytes) : t('Included with Natively'));
+            parts.push(selected ? humanBytes(selected.bytesOnDisk || selected.bytes) : t('Included with MeetFloo'));
         }
         return parts.join(' · ');
     }, [status, catalogModels, t]);
@@ -1396,7 +1396,7 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
                         <section className="space-y-1.5">
                             <header className="flex items-baseline justify-between gap-3 px-1">
                                 <h5 className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--aip-secondary)' }}>
-                                    {t('Bundled with Natively')}
+                                    {t('Bundled with MeetFloo')}
                                 </h5>
                                 <span className="text-[10px] tabular-nums" style={{ color: 'var(--aip-tertiary)' }}>1/1</span>
                             </header>
@@ -1534,8 +1534,8 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
                             <div className="aip-provider-row">
                                 <p className="text-[11px] text-white/45 leading-relaxed">
                                     {hasKey
-                                        ? t('Runs on your Natively API key. Reranking counts toward your plan\u2019s Knowledge allowance.')
-                                        : t('Requires a Natively API key. Add one in the Natively API section to use the managed reranker.')}
+                                        ? t('Runs on your MeetFloo API key. Reranking counts toward your plan\u2019s Knowledge allowance.')
+                                        : t('Requires a MeetFloo API key. Add one in the MeetFloo API section to use the managed reranker.')}
                                 </p>
                             </div>
                         )}
@@ -2028,7 +2028,7 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
             <header className="space-y-1">
                 <h3 className="aip-title">{t('Reranker')}</h3>
                 <p className="aip-subtitle">
-                    {t('After Natively searches your documents, the reranker decides which passages actually answer the question. It is chosen separately from your embedding model and your AI model.')}
+                    {t('After MeetFloo searches your documents, the reranker decides which passages actually answer the question. It is chosen separately from your embedding model and your AI model.')}
                 </p>
             </header>
             {hero}

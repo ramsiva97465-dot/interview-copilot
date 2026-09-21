@@ -969,7 +969,7 @@ export const NativelyProSettings: React.FC<NativelyProSettingsProps> = ({
                         >
                             <span className="relative z-[3] min-w-0 flex-1 block">
                                 <span className="pro-teaser-eyebrow inline-flex items-center px-2 py-0.5 rounded-full text-[9.5px] font-bold" style={{ letterSpacing: '0.09em' }}>
-                                    NATIVELY PRO
+                                    MEETFLOO PRO
                                 </span>
                                 <span className="pro-teaser-title block mt-2 text-[14.5px] font-semibold tracking-[-0.012em]">
                                     Own the app. Use your own AI keys.
