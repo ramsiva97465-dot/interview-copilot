@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
     Download, 
     Shield, 
@@ -22,6 +22,15 @@ import logoImg from '../assets/logo.png';
 
 export const WebLandingPage: React.FC = () => {
     const [downloading, setDownloading] = useState(false);
+
+    useEffect(() => {
+        document.body.style.overflow = 'auto';
+        document.documentElement.style.overflow = 'auto';
+        return () => {
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
+        };
+    }, []);
 
     const downloadUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/latest/download/Xivora.Studio-Setup-2.9.0.exe';
     const releasePageUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/tag/v2.9.0';
