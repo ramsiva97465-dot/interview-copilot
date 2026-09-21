@@ -51,6 +51,7 @@ import { analytics } from "./lib/analytics/analytics.service"
 import { ErrorBoundary } from "./components/ErrorBoundary"
 import ModesSettings from "./components/settings/ModesSettings"
 import { ProfileIntelligenceSettings } from "./components/ProfileIntelligenceSettings"
+import { WebDownloadBanner } from "./components/WebDownloadBanner"
 
 
 // DEV-ONLY: should the launcher mount an uncontrolled ReviewPromptHost?
@@ -1155,6 +1156,7 @@ const App: React.FC = () => {
           >
             <QueryClientProvider client={queryClient}>
               <ToastProvider>
+                <WebDownloadBanner />
                 <div id="launcher-container" className="h-full w-full relative">
                   <Launcher
                     onStartMeeting={handleStartMeeting}
