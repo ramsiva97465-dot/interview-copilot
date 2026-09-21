@@ -1156,7 +1156,7 @@ export const HelpSettings: React.FC<{ onNavigate?: (tab: string) => void }> = ({
                                     <li>Alternatively, for faster generation without GPU, use Microsoft's smaller model:
                                         <div className="mt-1 bg-bg-input p-2 rounded border border-border-subtle font-mono text-[11px]">ollama run phi3</div>
                                     </li>
-                                    <li>Return to Natively's AI Providers overlay, and you will see your Local models ready for usage.</li>
+                                    <li>Return to MeetFloo's AI Providers overlay, and you will see your Local models ready for usage.</li>
                                 </ol>
                             </div>
                         </div>

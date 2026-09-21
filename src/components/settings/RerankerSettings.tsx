@@ -1692,7 +1692,7 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
                 </div>
 
                 <p className="text-[10px] aip-muted px-1">
-                    {t('An extension teaches Natively to use custom reranking models. Extensions run locally with full data privacy.')}
+                    {t('An extension teaches MeetFloo to use custom reranking models. Extensions run locally with full data privacy.')}
                 </p>
 
                 {installError && (

@@ -89,7 +89,7 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
     };
 
     const handleCopyCommand = () => {
-        navigator.clipboard.writeText('xattr -cr /Applications/Natively.app');
+        navigator.clipboard.writeText('xattr -cr /Applications/MeetFloo.app');
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -198,19 +198,19 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
                                         <>
                                             <div className="space-y-1 w-full">
                                                 <p className="text-[12px] font-medium text-white/80">{t('1. Clear quarantine on the downloaded file:')}</p>
-                                                <CopyBlock command={`xattr -cr ~/Downloads/Natively-${displayVersion.replace('v', '')}-${instructionsArch || 'arm64'}.dmg`} />
+                                                <CopyBlock command={`xattr -cr ~/Downloads/MeetFloo-${displayVersion.replace('v', '')}-${instructionsArch || 'arm64'}.dmg`} />
                                             </div>
                                             <div className="space-y-1 mt-1 pl-0.5">
-                                                <p className="text-[12px] font-medium text-white/80">{t('2. Open the file and install Natively.')}</p>
+                                                <p className="text-[12px] font-medium text-white/80">{t('2. Open the file and install MeetFloo.')}</p>
                                             </div>
                                             <div className="space-y-1 mt-3 w-full">
                                                 <p className="text-[12px] font-medium text-white/80">{t('3. Clear quarantine on the installed app:')}</p>
-                                                <CopyBlock command="xattr -cr /Applications/Natively.app" />
+                                                <CopyBlock command="xattr -cr /Applications/MeetFloo.app" />
                                             </div>
                                         </>
                                     ) : (
                                         <div className="space-y-1 w-full">
-                                            <p className="text-[12px] font-medium text-white/80">{t('Run the downloaded installer (.exe) and follow the prompts. Natively will restart when finished.')}</p>
+                                            <p className="text-[12px] font-medium text-white/80">{t('Run the downloaded installer (.exe) and follow the prompts. MeetFloo will restart when finished.')}</p>
                                         </div>
                                     )}
                                 </div>
@@ -263,7 +263,7 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
                                     {/* Code Block with Copy */}
                                     <div className="flex items-center justify-between bg-black/20 rounded-lg pl-3 pr-1.5 py-1.5 border border-white/[0.03] group hover:border-white/10 transition-colors">
                                         <code className="text-[10px] font-mono text-blue-400 truncate mr-2 select-all">
-                                            xattr -cr /Applications/Natively.app
+                                            xattr -cr /Applications/MeetFloo.app
                                         </code>
                                         <button
                                             onClick={handleCopyCommand}

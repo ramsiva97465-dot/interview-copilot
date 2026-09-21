@@ -2420,8 +2420,8 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
     const keyWriteFailureText = (result: { error?: string; message?: string } | undefined, action: 'save' | 'remove'): string =>
         result?.error === 'credential_store_degraded'
             ? (action === 'save'
-                ? t('Could not save the key: your credential store is unavailable this session. Restart Natively and try again.')
-                : t('Could not remove the key: your credential store is unavailable this session. Restart Natively and try again.'))
+                ? t('Could not save the key: your credential store is unavailable this session. Restart MeetFloo and try again.')
+                : t('Could not remove the key: your credential store is unavailable this session. Restart MeetFloo and try again.'))
             : (result?.message || result?.error || (action === 'save' ? t('Could not save the key.') : t('Could not remove the key.')));
 
     // --- Custom Providers ---
@@ -2879,7 +2879,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
         const opts: { id: string; name: string }[] = [];
 
         if (hasStoredKey.natively && isProviderEnabled('natively')) {
-            opts.push({ id: 'natively', name: 'Natively API' });
+            opts.push({ id: 'natively', name: 'MeetFloo API' });
         }
 
         for (const [prov, cfg] of Object.entries(STANDARD_CLOUD_MODELS)) {
@@ -4078,7 +4078,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
 
 <div
                     className={`aip-card p-5 flex items-center justify-between gap-4 ${!canUseFastMode ? 'opacity-50 grayscale' : ''}`}
-                    title={!canUseFastMode ? t("Requires Groq, Natively API, or Codex CLI to be configured") : ""}
+                    title={!canUseFastMode ? t("Requires Groq, MeetFloo API, or Codex CLI to be configured") : ""}
                 >
                     <div className="flex-1 min-w-0">
                         {/* No "Needs Groq" badge. It named ONE of the three
@@ -4091,7 +4091,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                         <label className="block text-xs font-medium uppercase tracking-wide mb-0 aip-hero">{t('Fast Response Mode')}</label>
                         <p className="text-[10px] aip-muted mt-0.5">{t('Uses the fastest available provider instead of your selected model.')}</p>
                         {!canUseFastMode && (
-                            <p className="text-xs aip-warn-fg mt-0.5 font-medium">{t('Requires Groq, Natively API, or Codex CLI to be configured.')}</p>
+                            <p className="text-xs aip-warn-fg mt-0.5 font-medium">{t('Requires Groq, MeetFloo API, or Codex CLI to be configured.')}</p>
                         )}
                     </div>
                     {/* aria-disabled, not disabled: the onClick guard below is the
@@ -4104,7 +4104,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                         label={t('Fast Response Mode')}
                         onChange={async () => {
                             if (!canUseFastMode) {
-                                alert(t("Please configure Groq, Natively API, or Codex CLI first to enable Fast Response Mode."));
+                                alert(t("Please configure Groq, MeetFloo API, or Codex CLI first to enable Fast Response Mode."));
                                 return;
                             }
                             const newState = !fastResponseMode;
@@ -4475,12 +4475,12 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                             ? t('Your Codex CLI login has expired — run any `codex` command to refresh it, or sign in with ChatGPT here.')
                             : codexOauthStatus.cliLogin === 'api-key'
                                 ? t('Your Codex CLI is logged in with an API key, which Codex here cannot use — sign in with ChatGPT here, or run `codex login` with your ChatGPT account.')
-                                : t('Or run `codex login` in a terminal — Natively can use that ChatGPT login too.')}
+                                : t('Or run `codex login` in a terminal — MeetFloo can use that ChatGPT login too.')}
                     </p>
                 )}
                 {codexOauthStatus.signedIn && codexOauthStatus.source === 'codex-cli' && (
                     <p className="text-xs aip-muted">
-                        {t('Natively uses this login read-only. When it expires, run any `codex` command to refresh it.')}
+                        {t('MeetFloo uses this login read-only. When it expires, run any `codex` command to refresh it.')}
                     </p>
                 )}
 
@@ -4873,7 +4873,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                                 Telling that user nothing is installed sends them
                                 to fix something that is not broken. */}
                             <div className="text-xs aip-muted">
-                                {t('No model here can generate text yet. Embedding models, such as the one Natively uses for retrieval, cannot chat. Run `ollama pull qwen2.5:3b` to add one.')}
+                                {t('No model here can generate text yet. Embedding models, such as the one MeetFloo uses for retrieval, cannot chat. Run `ollama pull qwen2.5:3b` to add one.')}
                             </div>
                         </div>
                     )}

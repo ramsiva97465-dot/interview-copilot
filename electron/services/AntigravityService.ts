@@ -397,7 +397,7 @@ function startCallbackServer(expectedState: string): CallbackServer {
       return;
     }
     response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    response.end('<!doctype html><title>Natively</title><p>You can close this tab and return to Natively.</p>');
+    response.end('<!doctype html><title>MeetFloo</title><p>You can close this tab and return to MeetFloo.</p>');
     if (settled) return;
     settled = true;
     resolveCallback({

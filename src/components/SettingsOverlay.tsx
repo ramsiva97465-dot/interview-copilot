@@ -2265,7 +2265,7 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
                                     <div className="space-y-3.5">
                                         <div data-settings-stagger>
                                             <h3 className="text-lg font-bold text-text-primary mb-1">{t('General settings')}</h3>
-                                            <p className="text-xs text-text-secondary mb-2">{t('Customize how Natively works for you')}</p>
+                                            <p className="text-xs text-text-secondary mb-2">{t('Customize how MeetFloo works for you')}</p>
 
                                             <div className="rounded-xl border bg-transparent border-transparent divide-y divide-border-subtle/20">
                                             <div className="space-y-0">
@@ -2469,7 +2469,7 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
                                                         </div>
                                                         <div>
                                                             <h3 className="text-sm font-bold text-text-primary">{t('Theme')}</h3>
-                                                            <p className="text-xs text-text-secondary mt-0.5">{t('Customize how Natively looks on your device')}</p>
+                                                            <p className="text-xs text-text-secondary mt-0.5">{t('Customize how MeetFloo looks on your device')}</p>
                                                         </div>
                                                     </div>
 
@@ -2522,7 +2522,7 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
                                                         </div>
                                                         <div>
                                                             <h3 className="text-sm font-bold text-text-primary">{t('Language')}</h3>
-                                                            <p className="text-xs text-text-secondary mt-0.5">{t('Interface language for Natively')}</p>
+                                                            <p className="text-xs text-text-secondary mt-0.5">{t('Interface language for MeetFloo')}</p>
                                                         </div>
                                                     </div>
 
@@ -2959,7 +2959,7 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
                                                 <h3 className="text-lg font-bold text-text-primary">{t('Process Disguise')}</h3>
                                             </div>
                                             <p className="text-xs text-text-secondary">
-                                                {t('Disguise Natively as another application to prevent detection during screen sharing.')}
+                                                {t('Disguise MeetFloo as another application to prevent detection during screen sharing.')}
                                                 <span className="block mt-1 text-text-tertiary">
                                                     {t('Select a disguise to be automatically applied when Undetectable mode is on.')}
                                                 </span>

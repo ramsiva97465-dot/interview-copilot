@@ -99,7 +99,7 @@ export class CalendarManager extends EventEmitter {
                         }
 
                         if (code) {
-                            res.end('Authentication successful! You can close this window and return to Natively.');
+                            res.end('Authentication successful! You can close this window and return to MeetFloo.');
                             // Exchange code for tokens. If this throws, still finish so the server closes.
                             try {
                                 await this.exchangeCodeForToken(code);
