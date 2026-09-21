@@ -26,11 +26,14 @@ WORKDIR /app
 # Prevent onnxruntime-node from attempting CUDA/GPU binary installation on CPU cloud instances
 ENV ONNXRUNTIME_NODE_INSTALL_CUDA=skip
 
-# Copy full application code first so postinstall scripts in scripts/ exist during npm install
+# Copy full application code
 COPY . .
 
 RUN npm install
 
+# Build the web bundle for production serving
+RUN npm run build
+
 EXPOSE 5180
 
-CMD ["xvfb-run", "npm", "start"]
+CMD ["sh", "-c", "npx vite preview --host 0.0.0.0 --port ${PORT:-5180}"]
