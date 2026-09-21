@@ -14,7 +14,6 @@ import {
     EyeOff,
     Terminal,
     Bot,
-    ExternalLink,
     Play
 } from 'lucide-react';
 import desktopUiPreview from '../assets/desktopui.webp';
@@ -40,7 +39,6 @@ export const WebLandingPage: React.FC = () => {
     }, []);
 
     const downloadUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/latest/download/Xivora.Studio-Setup-2.9.0.exe';
-    const releasePageUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/tag/v2.9.0';
 
     const handleDownload = () => {
         setDownloading(true);
@@ -154,16 +152,6 @@ export const WebLandingPage: React.FC = () => {
                                     <Download className="w-5 h-5 text-white group-hover:translate-y-0.5 transition-transform" />
                                     <span>{downloading ? 'Starting Download...' : 'Download for Windows (.exe)'}</span>
                                 </button>
-
-                                <a
-                                    href={releasePageUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center justify-center gap-2 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white font-medium text-sm px-6 py-4 rounded-2xl border border-white/10 transition-all duration-200"
-                                >
-                                    <ExternalLink className="w-4 h-4 text-zinc-400" />
-                                    <span>GitHub Releases (v2.9.0)</span>
-                                </a>
                             </div>
 
                             {/* System Spec Badges */}
@@ -426,7 +414,7 @@ export const WebLandingPage: React.FC = () => {
                     </div>
 
                     <p className="text-xs text-zinc-500 mt-4">
-                        Version 2.9.0 • Windows 10/11 64-bit • Direct GitHub Release Host
+                        Version 2.9.0 • Windows 10/11 64-bit • Standalone Desktop Application
                     </p>
                 </div>
             </section>
@@ -444,7 +432,6 @@ export const WebLandingPage: React.FC = () => {
                     <div className="flex items-center gap-6">
                         <a href="#features" className="hover:text-zinc-300 transition-colors">Features</a>
                         <a href="#steps" className="hover:text-zinc-300 transition-colors">Install Guide</a>
-                        <a href={releasePageUrl} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-300 transition-colors">GitHub Release</a>
                     </div>
                 </div>
             </footer>
