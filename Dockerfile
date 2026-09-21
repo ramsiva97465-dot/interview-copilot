@@ -34,6 +34,6 @@ RUN npm install
 # Build the web bundle for production serving
 RUN npm run build
 
-EXPOSE 5180
+EXPOSE 8080 5180
 
 CMD ["node", "server.mjs"]

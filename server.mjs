@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PORT = parseInt(process.env.PORT || '5180', 10);
+const PORT = parseInt(process.env.PORT || '8080', 10);
 const HOST = '0.0.0.0';
 const DIST_DIR = path.join(__dirname, 'dist');
 
@@ -29,7 +29,7 @@ const MIME_TYPES = {
     '.wasm': 'application/wasm',
 };
 
-const server = http.createServer((req, res) => {
+function handleRequest(req, res) {
     try {
         const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
         let pathname = decodeURIComponent(parsedUrl.pathname);
@@ -69,9 +69,23 @@ const server = http.createServer((req, res) => {
         res.writeHead(500, { 'Content-Type': 'text/plain' });
         res.end('500 Internal Server Error');
     }
-});
+}
 
-server.listen(PORT, HOST, () => {
-    console.log(`🚀 Production server successfully running on http://${HOST}:${PORT}`);
-    console.log(`Serving static files from: ${DIST_DIR}`);
-});
+// Bind to PORT, and also 5180 and 8080 so that whichever port Railway routes traffic to, it responds instantly!
+const candidatePorts = Array.from(new Set([PORT, 5180, 8080, 3000].filter(p => !isNaN(p) && p > 0)));
+
+for (const p of candidatePorts) {
+    try {
+        const s = http.createServer(handleRequest);
+        s.listen(p, HOST, () => {
+            console.log(`🚀 Production server listening on http://${HOST}:${p}`);
+        });
+        s.on('error', (e) => {
+            if (e.code !== 'EADDRINUSE') {
+                console.warn(`Port ${p} warning:`, e.message);
+            }
+        });
+    } catch (err) {
+        console.warn(`Could not bind to port ${p}:`, err.message);
+    }
+}
