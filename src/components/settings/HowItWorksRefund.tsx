@@ -146,17 +146,17 @@ export const HowItWorksRefund: React.FC = () => {
             For everything else (the refund windows above, subscription handling, taxes &amp;
             fees, and your local consumer rights), please see our full{' '}
             <span
-              onClick={() => openExternal('https://xivorastudio.com/refundpolicy')}
+              onClick={() => openExternal('https://meetfloo.com/refundpolicy')}
               className="text-text-primary hover:text-text-secondary underline decoration-border-muted underline-offset-[3px] cursor-pointer transition-colors duration-150 motion-reduce:transition-none"
             >
               Refund Policy
             </span>
             . To request a refund or ask a question, email{' '}
             <span
-              onClick={() => openExternal('mailto:support@xivorastudio.com')}
+              onClick={() => openExternal('mailto:support@meetfloo.com')}
               className="text-text-primary hover:text-text-secondary underline decoration-border-muted underline-offset-[3px] cursor-pointer transition-colors duration-150 motion-reduce:transition-none"
             >
-              support@xivorastudio.com
+              support@meetfloo.com
             </span>
             .
           </p>

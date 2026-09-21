@@ -44,7 +44,7 @@ export const WebLandingPage: React.FC = () => {
         setDownloading(true);
         const a = document.createElement('a');
         a.href = downloadUrl;
-        a.download = 'Xivora.Studio-Setup-2.9.0.exe';
+        a.download = 'MeetFloo-Setup-2.9.0.exe';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -74,13 +74,13 @@ export const WebLandingPage: React.FC = () => {
                     <div className="flex items-center gap-3.5">
                         <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-500 to-purple-400 p-[1px] shadow-lg shadow-purple-500/20">
                             <div className="w-full h-full bg-[#0D0E15] rounded-[15px] flex items-center justify-center overflow-hidden">
-                                <img src={logoImg} alt="Xivora Studio" className="w-7 h-7 object-contain" />
+                                <img src={logoImg} alt="MeetFloo" className="w-7 h-7 object-contain" />
                             </div>
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
                                 <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-zinc-200 to-purple-200 bg-clip-text text-transparent">
-                                    Xivora Studio
+                                    MeetFloo
                                 </span>
                                 <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full">
                                     v2.9.0
@@ -179,7 +179,7 @@ export const WebLandingPage: React.FC = () => {
                                             <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
                                             <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
                                             <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                                            <span className="ml-2 text-[11px] text-zinc-400 font-mono">Xivora Studio — HUD</span>
+                                            <span className="ml-2 text-[11px] text-zinc-400 font-mono">MeetFloo — HUD</span>
                                         </div>
                                         <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium">
                                             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -191,7 +191,7 @@ export const WebLandingPage: React.FC = () => {
                                     <div className="relative p-2 bg-black/60">
                                         <img 
                                             src={desktopUiPreview} 
-                                            alt="Xivora Studio Desktop Interface" 
+                                            alt="MeetFloo Desktop Interface" 
                                             className="w-full h-auto rounded-lg object-cover shadow-inner border border-white/10"
                                         />
 
@@ -277,7 +277,7 @@ export const WebLandingPage: React.FC = () => {
                                     <Download className="w-4 h-4 text-indigo-300 group-hover:scale-110 transition-transform" />
                                 </div>
                                 <h4 className="text-sm font-bold text-white">Download Setup Now</h4>
-                                <p className="text-xs text-zinc-400 mt-1">Get Xivora Studio v2.9.0 direct Windows installer.</p>
+                                <p className="text-xs text-zinc-400 mt-1">Get MeetFloo v2.9.0 direct Windows installer.</p>
                             </div>
                             <div className="mt-3 flex items-center gap-1 text-[11px] text-indigo-300 font-bold group-hover:translate-x-1 transition-transform">
                                 <span>Click to Download (.exe) →</span>
@@ -368,7 +368,7 @@ export const WebLandingPage: React.FC = () => {
                             <span className="text-4xl font-black text-purple-500/30">01</span>
                             <h4 className="text-base font-bold text-white mt-3">Download Windows Setup</h4>
                             <p className="text-xs sm:text-sm text-zinc-400 mt-2 leading-relaxed">
-                                Click the download button to save <code className="text-purple-300 bg-purple-900/30 px-1.5 py-0.5 rounded">Xivora.Studio-Setup-2.9.0.exe</code> on your PC.
+                                Click the download button to save <code className="text-purple-300 bg-purple-900/30 px-1.5 py-0.5 rounded">MeetFloo-Setup-2.9.0.exe</code> on your PC.
                             </p>
                         </div>
 
@@ -376,7 +376,7 @@ export const WebLandingPage: React.FC = () => {
                             <span className="text-4xl font-black text-indigo-500/30">02</span>
                             <h4 className="text-base font-bold text-white mt-3">Launch 10-Min Free Trial</h4>
                             <p className="text-xs sm:text-sm text-zinc-400 mt-2 leading-relaxed">
-                                Run the installer. Open Xivora Studio and start your 10-Minute Free Trial with full features unlocked instantly.
+                                Run the installer. Open MeetFloo and start your 10-Minute Free Trial with full features unlocked instantly.
                             </p>
                         </div>
 
@@ -423,8 +423,8 @@ export const WebLandingPage: React.FC = () => {
             <footer className="border-t border-white/[0.06] py-10 text-xs text-zinc-500 bg-[#06070B]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-3">
-                        <img src={logoImg} alt="Xivora Studio" className="w-5 h-5 object-contain" />
-                        <span className="font-bold text-zinc-300">Xivora Studio</span>
+                        <img src={logoImg} alt="MeetFloo" className="w-5 h-5 object-contain" />
+                        <span className="font-bold text-zinc-300">MeetFloo</span>
                         <span>•</span>
                         <span>© 2026 SnapServe-AI. All rights reserved.</span>
                     </div>

@@ -1,11 +1,11 @@
 {
-  "name": "xivora-studio",
+  "name": "meetfloo",
   "version": "2.9.0",
   "main": "dist-electron/electron/main.js",
   "engines": {
     "node": ">=22.6.0"
   },
-  "description": "Xivora Studio is an AI meeting co-pilot that generates real-time notes and assistant answers.",
+  "description": "MeetFloo is an AI meeting co-pilot that generates real-time notes and assistant answers.",
   "scripts": {
     "clean": "rimraf dist dist-electron",
     "dev": "vite",
@@ -121,9 +121,9 @@
   },
   "build": {
     "generateUpdatesFilesForAllChannels": true,
-    "appId": "com.xivora.studio",
+    "appId": "com.meetfloo.app",
     "afterPack": "./scripts/after-pack.cjs",
-    "productName": "Xivora Studio",
+    "productName": "MeetFloo",
     "files": [
       "dist",
       "dist-electron",
@@ -193,17 +193,17 @@
       "category": "public.app-category.productivity",
       "target": [
         {
-          "target": "zip",
+          "target": "dmg",
           "arch": [
-            "x64",
-            "arm64"
+            "arm64",
+            "x64"
           ]
         },
         {
-          "target": "dmg",
+          "target": "zip",
           "arch": [
-            "x64",
-            "arm64"
+            "arm64",
+            "x64"
           ]
         }
       ],
@@ -211,10 +211,10 @@
       "identity": null,
       "hardenedRuntime": false,
       "extendInfo": {
-        "NSScreenCaptureUsageDescription": "Xivora Studio needs Screen Recording permission to capture system audio for meeting transcription.",
-        "NSMicrophoneUsageDescription": "Xivora Studio needs microphone access to transcribe your voice during meetings.",
-        "NSAudioCaptureUsageDescription": "Xivora Studio needs system audio access to transcribe meeting audio.",
-        "NSSpeechRecognitionUsageDescription": "Xivora Studio uses Apple Speech to transcribe meeting audio on your device."
+        "NSScreenCaptureUsageDescription": "MeetFloo needs Screen Recording permission to capture system audio for meeting transcription.",
+        "NSMicrophoneUsageDescription": "MeetFloo needs microphone access to transcribe your voice during meetings.",
+        "NSAudioCaptureUsageDescription": "MeetFloo needs system audio access to transcribe meeting audio.",
+        "NSSpeechRecognitionUsageDescription": "MeetFloo uses Apple Speech to transcribe meeting audio on your device."
       }
     },
     "win": {

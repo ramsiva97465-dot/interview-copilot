@@ -16,7 +16,7 @@ export const WebDownloadBanner: React.FC = () => {
         // Trigger download
         const a = document.createElement('a');
         a.href = downloadUrl;
-        a.download = 'Xivora Studio-Setup-2.9.0.exe';
+        a.download = 'MeetFloo-Setup-2.9.0.exe';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -30,7 +30,7 @@ export const WebDownloadBanner: React.FC = () => {
                 </div>
                 <div>
                     <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm tracking-tight">Xivora Studio for Windows</span>
+                        <span className="font-semibold text-sm tracking-tight">MeetFloo for Windows</span>
                         <span className="text-[10px] bg-purple-500/30 text-purple-200 px-2 py-0.5 rounded-full border border-purple-400/30 font-medium flex items-center gap-1">
                             <Sparkles className="w-2.5 h-2.5" /> Desktop App
                         </span>

@@ -86,7 +86,7 @@ export const AdminDashboard: React.FC = () => {
             }
         } catch (err: any) {
             setActionMsg(`Local Action: License key generated & approved.`);
-            setPayments(prev => prev.map(p => p.id === paymentId ? { ...p, status: 'approved', license_key: 'XIVORA-PRO-LOCAL-KEY' } : p));
+            setPayments(prev => prev.map(p => p.id === paymentId ? { ...p, status: 'approved', license_key: 'MEETFLOO-PRO-LOCAL-KEY' } : p));
         }
     };
 
@@ -164,7 +164,7 @@ export const AdminDashboard: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div>
-                    <h2 className="text-lg font-bold tracking-tight">Xivora Admin Control Center</h2>
+                    <h2 className="text-lg font-bold tracking-tight">MeetFloo Admin Control Center</h2>
                     <p className="text-xs text-zinc-400">Verify 0% UPI Payments, Track Credits & Issue Licenses</p>
                 </div>
                 <div className="flex items-center gap-2">

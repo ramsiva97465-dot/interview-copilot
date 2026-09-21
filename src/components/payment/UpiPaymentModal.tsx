@@ -11,7 +11,7 @@ interface UpiPaymentModalProps {
 export const UpiPaymentModal: React.FC<UpiPaymentModalProps> = ({
     isOpen,
     onClose,
-    upiId = 'xivorastudio@upi',
+    upiId = 'meetfloo@upi',
     amount = 1499,
 }) => {
     const [email, setEmail] = useState('');
@@ -45,7 +45,7 @@ export const UpiPaymentModal: React.FC<UpiPaymentModalProps> = ({
         setError(null);
 
         try {
-            const baseUrl = (import.meta.env.VITE_APP_API_URL || 'https://api.xivorastudio.com').replace(/\/+$/, '');
+            const baseUrl = (import.meta.env.VITE_APP_API_URL || 'https://api.meetfloo.com').replace(/\/+$/, '');
             const res = await fetch(`${baseUrl}/api/payments/upi-submit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -67,7 +67,7 @@ export const UpiPaymentModal: React.FC<UpiPaymentModalProps> = ({
     };
 
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-        `upi://pay?pa=${upiId}&pn=XivoraStudio&am=${amount}&cu=INR`
+        `upi://pay?pa=${upiId}&pn=MeetFloo&am=${amount}&cu=INR`
     )}`;
 
     return (

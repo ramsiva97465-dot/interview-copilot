@@ -2206,7 +2206,7 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
                                     onClick={() => window.electronAPI.quitApp()}
                                     className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-3"
                                 >
-                                    <LogOut size={16} /> {t('Quit Xivora Studio')}
+                                    <LogOut size={16} /> {t('Quit MeetFloo')}
                                 </button>
                             </div>
                         </div>
@@ -2295,7 +2295,7 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
                                                         <div>
                                                             <h3 className="text-sm font-bold text-text-primary">{isUndetectable ? t('Undetectable') : t('Detectable')}</h3>
                                                             <p className="text-xs text-text-secondary mt-0.5">
-                                                                {isUndetectable ? t('Xivora Studio is undetectable by screen-sharing (Zoom, MS Teams, Google Meet).') : t('Xivora Studio is visible during screen-sharing.')}
+                                                                {isUndetectable ? t('MeetFloo is undetectable by screen-sharing (Zoom, MS Teams, Google Meet).') : t('MeetFloo is visible during screen-sharing.')}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -2320,13 +2320,13 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
                                                             <Power size={20} />
                                                         </div>
                                                         <div>
-                                                            <h3 className="text-sm font-bold text-text-primary">{t('Open Xivora Studio when you log in')}</h3>
-                                                            <p className="text-xs text-text-secondary mt-0.5">{t('Xivora Studio will open automatically when you log in to your computer')}</p>
+                                                            <h3 className="text-sm font-bold text-text-primary">{t('Open MeetFloo when you log in')}</h3>
+                                                            <p className="text-xs text-text-secondary mt-0.5">{t('MeetFloo will open automatically when you log in to your computer')}</p>
                                                         </div>
                                                     </div>
                                                     <SettingsToggle
                                                         checked={openOnLogin}
-                                                        label={t('Open Xivora Studio when you log in')}
+                                                        label={t('Open MeetFloo when you log in')}
                                                         onChange={() => {
                                                             const newState = !openOnLogin;
                                                             setOpenOnLogin(newState);
@@ -2347,13 +2347,13 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
                                                                 <Keyboard size={20} />
                                                             </div>
                                                             <div>
-                                                                <h3 className="text-sm font-bold text-text-primary">{t('Protect Xivora Studio shortcuts')}</h3>
-                                                                <p className="text-xs text-text-secondary mt-0.5">{t('Stops a Xivora Studio shortcut from typing into the app underneath. Turn off if your antivirus flags the keyboard hook.')}</p>
+                                                                <h3 className="text-sm font-bold text-text-primary">{t('Protect MeetFloo shortcuts')}</h3>
+                                                                <p className="text-xs text-text-secondary mt-0.5">{t('Stops a MeetFloo shortcut from typing into the app underneath. Turn off if your antivirus flags the keyboard hook.')}</p>
                                                             </div>
                                                         </div>
                                                         <SettingsToggle
                                                             checked={shortcutGuard}
-                                                            label={t('Protect Xivora Studio shortcuts')}
+                                                            label={t('Protect MeetFloo shortcuts')}
                                                             onChange={async () => {
                                                                 const previous = shortcutGuard;
                                                                 const newState = !previous;
@@ -3037,7 +3037,7 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
                                     <div className="flex items-start justify-between">
                                         <div>
                                             <h3 className="text-lg font-bold text-text-primary mb-1">{t('Keyboard shortcuts')}</h3>
-                                            <p className="text-xs text-text-secondary">{t('Xivora Studio works with these easy to remember commands.')}</p>
+                                            <p className="text-xs text-text-secondary">{t('MeetFloo works with these easy to remember commands.')}</p>
                                         </div>
                                         <button
                                             onClick={resetShortcuts}

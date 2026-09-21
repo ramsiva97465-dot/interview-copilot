@@ -17,7 +17,7 @@ export const AboutSection: React.FC<AboutSectionProps> = () => {
         <div className="space-y-6 animated fadeIn pb-10" data-settings-stagger>
             {/* Header */}
             <div>
-                <h3 className="text-lg font-bold text-text-primary mb-1">{t('About Xivora Studio')}</h3>
+                <h3 className="text-lg font-bold text-text-primary mb-1">{t('About MeetFloo')}</h3>
                 <p className="text-sm text-text-secondary">{t('Designed to be invisible, intelligent, and trusted.')}</p>
             </div>
 
@@ -104,7 +104,7 @@ export const AboutSection: React.FC<AboutSectionProps> = () => {
 
             {/* Architecture Section */}
             <div>
-                <h4 className="text-xs font-bold text-text-tertiary uppercase tracking-wider mb-2 px-1">{t('How Xivora Studio Works')}</h4>
+                <h4 className="text-xs font-bold text-text-tertiary uppercase tracking-wider mb-2 px-1">{t('How MeetFloo Works')}</h4>
                 <div className="bg-bg-item-surface rounded-xl border border-border-subtle overflow-hidden">
                     <div className="p-3 border-b border-border-subtle bg-bg-card/50">
                         <div className="flex items-start gap-4">
@@ -154,7 +154,7 @@ export const AboutSection: React.FC<AboutSectionProps> = () => {
                         <div>
                             <h5 className="text-sm font-medium text-text-primary">{t('Zero Telemetry & 100% Local')}</h5>
                             <p className="text-xs text-text-secondary mt-1 leading-relaxed">
-                                All telemetry, phone-home metrics, and background pings are completely disabled. Xivora Studio communicates only with your configured AI providers directly.
+                                All telemetry, phone-home metrics, and background pings are completely disabled. MeetFloo communicates only with your configured AI providers directly.
                             </p>
                         </div>
                     </div>
@@ -163,7 +163,7 @@ export const AboutSection: React.FC<AboutSectionProps> = () => {
                         <div>
                             <h5 className="text-sm font-medium text-text-primary">{t('No Ambient Recording')}</h5>
                             <p className="text-xs text-text-secondary mt-1 leading-relaxed">
-                                Xivora Studio captures audio loopback only when explicitly active. It does not record video, store persistent mic tracks, or perform background surveillance.
+                                MeetFloo captures audio loopback only when explicitly active. It does not record video, store persistent mic tracks, or perform background surveillance.
                             </p>
                         </div>
                     </div>
@@ -179,7 +179,7 @@ export const AboutSection: React.FC<AboutSectionProps> = () => {
                             <Sparkles size={18} className="opacity-80" />
                         </div>
                         <div>
-                            <h5 className="text-sm font-bold text-text-primary">Xivora Studio Copilot</h5>
+                            <h5 className="text-sm font-bold text-text-primary">MeetFloo Copilot</h5>
                             <p className="text-xs text-text-secondary mt-0.5">High-performance AI copilot for live interviews, meetings, and contextual assistance.</p>
                         </div>
                     </div>
