@@ -96,9 +96,6 @@ export const WebLandingPage: React.FC = () => {
                         <a href="#features" className="hover:text-purple-300 transition-colors">Features</a>
                         <a href="#preview" className="hover:text-purple-300 transition-colors">Desktop HUD</a>
                         <a href="#steps" className="hover:text-purple-300 transition-colors">Installation</a>
-                        <a href="/?page=admin" className="text-zinc-400 hover:text-white transition-colors flex items-center gap-1.5 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg border border-white/5">
-                            <Lock className="w-3.5 h-3.5 text-purple-400" /> Admin Access
-                        </a>
                     </nav>
 
                     <div className="flex items-center gap-3">
@@ -448,9 +445,6 @@ export const WebLandingPage: React.FC = () => {
                         <a href="#features" className="hover:text-zinc-300 transition-colors">Features</a>
                         <a href="#steps" className="hover:text-zinc-300 transition-colors">Install Guide</a>
                         <a href={releasePageUrl} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-300 transition-colors">GitHub Release</a>
-                        <a href="/?page=admin" className="hover:text-purple-400 transition-colors flex items-center gap-1 text-zinc-400">
-                            <Lock className="w-3 h-3 text-purple-400" /> Admin
-                        </a>
                     </div>
                 </div>
             </footer>
