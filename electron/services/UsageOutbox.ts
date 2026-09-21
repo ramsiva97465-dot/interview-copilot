@@ -308,7 +308,7 @@ export class UsageOutbox {
             try {
                 res = await fetch(`${XIVORA_API_URL}/v1/usage/audit`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-natively-key': apiKey },
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'x-natively-key': apiKey },
                     body: JSON.stringify({ events: live.map((b) => b.payload) }),
                     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
                 });

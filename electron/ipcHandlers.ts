@@ -10187,7 +10187,7 @@ export function initializeIpcHandlers(appState: AppState): void {
       }
 
       const res = await fetch(`${APP_API_BASE}/v1/usage`, {
-        headers: { 'x-natively-key': key },
+        headers: { 'x-api-key': key, 'x-natively-key': key },
         signal: AbortSignal.timeout(8000),
       });
       if (!res.ok) {

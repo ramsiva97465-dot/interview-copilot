@@ -210,10 +210,10 @@
       "identity": null,
       "hardenedRuntime": false,
       "extendInfo": {
-        "NSScreenCaptureUsageDescription": "Natively needs Screen Recording permission to capture system audio for meeting transcription.",
-        "NSMicrophoneUsageDescription": "Natively needs microphone access to transcribe your voice during meetings.",
-        "NSAudioCaptureUsageDescription": "Natively needs system audio access to transcribe meeting audio.",
-        "NSSpeechRecognitionUsageDescription": "Natively uses Apple Speech to transcribe meeting audio on your device."
+        "NSScreenCaptureUsageDescription": "Xivora Studio needs Screen Recording permission to capture system audio for meeting transcription.",
+        "NSMicrophoneUsageDescription": "Xivora Studio needs microphone access to transcribe your voice during meetings.",
+        "NSAudioCaptureUsageDescription": "Xivora Studio needs system audio access to transcribe meeting audio.",
+        "NSSpeechRecognitionUsageDescription": "Xivora Studio uses Apple Speech to transcribe meeting audio on your device."
       }
     },
     "win": {

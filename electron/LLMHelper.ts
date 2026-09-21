@@ -4810,6 +4810,7 @@ let isMultimodal = !!(imagePaths?.length);
       if (!trialToken) throw new Error('Trial token not found');
       headers['x-trial-token'] = trialToken;
     } else {
+      headers['x-api-key'] = nativelyKey;
       headers['x-natively-key'] = nativelyKey;
     }
 
@@ -9382,6 +9383,7 @@ let isMultimodal = !!(imagePaths?.length);
     } else {
       // Non-null: this `else` implies `e2eLocalToken` is falsy, and the guard above
       // (`if (!nativelyKey && !e2eLocalToken) throw`) already threw for a null key.
+      streamHeaders['x-api-key'] = nativelyKey!;
       streamHeaders['x-natively-key'] = nativelyKey!;
     }
 

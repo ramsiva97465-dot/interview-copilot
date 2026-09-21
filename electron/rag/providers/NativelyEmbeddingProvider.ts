@@ -121,6 +121,7 @@ export class NativelyEmbeddingProvider implements IEmbeddingProvider {
       if (!this.trialToken) throw new Error('Natively trial token not available for embeddings');
       h['x-trial-token'] = this.trialToken;
     } else {
+      h['x-api-key'] = this.apiKey;
       h['x-natively-key'] = this.apiKey;
     }
     return h;
