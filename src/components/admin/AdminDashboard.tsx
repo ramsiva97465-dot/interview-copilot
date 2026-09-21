@@ -16,8 +16,8 @@ export const AdminDashboard: React.FC = () => {
     const [newEmail, setNewEmail] = useState('');
     const [newPlan, setNewPlan] = useState('pro');
 
-    const adminPasscode = import.meta.env.VITE_ADMIN_PASSCODE || 'admin123';
-    const baseUrl = (import.meta.env.VITE_APP_API_URL || 'https://api.xivorastudio.com').replace(/\/+$/, '');
+    const adminPasscode = import.meta.env.VITE_ADMIN_PASSCODE || 'SnapServe2026';
+    const baseUrl = (import.meta.env.VITE_APP_API_URL || (typeof window !== 'undefined' ? window.location.origin : '')).replace(/\/+$/, '');
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
