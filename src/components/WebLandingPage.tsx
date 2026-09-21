@@ -24,12 +24,19 @@ export const WebLandingPage: React.FC = () => {
     const [downloading, setDownloading] = useState(false);
 
     useEffect(() => {
-        document.body.style.overflow = 'auto';
-        document.documentElement.style.overflow = 'auto';
-        return () => {
-            document.body.style.overflow = 'hidden';
-            document.documentElement.style.overflow = 'hidden';
-        };
+        document.documentElement.style.overflowY = 'auto';
+        document.documentElement.style.overflowX = 'hidden';
+        document.documentElement.style.height = 'auto';
+        document.body.style.overflowY = 'auto';
+        document.body.style.overflowX = 'hidden';
+        document.body.style.height = 'auto';
+        const root = document.getElementById('root');
+        if (root) {
+            root.style.overflowY = 'visible';
+            root.style.overflowX = 'hidden';
+            root.style.height = 'auto';
+            root.style.minHeight = '100vh';
+        }
     }, []);
 
     const downloadUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/latest/download/Xivora.Studio-Setup-2.9.0.exe';
@@ -48,7 +55,15 @@ export const WebLandingPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#07080D] text-white selection:bg-purple-500/30 font-sans relative overflow-x-hidden">
+        <div className="w-full min-h-screen bg-[#07080D] text-white selection:bg-purple-500/30 font-sans relative overflow-x-hidden overflow-y-visible">
+            <style>{`
+                html, body, #root {
+                    overflow-y: auto !important;
+                    overflow-x: hidden !important;
+                    height: auto !important;
+                    min-height: 100% !important;
+                }
+            `}</style>
             {/* Background Tech Grid & Glow Orbs */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[600px] bg-gradient-to-b from-purple-600/25 via-indigo-600/15 to-transparent blur-[140px] pointer-events-none rounded-full" />
