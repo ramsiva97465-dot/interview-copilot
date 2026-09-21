@@ -52,6 +52,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary"
 import ModesSettings from "./components/settings/ModesSettings"
 import { ProfileIntelligenceSettings } from "./components/ProfileIntelligenceSettings"
 import { WebDownloadBanner } from "./components/WebDownloadBanner"
+import { WebLandingPage } from "./components/WebLandingPage"
 
 
 // DEV-ONLY: should the launcher mount an uncontrolled ReviewPromptHost?
@@ -1023,6 +1024,15 @@ const App: React.FC = () => {
             </ToastProvider>
           </QueryClientProvider>
         </div>
+      </ErrorBoundary>
+    );
+  }
+
+  // When visited in any web browser, render the dedicated high-converting Xivora Studio Landing Page
+  if (!isElectron) {
+    return (
+      <ErrorBoundary context="WebLandingPage">
+        <WebLandingPage />
       </ErrorBoundary>
     );
   }
