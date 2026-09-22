@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, RefreshCw, Plus, Minus, CreditCard, Key, Users, Clock, Coins, Search, ShieldCheck, CheckCircle2, AlertCircle, X, Sparkles } from 'lucide-react';
+import MeetFlooLogo from '../../assets/logo.webp';
 
 interface UserRecord {
     id: string;
@@ -295,8 +296,8 @@ export const AdminDashboard: React.FC = () => {
     if (!isAuthenticated) {
         return (
             <div className="flex flex-col items-center justify-center p-8 bg-zinc-950 border border-white/10 rounded-2xl max-w-sm mx-auto my-12 text-white space-y-4 shadow-2xl">
-                <div className="p-3 bg-blue-500/10 text-blue-400 rounded-2xl border border-blue-500/20">
-                    <Lock size={24} />
+                <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center shadow-lg p-2">
+                    <img src={MeetFlooLogo} alt="MeetFloo" className="w-10 h-10 object-contain" />
                 </div>
                 <div className="text-center space-y-1">
                     <h3 className="text-base font-semibold">MeetFloo Admin Panel</h3>
@@ -332,7 +333,8 @@ export const AdminDashboard: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div>
-                    <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
+                    <h2 className="text-lg font-bold tracking-tight flex items-center gap-2.5">
+                        <img src={MeetFlooLogo} alt="MeetFloo" className="w-6 h-6 object-contain" />
                         <span>MeetFloo Admin Control Center</span>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                             Live Server

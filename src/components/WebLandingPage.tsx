@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import desktopUiPreview from '../assets/desktopui.webp';
 import logoImg from '../assets/logo.png';
+import logoFullDark from '../assets/logo-full-dark.png';
 
 export const WebLandingPage: React.FC = () => {
     const [downloading, setDownloading] = useState(false);
@@ -66,22 +67,10 @@ export const WebLandingPage: React.FC = () => {
             <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#07080D]/85 border-b border-white/[0.08] transition-all">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-3.5">
-                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-500 to-purple-400 p-[1px] shadow-lg shadow-purple-500/20">
-                            <div className="w-full h-full bg-[#0D0E15] rounded-[15px] flex items-center justify-center overflow-hidden">
-                                <img src={logoImg} alt="MeetFloo" className="w-7 h-7 object-contain" />
-                            </div>
-                        </div>
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-zinc-200 to-purple-200 bg-clip-text text-transparent">
-                                    MeetFloo
-                                </span>
-                                <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full">
-                                    v2.9.0
-                                </span>
-                            </div>
-                            <span className="text-[11px] text-zinc-400 font-medium block">AI Interview & Meeting Copilot</span>
-                        </div>
+                        <img src={logoFullDark} alt="MeetFloo" className="h-9 w-auto object-contain" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full">
+                            v2.9.2
+                        </span>
                     </div>
 
                     <nav className="hidden lg:flex items-center gap-8 text-sm text-zinc-300 font-medium">
@@ -416,7 +405,7 @@ export const WebLandingPage: React.FC = () => {
                     </div>
 
                     <p className="text-xs text-zinc-500 mt-4">
-                        Version 2.9.0 • Windows 10/11 64-bit • Standalone Desktop Application
+                        Version 2.9.2 • Windows 10/11 64-bit • Standalone Desktop Application
                     </p>
                 </div>
             </section>
@@ -425,8 +414,7 @@ export const WebLandingPage: React.FC = () => {
             <footer className="border-t border-white/[0.06] py-10 text-xs text-zinc-500 bg-[#06070B]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-3">
-                        <img src={logoImg} alt="MeetFloo" className="w-5 h-5 object-contain" />
-                        <span className="font-bold text-zinc-300">MeetFloo</span>
+                        <img src={logoFullDark} alt="MeetFloo" className="h-6 w-auto object-contain opacity-90" />
                         <span>•</span>
                         <span>© 2026 SnapServe-AI. All rights reserved.</span>
                     </div>
