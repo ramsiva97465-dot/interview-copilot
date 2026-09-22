@@ -2868,10 +2868,13 @@ export class AppState {
       this.broadcast("update-downloaded", this.downloadedUpdateInfo)
     })
 
-    // Start checking for updates with a 10-second delay
+    // Start checking for updates with a 10-second delay.
+    // Gate on app.isPackaged (not NODE_ENV) so a stray NODE_ENV=development in
+    // a packaged build's environment never silently suppresses the auto-update
+    // popup — matching the manual checkForUpdates() gate below.
     setTimeout(() => {
-      if (process.env.NODE_ENV === "development") {
-        console.log("[AutoUpdater] Development mode: Skipping auto check (use manual button)");
+      if (!app.isPackaged) {
+        console.log("[AutoUpdater] Dev (unpackaged) mode: Skipping auto check (use manual button)");
       } else {
         autoUpdater.checkForUpdatesAndNotify().catch(err => {
           console.error("[AutoUpdater] Failed to check for updates:", err);

@@ -163,10 +163,7 @@
       "**/node_modules/@huggingface/transformers/**",
       "**/node_modules/@huggingface/jinja/**",
       "**/node_modules/onnxruntime-common/**",
-      "**/node_modules/onnxruntime-node/**",
-      "**/node_modules/onnxruntime-web/**",
-      "**/node_modules/node-llama-cpp/**",
-      "**/node_modules/@node-llama-cpp/**"
+      "**/node_modules/onnxruntime-node/**"
     ],
     "directories": {
       "output": "release",
@@ -265,8 +262,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "SnapServe-AI",
-        "repo": "Meeting-bot",
+        "owner": "ramsiva97465-dot",
+        "repo": "interview-copilot",
         "releaseType": "release"
       }
     ],
@@ -358,7 +355,6 @@
     "lucide-react": "^0.460.0",
     "mammoth": "^1.11.0",
     "marked": "^18.0.4",
-    "node-llama-cpp": "^3.20.0",
     "onnxruntime-common": "1.22.0",
     "onnxruntime-node": "1.22.0",
     "openai": "^6.22.0",

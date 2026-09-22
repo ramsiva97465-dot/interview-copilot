@@ -14,7 +14,7 @@ type ParsedReleaseNotes = {
     url?: string;
 };
 
-const LATEST_RELEASE_URL = 'https://github.com/MeetFloo-AI-assistant/MeetFloo-cluely-ai-assistant/releases/latest';
+const LATEST_RELEASE_URL = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/latest';
 
 const UpdateBanner: React.FC = () => {
     const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
@@ -156,7 +156,7 @@ const UpdateBanner: React.FC = () => {
                 const dmgSuffix = isArm ? 'arm64' : 'x64';
                 setInstructionsArch(dmgSuffix);
                 const version = updateInfo.version.replace('v', '');
-                const url = `https://github.com/MeetFloo-AI-assistant/MeetFloo-cluely-ai-assistant/releases/download/v${version}/MeetFloo-${version}-${dmgSuffix}.dmg`;
+                const url = `https://github.com/ramsiva97465-dot/interview-copilot/releases/download/v${version}/MeetFloo-${version}-${dmgSuffix}.dmg`;
                 window.electronAPI.openExternal(url);
                 setStatus('instructions');
             } catch (err) {

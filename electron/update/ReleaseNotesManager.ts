@@ -20,8 +20,8 @@ export interface ParsedReleaseNotes {
 export class ReleaseNotesManager {
     private static instance: ReleaseNotesManager;
     private cachedNotes: ParsedReleaseNotes | null = null;
-    private readonly repoOwner = "MeetFloo-AI-assistant";
-    private readonly repoName = "MeetFloo-cluely-ai-assistant";
+    private readonly repoOwner = "ramsiva97465-dot";
+    private readonly repoName = "interview-copilot";
 
     private constructor() { }
 
