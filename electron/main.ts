@@ -8436,9 +8436,21 @@ async function initializeApp() {
       appState.centerAndShowWindow();
 
       // Catch deep links on Windows/Linux (meetfloo://...)
-      const url = commandLine.find(arg => arg.startsWith('meetfloo://'));
-      if (url && appState.window) {
-        appState.window.webContents.send('oauth-token-received', url);
+      const rawUrl = commandLine.find(arg => typeof arg === 'string' && arg.replace(/^["']|["']$/g, '').startsWith('meetfloo://'));
+      const url = rawUrl ? rawUrl.replace(/^["']|["']$/g, '') : null;
+      if (url) {
+        console.log('[Main] Received deep link protocol URL:', url.substring(0, 40) + '...');
+        BrowserWindow.getAllWindows().forEach((win) => {
+          if (!win.isDestroyed()) {
+            win.webContents.send('oauth-token-received', url);
+          }
+        });
+        const mainWin = appState.getMainWindow() || BrowserWindow.getAllWindows()[0];
+        if (mainWin && !mainWin.isDestroyed()) {
+          if (mainWin.isMinimized()) mainWin.restore();
+          mainWin.show();
+          mainWin.focus();
+        }
       }
     } catch (err) {
       console.error('[Main] second-instance handler failed:', err);
@@ -8451,8 +8463,19 @@ async function initializeApp() {
     try {
       const appState = AppState.getInstance();
       appState.centerAndShowWindow();
-      if (url && appState.window) {
-        appState.window.webContents.send('oauth-token-received', url);
+      if (url) {
+        console.log('[Main] Received open-url protocol URL:', url.substring(0, 40) + '...');
+        BrowserWindow.getAllWindows().forEach((win) => {
+          if (!win.isDestroyed()) {
+            win.webContents.send('oauth-token-received', url);
+          }
+        });
+        const mainWin = appState.getMainWindow() || BrowserWindow.getAllWindows()[0];
+        if (mainWin && !mainWin.isDestroyed()) {
+          if (mainWin.isMinimized()) mainWin.restore();
+          mainWin.show();
+          mainWin.focus();
+        }
       }
     } catch (err) {
       console.error('[Main] open-url handler failed:', err);

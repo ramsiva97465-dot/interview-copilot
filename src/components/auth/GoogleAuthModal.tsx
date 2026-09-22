@@ -63,9 +63,17 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
         if (isElectron && isOpen) {
             const cleanup = (window as any).electronAPI.onOAuthTokenReceived((url: string) => {
                 try {
-                    // Extract token from meetfloo://auth?token=XYZ
-                    const parsedUrl = new URL(url);
-                    const token = parsedUrl.searchParams.get('token');
+                    let token: string | null = null;
+                    try {
+                        const parsedUrl = new URL(url);
+                        token = parsedUrl.searchParams.get('token');
+                    } catch {
+                        // fall through to regex
+                    }
+                    if (!token) {
+                        const match = url.match(/[?&]token=([^&#]+)/);
+                        if (match) token = decodeURIComponent(match[1]);
+                    }
                     if (token) {
                         handleGoogleSuccess({ credential: token });
                     } else {
