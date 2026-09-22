@@ -60,7 +60,10 @@ export async function fetchUserProfile(email?: string | null): Promise<UserAccou
 
   try {
     const baseUrl = getBaseApiUrl();
-    const res = await fetch(`${baseUrl}/api/user/profile?email=${encodeURIComponent(targetEmail)}`);
+    const res = await fetch(`${baseUrl}/api/user/profile?email=${encodeURIComponent(targetEmail)}&_t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+    });
     const data = await res.json();
     if (data.success && data.user) {
       setStoredUserData(data.user);

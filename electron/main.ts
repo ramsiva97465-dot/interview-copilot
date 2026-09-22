@@ -1435,6 +1435,7 @@ export class AppState {
   private _verboseLogging: boolean = false;
   // Meeting Usage Tracking (Credits deduction & admin sync)
   private _usageHeartbeatTimer: NodeJS.Timeout | null = null;
+  private _creditCheckTimer: NodeJS.Timeout | null = null;
   private _meetingStartTimestamp: number = 0;
   private _meetingLastHeartbeatTimestamp: number = 0;
   private _meetingUserEmail: string | null = null;
@@ -2411,6 +2412,28 @@ export class AppState {
     }
   }
 
+  public async checkAndSyncUserCredits(email: string): Promise<any> {
+    try {
+      const baseUrl = (process.env.VITE_APP_API_URL || 'https://www.meetfloo.com').replace(/\/+$/, '');
+      const resp = await fetch(`${baseUrl}/api/user/profile?email=${encodeURIComponent(email.toLowerCase().trim())}&_t=${Date.now()}`);
+      const data: any = await resp.json();
+      if (data?.success && data?.user) {
+        this.broadcast('credits-updated', data.user);
+        if ((data.user.credits || 0) <= 0) {
+          console.warn(`[Main] User ${email} has 0 credits (synced from server). Triggering out-of-credits.`);
+          this.broadcast('out-of-credits', data.user);
+          if (this.isMeetingActive) {
+            this.endMeetingTransition();
+          }
+        }
+        return data.user;
+      }
+    } catch (e: any) {
+      // Network or offline fallback
+    }
+    return null;
+  }
+
   public startMeetingUsageTracking(email?: string | null): void {
     this.stopMeetingUsageTracking(false);
     if (!email || typeof email !== 'string' || !email.includes('@')) {
@@ -2424,6 +2447,10 @@ export class AppState {
 
     console.log(`[Main] Started meeting usage heartbeat for ${this._meetingUserEmail}`);
 
+    // Verify credits immediately on meeting start
+    this.checkAndSyncUserCredits(this._meetingUserEmail).catch(() => {});
+
+    // Every 60s of active meeting, record 1 minute used
     this._usageHeartbeatTimer = setInterval(async () => {
       if (!this.isMeetingActive || !this._meetingUserEmail) {
         this.stopMeetingUsageTracking(false);
@@ -2433,12 +2460,25 @@ export class AppState {
       console.log(`[Main] 1-minute usage heartbeat: deducting 1 minute for ${this._meetingUserEmail}`);
       await this.recordUsageToBackend(this._meetingUserEmail, 1);
     }, 60000);
+
+    // Also poll backend credit balance every 20s to catch real-time admin deductions/removals
+    this._creditCheckTimer = setInterval(async () => {
+      if (!this.isMeetingActive || !this._meetingUserEmail) {
+        if (this._creditCheckTimer) clearInterval(this._creditCheckTimer);
+        return;
+      }
+      await this.checkAndSyncUserCredits(this._meetingUserEmail);
+    }, 20000);
   }
 
   public async stopMeetingUsageTracking(recordTrailingRemainder = true): Promise<void> {
     if (this._usageHeartbeatTimer) {
       clearInterval(this._usageHeartbeatTimer);
       this._usageHeartbeatTimer = null;
+    }
+    if (this._creditCheckTimer) {
+      clearInterval(this._creditCheckTimer);
+      this._creditCheckTimer = null;
     }
 
     if (recordTrailingRemainder && this._meetingUserEmail && this._meetingLastHeartbeatTimestamp > 0) {

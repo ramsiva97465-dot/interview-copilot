@@ -274,10 +274,25 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
         // Simple polling for events every minute
         const interval = setInterval(fetchEvents, 60000);
 
+        // Sync user credits on focus & every 20 seconds
+        const refreshCredits = () => {
+            fetchUserProfile().then(user => {
+                if (mounted && user) {
+                    setUserCredits(user.credits);
+                    setUserPlan(user.plan);
+                }
+            }).catch(() => {});
+        };
+
+        const creditsInterval = setInterval(refreshCredits, 20000);
+
         // Orchestrator: foreground/background tracking via window blur/focus.
         // On macOS Cmd+H and Cmd+Tab the BrowserWindow fires 'blur'/'focus'
         // (mapped to window blur/focus in renderer).
-        const onFocus = () => emitOrchestratorEvent({ type: 'foreground:change', isForeground: true });
+        const onFocus = () => {
+            emitOrchestratorEvent({ type: 'foreground:change', isForeground: true });
+            refreshCredits();
+        };
         const onBlur = () => emitOrchestratorEvent({ type: 'foreground:change', isForeground: false });
         window.addEventListener('focus', onFocus);
         window.addEventListener('blur', onBlur);
@@ -317,6 +332,7 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
             if (removeMeetingStateListener) removeMeetingStateListener();
             window.removeEventListener('meetfloo_user_credits_updated', handleCreditsEvent);
             clearInterval(interval);
+            clearInterval(creditsInterval);
             window.removeEventListener('focus', onFocus);
             window.removeEventListener('blur', onBlur);
             clearInterval(usageTimer);

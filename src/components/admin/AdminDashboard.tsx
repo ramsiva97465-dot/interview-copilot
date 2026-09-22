@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, RefreshCw, Plus, CreditCard, Key, Users, Clock, Coins, Search, ShieldCheck, CheckCircle2, AlertCircle, X, Sparkles } from 'lucide-react';
+import { Lock, RefreshCw, Plus, Minus, CreditCard, Key, Users, Clock, Coins, Search, ShieldCheck, CheckCircle2, AlertCircle, X, Sparkles } from 'lucide-react';
 
 interface UserRecord {
     id: string;
@@ -48,10 +48,13 @@ export const AdminDashboard: React.FC = () => {
     // Search filter
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Add Credits Modal State
+    // Credits Management Modal State (Add, Remove, Set)
     const [creditModalOpen, setCreditModalOpen] = useState(false);
+    const [creditModalMode, setCreditModalMode] = useState<'add' | 'remove' | 'set'>('add');
     const [targetEmail, setTargetEmail] = useState('');
-    const [creditsToAdd, setCreditsToAdd] = useState(500);
+    const [targetCurrentCredits, setTargetCurrentCredits] = useState<number>(0);
+    const [creditAmount, setCreditAmount] = useState(500);
+    const [removeAllCredits, setRemoveAllCredits] = useState(false);
     const [creditNote, setCreditNote] = useState('');
 
     // New License Form State
@@ -147,31 +150,85 @@ export const AdminDashboard: React.FC = () => {
         }
     }, [isAuthenticated, activeTab]);
 
-    const handleAddCreditsSubmit = async (e: React.FormEvent) => {
+    const handleCreditActionSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!targetEmail.trim()) return;
 
-        setActionMsg(`Granting ${creditsToAdd} credits to ${targetEmail}...`);
-        try {
-            const res = await fetch(`${baseUrl}/api/admin/credits/add`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: targetEmail.trim(), credits: creditsToAdd, note: creditNote }),
-            });
-            const data = await res.json();
-            if (data.success) {
-                setActionMsg(`Successfully added ${creditsToAdd} credits to ${targetEmail}!`);
+        if (creditModalMode === 'add') {
+            setActionMsg(`Granting ${creditAmount} credits to ${targetEmail}...`);
+            try {
+                const res = await fetch(`${baseUrl}/api/admin/credits/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: targetEmail.trim(), credits: creditAmount, note: creditNote }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    setActionMsg(`Successfully added ${creditAmount} credits to ${targetEmail}!`);
+                    setCreditModalOpen(false);
+                    setTargetEmail('');
+                    setCreditNote('');
+                    refreshData();
+                } else {
+                    setActionMsg(`Error: ${data.error}`);
+                }
+            } catch {
+                setActionMsg(`Local Action: Added ${creditAmount} credits to ${targetEmail}`);
+                setUsers(prev => prev.map(u => u.email === targetEmail ? { ...u, credits: u.credits + creditAmount } : u));
                 setCreditModalOpen(false);
-                setTargetEmail('');
-                setCreditNote('');
-                refreshData();
-            } else {
-                setActionMsg(`Error: ${data.error}`);
             }
-        } catch {
-            setActionMsg(`Local Action: Added ${creditsToAdd} credits to ${targetEmail}`);
-            setUsers(prev => prev.map(u => u.email === targetEmail ? { ...u, credits: u.credits + creditsToAdd } : u));
-            setCreditModalOpen(false);
+        } else if (creditModalMode === 'remove') {
+            const deduct = removeAllCredits ? targetCurrentCredits : creditAmount;
+            setActionMsg(`Removing ${deduct} credits from ${targetEmail}...`);
+            try {
+                const res = await fetch(`${baseUrl}/api/admin/credits/remove`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: targetEmail.trim(),
+                        credits: creditAmount,
+                        removeAll: removeAllCredits,
+                        note: creditNote
+                    }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    setActionMsg(`Successfully removed ${data.deducted || deduct} credits from ${targetEmail}!`);
+                    setCreditModalOpen(false);
+                    setTargetEmail('');
+                    setCreditNote('');
+                    refreshData();
+                } else {
+                    setActionMsg(`Error: ${data.error}`);
+                }
+            } catch {
+                setActionMsg(`Local Action: Removed ${deduct} credits from ${targetEmail}`);
+                setUsers(prev => prev.map(u => u.email === targetEmail ? { ...u, credits: Math.max(0, u.credits - deduct) } : u));
+                setCreditModalOpen(false);
+            }
+        } else if (creditModalMode === 'set') {
+            setActionMsg(`Setting credits for ${targetEmail} to ${creditAmount}...`);
+            try {
+                const res = await fetch(`${baseUrl}/api/admin/credits/set`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: targetEmail.trim(), credits: creditAmount, note: creditNote }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    setActionMsg(`Successfully set credits for ${targetEmail} to ${creditAmount}!`);
+                    setCreditModalOpen(false);
+                    setTargetEmail('');
+                    setCreditNote('');
+                    refreshData();
+                } else {
+                    setActionMsg(`Error: ${data.error}`);
+                }
+            } catch {
+                setActionMsg(`Local Action: Set credits for ${targetEmail} to ${creditAmount}`);
+                setUsers(prev => prev.map(u => u.email === targetEmail ? { ...u, credits: creditAmount } : u));
+                setCreditModalOpen(false);
+            }
         }
     };
 
@@ -396,16 +453,36 @@ export const AdminDashboard: React.FC = () => {
                             />
                         </div>
 
-                        <button
-                            onClick={() => {
-                                setTargetEmail('');
-                                setCreditsToAdd(500);
-                                setCreditModalOpen(true);
-                            }}
-                            className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-xl flex items-center gap-1.5 transition-colors shadow-lg shadow-emerald-600/20"
-                        >
-                            <Plus size={14} /> Grant Credits to User
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => {
+                                    setTargetEmail('');
+                                    setTargetCurrentCredits(0);
+                                    setCreditModalMode('add');
+                                    setCreditAmount(500);
+                                    setRemoveAllCredits(false);
+                                    setCreditNote('');
+                                    setCreditModalOpen(true);
+                                }}
+                                className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-xl flex items-center gap-1.5 transition-colors shadow-lg shadow-emerald-600/20"
+                            >
+                                <Plus size={14} /> Grant Credits
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setTargetEmail('');
+                                    setTargetCurrentCredits(0);
+                                    setCreditModalMode('remove');
+                                    setCreditAmount(500);
+                                    setRemoveAllCredits(false);
+                                    setCreditNote('');
+                                    setCreditModalOpen(true);
+                                }}
+                                className="px-3.5 py-2 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 font-medium text-xs rounded-xl flex items-center gap-1.5 transition-colors"
+                            >
+                                <Minus size={14} /> Deduct Credits
+                            </button>
+                        </div>
                     </div>
 
                     {/* Users Table */}
@@ -451,16 +528,38 @@ export const AdminDashboard: React.FC = () => {
                                                 {u.last_active ? new Date(u.last_active).toLocaleString() : '—'}
                                             </td>
                                             <td className="p-3 text-right">
-                                                <button
-                                                    onClick={() => {
-                                                        setTargetEmail(u.email);
-                                                        setCreditsToAdd(500);
-                                                        setCreditModalOpen(true);
-                                                    }}
-                                                    className="px-2.5 py-1 bg-zinc-800 hover:bg-emerald-600/20 text-emerald-400 hover:text-emerald-300 border border-white/5 rounded-lg text-[11px] font-medium transition-colors"
-                                                >
-                                                    + Add Credits
-                                                </button>
+                                                <div className="flex items-center justify-end gap-1.5">
+                                                    <button
+                                                        onClick={() => {
+                                                            setTargetEmail(u.email);
+                                                            setTargetCurrentCredits(u.credits || 0);
+                                                            setCreditModalMode('add');
+                                                            setCreditAmount(500);
+                                                            setRemoveAllCredits(false);
+                                                            setCreditNote('');
+                                                            setCreditModalOpen(true);
+                                                        }}
+                                                        className="px-2.5 py-1 bg-zinc-800 hover:bg-emerald-600/20 text-emerald-400 hover:text-emerald-300 border border-white/5 rounded-lg text-[11px] font-medium transition-colors flex items-center gap-1"
+                                                        title="Grant credits"
+                                                    >
+                                                        <Plus size={12} /> Add
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setTargetEmail(u.email);
+                                                            setTargetCurrentCredits(u.credits || 0);
+                                                            setCreditModalMode('remove');
+                                                            setCreditAmount(Math.min(u.credits || 0, 500));
+                                                            setRemoveAllCredits(false);
+                                                            setCreditNote('');
+                                                            setCreditModalOpen(true);
+                                                        }}
+                                                        className="px-2.5 py-1 bg-zinc-800 hover:bg-rose-600/20 text-rose-400 hover:text-rose-300 border border-white/5 rounded-lg text-[11px] font-medium transition-colors flex items-center gap-1"
+                                                        title="Deduct or remove credits from user"
+                                                    >
+                                                        <Minus size={12} /> Remove
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
@@ -615,16 +714,30 @@ export const AdminDashboard: React.FC = () => {
                 </div>
             )}
 
-            {/* Grant / Add Credits Modal */}
+            {/* Credit Management Modal (Add / Remove / Set) */}
             {creditModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                     <div className="w-full max-w-md bg-zinc-950 border border-white/10 rounded-2xl p-6 text-white space-y-4 shadow-2xl">
                         <div className="flex items-center justify-between border-b border-white/10 pb-3">
                             <div className="flex items-center gap-2">
-                                <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
-                                    <Coins size={18} />
+                                <div className={`p-2 rounded-xl border ${
+                                    creditModalMode === 'remove'
+                                        ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                                        : creditModalMode === 'set'
+                                        ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                        : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                }`}>
+                                    {creditModalMode === 'remove' ? <Minus size={18} /> : <Coins size={18} />}
                                 </div>
-                                <h3 className="text-base font-semibold">Grant / Add User Credits</h3>
+                                <div>
+                                    <h3 className="text-base font-semibold">
+                                        {creditModalMode === 'remove' ? 'Deduct / Remove Credits' :
+                                         creditModalMode === 'set' ? 'Set Exact Balance' : 'Grant / Add Credits'}
+                                    </h3>
+                                    <p className="text-[11px] text-zinc-400">
+                                        Updates database and syncs instantly with desktop app
+                                    </p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => setCreditModalOpen(false)}
@@ -634,7 +747,44 @@ export const AdminDashboard: React.FC = () => {
                             </button>
                         </div>
 
-                        <form onSubmit={handleAddCreditsSubmit} className="space-y-4">
+                        {/* Mode Switcher Tabs */}
+                        <div className="flex p-1 bg-zinc-900 rounded-xl border border-white/5 text-xs font-medium">
+                            <button
+                                type="button"
+                                onClick={() => { setCreditModalMode('add'); setRemoveAllCredits(false); }}
+                                className={`flex-1 py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all ${
+                                    creditModalMode === 'add'
+                                        ? 'bg-emerald-600 text-white font-semibold shadow'
+                                        : 'text-zinc-400 hover:text-white'
+                                }`}
+                            >
+                                <Plus size={12} /> Add
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => { setCreditModalMode('remove'); setRemoveAllCredits(false); }}
+                                className={`flex-1 py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all ${
+                                    creditModalMode === 'remove'
+                                        ? 'bg-rose-600 text-white font-semibold shadow'
+                                        : 'text-zinc-400 hover:text-white'
+                                }`}
+                            >
+                                <Minus size={12} /> Remove / Deduct
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => { setCreditModalMode('set'); setRemoveAllCredits(false); }}
+                                className={`flex-1 py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all ${
+                                    creditModalMode === 'set'
+                                        ? 'bg-blue-600 text-white font-semibold shadow'
+                                        : 'text-zinc-400 hover:text-white'
+                                }`}
+                            >
+                                Set Balance
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleCreditActionSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-xs font-medium text-zinc-400 mb-1">Customer Email</label>
                                 <input
@@ -642,43 +792,142 @@ export const AdminDashboard: React.FC = () => {
                                     required
                                     placeholder="user@example.com"
                                     value={targetEmail}
-                                    onChange={(e) => setTargetEmail(e.target.value)}
+                                    onChange={(e) => {
+                                        setTargetEmail(e.target.value);
+                                        const found = users.find(u => u.email.toLowerCase() === e.target.value.toLowerCase());
+                                        if (found) setTargetCurrentCredits(found.credits || 0);
+                                    }}
                                     className="w-full bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500"
                                 />
+                                {targetEmail && (
+                                    <div className="flex items-center justify-between text-[11px] text-zinc-400 mt-1 px-1">
+                                        <span>Current Balance in DB:</span>
+                                        <span className="font-mono font-semibold text-emerald-400">{targetCurrentCredits} Credits</span>
+                                    </div>
+                                )}
                             </div>
 
-                            <div>
-                                <label className="block text-xs font-medium text-zinc-400 mb-1">Credits Amount to Add</label>
-                                <div className="flex gap-2 mb-2">
-                                    {[200, 500, 1000, 2500].map((amt) => (
+                            {/* Options for Remove Mode */}
+                            {creditModalMode === 'remove' && (
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <label className="block text-xs font-medium text-zinc-400">Credits to Deduct</label>
                                         <button
-                                            key={amt}
                                             type="button"
-                                            onClick={() => setCreditsToAdd(amt)}
-                                            className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                                                creditsToAdd === amt
-                                                    ? 'bg-emerald-600 text-white border-emerald-500'
-                                                    : 'bg-zinc-900 text-zinc-400 border-white/5 hover:bg-zinc-800'
+                                            onClick={() => setRemoveAllCredits(!removeAllCredits)}
+                                            className={`text-[11px] px-2 py-0.5 rounded border transition-colors ${
+                                                removeAllCredits
+                                                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 font-bold'
+                                                    : 'bg-zinc-900 text-zinc-400 border-white/10 hover:text-white'
                                             }`}
                                         >
-                                            +{amt}
+                                            {removeAllCredits ? '✓ Clear All (0)' : 'Clear All (Reset to 0)'}
                                         </button>
-                                    ))}
+                                    </div>
+
+                                    {!removeAllCredits && (
+                                        <>
+                                            <div className="flex gap-2">
+                                                {[50, 100, 250, 500].map((amt) => (
+                                                    <button
+                                                        key={amt}
+                                                        type="button"
+                                                        onClick={() => setCreditAmount(amt)}
+                                                        className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                                                            creditAmount === amt
+                                                                ? 'bg-rose-600 text-white border-rose-500'
+                                                                : 'bg-zinc-900 text-zinc-400 border-white/5 hover:bg-zinc-800'
+                                                        }`}
+                                                    >
+                                                        -{amt}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <input
+                                                type="number"
+                                                required
+                                                min="1"
+                                                value={creditAmount}
+                                                onChange={(e) => setCreditAmount(Math.max(1, parseInt(e.target.value || '0', 10)))}
+                                                className="w-full bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-rose-500"
+                                            />
+                                        </>
+                                    )}
+
+                                    {/* Balance Preview */}
+                                    <div className="p-2.5 bg-zinc-900/80 rounded-xl border border-white/5 text-xs flex items-center justify-between">
+                                        <span className="text-zinc-400">New Balance after deduction:</span>
+                                        <span className="font-mono font-bold text-white">
+                                            {removeAllCredits ? 0 : Math.max(0, targetCurrentCredits - creditAmount)} credits
+                                        </span>
+                                    </div>
                                 </div>
-                                <input
-                                    type="number"
-                                    required
-                                    value={creditsToAdd}
-                                    onChange={(e) => setCreditsToAdd(parseInt(e.target.value || '0', 10))}
-                                    className="w-full bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-blue-500"
-                                />
-                            </div>
+                            )}
+
+                            {/* Options for Add Mode */}
+                            {creditModalMode === 'add' && (
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-zinc-400">Credits to Grant</label>
+                                    <div className="flex gap-2">
+                                        {[100, 250, 500, 1000].map((amt) => (
+                                            <button
+                                                key={amt}
+                                                type="button"
+                                                onClick={() => setCreditAmount(amt)}
+                                                className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                                                    creditAmount === amt
+                                                        ? 'bg-emerald-600 text-white border-emerald-500'
+                                                        : 'bg-zinc-900 text-zinc-400 border-white/5 hover:bg-zinc-800'
+                                                }`}
+                                            >
+                                                +{amt}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="1"
+                                        value={creditAmount}
+                                        onChange={(e) => setCreditAmount(Math.max(1, parseInt(e.target.value || '0', 10)))}
+                                        className="w-full bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                                    />
+                                    {/* Balance Preview */}
+                                    <div className="p-2.5 bg-zinc-900/80 rounded-xl border border-white/5 text-xs flex items-center justify-between">
+                                        <span className="text-zinc-400">New Balance after grant:</span>
+                                        <span className="font-mono font-bold text-white">
+                                            {targetCurrentCredits + creditAmount} credits
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Options for Set Mode */}
+                            {creditModalMode === 'set' && (
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-zinc-400">Set Exact Total Credits</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="0"
+                                        value={creditAmount}
+                                        onChange={(e) => setCreditAmount(Math.max(0, parseInt(e.target.value || '0', 10)))}
+                                        className="w-full bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-blue-500"
+                                    />
+                                    <div className="p-2.5 bg-zinc-900/80 rounded-xl border border-white/5 text-xs flex items-center justify-between">
+                                        <span className="text-zinc-400">New Balance:</span>
+                                        <span className="font-mono font-bold text-white">
+                                            {creditAmount} credits
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
 
                             <div>
                                 <label className="block text-xs font-medium text-zinc-400 mb-1">Reason / Note (Optional)</label>
                                 <input
                                     type="text"
-                                    placeholder="e.g. UPI Payment Top-Up, Manual Grant, Promotional Bonus"
+                                    placeholder="e.g. Account adjustment, refund deduction, promotional bonus"
                                     value={creditNote}
                                     onChange={(e) => setCreditNote(e.target.value)}
                                     className="w-full bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none"
@@ -687,9 +936,19 @@ export const AdminDashboard: React.FC = () => {
 
                             <button
                                 type="submit"
-                                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-xl transition-all shadow-lg shadow-emerald-600/20"
+                                className={`w-full py-2.5 font-medium text-xs rounded-xl transition-all shadow-lg ${
+                                    creditModalMode === 'remove'
+                                        ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20'
+                                        : creditModalMode === 'set'
+                                        ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20'
+                                        : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20'
+                                }`}
                             >
-                                Confirm & Add {creditsToAdd} Credits
+                                {creditModalMode === 'remove'
+                                    ? (removeAllCredits ? 'Confirm & Remove All Credits (Set to 0)' : `Confirm & Deduct ${creditAmount} Credits`)
+                                    : creditModalMode === 'set'
+                                    ? `Confirm & Set Balance to ${creditAmount} Credits`
+                                    : `Confirm & Add ${creditAmount} Credits`}
                             </button>
                         </form>
                     </div>

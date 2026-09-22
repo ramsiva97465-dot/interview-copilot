@@ -64,6 +64,81 @@ export async function handleAdminRoutes(req, res, pathname) {
         return true;
     }
 
+    // Deduct / Remove Credits from User
+    if (pathname === '/api/admin/credits/remove' && req.method === 'POST') {
+        const body = await parseJsonBody(req);
+        const { email, credits, removeAll, note } = body;
+
+        if (!email) {
+            res.writeHead(400);
+            res.end(JSON.stringify({ success: false, error: 'Email is required' }));
+            return true;
+        }
+
+        let user = adminStore.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+        if (!user) {
+            res.writeHead(404);
+            res.end(JSON.stringify({ success: false, error: 'User record not found' }));
+            return true;
+        }
+
+        const currentCredits = user.credits || 0;
+        const deductAmount = removeAll ? currentCredits : Math.max(0, parseInt(credits || '0', 10));
+
+        user.credits = Math.max(0, currentCredits - deductAmount);
+        user.last_active = new Date().toISOString();
+        saveStore();
+
+        res.writeHead(200);
+        res.end(JSON.stringify({
+            success: true,
+            message: `Removed ${deductAmount} credits from ${email}`,
+            deducted: deductAmount,
+            user
+        }));
+        return true;
+    }
+
+    // Set Exact Credits Balance for User
+    if (pathname === '/api/admin/credits/set' && req.method === 'POST') {
+        const body = await parseJsonBody(req);
+        const { email, credits, note } = body;
+
+        if (!email) {
+            res.writeHead(400);
+            res.end(JSON.stringify({ success: false, error: 'Email is required' }));
+            return true;
+        }
+
+        let user = adminStore.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+        if (!user) {
+            user = {
+                id: `usr_${Date.now()}`,
+                email: email.toLowerCase(),
+                minutes_used: 0,
+                credits: 0,
+                plan: 'pro',
+                status: 'active',
+                created_at: new Date().toISOString(),
+                last_active: new Date().toISOString()
+            };
+            adminStore.users.push(user);
+        }
+
+        const newBalance = Math.max(0, parseInt(credits || '0', 10));
+        user.credits = newBalance;
+        user.last_active = new Date().toISOString();
+        saveStore();
+
+        res.writeHead(200);
+        res.end(JSON.stringify({
+            success: true,
+            message: `Set credits balance to ${newBalance} for ${email}`,
+            user
+        }));
+        return true;
+    }
+
     // Get UPI Payments
     if (pathname === '/api/admin/payments' && req.method === 'GET') {
         res.writeHead(200);
