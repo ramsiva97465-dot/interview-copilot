@@ -38,7 +38,7 @@ export const WebLandingPage: React.FC = () => {
         }
     }, []);
 
-    const downloadUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/download/v2.9.0/MeetFloo-Setup-2.9.0.exe';
+    const downloadUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/download/v2.9.1/MeetFloo-Setup-2.9.1.exe';
 
     const handleDownload = () => {
         setDownloading(true);
@@ -93,7 +93,7 @@ export const WebLandingPage: React.FC = () => {
                     <div className="flex items-center gap-3">
                         <a
                             href={downloadUrl}
-                            download="MeetFloo-Setup-2.9.0.exe"
+                            download="MeetFloo-Setup-2.9.1.exe"
                             onClick={handleDownload}
                             id="header-download-cta"
                             className="flex items-center gap-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs sm:text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-purple-600/30 border border-purple-400/40 transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] cursor-pointer no-underline"
@@ -142,7 +142,7 @@ export const WebLandingPage: React.FC = () => {
                             <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
                                 <a
                                     href={downloadUrl}
-                                    download="MeetFloo-Setup-2.9.0.exe"
+                                    download="MeetFloo-Setup-2.9.1.exe"
                                     onClick={handleDownload}
                                     id="hero-primary-download-btn"
                                     className="flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-base px-8 py-4 rounded-2xl shadow-xl shadow-purple-600/35 border border-purple-400/40 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] cursor-pointer group no-underline"
@@ -268,7 +268,7 @@ export const WebLandingPage: React.FC = () => {
                         {/* Box 4: CTA Tile */}
                         <a 
                             href={downloadUrl}
-                            download="MeetFloo-Setup-2.9.0.exe"
+                            download="MeetFloo-Setup-2.9.1.exe"
                             onClick={handleDownload}
                             className="p-4 rounded-2xl bg-gradient-to-br from-indigo-900/40 via-purple-900/30 to-indigo-950/40 border border-indigo-500/30 flex flex-col justify-between cursor-pointer group hover:border-indigo-400/60 transition-all no-underline block"
                         >
@@ -368,7 +368,7 @@ export const WebLandingPage: React.FC = () => {
                             <span className="text-4xl font-black text-purple-500/30">01</span>
                             <h4 className="text-base font-bold text-white mt-3">Download Windows Setup</h4>
                             <p className="text-xs sm:text-sm text-zinc-400 mt-2 leading-relaxed">
-                                Click the download button to save <code className="text-purple-300 bg-purple-900/30 px-1.5 py-0.5 rounded">MeetFloo-Setup-2.9.0.exe</code> on your PC.
+                                Click the download button to save <code className="text-purple-300 bg-purple-900/30 px-1.5 py-0.5 rounded">MeetFloo-Setup-2.9.1.exe</code> on your PC.
                             </p>
                         </div>
 
@@ -405,7 +405,7 @@ export const WebLandingPage: React.FC = () => {
                     <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                         <a
                             href={downloadUrl}
-                            download="MeetFloo-Setup-2.9.0.exe"
+                            download="MeetFloo-Setup-2.9.1.exe"
                             onClick={handleDownload}
                             id="bottom-download-btn"
                             className="w-full sm:w-auto flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-base px-8 py-4 rounded-2xl shadow-xl shadow-purple-600/35 border border-purple-400/40 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] cursor-pointer no-underline"

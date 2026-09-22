@@ -31,12 +31,35 @@ if (process.platform === 'win32' && fs.existsSync(defaultWinPath)) {
   ghBin = defaultWinPath;
 }
 
+// Collect all assets needed for auto-updating
+const filesToUpload = [installerPath];
+const latestYmlPath = path.join(repoRoot, 'release', 'latest.yml');
+if (fs.existsSync(latestYmlPath)) {
+  filesToUpload.push(latestYmlPath);
+}
+const blockmapPath = path.join(repoRoot, 'release', `${installerName}.blockmap`);
+if (fs.existsSync(blockmapPath)) {
+  filesToUpload.push(blockmapPath);
+}
+
 try {
-  execFileSync(ghBin, ['release', 'upload', tag, installerPath, '--clobber'], {
+  // Ensure the release exists first, if not create it
+  try {
+    execFileSync(ghBin, ['release', 'view', tag], { cwd: repoRoot, stdio: 'pipe' });
+  } catch (e) {
+    console.log(`[upload-github-release] Creating release ${tag}...`);
+    execFileSync(ghBin, ['release', 'create', tag, '--title', `MeetFloo ${tag}`, '--notes', `MeetFloo ${tag} with Google Sign-In & auto-update support.`], {
+      cwd: repoRoot,
+      stdio: 'inherit'
+    });
+  }
+
+  console.log(`[upload-github-release] Uploading assets:`, filesToUpload.map(f => path.basename(f)).join(', '));
+  execFileSync(ghBin, ['release', 'upload', tag, ...filesToUpload, '--clobber'], {
     cwd: repoRoot,
     stdio: 'inherit',
   });
-  console.log(`\n🎉 [upload-github-release] Successfully uploaded ${installerName} to ${tag}!`);
+  console.log(`\n🎉 [upload-github-release] Successfully uploaded ${filesToUpload.length} files to ${tag} for Auto-Update!`);
 } catch (err) {
   console.error(`\n❌ [upload-github-release] Upload failed:`, err.message);
   process.exit(1);
