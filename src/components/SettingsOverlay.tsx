@@ -1507,6 +1507,15 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
         if (googleUserEmail) {
             fetchGoogleUserProfile(googleUserEmail);
         }
+        const handleCreditsEvent = (e: any) => {
+            if (e.detail?.credits !== undefined) setGoogleUserCredits(e.detail.credits);
+            if (e.detail?.minutes_used !== undefined) setGoogleUserMinutes(e.detail.minutes_used);
+            if (e.detail?.plan) setGoogleUserPlan(e.detail.plan);
+        };
+        window.addEventListener('meetfloo_user_credits_updated', handleCreditsEvent);
+        return () => {
+            window.removeEventListener('meetfloo_user_credits_updated', handleCreditsEvent);
+        };
     }, [googleUserEmail]);
 
     // Close STT dropdown when clicking outside

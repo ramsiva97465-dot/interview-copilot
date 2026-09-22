@@ -21,6 +21,7 @@ import { APP_FEATURE_VERSION } from '../utils/appVersion';
 import WindowControls from './WindowControls';
 import { LiquidGlassBadge } from '../ui-components/LiquidGlassBadge';
 import { emitOrchestratorEvent, setUserState as setOrchestratorUserState } from './onboarding/OrchestratedToasterHost';
+import { fetchUserProfile } from '../lib/userUsageService';
 
 interface Meeting {
     id: string;
@@ -109,6 +110,18 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
     const [showModesOnboarding, setShowModesOnboarding] = useState(false);
     const [showProfileOnboarding, setShowProfileOnboarding] = useState(false);
     const [launchCount, setLaunchCount] = useState<number>(0);
+    const [userCredits, setUserCredits] = useState<number>(() => {
+        if (typeof localStorage !== 'undefined') {
+            return parseInt(localStorage.getItem('meetfloo_user_credits') || '0', 10);
+        }
+        return 0;
+    });
+    const [userPlan, setUserPlan] = useState<string>(() => {
+        if (typeof localStorage !== 'undefined') {
+            return localStorage.getItem('meetfloo_user_plan') || '';
+        }
+        return '';
+    });
     // StrictMode-safe guard for mount-only side-effects: the dev build
     // intentionally double-invokes effects to surface this class of bug.
     const mountedOnceRef = useRef<boolean>(false);
@@ -128,6 +141,12 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
     const handleRefresh = async () => {
         setIsRefreshing(true);
         analytics.trackCommandExecuted('refresh_calendar');
+        fetchUserProfile().then(user => {
+            if (user) {
+                setUserCredits(user.credits);
+                setUserPlan(user.plan);
+            }
+        }).catch(() => {});
         try {
             if (window.electronAPI && window.electronAPI.calendarRefresh) {
                 setShowNotification(true);
@@ -226,6 +245,32 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
             fetchMeetings();
         });
 
+        const syncCredits = () => {
+            if (typeof localStorage !== 'undefined') {
+                setUserCredits(parseInt(localStorage.getItem('meetfloo_user_credits') || '0', 10));
+                setUserPlan(localStorage.getItem('meetfloo_user_plan') || '');
+            }
+        };
+
+        syncCredits();
+        fetchUserProfile().then(user => {
+            if (mounted && user) {
+                setUserCredits(user.credits);
+                setUserPlan(user.plan);
+            }
+        }).catch(() => {});
+
+        const handleCreditsEvent = (e: any) => {
+            if (e.detail?.credits !== undefined) {
+                setUserCredits(e.detail.credits);
+            }
+            if (e.detail?.plan) {
+                setUserPlan(e.detail.plan);
+            }
+        };
+
+        window.addEventListener('meetfloo_user_credits_updated', handleCreditsEvent);
+
         // Simple polling for events every minute
         const interval = setInterval(fetchEvents, 60000);
 
@@ -270,6 +315,7 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
             if (removeMeetingsListener) removeMeetingsListener();
             if (removeUndetectableListener) removeUndetectableListener();
             if (removeMeetingStateListener) removeMeetingStateListener();
+            window.removeEventListener('meetfloo_user_credits_updated', handleCreditsEvent);
             clearInterval(interval);
             window.removeEventListener('focus', onFocus);
             window.removeEventListener('blur', onBlur);
@@ -962,6 +1008,23 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
                                                     <span className="t-toggle-thumb" aria-hidden="true" />
                                                 </button>
                                             </div>
+
+                                            {/* User Credits / Remaining Minutes Pill */}
+                                            <button
+                                                onClick={() => onOpenSettings('account')}
+                                                className={`flex items-center gap-1.5 border rounded-full px-3 py-1.5 transition-all duration-200 cursor-pointer active:scale-95 text-xs font-medium shrink-0 select-none ${
+                                                    userCredits <= 15
+                                                        ? 'bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400'
+                                                        : isLight
+                                                        ? 'bg-blue-50 hover:bg-blue-100/70 border-blue-200 text-blue-700 shadow-sm'
+                                                        : 'bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20 text-blue-400'
+                                                }`}
+                                                title={t("Remaining Meeting Credits (Click to view account)")}
+                                            >
+                                                <Clock size={13} className={userCredits <= 15 ? 'text-rose-400' : 'text-blue-400'} />
+                                                <span className="font-semibold">{userCredits}</span>
+                                                <span className="text-[11px] opacity-80">{t('mins')}</span>
+                                            </button>
 
                                             {/* What's New Pill */}
                                             {launchCount < 10 && (

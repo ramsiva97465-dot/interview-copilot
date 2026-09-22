@@ -51,7 +51,7 @@ async function handleRequest(req, res) {
         // Direct installer download redirect
         if (pathname === '/download' || pathname === '/download/windows' || pathname.endsWith('.exe')) {
             res.writeHead(302, {
-                'Location': 'https://github.com/ramsiva97465-dot/interview-copilot/releases/download/v2.9.1/MeetFloo-Setup-2.9.1.exe'
+                'Location': 'https://github.com/ramsiva97465-dot/interview-copilot/releases/download/v2.9.2/MeetFloo-Setup-2.9.2.exe'
             });
             res.end();
             return;

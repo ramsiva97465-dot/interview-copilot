@@ -746,6 +746,27 @@ const App: React.FC = () => {
       setLastMeetingEndTime(Date.now());
     });
 
+    // Listen for real-time meeting usage credit updates
+    const removeCreditsListener = window.electronAPI?.onCreditsUpdated?.((data) => {
+      console.log("[App.tsx] Credits updated from meeting usage:", data);
+      if (data?.credits !== undefined) {
+        localStorage.setItem('meetfloo_user_credits', String(data.credits));
+      }
+      if (data?.minutes_used !== undefined) {
+        localStorage.setItem('meetfloo_user_minutes_used', String(data.minutes_used));
+      }
+      if (data?.plan) {
+        localStorage.setItem('meetfloo_user_plan', data.plan);
+      }
+      window.dispatchEvent(new CustomEvent('meetfloo_user_credits_updated', { detail: data }));
+    });
+
+    const removeOutOfCreditsListener = window.electronAPI?.onOutOfCredits?.((data) => {
+      console.warn("[App.tsx] User ran out of credits during meeting:", data);
+      handleEndMeeting();
+      openSettingsExclusive('account');
+    });
+
     // Listen for Ollama Auto-Pull Progress
     let removeProgress: (() => void) | undefined;
     let removeComplete: (() => void) | undefined;
@@ -852,6 +873,8 @@ const App: React.FC = () => {
       if (removeReindexProgress) removeReindexProgress();
       if (removeLicenseListener) removeLicenseListener();
       if (trialPollId) clearInterval(trialPollId);
+      if (removeCreditsListener) removeCreditsListener();
+      if (removeOutOfCreditsListener) removeOutOfCreditsListener();
       if (removeTrialListener) removeTrialListener();
       if (removeOpenSettingsTab) removeOpenSettingsTab();
     }
@@ -952,6 +975,14 @@ const App: React.FC = () => {
         console.log("[App] Using CoreAudio backend (Default).");
       }
 
+      const userEmail = localStorage.getItem('meetfloo_user_email');
+      const userCredits = parseInt(localStorage.getItem('meetfloo_user_credits') || '0', 10);
+      if (userEmail && userCredits <= 0) {
+        console.warn("[App.tsx] 0 credits remaining, opening account settings");
+        openSettingsExclusive('account');
+        return;
+      }
+
       const meetingRetention = await window.electronAPI.getMeetingRetention?.().catch(() => 'forever');
       const result = await window.electronAPI.startMeeting({
         audio: { inputDeviceId, outputDeviceId },
@@ -960,6 +991,7 @@ const App: React.FC = () => {
         generateSummary: customOptions?.generateSummary,
         customRole: customOptions?.customRole,
         userName: customOptions?.userName,
+        userEmail: userEmail || undefined,
       });
       if (result.success) {
         analytics.trackMeetingStarted();

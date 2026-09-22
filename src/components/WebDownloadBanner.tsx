@@ -9,7 +9,7 @@ export const WebDownloadBanner: React.FC = () => {
 
     if (isElectron) return null;
 
-    const downloadUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/download/v2.9.1/MeetFloo-Setup-2.9.1.exe';
+    const downloadUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/download/v2.9.2/MeetFloo-Setup-2.9.2.exe';
 
     return (
         <div className="w-full bg-gradient-to-r from-purple-900/90 via-indigo-900/90 to-purple-900/90 border-b border-purple-500/30 px-4 py-2.5 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg z-50">

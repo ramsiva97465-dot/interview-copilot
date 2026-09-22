@@ -1433,6 +1433,11 @@ export class AppState {
   private _ragProcessingInFlight: Set<string> = new Set();
   private _isQuitting: boolean = false;
   private _verboseLogging: boolean = false;
+  // Meeting Usage Tracking (Credits deduction & admin sync)
+  private _usageHeartbeatTimer: NodeJS.Timeout | null = null;
+  private _meetingStartTimestamp: number = 0;
+  private _meetingLastHeartbeatTimestamp: number = 0;
+  private _meetingUserEmail: string | null = null;
   // NOTE: what contextDebugLevel was before verbose logging raised it lives in
   // SettingsManager ('contextDebugLevelBeforeVerbose'), NOT in a field here.
   // An in-memory field is null again after a restart, so
@@ -2380,6 +2385,76 @@ export class AppState {
 
   private broadcastMeetingState(): void {
     this.broadcast('meeting-state-changed', { isActive: this.isMeetingActive });
+  }
+
+  // ── Meeting Usage Tracking (Credits deduction & admin sync) ──────────
+  public async recordUsageToBackend(email: string, minutes: number): Promise<{ success: boolean; user?: any }> {
+    try {
+      const baseUrl = process.env.VITE_APP_API_URL || 'https://www.meetfloo.com';
+      const cleanUrl = baseUrl.replace(/\/+$/, '');
+      const resp = await fetch(`${cleanUrl}/api/user/record-usage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.toLowerCase().trim(), minutesUsed: minutes }),
+      });
+      const data: any = await resp.json();
+      if (data?.success && data?.user) {
+        this.broadcast('credits-updated', data.user);
+        if ((data.user.credits || 0) <= 0) {
+          this.broadcast('out-of-credits', data.user);
+        }
+      }
+      return data;
+    } catch (e: any) {
+      console.warn('[Main] recordUsageToBackend failed:', e?.message || e);
+      return { success: false };
+    }
+  }
+
+  public startMeetingUsageTracking(email?: string | null): void {
+    this.stopMeetingUsageTracking(false);
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      console.log('[Main] No valid user email provided for meeting usage tracking');
+      return;
+    }
+
+    this._meetingUserEmail = email.toLowerCase().trim();
+    this._meetingStartTimestamp = Date.now();
+    this._meetingLastHeartbeatTimestamp = Date.now();
+
+    console.log(`[Main] Started meeting usage heartbeat for ${this._meetingUserEmail}`);
+
+    this._usageHeartbeatTimer = setInterval(async () => {
+      if (!this.isMeetingActive || !this._meetingUserEmail) {
+        this.stopMeetingUsageTracking(false);
+        return;
+      }
+      this._meetingLastHeartbeatTimestamp = Date.now();
+      console.log(`[Main] 1-minute usage heartbeat: deducting 1 minute for ${this._meetingUserEmail}`);
+      await this.recordUsageToBackend(this._meetingUserEmail, 1);
+    }, 60000);
+  }
+
+  public async stopMeetingUsageTracking(recordTrailingRemainder = true): Promise<void> {
+    if (this._usageHeartbeatTimer) {
+      clearInterval(this._usageHeartbeatTimer);
+      this._usageHeartbeatTimer = null;
+    }
+
+    if (recordTrailingRemainder && this._meetingUserEmail && this._meetingLastHeartbeatTimestamp > 0) {
+      const elapsedSinceTick = Date.now() - this._meetingLastHeartbeatTimestamp;
+      // If at least 30 seconds elapsed since the last 1-min heartbeat tick (or total >= 30s)
+      if (elapsedSinceTick >= 30000) {
+        console.log(`[Main] Deducting 1 trailing minute for ${this._meetingUserEmail} (${Math.round(elapsedSinceTick / 1000)}s elapsed since last tick)`);
+        await this.recordUsageToBackend(this._meetingUserEmail, 1);
+      } else {
+        console.log(`[Main] Trailing session < 30s (${Math.round(elapsedSinceTick / 1000)}s), skipping remainder minute deduction`);
+      }
+    }
+
+    this._meetingUserEmail = null;
+    this._meetingStartTimestamp = 0;
+    this._meetingLastHeartbeatTimestamp = 0;
   }
 
   // Public so the reference-file upload IPC handler can kick a retry for a
@@ -6341,7 +6416,8 @@ export class AppState {
 
     const meetingGeneration = ++this._meetingGeneration;
     this.isMeetingActive = true;
-    this.broadcastMeetingState()
+    this.broadcastMeetingState();
+    this.startMeetingUsageTracking(metadata?.userEmail);
     if (metadata) {
       this.intelligenceManager.setMeetingMetadata(metadata);
       if (metadata.recordAudio) {
@@ -6607,6 +6683,7 @@ export class AppState {
     }
 
     this.cancelAutoAnswer();
+    this.stopMeetingUsageTracking(true).catch(e => console.warn('[Main] stopMeetingUsageTracking error:', e));
     // Cover the window between here and `_pendingTeardown` assignment, during which
     // the new in-flight-audio-init await below yields the event loop.
     this._endMeetingInFlight = true;

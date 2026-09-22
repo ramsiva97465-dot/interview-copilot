@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Download, 
-    Shield, 
-    Sparkles, 
-    Monitor, 
-    Cpu, 
-    Code, 
-    CheckCircle2, 
-    Lock, 
-    Zap, 
+import {
+    Download,
+    Shield,
+    Sparkles,
+    Monitor,
+    Cpu,
+    Code,
+    CheckCircle2,
+    Lock,
+    Zap,
     ArrowRight,
     Headphones,
     EyeOff,
@@ -38,7 +38,7 @@ export const WebLandingPage: React.FC = () => {
         }
     }, []);
 
-    const downloadUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/download/v2.9.1/MeetFloo-Setup-2.9.1.exe';
+    const downloadUrl = 'https://github.com/ramsiva97465-dot/interview-copilot/releases/download/v2.9.2/MeetFloo-Setup-2.9.2.exe';
 
     const handleDownload = () => {
         setDownloading(true);
@@ -187,9 +187,9 @@ export const WebLandingPage: React.FC = () => {
 
                                     {/* Real UI Preview Image */}
                                     <div className="relative p-2 bg-black/60">
-                                        <img 
-                                            src={desktopUiPreview} 
-                                            alt="MeetFloo Desktop Interface" 
+                                        <img
+                                            src={desktopUiPreview}
+                                            alt="MeetFloo Desktop Interface"
                                             className="w-full h-auto rounded-lg object-cover shadow-inner border border-white/10"
                                         />
 
@@ -266,9 +266,9 @@ export const WebLandingPage: React.FC = () => {
                         </div>
 
                         {/* Box 4: CTA Tile */}
-                        <a 
+                        <a
                             href={downloadUrl}
-                            download="MeetFloo-Setup-2.9.1.exe"
+                            download="MeetFloo-Setup-2.9.2.exe"
                             onClick={handleDownload}
                             className="p-4 rounded-2xl bg-gradient-to-br from-indigo-900/40 via-purple-900/30 to-indigo-950/40 border border-indigo-500/30 flex flex-col justify-between cursor-pointer group hover:border-indigo-400/60 transition-all no-underline block"
                         >
@@ -337,8 +337,8 @@ export const WebLandingPage: React.FC = () => {
                         ].map((feature, idx) => {
                             const IconComp = feature.icon;
                             return (
-                                <div 
-                                    key={idx} 
+                                <div
+                                    key={idx}
                                     className="p-7 rounded-2xl bg-[#0D0F18]/80 border border-white/[0.06] hover:border-purple-500/40 hover:bg-[#111322] transition-all duration-300 hover:-translate-y-1 shadow-lg"
                                 >
                                     <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-5">

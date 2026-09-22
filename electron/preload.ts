@@ -750,6 +750,8 @@ interface ElectronAPI {
   hideOverlay: () => Promise<void>;
   getMeetingActive: () => Promise<boolean>;
   onMeetingStateChanged: (callback: (data: { isActive: boolean }) => void) => () => void;
+  onCreditsUpdated: (callback: (data: { credits: number; minutes_used: number; plan?: string }) => void) => () => void;
+  onOutOfCredits: (callback: (data: any) => void) => () => void;
   onWindowMaximizedChanged: (callback: (isMaximized: boolean) => void) => () => void;
   onEnsureExpanded: (callback: () => void) => () => void;
   onToggleExpand: (callback: () => void) => () => void;
@@ -1482,6 +1484,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('meeting-state-changed', subscription);
     return () => {
       ipcRenderer.removeListener('meeting-state-changed', subscription);
+    };
+  },
+  onCreditsUpdated: (callback: (data: { credits: number; minutes_used: number; plan?: string }) => void) => {
+    const subscription = (_: any, data: any) => callback(data);
+    ipcRenderer.on('credits-updated', subscription);
+    return () => {
+      ipcRenderer.removeListener('credits-updated', subscription);
+    };
+  },
+  onOutOfCredits: (callback: (data: any) => void) => {
+    const subscription = (_: any, data: any) => callback(data);
+    ipcRenderer.on('out-of-credits', subscription);
+    return () => {
+      ipcRenderer.removeListener('out-of-credits', subscription);
     };
   },
   onWindowMaximizedChanged: (callback: (isMaximized: boolean) => void) => {
