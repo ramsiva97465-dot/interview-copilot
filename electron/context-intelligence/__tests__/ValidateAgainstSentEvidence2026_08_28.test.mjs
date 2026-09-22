@@ -42,7 +42,7 @@ import { pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 
 const USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'v3-sent-evidence-'));
-process.env.NATIVELY_TEST_USERDATA = USERDATA;
+process.env.MEETFLOO_TEST_USERDATA = USERDATA;
 
 const repoRoot = process.cwd();
 const base = path.resolve(repoRoot, 'dist-electron/electron/context-intelligence');

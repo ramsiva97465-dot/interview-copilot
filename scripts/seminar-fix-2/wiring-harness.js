@@ -9,9 +9,9 @@
 // the live DB and asserting the HYBRID `[FIX2-TRACE]` tags fire.
 //
 // WHAT IT DOES
-//   1. DB isolation: copies the live natively userData DB (natively.db + -wal +
+//   1. DB isolation: copies the live MeetFloo userData DB (MeetFloo.db + -wal +
 //      -shm + credentials.*) into a throwaway temp dir under os.tmpdir(), points
-//      NATIVELY_TEST_USERDATA at the COPY, and asserts we're on the copy. The
+//      MEETFLOO_TEST_USERDATA at the COPY, and asserts we're on the copy. The
 //      user's real DB is byte-untouched (mtime+sha compared at exit).
 //   2. Wiring proof: drives the REAL main-path call
 //      mm.buildRetrievedActiveModeContextBlockHybrid(...) for one probe question,
@@ -55,7 +55,7 @@
 //   HARNESS_ONLY=A1,C2       run a subset (comma ids; E1/E2 select whole chains)
 //   HARNESS_MS=<ms>          watchdog (default 1500000 = 25min)
 //   RUN_TAG=<name>           output dir run-<RUN_TAG> (default run-<counter>)
-//   NATIVELY_LIVE_EMBED=1    force wiring the embedder (default: try it)
+//   MEETFLOO_LIVE_EMBED=1    force wiring the embedder (default: try it)
 //   WIRING_ONLY=1            do ONLY the wiring proof + fingerprint + index-fresh,
 //                            skip generation/scoring (no gen key needed)
 //   OLLAMA_URL=<url>         embedder (default http://localhost:11434)
@@ -98,7 +98,7 @@ const capturedTrace = [];
 let capturing = false;
 // [FIX2-TRACE] was converted to the permanent, default-OFF
 // `[retrievalDiagnostics]` debug flag (electron/llm/documentGroundedPrompt.ts,
-// env NATIVELY_RETRIEVAL_DIAGNOSTICS=1) — match both prefixes for continuity
+// env MEETFLOO_RETRIEVAL_DIAGNOSTICS=1) — match both prefixes for continuity
 // with earlier captures, and enable the flag below so the harness can still see
 // the wiring-proof trace.
 const TRACE_RE = /\[FIX2-TRACE\]|\[retrievalDiagnostics\]|\[ModeHybridRetriever\]|\[ModeContextRetriever\]|\[ModesManager\]|\[LLMHelper\] manual hybrid retrieval exceeded|doc_grounded_hybrid_timeout/;
@@ -171,22 +171,30 @@ const SECTION_A = [
 ];
 
 const SECTION_B = [
-  { id: 'B1', shared: 'four-phase methodology',
+  {
+    id: 'B1', shared: 'four-phase methodology',
     a: { id: 'B1a', q: 'Explain the research methodology.', must: [[/teleoperation/i], [/data ?collection|dataset collection|data ?gathering|data ?acquisition|dataset (design|creation|structure)|collect(ing|ion of)?\s+(the\s+)?(data|dataset|demonstrations|trajector)/i], [/training|finetun|fine-tun|openvla-oft/i], [/agentic|autogen|integration/i]] },
     b: { id: 'B1b', q: 'What are the four main phases of the project?', must: [[/teleoperation/i], [/data ?collection|dataset collection|data ?gathering|data ?acquisition|dataset (design|creation|structure)|collect(ing|ion of)?\s+(the\s+)?(data|dataset|demonstrations|trajector)/i], [/training|finetun|fine-tun|openvla-oft/i], [/agentic|autogen|integration/i]] },
-    agreeRe: [/teleoperation/i, /data ?collection|dataset collection|data ?gathering|data ?acquisition|dataset (design|creation|structure)|collect(ing|ion of)?\s+(the\s+)?(data|dataset|demonstrations|trajector)/i] },
-  { id: 'B2', shared: 'objects picked',
+    agreeRe: [/teleoperation/i, /data ?collection|dataset collection|data ?gathering|data ?acquisition|dataset (design|creation|structure)|collect(ing|ion of)?\s+(the\s+)?(data|dataset|demonstrations|trajector)/i]
+  },
+  {
+    id: 'B2', shared: 'objects picked',
     a: { id: 'B2a', q: 'What did the robot pick up during the experiments?', must: [[/banana/i], [/grape/i]] },
     b: { id: 'B2b', q: 'What objects were used in the robotic tasks?', must: [[/banana/i], [/grape/i]] },
-    agreeRe: [/banana/i, /grape/i] },
-  { id: 'B3', shared: 'research questions',
+    agreeRe: [/banana/i, /grape/i]
+  },
+  {
+    id: 'B3', shared: 'research questions',
     a: { id: 'B3a', q: 'State RQ1 and RQ2.', must: [[/RQ1|research question 1|agentic ai framework/i, /AGI/i], [/RQ2|research question 2|perception|decision/i]] },
     b: { id: 'B3b', q: 'What are the two research questions?', must: [[/RQ1|research question 1|agentic ai framework/i, /AGI/i], [/RQ2|research question 2|perception|decision/i]] },
-    agreeRe: [/AGI/i] },
-  { id: 'B4', shared: 'VLA general concept (not the wrapper)',
+    agreeRe: [/AGI/i]
+  },
+  {
+    id: 'B4', shared: 'VLA general concept (not the wrapper)',
     a: { id: 'B4a', q: 'What does a VLA model do?', must: [[/action|control|manipul|task/i]], mustNot: [/agenticvla (system|wrapper)/i] },
     b: { id: 'B4b', q: 'Why are VLA models important for robotics?', must: [[/robot|generaliz|task|control|manipul/i]], mustNot: [/agenticvla (system|wrapper)/i] },
-    agreeRe: [/vla|vision-language-action|action|robot/i] },
+    agreeRe: [/vla|vision-language-action|action|robot/i]
+  },
 ];
 
 const SECTION_C = [
@@ -311,18 +319,18 @@ function stripPriorAssistantTurnsLocal(snapshot) {
 }
 
 // ============================================================================
-// DB ISOLATION — copy the live natively DB (+ credentials) to a throwaway temp
-// dir, point NATIVELY_TEST_USERDATA at the COPY, assert we're on the copy.
+// DB ISOLATION — copy the live MeetFloo DB (+ credentials) to a throwaway temp
+// dir, point MEETFLOO_TEST_USERDATA at the COPY, assert we're on the copy.
 // ============================================================================
-const LIVE_USERDATA = path.join(os.homedir(), 'Library', 'Application Support', 'natively');
-const LIVE_DB = path.join(LIVE_USERDATA, 'natively.db');
+const LIVE_USERDATA = path.join(os.homedir(), 'Library', 'Application Support', 'MeetFloo');
+const LIVE_DB = path.join(LIVE_USERDATA, 'MeetFloo.db');
 function sha256File(p) { try { return crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'); } catch { return null; } }
 function mtimeOf(p) { try { return fs.statSync(p).mtimeMs; } catch { return null; } }
 
 function setupDbCopy(log) {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-seminar-fix2-'));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-seminar-fix2-'));
   // Copy the DB triplet + any credential/config files small enough to matter.
-  const copyList = ['natively.db', 'natively.db-wal', 'natively.db-shm', 'credentials.enc', 'credentials.fallback.enc', 'credentials.salt'];
+  const copyList = ['MeetFloo.db', 'MeetFloo.db-wal', 'MeetFloo.db-shm', 'credentials.enc', 'credentials.fallback.enc', 'credentials.salt'];
   const copied = [];
   for (const name of copyList) {
     const src = path.join(LIVE_USERDATA, name);
@@ -332,15 +340,15 @@ function setupDbCopy(log) {
       copied.push(name);
     }
   }
-  process.env.NATIVELY_TEST_USERDATA = tmpDir;
+  process.env.MEETFLOO_TEST_USERDATA = tmpDir;
   // Enable the permanent (default-OFF) retrieval-diagnostics flag so the
   // wiring-proof trace fires — [FIX2-TRACE] was converted to this flag.
-  process.env.NATIVELY_RETRIEVAL_DIAGNOSTICS = '1';
+  process.env.MEETFLOO_RETRIEVAL_DIAGNOSTICS = '1';
   // ASSERT: we are on the copy, and the copy is under os.tmpdir().
   const underTmp = tmpDir.startsWith(os.tmpdir());
   if (!underTmp) { throw new Error(`FATAL: copy dir ${tmpDir} is NOT under os.tmpdir() (${os.tmpdir()}) — refusing to run`); }
   log(`[harness] DB ISOLATION: copied [${copied.join(', ')}] → ${tmpDir}`);
-  log(`[harness] DB ISOLATION: NATIVELY_TEST_USERDATA=${process.env.NATIVELY_TEST_USERDATA}`);
+  log(`[harness] DB ISOLATION: MEETFLOO_TEST_USERDATA=${process.env.MEETFLOO_TEST_USERDATA}`);
   log(`[harness] DB ISOLATION: assert copyUnderTmp=${underTmp} (os.tmpdir=${os.tmpdir()})`);
   return { tmpDir, copied };
 }
@@ -427,7 +435,7 @@ async function main() {
   say(`[harness] LIVE DB before: sha256=${liveShaBefore ? liveShaBefore.slice(0, 16) + '…' : 'MISSING'} mtimeMs=${liveMtimeBefore}`);
   const { tmpDir } = setupDbCopy(say);
 
-  // ── Load product modules (after NATIVELY_TEST_USERDATA is set) ──────────
+  // ── Load product modules (after MEETFLOO_TEST_USERDATA is set) ──────────
   const { DatabaseManager } = require(path.join(distRoot, 'db/DatabaseManager.js'));
   const dbm = DatabaseManager.getInstance();
   const db = dbm.getDb();
@@ -480,7 +488,7 @@ async function main() {
   // COPY, harmless) — but matching avoids the Gemini-429→local-worker SIGTRAP.
   const { ModesManager } = require(path.join(distRoot, 'services/ModesManager.js'));
   const mm = ModesManager.getInstance();
-  const wantEmbed = process.env.NATIVELY_LIVE_EMBED !== '0';
+  const wantEmbed = process.env.MEETFLOO_LIVE_EMBED !== '0';
   let embedWired = false;
   let embedProvider = 'none';
   let embedSpace = null;
@@ -504,7 +512,7 @@ async function main() {
       if (!spaceMatch) say(`[harness] WARN: active space (${embedSpace}) != persisted (${persistedSpace}) — hybrid will ephemeral-embed on the COPY (harmless, but slower / risk of embed-provider fallback).`);
     } catch (e) { say(`[harness] embed wiring failed: ${e && e.message}`); }
   } else {
-    say(`[harness] NATIVELY_LIVE_EMBED=0 — embedder NOT wired (lexical-only run).`);
+    say(`[harness] MEETFLOO_LIVE_EMBED=0 — embedder NOT wired (lexical-only run).`);
   }
 
   // ── Activate the live Seminar mode (mirror setActiveMode) ───────────────

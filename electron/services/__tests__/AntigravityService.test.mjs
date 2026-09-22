@@ -126,17 +126,19 @@ test('Antigravity PKCE uses a 32-byte base64url verifier and S256 challenge', as
 
 test('Antigravity filters and orders only quota-bearing public models', async () => {
   const mod = await loadService();
-  const models = mod.parseAntigravityModels({ models: {
-    'gemini-3.6-flash-low': { displayName: 'Flash low', quotaInfo: { remainingFraction: 0.4 } },
-    'gemini-3-flash': { displayName: 'Flash', quotaInfo: { remainingFraction: 0.4 } },
-    'zeta-flash': { displayName: 'Zeta', quotaInfo: { remainingFraction: 0.4 } },
-    'alpha-pro': { displayName: 'Alpha', quotaInfo: { remainingFraction: 0.4 } },
-    'internal': { displayName: 'Internal', quotaInfo: { remainingFraction: 0.4 }, isInternal: true },
-    'no-quota': { displayName: 'No quota', quotaInfo: { remainingFraction: 0 } },
-    'gemini-3.5-flash': { displayName: 'Old', quotaInfo: { remainingFraction: 1 } },
-    'foo-image': { displayName: 'Image', quotaInfo: { remainingFraction: 1 } },
-    'flash-lite': { displayName: 'Flash Lite', quotaInfo: { remainingFraction: 1 } },
-  } });
+  const models = mod.parseAntigravityModels({
+    models: {
+      'gemini-3.6-flash-low': { displayName: 'Flash low', quotaInfo: { remainingFraction: 0.4 } },
+      'gemini-3-flash': { displayName: 'Flash', quotaInfo: { remainingFraction: 0.4 } },
+      'zeta-flash': { displayName: 'Zeta', quotaInfo: { remainingFraction: 0.4 } },
+      'alpha-pro': { displayName: 'Alpha', quotaInfo: { remainingFraction: 0.4 } },
+      'internal': { displayName: 'Internal', quotaInfo: { remainingFraction: 0.4 }, isInternal: true },
+      'no-quota': { displayName: 'No quota', quotaInfo: { remainingFraction: 0 } },
+      'gemini-3.5-flash': { displayName: 'Old', quotaInfo: { remainingFraction: 1 } },
+      'foo-image': { displayName: 'Image', quotaInfo: { remainingFraction: 1 } },
+      'flash-lite': { displayName: 'Flash Lite', quotaInfo: { remainingFraction: 1 } },
+    }
+  });
   assert.deepEqual(models.map(model => model.id), [
     'gemini-3.6-flash-low', 'gemini-3-flash', 'zeta-flash', 'alpha-pro',
   ]);
@@ -150,7 +152,7 @@ test('Antigravity request payload and SSE parser match the Code Assist wire shap
   const payload = mod.buildAntigravityRequestPayload({
     projectId: 'account-project',
     model: 'gemini-3.7-flash-low',
-    systemPrompt: 'Use the existing Natively answer rules.',
+    systemPrompt: 'Use the existing MeetFloo answer rules.',
     userPrompt: 'Answer this.',
     images: [{ mimeType: 'image/png', data: 'aGVsbG8=' }],
     maxOutputTokens: 77,
@@ -159,7 +161,7 @@ test('Antigravity request payload and SSE parser match the Code Assist wire shap
   assert.equal(payload.project, 'account-project');
   assert.match(payload.requestId, /^agent-[0-9a-f-]{36}$/);
   assert.equal(payload.requestType, 'agent');
-  assert.equal(payload.request.contents[0].parts[0].text, 'System instruction: Use the existing Natively answer rules.');
+  assert.equal(payload.request.contents[0].parts[0].text, 'System instruction: Use the existing MeetFloo answer rules.');
   assert.deepEqual(payload.request.contents[1].parts[1].inlineData, { mimeType: 'image/png', data: 'aGVsbG8=' });
   assert.deepEqual(payload.request.generationConfig, {
     candidateCount: 1,
@@ -167,11 +169,17 @@ test('Antigravity request payload and SSE parser match the Code Assist wire shap
     temperature: 0.45,
     thinkingConfig: { thinkingLevel: 'low' },
   });
-  assert.deepEqual(mod.parseAntigravityEvent(JSON.stringify({ response: {
-    candidates: [{ content: { parts: [
-      { text: 'Hello ' }, { thought: true, text: 'hidden' }, { text: 'world' },
-    ] }, finishReason: 'STOP' }],
-  } })), 'Hello world');
+  assert.deepEqual(mod.parseAntigravityEvent(JSON.stringify({
+    response: {
+      candidates: [{
+        content: {
+          parts: [
+            { text: 'Hello ' }, { thought: true, text: 'hidden' }, { text: 'world' },
+          ]
+        }, finishReason: 'STOP'
+      }],
+    }
+  })), 'Hello world');
   assert.throws(() => mod.parseAntigravityEvent('{bad-json}'), /malformed streaming data/i);
 });
 
@@ -414,10 +422,12 @@ test('disconnect aborts a stream after headers and never returns buffered stale 
   let requestSignal;
   globalThis.fetch = async (_url, init) => {
     requestSignal = init.signal;
-    return new Response(new ReadableStream({ start(controller) {
-      controller.enqueue(new TextEncoder().encode(`data: ${answer}\n\n`));
-      init.signal.addEventListener('abort', () => controller.error(new DOMException('Aborted', 'AbortError')), { once: true });
-    } }));
+    return new Response(new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(`data: ${answer}\n\n`));
+        init.signal.addEventListener('abort', () => controller.error(new DOMException('Aborted', 'AbortError')), { once: true });
+      }
+    }));
   };
   try {
     const stream = service.stream({ model: 'gemini-3-flash', userPrompt: 'Q' });

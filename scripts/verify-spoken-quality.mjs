@@ -30,9 +30,9 @@ fs.mkdirSync(OUT_DIR, { recursive: true });
 
 const { QUESTIONS } = await import('./spoken-quality-dataset.mjs');
 
-process.env.NATIVELY_CONVERSATION_MEMORY_V2 = 'true';
-process.env.NATIVELY_ANSWER_DIVERSITY_GUARD = 'true';
-process.env.NATIVELY_PROFILE_TREE_V2 = 'true';
+process.env.MEETFLOO_CONVERSATION_MEMORY_V2 = 'true';
+process.env.MEETFLOO_ANSWER_DIVERSITY_GUARD = 'true';
+process.env.MEETFLOO_PROFILE_TREE_V2 = 'true';
 
 const llm = require(path.join(DIST, 'llm', 'index.js'));
 const {
@@ -291,6 +291,6 @@ ${failing.length ? `## Failing (${failing.length})\n` + failing.map((r) => `- **
 fs.writeFileSync(path.join(OUT_DIR, 'spoken-quality-summary.md'), summary);
 console.log('\n' + summary);
 
-try { harness?.cleanup?.(); } catch {}
+try { harness?.cleanup?.(); } catch { }
 const hardFail = hasProvider && (agg.banned_phrase_total > 0 || agg.spoken_over_word_cap > 0 || agg.pass_rate < 90);
 process.exit(hardFail ? 1 : 0);

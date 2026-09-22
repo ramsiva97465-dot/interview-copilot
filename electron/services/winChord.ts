@@ -12,7 +12,7 @@
  * To do that the hook needs each chord as {vk, mods}. This module produces that
  * table from the Electron accelerator strings KeybindManager already holds.
  *
- * Scope is deliberately narrow — Natively's default Windows chord set:
+ * Scope is deliberately narrow — MeetFloo's default Windows chord set:
  *   - modifiers: Ctrl present, Win/Super absent (Shift allowed)
  *   - completing key: A-Z, 0-9, Enter, Space, or an arrow
  * Ctrl+Alt is accepted only for arrows (the horizontal-scroll defaults), so
@@ -48,7 +48,7 @@ function isArrowVk(vk: number): boolean {
 }
 
 /**
- * Win32 VK for an Electron key token supported by Natively's default binds.
+ * Win32 VK for an Electron key token supported by MeetFloo's default binds.
  */
 function keyTokenToVk(token: string): number | null {
     const t = token.trim();

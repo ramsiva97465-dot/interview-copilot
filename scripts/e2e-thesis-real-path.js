@@ -1,13 +1,13 @@
 // scripts/e2e-thesis-real-path.js
 //
 // Round-6 acceptance gate: drives the REAL document-grounded path end-to-end
-// against a REAL multi-page thesis PDF and the REAL Natively API backend.
+// against a REAL multi-page thesis PDF and the REAL MeetFloo API backend.
 //
 //   real PDF ingest (pdf-parse + [Page N] markers)
 //   → real ModesManager + ModeContextRetriever (Document Map: ToC-exclusion,
 //     section tree, bounded scoring, query planner)
 //   → real LLMHelper.streamChat with CHAT_MODE_PROMPT
-//   → model=natively → POST api.natively.software/v1/chat
+//   → model=MeetFloo → POST api.MeetFloo.software/v1/chat
 //   → serverModel=gemini-3.1-flash-lite
 //
 // This is the harness that proved the round-6 rebuild: it caught that the model
@@ -19,14 +19,14 @@
 //
 // Run:
 //   npm run build:electron
-//   RUN_NATIVELY_API_E2E=1 NATIVELY_API_KEY=<key> \
-//     [E2E_MODEL=natively] [E2E_PDF="/abs/path/thesis.pdf"] \
+//   RUN_MEETFLOO_API_E2E=1 MEETFLOO_API_KEY=<key> \
+//     [E2E_MODEL=MeetFloo] [E2E_PDF="/abs/path/thesis.pdf"] \
 //     ./node_modules/.bin/electron scripts/e2e-thesis-real-path.js
 //
 // PDF source resolution (first that exists):
 //   1. $E2E_PDF
 //   2. repo-root "Sample thesis for testing.pdf"
-//   3. the stored content of any reference file in the live natively.db
+//   3. the stored content of any reference file in the live MeetFloo.db
 //      (so it works even without the PDF file, using what the app ingested)
 // If none resolve, the harness SKIPs cleanly (exit 0).
 
@@ -40,14 +40,14 @@ const { app } = require('electron');
 const repoRoot = path.resolve(__dirname, '..');
 const distRoot = path.join(repoRoot, 'dist-electron', 'electron');
 
-const KEY = process.env.NATIVELY_API_KEY || '';
-const MODEL = process.env.E2E_MODEL || 'natively';
-if (process.env.RUN_NATIVELY_API_E2E !== '1' || !KEY) {
-  console.log('[e2e] SKIP — set RUN_NATIVELY_API_E2E=1 + NATIVELY_API_KEY to run the real-backend thesis E2E');
+const KEY = process.env.MEETFLOO_API_KEY || '';
+const MODEL = process.env.E2E_MODEL || 'MeetFloo';
+if (process.env.RUN_MEETFLOO_API_E2E !== '1' || !KEY) {
+  console.log('[e2e] SKIP — set RUN_MEETFLOO_API_E2E=1 + MEETFLOO_API_KEY to run the real-backend thesis E2E');
   process.exit(0);
 }
 
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-thesis-e2e-'));
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-thesis-e2e-'));
 app.setPath('userData', tmpUserData);
 
 const CUSTOM_PROMPT = [
@@ -146,7 +146,7 @@ function resolveContent() {
   if (envPdf && fs.existsSync(envPdf)) return { kind: 'pdf', src: envPdf };
   if (fs.existsSync(repoPdf)) return { kind: 'pdf', src: repoPdf };
   // Fall back to whatever a reference file already in the live DB holds.
-  const liveDb = path.join(os.homedir(), 'Library/Application Support/natively/natively.db');
+  const liveDb = path.join(os.homedir(), 'Library/Application Support/MeetFloo/MeetFloo.db');
   if (fs.existsSync(liveDb)) {
     try {
       const Database = require(path.join(repoRoot, 'node_modules', 'better-sqlite3'));
@@ -187,7 +187,7 @@ async function main() {
   }
 
   const llm = new LLMHelper();
-  llm.setNativelyKey(KEY);
+  llm.setMeetFlooKey(KEY);
   llm.setModel(MODEL);
 
   let pass = 0, fail = 0;

@@ -82,7 +82,7 @@ function freshManager(env) {
   const mod = require(COMPILED);
   if (mod.CredentialsManager.instance) mod.CredentialsManager.instance = undefined;
   const g = globalThis;
-  delete g.__nativelyCredentialsManagerV1__;
+  delete g.__MeetFlooCredentialsManagerV1__;
   const cm = mod.CredentialsManager.getInstance();
   cm.init();
   return cm;
@@ -257,7 +257,7 @@ test('EVERY method that calls saveCredentials() checks the degraded guard first'
       // the thing that SETS the flag; the two write primitives are the guard's home.
       const exempt = ['saveCredentials', 'writeCredentials', 'loadCredentials'];
       if (b.includes('this.saveCredentials()') && !exempt.includes(name)
-          && !b.includes('refuseWriteWhileDegraded') && !b.includes('keyringUnreadable')) {
+        && !b.includes('refuseWriteWhileDegraded') && !b.includes('keyringUnreadable')) {
         unguarded.push(name);
       }
       i = j;

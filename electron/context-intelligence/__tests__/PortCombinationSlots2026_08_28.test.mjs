@@ -33,7 +33,7 @@ import { pathToFileURL } from 'node:url';
 const base = path.resolve(process.cwd(), 'dist-electron/electron/context-intelligence');
 const { combineRetrievalPorts } = await import(pathToFileURL(path.join(base, 'retrieval/meeting-retrieval-port.js')).href);
 
-const ENV = 'NATIVELY_RETRIEVAL_PORT_COMBINATION_PRESERVES_SLOTS';
+const ENV = 'MEETFLOO_RETRIEVAL_PORT_COMBINATION_PRESERVES_SLOTS';
 const withFlag = async (value, fn) => {
   const original = process.env[ENV];
   if (value === undefined) delete process.env[ENV]; else process.env[ENV] = value;

@@ -10,7 +10,7 @@
 //   (3) The signal NEVER changes which chunks are returned — same chunks/order
 //       with the flag on vs off.
 //
-// The flag is env-driven (NATIVELY_RAG_CONFIDENCE_GATE) and read FRESH on every
+// The flag is env-driven (MEETFLOO_RAG_CONFIDENCE_GATE) and read FRESH on every
 // call (no cache), so toggling process.env mid-test is sufficient.
 
 import { test, describe, beforeEach, afterEach, mock } from 'node:test';
@@ -41,7 +41,7 @@ function mockDeps() {
       all: mock.fn(() => []),
       run: mock.fn(),
     })),
-    exec: mock.fn(() => {}),
+    exec: mock.fn(() => { }),
     transaction: mock.fn((fn) => fn),
   };
   const mockVectorStore = {
@@ -59,7 +59,7 @@ function mockDeps() {
   return { mockDb, mockVectorStore, mockEmbeddingPipeline };
 }
 
-const FLAG = 'NATIVELY_RAG_CONFIDENCE_GATE';
+const FLAG = 'MEETFLOO_RAG_CONFIDENCE_GATE';
 
 describe('Phase 0: retrieval-confidence signal (observe only)', () => {
   let prevFlag;

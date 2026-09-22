@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <!--
-      Natively — INHERITED entitlements for Electron HELPER processes
+      MeetFloo — INHERITED entitlements for Electron HELPER processes
       (GPU / Renderer / Plugin / Utility / Network).
 
       Helpers only need the V8/native-module runtime allowances. The privacy

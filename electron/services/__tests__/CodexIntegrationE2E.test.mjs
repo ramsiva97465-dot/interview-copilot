@@ -44,7 +44,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 // Hermetic (issue #558): Codex now also accepts the Codex CLI's `codex login`
 // from $CODEX_HOME/auth.json. Point it at an empty dir so these tests never
 // pick up — or send requests with — the developer's real CLI login.
-process.env.CODEX_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-codex-home-'));
+process.env.CODEX_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-codex-home-'));
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const compiledPath = path.resolve(__dirname, '../../../dist-electron/electron/services/CodexCliService.js');

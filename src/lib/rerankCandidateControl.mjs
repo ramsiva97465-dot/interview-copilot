@@ -13,7 +13,7 @@
 //   on this path the knob can only narrow retrieval, and it buys back latency
 //   the user was never short of. Nothing to decide: hide it.
 //
-//   HOSTED ports (Natively, OpenRouter, Jina) and EXTENSION ports. Both declare
+//   HOSTED ports (MeetFloo, OpenRouter, Jina) and EXTENSION ports. Both declare
 //   `batchSize = Number.MAX_SAFE_INTEGER`, so the entire pool goes in ONE call.
 //   Pool size is then passages billed, and the difference between a round trip
 //   that lands inside the 3000ms live / 8000ms manual budget and one that does

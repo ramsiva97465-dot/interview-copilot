@@ -55,7 +55,7 @@ export interface InstallProgress {
 /** Root that `LocalReranker.resolveModelPath()` looks in first. */
 export function localModelsRoot(override?: string): string {
   if (override) return override;
-  if (process.env.NATIVELY_LOCAL_MODELS_PATH) return process.env.NATIVELY_LOCAL_MODELS_PATH;
+  if (process.env.MEETFLOO_LOCAL_MODELS_PATH) return process.env.MEETFLOO_LOCAL_MODELS_PATH;
   try {
     const userData = app?.getPath?.('userData');
     if (userData) return path.join(userData, 'local-models');
@@ -69,7 +69,7 @@ export function localModelsRoot(override?: string): string {
  *
  * This used to read USERPROFILE and then join a macOS
  * `Library/Application Support` onto it, which on Windows produces
- * `C:\Users\x\Library\Application Support\natively\local-models` — a
+ * `C:\Users\x\Library\Application Support\MeetFloo\local-models` — a
  * directory nothing else in the app ever looks in, so an installed model would
  * be invisible to the reranker that is supposed to load it. Repo convention
  * (CLAUDE.md, "Filesystem and paths") forbids hardcoding an OS-specific path in
@@ -79,16 +79,16 @@ function fallbackUserDataDir(): string {
   const home = process.env.HOME || process.env.USERPROFILE || process.cwd();
   switch (process.platform) {
     case 'darwin':
-      return path.join(home, 'Library', 'Application Support', 'natively');
+      return path.join(home, 'Library', 'Application Support', 'MeetFloo');
     case 'win32':
       return path.join(
         process.env.APPDATA || path.join(home, 'AppData', 'Roaming'),
-        'natively',
+        'MeetFloo',
       );
     default:
       return path.join(
         process.env.XDG_CONFIG_HOME || path.join(home, '.config'),
-        'natively',
+        'MeetFloo',
       );
   }
 }
@@ -161,7 +161,7 @@ export async function installCatalogModel(
 ): Promise<InstallResult> {
   const model = findCatalogModel(id);
   if (!model) return { ok: false, modelId: id, error: `unknown model "${id}"` };
-  // `supported` is deliberately NOT checked here. It answers "can Natively score
+  // `supported` is deliberately NOT checked here. It answers "can MeetFloo score
   // this yet", which is a different question from "may the user have the file".
   // Downloading is always an explicit act, the card states plainly that the
   // model is not usable, and activation still refuses it — so refusing the

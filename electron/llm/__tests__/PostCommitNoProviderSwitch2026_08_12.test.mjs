@@ -2,15 +2,15 @@
 //
 // The user's ORIGINAL report — "it shows a new answer that's wrong after
 // initially showing the right answer" — reproduced from a live capture and
-// traced to the CLIENT, not the natively-api provider cascade.
+// traced to the CLIENT, not the MeetFloo-api provider cascade.
 //
-// what_to_answer, Natively fast-mode, 2026-08-12:
+// what_to_answer, MeetFloo fast-mode, 2026-08-12:
 //
-//   [NativelyAPI] stream server error  stage=during_stream tfft=2084ms
+//   [MeetFlooAPI] stream server error  stage=during_stream tfft=2084ms
 //                                      tokens=8047 chars=22871
 //                                      error=ai_unavailable (aborted at 61s)
-//   [LLMHelper] Natively fast-mode failed, falling back
-//   [NativelyAPI] stream completed     chars=2342          <- a WHOLE new answer
+//   [LLMHelper] MeetFloo fast-mode failed, falling back
+//   [MeetFlooAPI] stream completed     chars=2342          <- a WHOLE new answer
 //   [SessionTracker] addAssistantMessage length=25210
 //
 //   22871 + 2342 = 25213, stored 25210 — a 3-char trim delta. The fallback's
@@ -140,9 +140,9 @@ describe('every text-path fall-through site consults the commit flag', () => {
     // be wrapped. Assert on the guarded sites' count instead of trying to parse
     // control flow. Eight sites found by sweeping every `yield*` for an
     // enclosing catch that neither returns nor rethrows: fast-mode
-    // Codex/Groq/Natively, selected-Groq (multimodal + text share one catch),
+    // Codex/Groq/MeetFloo, selected-Groq (multimodal + text share one catch),
     // the streaming rotation loop, the TTFT race (the primary text path), and
-    // the Natively and Custom last-resorts.
+    // the MeetFloo and Custom last-resorts.
     const wrapped = (src.match(/yield\* this\.trackCommit\(/g) || []).length;
     assert.ok(
       wrapped >= 8,

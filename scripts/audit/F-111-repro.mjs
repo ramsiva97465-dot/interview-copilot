@@ -22,7 +22,7 @@ import fs from 'node:fs';
 
 const app = await electron.launch({
   args: ['dist-electron/electron/main.js'],
-  env: { ...process.env, NODE_ENV: 'production', NATIVELY_DEV_BYPASS_SCREEN_TCC: '1' },
+  env: { ...process.env, NODE_ENV: 'production', MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1' },
   timeout: 60_000,
 });
 await app.firstWindow({ timeout: 30_000 }).catch(() => null);

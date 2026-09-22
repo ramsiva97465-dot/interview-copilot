@@ -84,17 +84,17 @@ describe('localRunner — python (real execution)', async () => {
   // ever spreads process.env, this test fails and the leak is caught.
   maybe('executed code CANNOT read parent env secrets (env is scrubbed)', async () => {
     const SECRET = 'sk-leak-canary-' + Date.now();
-    process.env.NATIVELY_TEST_SECRET = SECRET;
+    process.env.MEETFLOO_TEST_SECRET = SECRET;
     process.env.OPENAI_API_KEY = SECRET;
     try {
       const code = `import os
 def leak(x):
-    return os.environ.get("NATIVELY_TEST_SECRET", "ABSENT") + "|" + os.environ.get("OPENAI_API_KEY", "ABSENT")`;
+    return os.environ.get("MEETFLOO_TEST_SECRET", "ABSENT") + "|" + os.environ.get("OPENAI_API_KEY", "ABSENT")`;
       const r = await runCase('python', code, 'leak', tc([1], 'ABSENT|ABSENT'));
       assert.equal(r.status, 'pass', `secret leaked into sandbox: ${r.actual}`);
       assert.doesNotMatch(JSON.stringify(r.actual ?? ''), new RegExp(SECRET), 'secret value must never appear');
     } finally {
-      delete process.env.NATIVELY_TEST_SECRET;
+      delete process.env.MEETFLOO_TEST_SECRET;
       delete process.env.OPENAI_API_KEY;
     }
   });
@@ -134,10 +134,10 @@ def f(x):
   maybe('temp dirs are cleaned up after a run (no leak)', async () => {
     const fs = await import('node:fs');
     const os = await import('node:os');
-    const before = fs.readdirSync(os.tmpdir()).filter(d => d.startsWith('natively-verify-')).length;
+    const before = fs.readdirSync(os.tmpdir()).filter(d => d.startsWith('MeetFloo-verify-')).length;
     await runCase('python', 'def f(x):\n    return x', 'f', tc([1], 1));
     await runCase('python', 'def f(x):\n    while True: pass', 'f', tc([1], 1)); // timeout path
-    const after = fs.readdirSync(os.tmpdir()).filter(d => d.startsWith('natively-verify-')).length;
+    const after = fs.readdirSync(os.tmpdir()).filter(d => d.startsWith('MeetFloo-verify-')).length;
     assert.ok(after <= before, `temp dirs leaked: before=${before} after=${after}`);
   });
 });

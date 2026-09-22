@@ -27,7 +27,7 @@
 //      error and only prefill varies.
 //
 // Worst case for one press: ~48K input tokens and ~4 output tokens. On the most
-// expensive model Natively drives that is cents, and the user asked for it.
+// expensive model MeetFloo drives that is cents, and the user asked for it.
 // ─────────────────────────────────────────────────────────────────────────
 //
 // PRODUCTION REQUEST PATH (Phase 6 / rule 14). Calibration calls
@@ -470,8 +470,10 @@ export async function runCalibration(
         // rule the non-throwing path uses, so the two cannot disagree about the
         // same failure.
         vision = verdictFromProbe(
-          { ttftMs: null, totalMs: 0, interChunkGapsMs: [], chunkCount: 0, outputChars: 0,
-            reason: 'error', error: err, firstUsefulBudgetMs: 0, interTokenStallMs: 0, speculative: false },
+          {
+            ttftMs: null, totalMs: 0, interChunkGapsMs: [], chunkCount: 0, outputChars: 0,
+            reason: 'error', error: err, firstUsefulBudgetMs: 0, interTokenStallMs: 0, speculative: false
+          },
           '',
         ).verdict;
       }

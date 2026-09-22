@@ -7,7 +7,7 @@
 // silently only ever saw the last ~2 minutes: a project named at minute 1 was already
 // gone by minute 3. The fix routes that read through getDurableContext(), which reads
 // the persisted `fullTranscript` (survives the 120s eviction), behind the default-OFF
-// `durableMemoryWindow` flag (env NATIVELY_DURABLE_MEMORY_WINDOW).
+// `durableMemoryWindow` flag (env MEETFLOO_DURABLE_MEMORY_WINDOW).
 //
 // This test proves the bug and the fix at the SOURCE level against the REAL compiled
 // SessionTracker (no time-mocking needed: addTranscript honors each segment's own
@@ -30,7 +30,7 @@ const WINDOW = 7200; // IntelligenceEngine.LIVE_MEMORY_WINDOW_SECONDS (2h)
 const PROJECT = 'Project Atlas';
 
 function clearEnv() {
-  delete process.env.NATIVELY_DURABLE_MEMORY_WINDOW;
+  delete process.env.MEETFLOO_DURABLE_MEMORY_WINDOW;
   __resetIntelligenceFlagsCache();
 }
 
@@ -142,10 +142,10 @@ describe('durableMemoryWindow flag: flips the source, defaults OFF, fresh read',
     assert.equal(isDurableMemoryWindowEnabled(), false);
   });
 
-  test('NATIVELY_DURABLE_MEMORY_WINDOW=1 enables it (fresh env read, no cache)', () => {
-    process.env.NATIVELY_DURABLE_MEMORY_WINDOW = '1';
+  test('MEETFLOO_DURABLE_MEMORY_WINDOW=1 enables it (fresh env read, no cache)', () => {
+    process.env.MEETFLOO_DURABLE_MEMORY_WINDOW = '1';
     assert.equal(isDurableMemoryWindowEnabled(), true, 'env=1 must enable the durable window');
-    delete process.env.NATIVELY_DURABLE_MEMORY_WINDOW;
+    delete process.env.MEETFLOO_DURABLE_MEMORY_WINDOW;
     assert.equal(isDurableMemoryWindowEnabled(), false, 'removing the env var must flip back OFF without any cache reset');
   });
 
@@ -162,7 +162,7 @@ describe('durableMemoryWindow flag: flips the source, defaults OFF, fresh read',
     assert.equal(pickSource().some((i) => i.text.includes(PROJECT)), false, 'flag OFF must reproduce the bug (no long-range recall)');
 
     // Flag ON → getDurableContext → entity recalled (the fix).
-    process.env.NATIVELY_DURABLE_MEMORY_WINDOW = '1';
+    process.env.MEETFLOO_DURABLE_MEMORY_WINDOW = '1';
     assert.equal(pickSource().some((i) => i.text.includes(PROJECT)), true, 'flag ON must recall the long-range entity');
   });
 });

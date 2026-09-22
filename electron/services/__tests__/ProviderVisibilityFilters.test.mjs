@@ -39,7 +39,7 @@ test('modelAvailable() applies the visibility filters BEFORE the credential arms
     const body = modelAvailableSource();
     const disabledAt = body.indexOf('getDisabledProviders');
     const allowListAt = body.indexOf('getCloudEnabledModels');
-    const firstCredentialAt = body.indexOf('getNativelyApiKey');
+    const firstCredentialAt = body.indexOf('getMeetFlooApiKey');
 
     assert.ok(disabledAt >= 0, 'should consult disabledProviders');
     assert.ok(allowListAt >= 0, 'should consult the per-provider allow-list');
@@ -79,7 +79,7 @@ test('providerFamily() resolves custom-provider ids last, by identity', () => {
     // captured by a custom provider that reused the id.
     const customAt = body.indexOf("return 'custom'");
     assert.ok(customAt >= 0, "should classify saved custom providers as 'custom'");
-    for (const builtin of ['natively', 'codex-cli', 'litellm', 'ollama', 'gemini', 'groq', 'openai', 'claude', 'deepseek']) {
+    for (const builtin of ['MeetFloo', 'codex-cli', 'litellm', 'ollama', 'gemini', 'groq', 'openai', 'claude', 'deepseek']) {
         assert.ok(
             body.indexOf(`return '${builtin}'`) < customAt,
             `built-in family '${builtin}' must be classified before the custom identity lookup`,
@@ -98,7 +98,7 @@ test('reconciliation installs nothing when every candidate is filtered out', () 
     // provider the user just switched off...
     assert.doesNotMatch(
         body,
-        /has\(cm\.get(Gemini|Openai|Claude|Groq|Deepseek|Natively)ApiKey\(\)\) \?/,
+        /has\(cm\.get(Gemini|Openai|Claude|Groq|Deepseek|MeetFloo)ApiKey\(\)\) \?/,
         'candidates must be tested with modelAvailable(), not raw key checks',
     );
     // ...and when they all fail we must return WITHOUT persisting a default.

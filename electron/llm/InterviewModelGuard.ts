@@ -133,7 +133,7 @@ export class InterviewModelGuard {
    *
    * Priority order (fastest first, most likely to be already configured):
    *   1. Groq  — sub-300ms TTFT, user's Groq key
-   *   2. Antigravity Flash — user's Natively/Antigravity key
+   *   2. Antigravity Flash — user's MeetFloo/Antigravity key
    *   3. Gemini Flash — user's Gemini key
    *   4. Sarvam (backend) — always available, 0ms
    */

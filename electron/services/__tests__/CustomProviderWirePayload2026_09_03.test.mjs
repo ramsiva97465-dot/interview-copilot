@@ -91,7 +91,7 @@ after(async () => {
  *  full settings store to answer. Everything under test is the real code. */
 function helperFor(provider) {
   const h = Object.create(LLMHelper.prototype);
-  h.assertOutboundScopes = () => {};
+  h.assertOutboundScopes = () => { };
   h.isProviderDisabled = () => false;
   h.customProvider = provider;
   h.isLocalOnlyMode = false;
@@ -259,9 +259,9 @@ describe('the Ollama-native exclusion does not catch OpenAI gateways', () => {
   const body = `-d '{"messages":[{"role":"user","content":"{{TEXT}}"}]}'`;
   const cases = [
     ['public gateway mounted at /api/chat', `curl https://gw.example.com/api/chat ${body}`, true],
-    ['Ollama on its default port',          `curl http://192.168.1.9:11434/api/chat ${body}`, false],
-    ['Ollama on loopback, custom port',     `curl http://127.0.0.1:9999/api/chat ${body}`, false],
-    ['a gateway whose path also has /v1/',  `curl http://127.0.0.1:8080/v1/api/chat ${body}`, true],
+    ['Ollama on its default port', `curl http://192.168.1.9:11434/api/chat ${body}`, false],
+    ['Ollama on loopback, custom port', `curl http://127.0.0.1:9999/api/chat ${body}`, false],
+    ['a gateway whose path also has /v1/', `curl http://127.0.0.1:8080/v1/api/chat ${body}`, true],
   ];
   for (const [label, curl, expected] of cases) {
     test(`${label} → ${expected}`, () => {
@@ -388,9 +388,9 @@ describe('the vision gates count the ACTIVE custom provider, not every saved one
   const local = { id: 'l', name: 'local', curlCommand: `curl http://127.0.0.1:1234/v1/chat -d '{"messages":[{"role":"user","content":"{{TEXT}}"}]}'` };
   const withActive = (provider, fn) => {
     const g = globalThis;
-    const prev = g.__nativelyGetLLMHelper;
-    g.__nativelyGetLLMHelper = () => ({ getActiveCustomProvider: () => provider });
-    try { return fn(); } finally { g.__nativelyGetLLMHelper = prev; }
+    const prev = g.__MeetFlooGetLLMHelper;
+    g.__MeetFlooGetLLMHelper = () => ({ getActiveCustomProvider: () => provider });
+    try { return fn(); } finally { g.__MeetFlooGetLLMHelper = prev; }
   };
 
   test('reads the active provider', () => {
@@ -405,9 +405,9 @@ describe('the vision gates count the ACTIVE custom provider, not every saved one
 
   test('and null when no helper is up at all', () => {
     const g = globalThis;
-    const prev = g.__nativelyGetLLMHelper;
-    delete g.__nativelyGetLLMHelper;
-    try { assert.equal(readActiveCustomProvider(), null); } finally { g.__nativelyGetLLMHelper = prev; }
+    const prev = g.__MeetFlooGetLLMHelper;
+    delete g.__MeetFlooGetLLMHelper;
+    try { assert.equal(readActiveCustomProvider(), null); } finally { g.__MeetFlooGetLLMHelper = prev; }
   });
 });
 

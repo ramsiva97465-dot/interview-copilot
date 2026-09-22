@@ -1,9 +1,9 @@
 // electron/intelligence/intelligenceFlags.ts
 //
-// Central feature-flag module for the Natively Intelligence OS consolidation
+// Central feature-flag module for the MeetFloo Intelligence OS consolidation
 // (spec Phase 15). Follows the EXACT convention already established by
 // profileGroundingV2.ts / liveSessionMemoryConfig.ts / verificationEnabled.ts:
-//   • read process.env.NATIVELY_* first, then SettingsManager opt-in,
+//   • read process.env.MEETFLOO_* first, then SettingsManager opt-in,
 //   • read DEFENSIVELY (never throw — settings may be unavailable in headless
 //     benchmarks / tests / early boot),
 //   • expose a __reset*Cache() hook so a test can change env mid-process.
@@ -448,7 +448,7 @@ export type IntelligenceFlagKey =
   | 'adaptiveImageQuality';
 
 interface FlagSpec {
-  /** env var name (NATIVELY_* convention). */
+  /** env var name (MEETFLOO_* convention). */
   env: string;
   /** SettingsManager key for a UI/persisted opt-in. */
   setting: string;
@@ -493,81 +493,81 @@ function isInternalDevTestContext(): boolean {
   try {
     if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') return true;
     if (process.env.BENCHMARK_MODEL) return true;
-    if (process.env.NATIVELY_INTERNAL === '1' || process.env.NATIVELY_DEV === '1') return true;
+    if (process.env.MEETFLOO_INTERNAL === '1' || process.env.MEETFLOO_DEV === '1') return true;
   } catch { /* default false */ }
   return false;
 }
 
 const FLAGS: Record<IntelligenceFlagKey, FlagSpec> = {
   trace: {
-    env: 'NATIVELY_INTELLIGENCE_TRACE',
+    env: 'MEETFLOO_INTELLIGENCE_TRACE',
     setting: 'intelligenceTraceEnabled',
     default: false,
   },
   durableMemoryWindow: {
-    env: 'NATIVELY_DURABLE_MEMORY_WINDOW',
+    env: 'MEETFLOO_DURABLE_MEMORY_WINDOW',
     setting: 'intelligenceDurableMemoryWindow',
     default: false,
   },
-  profileTreeV2: { env: 'NATIVELY_PROFILE_TREE_V2', setting: 'profileTreeV2Enabled', default: false },
-  contextRouterV2: { env: 'NATIVELY_CONTEXT_ROUTER_V2', setting: 'contextRouterV2Enabled', default: false },
-  liveTranscriptBrain: { env: 'NATIVELY_LIVE_TRANSCRIPT_BRAIN', setting: 'liveTranscriptBrainEnabled', default: false },
-  questionLedgerShadow: { env: 'NATIVELY_QUESTION_LEDGER_SHADOW', setting: 'questionLedgerShadowEnabled', default: false },
-  wtaClauseCoverageRepair: { env: 'NATIVELY_WTA_CLAUSE_COVERAGE_REPAIR', setting: 'wtaClauseCoverageRepairEnabled', default: false },
-  promptAssemblerV2: { env: 'NATIVELY_PROMPT_ASSEMBLER_V2', setting: 'promptAssemblerV2Enabled', default: false },
-  answerDiversityGuard: { env: 'NATIVELY_ANSWER_DIVERSITY_GUARD', setting: 'answerDiversityGuardEnabled', default: false },
-  meetingMemoryV2: { env: 'NATIVELY_MEETING_MEMORY_V2', setting: 'meetingMemoryV2Enabled', default: false },
+  profileTreeV2: { env: 'MEETFLOO_PROFILE_TREE_V2', setting: 'profileTreeV2Enabled', default: false },
+  contextRouterV2: { env: 'MEETFLOO_CONTEXT_ROUTER_V2', setting: 'contextRouterV2Enabled', default: false },
+  liveTranscriptBrain: { env: 'MEETFLOO_LIVE_TRANSCRIPT_BRAIN', setting: 'liveTranscriptBrainEnabled', default: false },
+  questionLedgerShadow: { env: 'MEETFLOO_QUESTION_LEDGER_SHADOW', setting: 'questionLedgerShadowEnabled', default: false },
+  wtaClauseCoverageRepair: { env: 'MEETFLOO_WTA_CLAUSE_COVERAGE_REPAIR', setting: 'wtaClauseCoverageRepairEnabled', default: false },
+  promptAssemblerV2: { env: 'MEETFLOO_PROMPT_ASSEMBLER_V2', setting: 'promptAssemblerV2Enabled', default: false },
+  answerDiversityGuard: { env: 'MEETFLOO_ANSWER_DIVERSITY_GUARD', setting: 'answerDiversityGuardEnabled', default: false },
+  meetingMemoryV2: { env: 'MEETFLOO_MEETING_MEMORY_V2', setting: 'meetingMemoryV2Enabled', default: false },
   // Meeting Notes V3 is now the UNCONDITIONAL default (product decision 2026-08-25) —
   // the experimental settings toggle has been removed. `settingIgnored: true` means a
   // stale persisted `meetingSummaryV3Enabled` (from when the toggle existed, in either
   // direction) is never read — this flag now only listens to the env kill-switch and
-  // its default. Set NATIVELY_MEETING_SUMMARY_V3=0 to force the legacy single-pass
+  // its default. Set MEETFLOO_MEETING_SUMMARY_V3=0 to force the legacy single-pass
   // summary path in an emergency without a release; that is the ONLY remaining way to
   // turn this off. All paths keep a deterministic fallback and honor the
   // post_call_summary data scope.
-  meetingSummaryV3: { env: 'NATIVELY_MEETING_SUMMARY_V3', setting: 'meetingSummaryV3Enabled', settingIgnored: true, default: true },
-  meetingModeAutoDetect: { env: 'NATIVELY_MEETING_MODE_AUTODETECT', setting: 'meetingModeAutoDetectEnabled', default: true },
+  meetingSummaryV3: { env: 'MEETFLOO_MEETING_SUMMARY_V3', setting: 'meetingSummaryV3Enabled', settingIgnored: true, default: true },
+  meetingModeAutoDetect: { env: 'MEETFLOO_MEETING_MODE_AUTODETECT', setting: 'meetingModeAutoDetectEnabled', default: true },
   // The LLM-written follow-up draft is now the UNCONDITIONAL default (product decision
   // 2026-08-25) — the experimental settings toggle has been removed. `settingIgnored: true`
   // means a stale persisted `followUpDraftV2Enabled` (from when the toggle existed, in
   // either direction) is never read — this flag now only listens to the env kill-switch and
-  // its default. Set NATIVELY_FOLLOWUP_DRAFT_V2=0 to force the deterministic fallback draft
+  // its default. Set MEETFLOO_FOLLOWUP_DRAFT_V2=0 to force the deterministic fallback draft
   // in an emergency without a release; that is the ONLY remaining way to turn this off.
-  followUpDraftV2: { env: 'NATIVELY_FOLLOWUP_DRAFT_V2', setting: 'followUpDraftV2Enabled', settingIgnored: true, default: true },
-  speakerLabelsV1: { env: 'NATIVELY_SPEAKER_LABELS_V1', setting: 'speakerLabelsV1Enabled', default: true },
+  followUpDraftV2: { env: 'MEETFLOO_FOLLOWUP_DRAFT_V2', setting: 'followUpDraftV2Enabled', settingIgnored: true, default: true },
+  speakerLabelsV1: { env: 'MEETFLOO_SPEAKER_LABELS_V1', setting: 'speakerLabelsV1Enabled', default: true },
   // Constrained LLM polish of the Summary (note-content-only, "no new tokens" gated). ON by
   // default — it can only improve readability and always falls back to the deterministic
   // summary, so it never hallucinates or blocks.
-  meetingSummaryLlmPolish: { env: 'NATIVELY_MEETING_SUMMARY_LLM_POLISH', setting: 'meetingSummaryLlmPolishEnabled', default: true },
+  meetingSummaryLlmPolish: { env: 'MEETFLOO_MEETING_SUMMARY_LLM_POLISH', setting: 'meetingSummaryLlmPolishEnabled', default: true },
   // Provider diarization (Deepgram) — opt-in; touches the realtime STT path so default OFF.
-  speakerDiarizationV1: { env: 'NATIVELY_SPEAKER_DIARIZATION_V1', setting: 'speakerDiarizationV1Enabled', default: false },
-  globalSearchV2: { env: 'NATIVELY_GLOBAL_SEARCH_V2', setting: 'globalSearchV2Enabled', default: false },
-  inMeetingSearchV2: { env: 'NATIVELY_IN_MEETING_SEARCH_V2', setting: 'inMeetingSearchV2Enabled', default: false },
-  conversationMemoryV2: { env: 'NATIVELY_CONVERSATION_MEMORY_V2', setting: 'conversationMemoryV2Enabled', default: false },
+  speakerDiarizationV1: { env: 'MEETFLOO_SPEAKER_DIARIZATION_V1', setting: 'speakerDiarizationV1Enabled', default: false },
+  globalSearchV2: { env: 'MEETFLOO_GLOBAL_SEARCH_V2', setting: 'globalSearchV2Enabled', default: false },
+  inMeetingSearchV2: { env: 'MEETFLOO_IN_MEETING_SEARCH_V2', setting: 'inMeetingSearchV2Enabled', default: false },
+  conversationMemoryV2: { env: 'MEETFLOO_CONVERSATION_MEMORY_V2', setting: 'conversationMemoryV2Enabled', default: false },
   // DEFAULT ON, via a plain literal — never isInternalDevTestContext. This flag
   // guards a REGRESSION fix (chat history was one turn / 280 chars from V3's
   // default-ON flip on 2026-07-30 until 2026-08-29), and the suites assert the
   // FIXED behaviour. A dev/test-only default would pin a behaviour users never
   // get, which is precisely the failure contracts/flag.ts's header records.
   // Off is a genuine rollback to the one-turn window, not a half state.
-  chatHistoryMultiTurn: { env: 'NATIVELY_CHAT_HISTORY_MULTI_TURN', setting: 'chatHistoryMultiTurnEnabled', default: true },
-  lectureIntelligenceV2: { env: 'NATIVELY_LECTURE_INTELLIGENCE_V2', setting: 'lectureIntelligenceV2Enabled', default: false },
-  diagramIntelligence: { env: 'NATIVELY_DIAGRAM_INTELLIGENCE', setting: 'diagramIntelligenceEnabled', default: false },
-  hindsightMemory: { env: 'NATIVELY_HINDSIGHT_MEMORY', setting: 'hindsightMemoryEnabled', default: false },
-  hindsightLiveRecall: { env: 'NATIVELY_HINDSIGHT_LIVE_RECALL', setting: 'hindsightLiveRecallEnabled', default: false },
-  hindsightPostMeetingRetain: { env: 'NATIVELY_HINDSIGHT_POST_MEETING_RETAIN', setting: 'hindsightPostMeetingRetainEnabled', default: false },
+  chatHistoryMultiTurn: { env: 'MEETFLOO_CHAT_HISTORY_MULTI_TURN', setting: 'chatHistoryMultiTurnEnabled', default: true },
+  lectureIntelligenceV2: { env: 'MEETFLOO_LECTURE_INTELLIGENCE_V2', setting: 'lectureIntelligenceV2Enabled', default: false },
+  diagramIntelligence: { env: 'MEETFLOO_DIAGRAM_INTELLIGENCE', setting: 'diagramIntelligenceEnabled', default: false },
+  hindsightMemory: { env: 'MEETFLOO_HINDSIGHT_MEMORY', setting: 'hindsightMemoryEnabled', default: false },
+  hindsightLiveRecall: { env: 'MEETFLOO_HINDSIGHT_LIVE_RECALL', setting: 'hindsightLiveRecallEnabled', default: false },
+  hindsightPostMeetingRetain: { env: 'MEETFLOO_HINDSIGHT_POST_MEETING_RETAIN', setting: 'hindsightPostMeetingRetainEnabled', default: false },
   // Phase 0 — observe-only confidence telemetry. Promoted to unconditional
   // `true` (2026-08-30, user-directed override): the operator explicitly
   // chose to ship the dev/test-validated default to production WITHOUT the
   // packaged-build field validation this flag's prior comment called for.
   // See the 2026-08-30 dev/prod-parity-audit conversation for the tradeoff.
-  ragConfidenceGate: { env: 'NATIVELY_RAG_CONFIDENCE_GATE', setting: 'ragConfidenceGateEnabled', default: true },
+  ragConfidenceGate: { env: 'MEETFLOO_RAG_CONFIDENCE_GATE', setting: 'ragConfidenceGateEnabled', default: true },
   // Phase 1 — local cross-encoder rerank escalation (manual/follow-up).
   // Promoted to unconditional `true` (2026-08-30, user-directed override) —
   // same override as ragConfidenceGate above, no packaged-build validation.
-  ragLocalRerank: { env: 'NATIVELY_RAG_LOCAL_RERANK', setting: 'ragLocalRerankEnabled', default: true },
+  ragLocalRerank: { env: 'MEETFLOO_RAG_LOCAL_RERANK', setting: 'ragLocalRerankEnabled', default: true },
   // Phase 2 — Reciprocal Rank Fusion across heterogeneous retrieval sources. Default OFF.
-  ragRrfFusion: { env: 'NATIVELY_RAG_RRF_FUSION', setting: 'ragRrfFusionEnabled', default: false },
+  ragRrfFusion: { env: 'MEETFLOO_RAG_RRF_FUSION', setting: 'ragRrfFusionEnabled', default: false },
   // Phase 3 — allow rerank on the live transcript path (prewarmed + budget-
   // guarded). Promoted to unconditional `true` (2026-08-30, user-directed
   // override): the original comment called for soak-testing the local ONNX
@@ -576,24 +576,24 @@ const FLAGS: Record<IntelligenceFlagKey, FlagSpec> = {
   // on the LIVE transcript path across real user hardware diversity with no
   // field data on memory/CPU pressure. Revert this one first if packaged
   // users report crashes, hangs, or ONNX-related instability.
-  ragSpeculativeRerank: { env: 'NATIVELY_RAG_SPECULATIVE_RERANK', setting: 'ragSpeculativeRerankEnabled', default: true },
+  ragSpeculativeRerank: { env: 'MEETFLOO_RAG_SPECULATIVE_RERANK', setting: 'ragSpeculativeRerankEnabled', default: true },
   // Extension rerankers (see electron/services/reranking/RerankerRegistry.ts).
   // OFF by default and gated a second time by an extension actually being
   // installed AND enabled, so flipping this alone changes nothing.
-  extensionRerankers: { env: 'NATIVELY_EXTENSION_RERANKERS', setting: 'extensionRerankersEnabled', default: false },
+  extensionRerankers: { env: 'MEETFLOO_EXTENSION_RERANKERS', setting: 'extensionRerankersEnabled', default: false },
   // OKF Hybrid Knowledge System. Promoted to unconditional `true` (2026-08-30,
   // user-directed override) — no packaged-build validation.
-  okfKnowledgePacks: { env: 'NATIVELY_OKF_KNOWLEDGE_PACKS', setting: 'okfKnowledgePacksEnabled', default: true },
+  okfKnowledgePacks: { env: 'MEETFLOO_OKF_KNOWLEDGE_PACKS', setting: 'okfKnowledgePacksEnabled', default: true },
   // Promoted to unconditional `true` (2026-08-30, user-directed override):
   // this only writes a markdown bundle on an explicit user export action —
   // it never feeds back into retrieval or answer generation, so the risk
   // profile is low relative to the other 2026-08-30 promotions.
-  okfMarkdownExport: { env: 'NATIVELY_OKF_MARKDOWN_EXPORT', setting: 'okfMarkdownExportEnabled', default: true },
-  okfHybridRetrieval: { env: 'NATIVELY_OKF_HYBRID_RETRIEVAL', setting: 'okfHybridRetrievalEnabled', default: true },
+  okfMarkdownExport: { env: 'MEETFLOO_OKF_MARKDOWN_EXPORT', setting: 'okfMarkdownExportEnabled', default: true },
+  okfHybridRetrieval: { env: 'MEETFLOO_OKF_HYBRID_RETRIEVAL', setting: 'okfHybridRetrievalEnabled', default: true },
   // Entity/relation graph layer derived from OKF cards (Phase 4). Default OFF.
-  okfGraphExpansion: { env: 'NATIVELY_OKF_GRAPH_EXPANSION', setting: 'okfGraphExpansionEnabled', default: false },
-  okfKnowledgeUi: { env: 'NATIVELY_OKF_KNOWLEDGE_UI', setting: 'okfKnowledgeUiEnabled', default: false },
-  okfUserEditableCards: { env: 'NATIVELY_OKF_USER_EDITABLE_CARDS', setting: 'okfUserEditableCardsEnabled', default: false },
+  okfGraphExpansion: { env: 'MEETFLOO_OKF_GRAPH_EXPANSION', setting: 'okfGraphExpansionEnabled', default: false },
+  okfKnowledgeUi: { env: 'MEETFLOO_OKF_KNOWLEDGE_UI', setting: 'okfKnowledgeUiEnabled', default: false },
+  okfUserEditableCards: { env: 'MEETFLOO_OKF_USER_EDITABLE_CARDS', setting: 'okfUserEditableCardsEnabled', default: false },
   // OKF Profile Intelligence. Promoted to unconditional `true` (2026-08-30,
   // user-directed override): per contracts/flag.ts's header, this OKF
   // provenance/pack-generation path has never executed inside a shipped
@@ -602,25 +602,25 @@ const FLAGS: Record<IntelligenceFlagKey, FlagSpec> = {
   // answer quality; verify a real profile pack actually generates on a
   // packaged build before trusting it in front of a live interview. Graph/UI
   // stay OFF everywhere until their phases ship.
-  okfProfilePacks: { env: 'NATIVELY_OKF_PROFILE_PACKS', setting: 'okfProfilePacksEnabled', default: true },
-  okfProfileHybridRetrieval: { env: 'NATIVELY_OKF_PROFILE_HYBRID_RETRIEVAL', setting: 'okfProfileHybridRetrievalEnabled', default: true },
+  okfProfilePacks: { env: 'MEETFLOO_OKF_PROFILE_PACKS', setting: 'okfProfilePacksEnabled', default: true },
+  okfProfileHybridRetrieval: { env: 'MEETFLOO_OKF_PROFILE_HYBRID_RETRIEVAL', setting: 'okfProfileHybridRetrievalEnabled', default: true },
   // Promoted to unconditional `true` (2026-08-30, user-directed override) —
   // same low-risk reasoning as okfMarkdownExport above (explicit user export
   // action only, no feedback into retrieval/generation).
-  okfProfileMarkdownExport: { env: 'NATIVELY_OKF_PROFILE_MARKDOWN_EXPORT', setting: 'okfProfileMarkdownExportEnabled', default: true },
-  okfProfileGraphExpansion: { env: 'NATIVELY_OKF_PROFILE_GRAPH_EXPANSION', setting: 'okfProfileGraphExpansionEnabled', default: false },
-  okfProfileKnowledgeUi: { env: 'NATIVELY_OKF_PROFILE_KNOWLEDGE_UI', setting: 'okfProfileKnowledgeUiEnabled', default: false },
+  okfProfileMarkdownExport: { env: 'MEETFLOO_OKF_PROFILE_MARKDOWN_EXPORT', setting: 'okfProfileMarkdownExportEnabled', default: true },
+  okfProfileGraphExpansion: { env: 'MEETFLOO_OKF_PROFILE_GRAPH_EXPANSION', setting: 'okfProfileGraphExpansionEnabled', default: false },
+  okfProfileKnowledgeUi: { env: 'MEETFLOO_OKF_PROFILE_KNOWLEDGE_UI', setting: 'okfProfileKnowledgeUiEnabled', default: false },
   // Safety isolation gates — ON everywhere by default.
-  docGroundedStrictIsolation: { env: 'NATIVELY_DOC_GROUNDED_STRICT_ISOLATION', setting: 'docGroundedStrictIsolationEnabled', default: true },
+  docGroundedStrictIsolation: { env: 'MEETFLOO_DOC_GROUNDED_STRICT_ISOLATION', setting: 'docGroundedStrictIsolationEnabled', default: true },
   // Custom-Mode Source Isolation (2026-07-06, hardening/v2.7.0). Default OFF.
-  customModeSourceEnforcement: { env: 'NATIVELY_CUSTOM_MODE_SOURCE_ENFORCEMENT', setting: 'customModeSourceEnforcementEnabled', default: false },
+  customModeSourceEnforcement: { env: 'MEETFLOO_CUSTOM_MODE_SOURCE_ENFORCEMENT', setting: 'customModeSourceEnforcementEnabled', default: false },
   // NOTE (2026-07-02): the false-refusal REPAIR path is INERT unless
   // `okfHybridRetrieval` is also on — the repair gate keys off the active OKF
   // pack's entity/card-title overlap, which only exists when OKF packs are
   // built. With OKF off, a doc-grounded "not mentioned" is always treated as an
   // honest refusal (the safe fallback) regardless of this flag. Toggling this
   // flag alone (without okfHybridRetrieval) has no effect.
-  docGroundedFalseRefusalRepair: { env: 'NATIVELY_DOC_GROUNDED_FALSE_REFUSAL_REPAIR', setting: 'docGroundedFalseRefusalRepairEnabled', default: true },
+  docGroundedFalseRefusalRepair: { env: 'MEETFLOO_DOC_GROUNDED_FALSE_REFUSAL_REPAIR', setting: 'docGroundedFalseRefusalRepairEnabled', default: true },
   // Full-JIT final-answer law (2026-07-07). Was default OFF everywhere for
   // stability (2026-07-09); the underlying issue is resolved (2026-07-14
   // flag-parity repair) — restored to `true` everywhere, matching the original
@@ -636,7 +636,7 @@ const FLAGS: Record<IntelligenceFlagKey, FlagSpec> = {
   // restoration). A future reader should not assume this flag is as
   // conservatively scoped as ragConfidenceGate/ragLocalRerank/
   // okfKnowledgePacks/okfHybridRetrieval, which stay production-OFF.
-  jitFinalAnswerEnforced: { env: 'NATIVELY_JIT_FINAL_ANSWER_ENFORCED', setting: 'jitFinalAnswerEnforcedEnabled', default: true },
+  jitFinalAnswerEnforced: { env: 'MEETFLOO_JIT_FINAL_ANSWER_ENFORCED', setting: 'jitFinalAnswerEnforcedEnabled', default: true },
   // ── Context OS / Source Authority Kernel (2026-07-10) ────────────────────
   // Rollout ladder (docs/context-os/): observe → shadow-block → enforce, per
   // surface. Originally everything defaulted OFF in production pending
@@ -660,12 +660,12 @@ const FLAGS: Record<IntelligenceFlagKey, FlagSpec> = {
   // SEPARATE, stricter enforcement flags not covered by this promotion — see
   // their own comment below; they remain dev/test-only pending their own
   // dedicated rollout decision.
-  contextOsEnabled: { env: 'NATIVELY_CONTEXT_OS', setting: 'contextOsEnabled', default: true },
-  contextOsManualChatEnabled: { env: 'NATIVELY_CONTEXT_OS_MANUAL_CHAT', setting: 'contextOsManualChatEnabled', default: true },
-  contextOsWtaEnabled: { env: 'NATIVELY_CONTEXT_OS_WTA', setting: 'contextOsWtaEnabled', default: true },
-  contextOsRecapFollowupEnabled: { env: 'NATIVELY_CONTEXT_OS_RECAP_FOLLOWUP', setting: 'contextOsRecapFollowupEnabled', default: true },
-  contextOsEvidencePackEnabled: { env: 'NATIVELY_CONTEXT_OS_EVIDENCE_PACK', setting: 'contextOsEvidencePackEnabled', default: true },
-  contextOsMemorySafetyEnabled: { env: 'NATIVELY_CONTEXT_OS_MEMORY_SAFETY', setting: 'contextOsMemorySafetyEnabled', default: true },
+  contextOsEnabled: { env: 'MEETFLOO_CONTEXT_OS', setting: 'contextOsEnabled', default: true },
+  contextOsManualChatEnabled: { env: 'MEETFLOO_CONTEXT_OS_MANUAL_CHAT', setting: 'contextOsManualChatEnabled', default: true },
+  contextOsWtaEnabled: { env: 'MEETFLOO_CONTEXT_OS_WTA', setting: 'contextOsWtaEnabled', default: true },
+  contextOsRecapFollowupEnabled: { env: 'MEETFLOO_CONTEXT_OS_RECAP_FOLLOWUP', setting: 'contextOsRecapFollowupEnabled', default: true },
+  contextOsEvidencePackEnabled: { env: 'MEETFLOO_CONTEXT_OS_EVIDENCE_PACK', setting: 'contextOsEvidencePackEnabled', default: true },
+  contextOsMemorySafetyEnabled: { env: 'MEETFLOO_CONTEXT_OS_MEMORY_SAFETY', setting: 'contextOsMemorySafetyEnabled', default: true },
   // Real-custom-mode-repair (2026-07-11), Phase 7: these two flags gate the
   // ONLY code paths that actually ACT on the kernel's decision (the
   // clarification short-circuit and the hard capability gate). Before this
@@ -684,15 +684,15 @@ const FLAGS: Record<IntelligenceFlagKey, FlagSpec> = {
   // real-traffic measurement of the false-refusal rate this introduces. If
   // users report answers that used to work now getting refused/declined,
   // these two flags are the first thing to revert.
-  contextOsEnforceSourceCapabilities: { env: 'NATIVELY_CONTEXT_OS_ENFORCE_CAPABILITIES', setting: 'contextOsEnforceSourceCapabilitiesEnabled', default: true },
-  contextOsPropertyValidation: { env: 'NATIVELY_CONTEXT_OS_PROPERTY_VALIDATION', setting: 'contextOsPropertyValidationEnabled', default: true },
+  contextOsEnforceSourceCapabilities: { env: 'MEETFLOO_CONTEXT_OS_ENFORCE_CAPABILITIES', setting: 'contextOsEnforceSourceCapabilitiesEnabled', default: true },
+  contextOsPropertyValidation: { env: 'MEETFLOO_CONTEXT_OS_PROPERTY_VALIDATION', setting: 'contextOsPropertyValidationEnabled', default: true },
   // Promoted to unconditional `true` (2026-08-30, SEPARATE user-directed
   // override, same batch as the two flags above): coordinates evidence from
   // multiple explicitly-authorized source families into one answer — a real
   // evidence-handling behavior change, no packaged-build/real-traffic
   // validation. Same revert priority as contextOsEnforceSourceCapabilities/
   // contextOsPropertyValidation if answer composition looks wrong in the field.
-  contextOsMultiFamilyEvidenceEnabled: { env: 'NATIVELY_CONTEXT_OS_MULTI_FAMILY_EVIDENCE', setting: 'contextOsMultiFamilyEvidenceEnabled', default: true },
+  contextOsMultiFamilyEvidenceEnabled: { env: 'MEETFLOO_CONTEXT_OS_MULTI_FAMILY_EVIDENCE', setting: 'contextOsMultiFamilyEvidenceEnabled', default: true },
   // Default false (not isInternalDevTestContext) even in dev/test — unlike
   // the Context OS flags above, this one's live-fire behavior was PROVEN to
   // regress real answers in run-032 (see the flag's doc comment). Dev/test
@@ -700,14 +700,14 @@ const FLAGS: Record<IntelligenceFlagKey, FlagSpec> = {
   // classifier is recalibrated against real traffic; it must not be
   // silently exercised by every dev-context test run the way the Context OS
   // rollout flags intentionally are.
-  answerRelevanceGuardLive: { env: 'NATIVELY_ANSWER_RELEVANCE_GUARD_LIVE', setting: 'answerRelevanceGuardLiveEnabled', default: false },
+  answerRelevanceGuardLive: { env: 'MEETFLOO_ANSWER_RELEVANCE_GUARD_LIVE', setting: 'answerRelevanceGuardLiveEnabled', default: false },
   // Promoted to unconditional `true` (2026-08-30, user-directed override).
   // NOTE the tradeoff this flag's own comment documents: awaiting the AOT
   // pipeline before ingestDocument() returns for a JD makes JD upload
   // genuinely, user-facingly SLOWER (real LLM calls in the critical path) —
   // this is not a free correctness fix, it's a deliberate latency-for-
   // correctness tradeoff now shipped to every user.
-  atomicJdProfilePackGeneration: { env: 'NATIVELY_ATOMIC_JD_PROFILE_PACK', setting: 'atomicJdProfilePackGenerationEnabled', default: true },
+  atomicJdProfilePackGeneration: { env: 'MEETFLOO_ATOMIC_JD_PROFILE_PACK', setting: 'atomicJdProfilePackGenerationEnabled', default: true },
   // Promoted to unconditional `true` (2026-08-30, dev/prod parity audit): this
   // is a pure shadow-observation side channel (divergence logging only, zero
   // change to processQuestion's return value — see the union member's
@@ -715,7 +715,7 @@ const FLAGS: Record<IntelligenceFlagKey, FlagSpec> = {
   // running it in production. Never scope a flag like this to
   // isInternalDevTestContext purely to save telemetry volume — that's the
   // exact dev/prod-divergence footgun contracts/flag.ts's header documents.
-  pronounRegexShadowObservation: { env: 'NATIVELY_PRONOUN_REGEX_SHADOW_OBSERVATION', setting: 'pronounRegexShadowObservationEnabled', default: true },
+  pronounRegexShadowObservation: { env: 'MEETFLOO_PRONOUN_REGEX_SHADOW_OBSERVATION', setting: 'pronounRegexShadowObservationEnabled', default: true },
   // Promoted to unconditional `true` (2026-08-30, dev/prod parity audit): Stage
   // 0 is shadow-only (divergence logging, zero change to the prompt/pack/return
   // value — see the union member's comment above). Note this is NOT the same
@@ -728,7 +728,7 @@ const FLAGS: Record<IntelligenceFlagKey, FlagSpec> = {
   // comments contradicted each other about one production enforcement gate.
   // The entry below is the accurate one; this cross-reference no longer asserts
   // a default it does not own.)
-  contextOsImpossibleStateGateShadow: { env: 'NATIVELY_CONTEXT_OS_IMPOSSIBLE_STATE_GATE_SHADOW', setting: 'contextOsImpossibleStateGateShadowEnabled', default: true },
+  contextOsImpossibleStateGateShadow: { env: 'MEETFLOO_CONTEXT_OS_IMPOSSIBLE_STATE_GATE_SHADOW', setting: 'contextOsImpossibleStateGateShadowEnabled', default: true },
   // Promoted to unconditional `true` (2026-08-30, user-directed override).
   // WARNING: unlike its Stage 0 shadow sibling above, this IS the real
   // enforcement gate — its own union-member comment calls it "the first REAL
@@ -739,7 +739,7 @@ const FLAGS: Record<IntelligenceFlagKey, FlagSpec> = {
   // period (Stage 0 above) precisely because a false-positive here turns a
   // fixable heuristic bug into a permanent structural refusal. No shadow
   // period was actually run before this promotion.
-  contextOsImpossibleStateGateEnforceForbidden: { env: 'NATIVELY_CONTEXT_OS_IMPOSSIBLE_STATE_GATE_ENFORCE_FORBIDDEN', setting: 'contextOsImpossibleStateGateEnforceForbiddenEnabled', default: true },
+  contextOsImpossibleStateGateEnforceForbidden: { env: 'MEETFLOO_CONTEXT_OS_IMPOSSIBLE_STATE_GATE_ENFORCE_FORBIDDEN', setting: 'contextOsImpossibleStateGateEnforceForbiddenEnabled', default: true },
   // Prompt System v2 — PROMOTED TO DEFAULT ON (2026-08-02) after the full
   // benchmark campaign: 8 runs × 600 scenarios vs the frozen legacy prompts
   // (benchmarks/prompt-v2-vs-legacy/results/COMPLETE-WIN.md). Final warm-cache
@@ -749,22 +749,22 @@ const FLAGS: Record<IntelligenceFlagKey, FlagSpec> = {
   // sole residual (trailing_offer, 2 responses in 600) is noise-floor.
   // Unconditional `true` (not isInternalDevTestContext) for flag parity with
   // production — the 2026-07-14 flag-parity incident is why dev/test must
-  // exercise what ships. Kill-switch: NATIVELY_PROMPT_SYSTEM_V2=0 or the
+  // exercise what ships. Kill-switch: MEETFLOO_PROMPT_SYSTEM_V2=0 or the
   // promptSystemV2Enabled setting reverts to the legacy constants everywhere
   // (every call site is `resolveV2SystemPrompt(...) ?? legacy`).
-  promptSystemV2: { env: 'NATIVELY_PROMPT_SYSTEM_V2', setting: 'promptSystemV2Enabled', default: true },
+  promptSystemV2: { env: 'MEETFLOO_PROMPT_SYSTEM_V2', setting: 'promptSystemV2Enabled', default: true },
   // Literal `true`, NOT isInternalDevTestContext — see the union member's note.
-  wtaGovernanceYieldsToV3: { env: 'NATIVELY_WTA_GOVERNANCE_YIELDS_TO_V3', setting: 'wtaGovernanceYieldsToV3Enabled', default: true },
-  docGroundedValidatorUsesSentEvidence: { env: 'NATIVELY_DOC_GROUNDED_VALIDATOR_SENT_EVIDENCE', setting: 'docGroundedValidatorUsesSentEvidenceEnabled', default: true },
+  wtaGovernanceYieldsToV3: { env: 'MEETFLOO_WTA_GOVERNANCE_YIELDS_TO_V3', setting: 'wtaGovernanceYieldsToV3Enabled', default: true },
+  docGroundedValidatorUsesSentEvidence: { env: 'MEETFLOO_DOC_GROUNDED_VALIDATOR_SENT_EVIDENCE', setting: 'docGroundedValidatorUsesSentEvidenceEnabled', default: true },
   // ── Provider Performance Profile ─────────────────────────────────────────
-  providerPerformanceProfile: { env: 'NATIVELY_PROVIDER_PERFORMANCE_PROFILE', setting: 'providerPerformanceProfileEnabled', default: true },
-  adaptiveStreamIdle: { env: 'NATIVELY_ADAPTIVE_STREAM_IDLE', setting: 'adaptiveStreamIdleEnabled', default: true },
-  adaptiveTtft: { env: 'NATIVELY_ADAPTIVE_TTFT', setting: 'adaptiveTtftEnabled', default: true },
-  providerPerformanceDiagnostics: { env: 'NATIVELY_PROVIDER_PERFORMANCE_DIAGNOSTICS', setting: 'providerPerformanceDiagnosticsEnabled', default: true },
-  calibration: { env: 'NATIVELY_PROVIDER_CALIBRATION', setting: 'providerCalibrationEnabled', default: false },
-  capabilityProbe: { env: 'NATIVELY_CAPABILITY_PROBE', setting: 'capabilityProbeEnabled', default: false },
-  adaptiveConnectTimeout: { env: 'NATIVELY_ADAPTIVE_CONNECT_TIMEOUT', setting: 'adaptiveConnectTimeoutEnabled', default: true },
-  adaptiveImageQuality: { env: 'NATIVELY_ADAPTIVE_IMAGE_QUALITY', setting: 'adaptiveImageQualityEnabled', default: false },
+  providerPerformanceProfile: { env: 'MEETFLOO_PROVIDER_PERFORMANCE_PROFILE', setting: 'providerPerformanceProfileEnabled', default: true },
+  adaptiveStreamIdle: { env: 'MEETFLOO_ADAPTIVE_STREAM_IDLE', setting: 'adaptiveStreamIdleEnabled', default: true },
+  adaptiveTtft: { env: 'MEETFLOO_ADAPTIVE_TTFT', setting: 'adaptiveTtftEnabled', default: true },
+  providerPerformanceDiagnostics: { env: 'MEETFLOO_PROVIDER_PERFORMANCE_DIAGNOSTICS', setting: 'providerPerformanceDiagnosticsEnabled', default: true },
+  calibration: { env: 'MEETFLOO_PROVIDER_CALIBRATION', setting: 'providerCalibrationEnabled', default: false },
+  capabilityProbe: { env: 'MEETFLOO_CAPABILITY_PROBE', setting: 'capabilityProbeEnabled', default: false },
+  adaptiveConnectTimeout: { env: 'MEETFLOO_ADAPTIVE_CONNECT_TIMEOUT', setting: 'adaptiveConnectTimeoutEnabled', default: true },
+  adaptiveImageQuality: { env: 'MEETFLOO_ADAPTIVE_IMAGE_QUALITY', setting: 'adaptiveImageQualityEnabled', default: false },
 };
 
 const ON_VALUES = new Set(['1', 'true', 'on', 'enabled', 'yes']);
@@ -816,11 +816,11 @@ export function isIntelligenceFlagEnabled(key: IntelligenceFlagKey): boolean {
 }
 
 /**
- * True when the flag's value is FORCED by an environment override (NATIVELY_* var set to
+ * True when the flag's value is FORCED by an environment override (MEETFLOO_* var set to
  * a recognized on/off value). When true, the env is the authoritative source — callers
  * must NOT persist a contradicting SettingsManager value (e.g. HindsightManager's
  * auto-flip would otherwise write `hindsightMemoryEnabled=true` to settings while
- * `NATIVELY_HINDSIGHT_MEMORY=0` is set, silently re-enabling the flag the moment the
+ * `MEETFLOO_HINDSIGHT_MEMORY=0` is set, silently re-enabling the flag the moment the
  * user unsets the env). Never throws.
  */
 export function isIntelligenceFlagEnvForced(key: IntelligenceFlagKey): boolean {
@@ -953,7 +953,7 @@ export const isDocGroundedFalseRefusalRepairEnabled = (): boolean =>
 
 export function getSourceOwnerEnforcementStage(): SourceOwnerEnforcementStage {
   try {
-    const raw = (process.env.NATIVELY_SOURCE_OWNER_ENFORCEMENT_STAGE || '').trim().toLowerCase();
+    const raw = (process.env.MEETFLOO_SOURCE_OWNER_ENFORCEMENT_STAGE || '').trim().toLowerCase();
     if (raw === 'off' || raw === 'observe' || raw === 'soft_block' || raw === 'enforce') return raw;
     if (isIntelligenceFlagEnabled('customModeSourceEnforcement')) return 'enforce';
   } catch {
@@ -1028,7 +1028,7 @@ export const REQUIRED_CONTEXT_OS_FLAGS_FOR_VERIFICATION: IntelligenceFlagKey[] =
 
 /**
  * True only when the process has explicitly opted into verification-mode
- * assertions (`NATIVELY_VERIFICATION_MODE=1`). Never true by default — this
+ * assertions (`MEETFLOO_VERIFICATION_MODE=1`). Never true by default — this
  * must never affect a normal user boot, a packaged build, or an ordinary dev
  * session; it is an opt-in internal check for benchmark/CI/soak runs that want
  * to FAIL FAST if the effective Context OS flags don't match what the
@@ -1036,7 +1036,7 @@ export const REQUIRED_CONTEXT_OS_FLAGS_FOR_VERIFICATION: IntelligenceFlagKey[] =
  */
 export function isVerificationModeEnabled(): boolean {
   try {
-    return (process.env.NATIVELY_VERIFICATION_MODE || '').trim() === '1';
+    return (process.env.MEETFLOO_VERIFICATION_MODE || '').trim() === '1';
   } catch {
     return false;
   }
@@ -1058,7 +1058,7 @@ export function assertVerificationFlagsOrThrow(): void {
   if (missing.length > 0) {
     throw new Error(
       `Context OS verification started with required flags disabled: ${missing.join(', ')}. `
-      + 'Set NATIVELY_VERIFICATION_MODE=0 to run without this check, or fix the flag defaults/env.',
+      + 'Set MEETFLOO_VERIFICATION_MODE=0 to run without this check, or fix the flag defaults/env.',
     );
   }
 }
@@ -1116,7 +1116,7 @@ export function setIntelligenceFlag(key: IntelligenceFlagKey, value: boolean | n
 
 /**
  * Test-only no-op. Env is read fresh on every call, so there is no cache to clear —
- * a test can change `process.env.NATIVELY_*` and the next read reflects it
+ * a test can change `process.env.MEETFLOO_*` and the next read reflects it
  * immediately. Kept for API stability with callers that defensively reset.
  */
 export function __resetIntelligenceFlagsCache(): void {

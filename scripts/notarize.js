@@ -30,7 +30,7 @@
  *   - No-op when notarization credentials are absent (local / dev / ad-hoc builds).
  *     This means `npm run app:build` (the ad-hoc dev path) is completely unaffected —
  *     it never tries to notarize and never fails for lack of an Apple account.
- *   - No-op when NATIVELY_SKIP_NOTARIZE=1 is set (explicit escape hatch).
+ *   - No-op when MEETFLOO_SKIP_NOTARIZE=1 is set (explicit escape hatch).
  *   - Notarization only runs when one of the three credential strategies is fully
  *     configured via environment variables (see below). This is the production path.
  *
@@ -94,10 +94,10 @@ function resolveCredentials(env = process.env) {
     }
     console.warn(
       `[notarize] APPLE_API_KEY points at a file that does not exist: ${env.APPLE_API_KEY}\n` +
-        '[notarize] Ignoring the api-key strategy and falling through to the next configured one ' +
-        '(apple-id, then keychain-profile). App Store Connect serves a .p8 only ONCE — if it is ' +
-        'gone, generate a new key, or drop APPLE_API_KEY/APPLE_API_KEY_ID and use ' +
-        'APPLE_KEYCHAIN_PROFILE (`xcrun notarytool store-credentials`) instead.'
+      '[notarize] Ignoring the api-key strategy and falling through to the next configured one ' +
+      '(apple-id, then keychain-profile). App Store Connect serves a .p8 only ONCE — if it is ' +
+      'gone, generate a new key, or drop APPLE_API_KEY/APPLE_API_KEY_ID and use ' +
+      'APPLE_KEYCHAIN_PROFILE (`xcrun notarytool store-credentials`) instead.'
     );
   }
 
@@ -132,8 +132,8 @@ module.exports = async function notarizeHook(context) {
     return; // Windows / Linux — nothing to notarize.
   }
 
-  if (process.env.NATIVELY_SKIP_NOTARIZE === '1') {
-    console.log('[notarize] NATIVELY_SKIP_NOTARIZE=1 — skipping notarization.');
+  if (process.env.MEETFLOO_SKIP_NOTARIZE === '1') {
+    console.log('[notarize] MEETFLOO_SKIP_NOTARIZE=1 — skipping notarization.');
     return;
   }
 
@@ -141,7 +141,7 @@ module.exports = async function notarizeHook(context) {
   if (!resolved) {
     console.log(
       '[notarize] No Apple notarization credentials in environment — skipping. ' +
-        '(This is expected for local/ad-hoc dev builds. Set APPLE_API_KEY*/APPLE_ID*/APPLE_KEYCHAIN_PROFILE for production.)'
+      '(This is expected for local/ad-hoc dev builds. Set APPLE_API_KEY*/APPLE_ID*/APPLE_KEYCHAIN_PROFILE for production.)'
     );
     return;
   }
@@ -202,7 +202,7 @@ module.exports = async function notarizeHook(context) {
         const delayS = 30 * attempt;
         console.warn(
           `[notarize] Transient network failure during submission (attempt ${attempt}/${MAX_SUBMIT_ATTEMPTS}) — ` +
-            `retrying in ${delayS}s. The upload restarts from scratch; the aborted one expires on Apple's side.`
+          `retrying in ${delayS}s. The upload restarts from scratch; the aborted one expires on Apple's side.`
         );
         await new Promise((r) => setTimeout(r, delayS * 1000));
         continue;
@@ -231,7 +231,7 @@ module.exports = async function notarizeHook(context) {
     if (isStapleRace) {
       console.warn(
         '[notarize] Notarization succeeded but the initial staple hit the CDN ticket-propagation race. ' +
-          'Recovering via staple-with-retry (exponential backoff)…'
+        'Recovering via staple-with-retry (exponential backoff)…'
       );
       try {
         await stapleWithRetry(appPath, { maxAttempts: 6, baseDelayMs: 15000 });
@@ -242,7 +242,7 @@ module.exports = async function notarizeHook(context) {
       } catch (stapleErr) {
         console.error(
           '[notarize] Staple still failed after retries — the notarization verdict was accepted but the ' +
-            'ticket never became stapleable. Failing the build.',
+          'ticket never became stapleable. Failing the build.',
           stapleErr && stapleErr.message ? stapleErr.message : stapleErr
         );
         throw stapleErr;

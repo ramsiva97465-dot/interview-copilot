@@ -24,13 +24,13 @@ describe('router slot budget', () => {
   test('with every ONNX slot held, classify() returns null inside its budget instead of waiting', async () => {
     const cap = getMaxConcurrentOnnxSessions();
     for (let i = 0; i < cap; i++) held.push(await acquireOnnxSlot('normal', 1));
-    process.env.NATIVELY_INTERACTION_ROUTER = '1';
+    process.env.MEETFLOO_INTERACTION_ROUTER = '1';
     const router = RouterModel.getInstance();
-    if (!router.isAvailable()) { delete process.env.NATIVELY_INTERACTION_ROUTER; return; } // model not downloaded on this checkout
+    if (!router.isAvailable()) { delete process.env.MEETFLOO_INTERACTION_ROUTER; return; } // model not downloaded on this checkout
     const t0 = Date.now();
     const r = await router.classify({ turn: 'mhm right right', mode: 'general', channel: 'system', history: [] }, { timeoutMs: 80 });
     const elapsed = Date.now() - t0;
-    delete process.env.NATIVELY_INTERACTION_ROUTER;
+    delete process.env.MEETFLOO_INTERACTION_ROUTER;
     assert.equal(r, null, 'no slot in budget means no opinion');
     assert.ok(elapsed < 5500, `must give up within the load budget, took ${elapsed}ms`);
   });

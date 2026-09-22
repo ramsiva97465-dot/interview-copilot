@@ -4,7 +4,7 @@
 // validated SkillUploadPayload to disk atomically. The installer:
 //   1. Re-runs validateSkillPayload as a defense-in-depth gate.
 //   2. Stages the entire skill folder under a unique temp dir
-//      (`os.tmpdir()/natively-skill-upload-<uuid>`), so a crash mid-write
+//      (`os.tmpdir()/MeetFloo-skill-upload-<uuid>`), so a crash mid-write
 //      never leaves the user's skills dir in a half-baked state.
 //   3. On full success, `fs.renameSync` the staged tree into the final
 //      `userData/skills/<id>/` slot. POSIX-atomic on the same volume;
@@ -22,7 +22,7 @@
 //     `SkillsManager.listSkills()` and passes the ids in.
 //
 // CONSTANT JUSTIFICATIONS:
-//   - `STAGING_DIR_PREFIX = 'natively-skill-upload-'`. The prefix lets the
+//   - `STAGING_DIR_PREFIX = 'MeetFloo-skill-upload-'`. The prefix lets the
 //     stale-stage reaper (`reapStaleUploadStages`) target ONLY its own
 //     leftovers even when `os.tmpdir()` is shared with other tools.
 //   - `DEFAULT_REAP_AGE_MS = 60 * 60 * 1000` (1 hour). Long enough that an
@@ -58,7 +58,7 @@ import type { SkillSummary, SkillSource } from '../SkillsManager';
 // ---------------------------------------------------------------------------
 
 /** Prefix for staged upload dirs under `os.tmpdir()`. */
-export const STAGING_DIR_PREFIX = 'natively-skill-upload-';
+export const STAGING_DIR_PREFIX = 'MeetFloo-skill-upload-';
 
 /** Default age threshold (1 hour) before a stale stage dir is reaped. */
 export const DEFAULT_REAP_AGE_MS = 60 * 60 * 1000;
@@ -359,7 +359,7 @@ export interface ReapStaleUploadStagesResult {
 
 /**
  * Recovery path for app crashes mid-install: scan `stagingRoot` for any
- * `natively-skill-upload-*` directory whose mtime is older than
+ * `MeetFloo-skill-upload-*` directory whose mtime is older than
  * `olderThanMs` (default 1 hour) and remove it.
  *
  * Safe to call from `app.whenReady()` — runs sync, swallows per-entry

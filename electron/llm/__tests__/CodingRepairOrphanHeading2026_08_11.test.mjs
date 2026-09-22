@@ -1,6 +1,6 @@
 // electron/llm/__tests__/CodingRepairOrphanHeading2026_08_11.test.mjs
 //
-// Third live regression on the same repair path (natively-api, 2026-08-11).
+// Third live regression on the same repair path (MeetFloo-api, 2026-08-11).
 //
 // CodingRepairNonDestructive2026_08_10 exempted answers that are substantively
 // complete (code + a stated complexity). This case is NOT exempt and SHOULD be

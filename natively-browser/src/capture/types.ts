@@ -5,7 +5,7 @@
  * cannot cross-import desktop/renderer code, so the Browser Context types are
  * DUPLICATED per subsystem by design:
  *
- *   - natively-browser/src/capture/types.ts      ← THIS FILE (canonical source)
+ *   - MeetFloo-browser/src/capture/types.ts      ← THIS FILE (canonical source)
  *   - electron/services/browser-context/types.ts ← desktop mirror
  *   - src/types/electron.d.ts                    ← renderer additions
  *
@@ -187,12 +187,12 @@ export interface CodingProblemPayload {
 /** Notes/docs editor payload — manual-first, selected/visible only. */
 export interface NotesPayload {
   editorType:
-    | 'google_docs'
-    | 'notion'
-    | 'textarea'
-    | 'contenteditable'
-    | 'prosemirror'
-    | 'unknown';
+  | 'google_docs'
+  | 'notion'
+  | 'textarea'
+  | 'contenteditable'
+  | 'prosemirror'
+  | 'unknown';
   selectedText?: string;
   visibleText?: string;
 }

@@ -79,9 +79,9 @@ const run = (label: string) => {
 
 // FLAGS OFF reproduces the build the user actually reported against.
 const FLAGS = [
-  'NATIVELY_RETRIEVAL_REFERENCE_FILES_EVIDENCE_USER_CLAIMS',
-  'NATIVELY_RETRIEVAL_CLASSIFIER_TOKEN_FRAMING',
-  'NATIVELY_RETRIEVAL_FOLLOWUP_SOURCE_CONTINUITY',
+  'MEETFLOO_RETRIEVAL_REFERENCE_FILES_EVIDENCE_USER_CLAIMS',
+  'MEETFLOO_RETRIEVAL_CLASSIFIER_TOKEN_FRAMING',
+  'MEETFLOO_RETRIEVAL_FOLLOWUP_SOURCE_CONTINUITY',
 ];
 for (const f of FLAGS) process.env[f] = '0';
 const before = run('BEFORE (the build he reported against)');

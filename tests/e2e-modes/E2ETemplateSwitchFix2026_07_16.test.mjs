@@ -19,11 +19,11 @@ let DatabaseManager, ModesManager, dbMgr, mgr, buildCustomModeExecutionContract,
 describe('E2E: Technical Interview template-switch scenario reproduces user-reported failure PRE-fix; passes POST-fix', () => {
   beforeEach(() => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'e2e-ti-template-switch-'));
-    process.env.NATIVELY_TEST_USERDATA = tmpDir;
-    try { delete require.cache[DB_PATH]; } catch {}
-    try { delete require.cache[MODES_PATH]; } catch {}
-    try { delete require.cache[CMEC_PATH]; } catch {}
-    try { delete require.cache[CTXOS_PATH]; } catch {}
+    process.env.MEETFLOO_TEST_USERDATA = tmpDir;
+    try { delete require.cache[DB_PATH]; } catch { }
+    try { delete require.cache[MODES_PATH]; } catch { }
+    try { delete require.cache[CMEC_PATH]; } catch { }
+    try { delete require.cache[CTXOS_PATH]; } catch { }
     DatabaseManager = require(DB_PATH).DatabaseManager;
     ModesManager = require(MODES_PATH).ModesManager;
     ({ buildCustomModeExecutionContract } = require(CMEC_PATH));
@@ -32,12 +32,12 @@ describe('E2E: Technical Interview template-switch scenario reproduces user-repo
     mgr = ModesManager.getInstance();
   });
   afterEach(() => {
-    try { dbMgr?.close?.(); } catch {}
-    try { delete require.cache[DB_PATH]; } catch {}
-    try { delete require.cache[MODES_PATH]; } catch {}
-    try { delete require.cache[CMEC_PATH]; } catch {}
-    try { delete require.cache[CTXOS_PATH]; } catch {}
-    delete process.env.NATIVELY_TEST_USERDATA;
+    try { dbMgr?.close?.(); } catch { }
+    try { delete require.cache[DB_PATH]; } catch { }
+    try { delete require.cache[MODES_PATH]; } catch { }
+    try { delete require.cache[CMEC_PATH]; } catch { }
+    try { delete require.cache[CTXOS_PATH]; } catch { }
+    delete process.env.MEETFLOO_TEST_USERDATA;
   });
 
   test('user-reported flow: create General, switch to Technical Interview, ask about most recent project', () => {

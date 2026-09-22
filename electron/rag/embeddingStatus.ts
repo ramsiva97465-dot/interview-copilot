@@ -47,7 +47,7 @@ function resolveLocation(provider: { name: string; space?: string }): 'cloud' | 
   return 'on-device';
 }
 
-const CLOUD_PROVIDERS = new Set(['natively', 'openai', 'gemini', 'voyage', 'openrouter']);
+const CLOUD_PROVIDERS = new Set(['MeetFloo', 'openai', 'gemini', 'voyage', 'openrouter']);
 
 /**
  * Whether an embedding space is a lightweight/compatibility-tier model.
@@ -122,7 +122,7 @@ export function shouldWarnAboutLightweightEmbeddings(input: {
   /** Single provider, when one is known. */
   generationProvider?: string | null;
   /**
-   * All configured providers. Natively is key-based rather than having one
+   * All configured providers. MeetFloo is key-based rather than having one
    * "current provider" setting, so the real question is whether ANY third-party
    * AI provider is configured while embeddings stayed lightweight.
    */
@@ -150,7 +150,7 @@ export interface EmbeddingRecommendation {
  * it is an advert.
  *
  * Carries NO comparative performance claim. Any "N% better than MiniLM" number
- * would be unmeasured until the embedding benchmark runs against Natively's own
+ * would be unmeasured until the embedding benchmark runs against MeetFloo's own
  * retrieval workload, and an invented one is worse than silence.
  */
 export function recommendEmbeddingModels(

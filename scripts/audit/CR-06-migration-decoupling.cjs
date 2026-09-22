@@ -9,21 +9,23 @@
  * as cosine. One database, mixed metrics, read through a single
  * `similarity = 1 - distance` and one shared minSimilarity threshold.
  *
- * This drives the real DatabaseManager against a real natively.db.
+ * This drives the real DatabaseManager against a real MeetFloo.db.
  */
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
 const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cr06-db-'));
-process.env.NATIVELY_TEST_USERDATA = userData;
+process.env.MEETFLOO_TEST_USERDATA = userData;
 
 const Module = require('module');
 const realLoad = Module._load;
 Module._load = function (req, parent, isMain) {
   if (req === 'electron') {
-    return { app: { isReady: () => true, getPath: () => userData, getVersion: () => '0.0.0-test' },
-             safeStorage: { isEncryptionAvailable: () => false } };
+    return {
+      app: { isReady: () => true, getPath: () => userData, getVersion: () => '0.0.0-test' },
+      safeStorage: { isEncryptionAvailable: () => false }
+    };
   }
   return realLoad.apply(this, arguments);
 };
@@ -32,7 +34,7 @@ const dist = (p) => path.join(__dirname, '../..', 'dist-electron/electron', p);
 const { DatabaseManager } = require(dist('db/DatabaseManager.js'));
 const Database = require(path.join(__dirname, '../..', 'node_modules/better-sqlite3'));
 
-const dbPath = path.join(userData, 'natively.db');
+const dbPath = path.join(userData, 'MeetFloo.db');
 const open = () => { DatabaseManager.instance = undefined; return DatabaseManager.getInstance(); };
 const raw = () => {
   const db = new Database(dbPath);

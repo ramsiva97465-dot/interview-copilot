@@ -41,7 +41,7 @@ function findRepoRoot(): string {
     if (fs.existsSync(pkgPath)) {
       try {
         const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-        if (pkg?.name === 'natively') return current;
+        if (pkg?.name === 'MeetFloo') return current;
       } catch {
         // fall through
       }
@@ -79,7 +79,7 @@ export function ensureNativeModuleAbi(): void {
   if (app.isPackaged) {
     console.error(
       '[NativeModuleGuard] Packaged build — cannot rebuild at runtime. ' +
-        'The release pipeline shipped the wrong .node binaries.'
+      'The release pipeline shipped the wrong .node binaries.'
     );
     app.exit(1);
     return;
@@ -92,7 +92,7 @@ export function ensureNativeModuleAbi(): void {
   if (!rebuildBin) {
     console.error(
       '[NativeModuleGuard] electron-rebuild not found in node_modules. ' +
-        'Run: npm install, then: npx electron-rebuild -f -w better-sqlite3,keytar'
+      'Run: npm install, then: npx electron-rebuild -f -w better-sqlite3,keytar'
     );
     app.exit(1);
     return;
@@ -113,7 +113,7 @@ export function ensureNativeModuleAbi(): void {
   if (result.status !== 0) {
     console.warn(
       `[NativeModuleGuard] electron-rebuild exited with code ${result.status}. ` +
-        'Continuing startup in fallback mode (in-memory persistence).'
+      'Continuing startup in fallback mode (in-memory persistence).'
     );
     return;
   }

@@ -8,19 +8,19 @@
 const VERSION = '1.0';
 
 const KEYS = {
-  state:         'natively_onboarding_state_v1',
-  version:       'natively_onboarding_version',
-  legacySweepAt: 'natively_onboarding_legacy_sweep_at',
+  state: 'MeetFloo_onboarding_state_v1',
+  version: 'MeetFloo_onboarding_version',
+  legacySweepAt: 'MeetFloo_onboarding_legacy_sweep_at',
 };
 
 const LEGACY = {
-  permsShown:           'natively_perms_shown_v1',
-  seenModesOnboarding:  'natively_seen_modes_onboarding_v5',
-  seenProfileOnboarding:'natively_seen_profile_onboarding_v1',
-  launchCount:          'natively_launch_count_v2.7',
-  appOpensCount:        'natively_app_opens_count',
-  trialPromoTs:         'natively_trial_promo_ts',
-  adsHistory:           'natively_ads_shown_history',
+  permsShown: 'MeetFloo_perms_shown_v1',
+  seenModesOnboarding: 'MeetFloo_seen_modes_onboarding_v5',
+  seenProfileOnboarding: 'MeetFloo_seen_profile_onboarding_v1',
+  launchCount: 'MeetFloo_launch_count_v2.7',
+  appOpensCount: 'MeetFloo_app_opens_count',
+  trialPromoTs: 'MeetFloo_trial_promo_ts',
+  adsHistory: 'MeetFloo_ads_shown_history',
 };
 
 const LEGACY_SWEEP_INTERVAL_MS = 60 * 24 * 60 * 60 * 1000;

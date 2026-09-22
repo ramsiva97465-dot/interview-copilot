@@ -2,8 +2,8 @@
 //
 // What a pasted hosted API key should turn on, and what it must not.
 //
-// Natively was the only key that did anything on its own: setNativelyApiKey()
-// promotes the reranker to 'natively' and readHostedModel() falls back to the
+// MeetFloo was the only key that did anything on its own: setMeetFlooApiKey()
+// promotes the reranker to 'MeetFloo' and readHostedModel() falls back to the
 // managed model. Every other hosted key was written to the credential store and
 // then ignored — setOpenrouterApiKey/setJinaApiKey save and return, and both
 // retrieval consumers gate on a MODEL as well as a key:
@@ -48,7 +48,7 @@
 //
 // It does not write embeddingMode:'manual'. That would filter the candidate
 // list to exactly one entry and delete the fallback chain — "a regression
-// wearing the feature's clothes", in the words of the Natively-key test that
+// wearing the feature's clothes", in the words of the MeetFloo-key test that
 // refused to do it for the same reason. Filling in the model and its width is
 // what makes a keyed provider usable: the resolver then builds the candidate,
 // and for Voyage ranks it above the generic chain. The user gets their key
@@ -157,7 +157,7 @@ export interface RevertDecision {
  * A cleared or refused key must undo its own promotion.
  *
  * Keyed on the CURRENT value being this provider rather than on a pre-call
- * snapshot — the same reasoning revertNativelyPromotions records: re-saving a
+ * snapshot — the same reasoning revertMeetFlooPromotions records: re-saving a
  * key that was already stored leaves the snapshot reading the same value, so
  * restoring it would restore the broken state.
  */

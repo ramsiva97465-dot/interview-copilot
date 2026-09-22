@@ -39,7 +39,7 @@ const compiledServicePath = path.resolve(
 );
 
 // ---- electron stub (app userData + BrowserWindow + safeStorage round-trip) ----
-const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-pm-test-'));
+const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-pm-test-'));
 
 // A trivially reversible "encryption" so persistence round-trips on disk without a
 // real OS keychain. (The bundled CredentialsManager only calls these three methods.)
@@ -79,7 +79,7 @@ const electronStub = {
     isReady: () => true,
     getPath: () => userDataDir,
     whenReady: () => Promise.resolve(),
-    on: () => {},
+    on: () => { },
   },
   BrowserWindow: FakeBrowserWindow,
   safeStorage: safeStorageStub,
@@ -105,7 +105,7 @@ after(() => {
   Module._load = originalLoad;
   try {
     fs.rmSync(userDataDir, { recursive: true, force: true });
-  } catch {}
+  } catch { }
 });
 
 // ---- helpers ----
@@ -116,7 +116,7 @@ function connectExtension(port, token, { hello = true } = {}) {
     ws.on('message', (d) => {
       try {
         frames.push(JSON.parse(d.toString()));
-      } catch {}
+      } catch { }
     });
     ws.on('error', reject);
     ws.on('open', () => {

@@ -28,10 +28,10 @@ import {
 } from "./services/googleServiceAccount"
 
 // Process-wide resilient DNS (2026-09-10). This used to route
-// api.natively.software through c-ares `resolve4` FIRST, unbounded and
+// api.MeetFloo.software through c-ares `resolve4` FIRST, unbounded and
 // uncached, as a workaround for a macOS getaddrinfo ENOTFOUND. Measured on an
 // iPhone-hotspot (IPv6/NAT64) network: resolve4 took 8,009 ms while the
-// system lookup took 11 ms, so every Natively request blew its 4 s connect
+// system lookup took 11 ms, so every MeetFloo request blew its 4 s connect
 // budget and the user saw "The model did not produce an answer in time" with
 // the server answering curl in 0.45 s. The workaround is kept — as the
 // bounded FALLBACK behind a cached system lookup. See
@@ -65,13 +65,13 @@ if (!app.isPackaged) {
 // ipcHandlers.ts get-os-name). Sequoia (macOS 15 / Darwin 24) and Windows keep
 // the faster Rust backend.
 //
-// ESCAPE HATCH (NATIVELY_* convention):
-//   NATIVELY_DISABLE_FONTATIONS=0 → force-KEEP Fontations even on macOS 26+
-//   NATIVELY_DISABLE_FONTATIONS=1 → force-DISABLE on any platform/version
+// ESCAPE HATCH (MEETFLOO_* convention):
+//   MEETFLOO_DISABLE_FONTATIONS=0 → force-KEEP Fontations even on macOS 26+
+//   MEETFLOO_DISABLE_FONTATIONS=1 → force-DISABLE on any platform/version
 //   (unset)                       → auto: disable on darwin macOS 26+ only
 // ============================================================================
 try {
-  const fontationsOverride = process.env.NATIVELY_DISABLE_FONTATIONS;
+  const fontationsOverride = process.env.MEETFLOO_DISABLE_FONTATIONS;
   let shouldDisableFontations: boolean;
   if (fontationsOverride === '0') {
     shouldDisableFontations = false;
@@ -117,7 +117,7 @@ try {
  * Whether THIS build carries a real Developer ID signature.
  *
  * The signed release path (`electron-builder.signed.cjs`) bakes
- * `nativelySigned: true` into the packaged app's package.json via
+ * `MeetFlooSigned: true` into the packaged app's package.json via
  * `extraMetadata`. The default/dev build leaves it absent. We read the flag
  * once from the bundled package.json (inside the asar) and cache it.
  *
@@ -129,7 +129,7 @@ function isSignedBuild(): boolean {
   try {
     const pkgPath = path.join(app.getAppPath(), 'package.json')
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
-    _cachedSignedBuild = pkg?.nativelySigned === true
+    _cachedSignedBuild = pkg?.MeetFlooSigned === true
   } catch {
     _cachedSignedBuild = false
   }
@@ -197,7 +197,7 @@ process.on('uncaughtException', (err) => {
       // showErrorBox is modal and blocks until the user clicks OK.
       dialog.showErrorBox(
         packaged
-          ? 'Natively was built for a different chip — please reinstall'
+          ? 'MeetFloo was built for a different chip — please reinstall'
           : 'Native modules are wrong architecture — run this command to fix:',
         detail,
       );
@@ -332,15 +332,15 @@ let _logFile: string | null = null;
 const getLogFile = (): string | null => {
   if (_logFile) return _logFile;
   try {
-    _logFile = path.join(app.getPath('documents'), 'natively_debug.log');
+    _logFile = path.join(app.getPath('documents'), 'MeetFloo_debug.log');
     return _logFile;
   } catch {
     // app.ready may not have fired yet (including native module boot gates).
     // Still write somewhere stable so a pre-ready crash leaves a reason behind.
     const home = os.homedir?.();
     _logFile = home
-      ? path.join(home, 'Documents', 'natively_debug.log')
-      : path.join(os.tmpdir(), 'natively_debug.log');
+      ? path.join(home, 'Documents', 'MeetFloo_debug.log')
+      : path.join(os.tmpdir(), 'MeetFloo_debug.log');
     return _logFile;
   }
 };
@@ -497,7 +497,7 @@ function emergencyCloseDatabase(reason: string): void {
     // unhandledRejection, SIGTERM/SIGINT, SIGHUP, render/child/gpu-process-gone,
     // initializeApp-failed). A TRUNCATE checkpoint fired from a crashing or
     // half-initialized process — or interrupted by the macOS SIGTERM→SIGKILL
-    // race — can leave natively.db-wal/-shm half-truncated, which then BLOCKS
+    // race — can leave MeetFloo.db-wal/-shm half-truncated, which then BLOCKS
     // the next `new Database()` open and bricks every subsequent launch on both
     // macOS and Windows (the "loads once, crashes, then never opens again" bug).
     // We now ONLY release the handle (drop the OS lock) and let SQLite's own
@@ -567,9 +567,9 @@ function writeProcessReport(label: string): string | null {
   try {
     const report = (process as any).report;
     if (!report?.writeReport) return null;
-    const dir = path.dirname(getLogFile() || path.join(os.tmpdir(), 'natively_debug.log'));
+    const dir = path.dirname(getLogFile() || path.join(os.tmpdir(), 'MeetFloo_debug.log'));
     try { fs.mkdirSync(dir, { recursive: true }); } catch { /* best-effort */ }
-    const file = path.join(dir, `natively-${label}-${Date.now()}.report.json`);
+    const file = path.join(dir, `MeetFloo-${label}-${Date.now()}.report.json`);
     report.writeReport(file);
     // REDACT environmentVariables from the report on disk. Node's process
     // report includes the FULL process.env — that includes any API keys the
@@ -582,7 +582,7 @@ function writeProcessReport(label: string): string | null {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object' && 'environmentVariables' in parsed) {
         delete parsed.environmentVariables;
-        parsed.environmentVariables = '[REDACTED: see natively_debug.log for env-free diagnostic context]';
+        parsed.environmentVariables = '[REDACTED: see MeetFloo_debug.log for env-free diagnostic context]';
         fs.writeFileSync(file, JSON.stringify(parsed, null, 2));
       }
     } catch (e: any) {
@@ -644,9 +644,9 @@ function withTimeout<T>(promise: Promise<T>, ms: number, tag: string): Promise<T
 const LOG_MAX_BYTES = 10 * 1024 * 1024;
 
 // Per-launch reset: when this version of the app starts, an existing
-// natively_debug.log from a previous session is overwritten so the user
+// MeetFloo_debug.log from a previous session is overwritten so the user
 // always sees only the CURRENT session's breadcrumbs. Opt-out via
-// NATIVELY_KEEP_PREVIOUS_LOG=1 (preserve the old log as natively_debug.log.prev
+// MEETFLOO_KEEP_PREVIOUS_LOG=1 (preserve the old log as MeetFloo_debug.log.prev
 // for forensics).
 //
 // CRITICAL FIX (2026-07-09): only TRUNCATE when the prior session ended
@@ -657,7 +657,7 @@ const LOG_MAX_BYTES = 10 * 1024 * 1024;
 // "crash → force-quit → relaunch to capture logs" sequence the user relies
 // on would eat exactly the crash record they want to read.
 function shouldTruncatePriorLog(): boolean {
-  if (process.env.NATIVELY_KEEP_PREVIOUS_LOG === '1') return false;
+  if (process.env.MEETFLOO_KEEP_PREVIOUS_LOG === '1') return false;
   try {
     const { LifecycleTracker } = require('./utils/lifecycleTracker');
     const crashed = LifecycleTracker.getInstance().didPreviousSessionCrash();
@@ -699,7 +699,7 @@ function resetStartupLog(): void {
       try {
         const dir = path.dirname(logFile);
         for (const name of fs.readdirSync(dir)) {
-          if (/^natively-.*\.report\.json$/.test(name)) {
+          if (/^MeetFloo-.*\.report\.json$/.test(name)) {
             try { fs.unlinkSync(path.join(dir, name)); } catch { /* best-effort */ }
           }
         }
@@ -867,11 +867,11 @@ const SCREEN_CAPABILITY_CACHE_TTL_MS = 3000;
  * no transcription" failure mode) were invisible during local dev.
  *
  * Now opt-in: default OFF in dev so devs see the real TCC status; set
- * `NATIVELY_DEV_BYPASS_SCREEN_TCC=1` to restore the legacy bypass for
+ * `MEETFLOO_DEV_BYPASS_SCREEN_TCC=1` to restore the legacy bypass for
  * smooth daily development.
  */
 function isDevTccBypassEnabled(): boolean {
-  return !app.isPackaged && process.env.NATIVELY_DEV_BYPASS_SCREEN_TCC === '1';
+  return !app.isPackaged && process.env.MEETFLOO_DEV_BYPASS_SCREEN_TCC === '1';
 }
 
 function getMacScreenCaptureStatus(): MacScreenCaptureStatus {
@@ -879,7 +879,7 @@ function getMacScreenCaptureStatus(): MacScreenCaptureStatus {
 
   // B5: opt-in dev bypass — see isDevTccBypassEnabled() for rationale.
   if (isDevTccBypassEnabled()) {
-    console.log('[Main] Dev TCC bypass enabled (NATIVELY_DEV_BYPASS_SCREEN_TCC=1) — reporting screen capture as granted');
+    console.log('[Main] Dev TCC bypass enabled (MEETFLOO_DEV_BYPASS_SCREEN_TCC=1) — reporting screen capture as granted');
     return 'granted';
   }
 
@@ -1029,27 +1029,27 @@ function formatPermissionMessage(reason: PermissionReason, extra?: { device?: st
         // console instead (logDevScreenTccBypassHint, below). Bodies here are
         // budgeted at ~2 lines at 11px and must never restate their own title
         // (see permissionTitleKey).
-        return 'Dev builds need their own grant. Enable Natively under Privacy & Security → Screen Recording, then restart.';
+        return 'Dev builds need their own grant. Enable MeetFloo under Privacy & Security → Screen Recording, then restart.';
       }
-      return "Interviewer audio won't be captured. Enable Natively under Privacy & Security → Screen Recording, then restart.";
+      return "Interviewer audio won't be captured. Enable MeetFloo under Privacy & Security → Screen Recording, then restart.";
     case 'mac-screen-recording-restricted':
       if (!isMac) return formatPermissionMessage('system-audio-stuck');
-      return 'Device policy blocks screen capture. Ask your administrator to allow Natively.';
+      return 'Device policy blocks screen capture. Ask your administrator to allow MeetFloo.';
     case 'mac-screen-recording-revoked-rebuild':
       // Defense-in-depth: even though all call sites must be darwin-gated
       // (the `mac-` prefix marks this constraint), if a future contributor
       // calls this from a cross-platform path we degrade gracefully rather
       // than leak macOS UI strings to Windows users.
       if (!isMac) return formatPermissionMessage('system-audio-stuck');
-      return 'System audio is arriving silent. Toggle Natively off and on under Privacy & Security → Screen Recording, then restart.';
+      return 'System audio is arriving silent. Toggle MeetFloo off and on under Privacy & Security → Screen Recording, then restart.';
     case 'mic-denied':
       return isMac
-        ? 'Enable Natively under Privacy & Security → Microphone, then restart.'
-        : 'Enable Natively under Settings → Privacy → Microphone, then restart.';
+        ? 'Enable MeetFloo under Privacy & Security → Microphone, then restart.'
+        : 'Enable MeetFloo under Settings → Privacy → Microphone, then restart.';
     case 'mic-zero-fill':
       return isMac
-        ? "Check the device isn't muted, and that Natively is enabled under Privacy & Security → Microphone."
-        : "Check the device isn't muted, and that Natively is enabled under Settings → Privacy → Microphone.";
+        ? "Check the device isn't muted, and that MeetFloo is enabled under Privacy & Security → Microphone."
+        : "Check the device isn't muted, and that MeetFloo is enabled under Settings → Privacy → Microphone.";
     case 'mac-same-device-input-output':
       // Defense-in-depth: see comment on `mac-screen-recording-revoked-rebuild`.
       // The CoreAudio Process Tap same-device limitation is macOS-specific;
@@ -1106,8 +1106,8 @@ function permissionTitleKey(reason: PermissionReason): string {
  * Dev-only: force the permission banner to render so it can be styled and
  * reviewed without actually revoking a TCC grant.
  *
- *   NATIVELY_DEV_FORCE_PERMISSION_BANNER=1        → screen-recording-denied
- *   NATIVELY_DEV_FORCE_PERMISSION_BANNER=mic-denied  → any PermissionReason
+ *   MEETFLOO_DEV_FORCE_PERMISSION_BANNER=1        → screen-recording-denied
+ *   MEETFLOO_DEV_FORCE_PERMISSION_BANNER=mic-denied  → any PermissionReason
  *
  * Gated on `!app.isPackaged` exactly like isDevTccBypassEnabled(), so it can
  * never fire in a shipped build even if the variable is somehow set. Copy and
@@ -1130,14 +1130,14 @@ const FORCEABLE_PERMISSION_REASONS: readonly PermissionReason[] = [
 ];
 
 function maybeForceDevPermissionBanner(appState: AppState): void {
-  const raw = process.env.NATIVELY_DEV_FORCE_PERMISSION_BANNER;
+  const raw = process.env.MEETFLOO_DEV_FORCE_PERMISSION_BANNER;
   if (!raw || app.isPackaged) return;
 
   const requested = raw === '1' ? 'screen-recording-denied' : raw;
   const reason = FORCEABLE_PERMISSION_REASONS.find((r) => r === requested);
   if (!reason) {
     console.warn(
-      `[DevBanner] Unknown NATIVELY_DEV_FORCE_PERMISSION_BANNER=${raw}. Expected 1 or one of: ${FORCEABLE_PERMISSION_REASONS.join(', ')}`,
+      `[DevBanner] Unknown MEETFLOO_DEV_FORCE_PERMISSION_BANNER=${raw}. Expected 1 or one of: ${FORCEABLE_PERMISSION_REASONS.join(', ')}`,
     );
     return;
   }
@@ -1163,7 +1163,7 @@ function maybeForceDevPermissionBanner(appState: AppState): void {
 function logDevScreenTccBypassHint(): void {
   if (process.platform !== 'darwin' || app.isPackaged) return;
   console.log(
-    '[TCC] Dev bypass available: set NATIVELY_DEV_BYPASS_SCREEN_TCC=1 to skip the Screen Recording check in dev builds.',
+    '[TCC] Dev bypass available: set MEETFLOO_DEV_BYPASS_SCREEN_TCC=1 to skip the Screen Recording check in dev builds.',
   );
 }
 
@@ -1214,7 +1214,7 @@ import type { SpeechEdge } from "./audio/speechEdge"
 import { SonioxStreamingSTT } from "./audio/SonioxStreamingSTT"
 import { ElevenLabsStreamingSTT } from "./audio/ElevenLabsStreamingSTT"
 import { OpenAIStreamingSTT } from "./audio/OpenAIStreamingSTT"
-import { NativelyProSTT } from "./audio/NativelyProSTT"
+import { MeetFlooProSTT } from "./audio/NativelyProSTT"
 import { NvidiaNimStreamingSTT } from "./audio/NvidiaNimStreamingSTT"
 import { AppleSpeechSTT } from "./audio/AppleSpeechSTT"
 import { punctuationSourceFor } from "./llm/punctuationProvenance"
@@ -1223,7 +1223,7 @@ import { RAGManager } from "./rag/RAGManager"
 import { DatabaseManager } from "./db/DatabaseManager"
 
 /** Unified type for all STT providers with optional extended capabilities */
-type STTProvider = (GoogleSTT | RestSTT | DeepgramStreamingSTT | SonioxStreamingSTT | ElevenLabsStreamingSTT | OpenAIStreamingSTT | NativelyProSTT | NvidiaNimStreamingSTT | AppleSpeechSTT) & {
+type STTProvider = (GoogleSTT | RestSTT | DeepgramStreamingSTT | SonioxStreamingSTT | ElevenLabsStreamingSTT | OpenAIStreamingSTT | MeetFlooProSTT | NvidiaNimStreamingSTT | AppleSpeechSTT) & {
   /** Local models return whether a trailing final is now in flight; cloud providers return void. */
   finalize?: () => void | boolean;
   setAudioChannelCount?: (count: number) => void;
@@ -1288,11 +1288,11 @@ let KnowledgeDatabaseManagerClass: any = null;
 // Phase 1: shared comp-evidence detector for transcript-aware intent routing.
 let textHasCompEvidence: ((text: string) => boolean) | null = null;
 try {
-    KnowledgeOrchestratorClass = require('../premium/electron/knowledge/KnowledgeOrchestrator').KnowledgeOrchestrator;
-    KnowledgeDatabaseManagerClass = require('../premium/electron/knowledge/KnowledgeDatabaseManager').KnowledgeDatabaseManager;
-    textHasCompEvidence = require('../premium/electron/knowledge/NegotiationConversationTracker').textHasCompEvidence;
+  KnowledgeOrchestratorClass = require('../premium/electron/knowledge/KnowledgeOrchestrator').KnowledgeOrchestrator;
+  KnowledgeDatabaseManagerClass = require('../premium/electron/knowledge/KnowledgeDatabaseManager').KnowledgeDatabaseManager;
+  textHasCompEvidence = require('../premium/electron/knowledge/NegotiationConversationTracker').textHasCompEvidence;
 } catch {
-    console.log('[Main] Knowledge modules not available — profile intelligence disabled.');
+  console.log('[Main] Knowledge modules not available — profile intelligence disabled.');
 }
 
 import { CredentialsManager } from "./services/CredentialsManager"
@@ -1414,7 +1414,7 @@ export class AppState {
   // (and only the transcript handler) treats `isMeetingActive || _isDraining`
   // as "accept trailing finals" — every other call site looks at
   // `isMeetingActive` alone, which flips to false synchronously on Stop so the
-  // launcher's "Meeting ongoing" pill switches back to "Start Natively" the
+  // launcher's "Meeting ongoing" pill switches back to "Start MeetFloo" the
   // instant the user clicks Stop, with no 250 ms green-→-blue stutter.
   private _isDraining: boolean = false;
   // Tracks remembered output device so reconfigureAudio can no-op when nothing changed.
@@ -1584,7 +1584,7 @@ export class AppState {
           // is locked out of audio until they manually clear settings.
           //
           // Also consume the Whisper load sentinel before validation/preload. If
-          // it exists, the previous process died while loading that model natively
+          // it exists, the previous process died while loading that model MeetFloo
           // (before JS error handlers could persist a cooldown). Reset any
           // matching selection headlessly so one bad ONNX model cannot brick
           // startup.
@@ -1808,8 +1808,8 @@ export class AppState {
       }
     } else {
       registerStealthHandler('stealth-tap:available', () => false);
-      registerStealthHandler('stealth-tap:open-settings', () => {});
-      registerStealthHandler('stealth-tap:stop', () => {});
+      registerStealthHandler('stealth-tap:open-settings', () => { });
+      registerStealthHandler('stealth-tap:stop', () => { });
       registerStealthHandler('stealth-tap:start', () => false);
       // Non-desktop: returns true so the renderer's stealthAutoEngageOkRef
       // stays true and the explicit isCgEventTapAvailableRef guard (added in
@@ -1849,7 +1849,7 @@ export class AppState {
           // connected, ask it to grab the active tab's page context (delivered to
           // the overlay via /dom). If it isn't reachable — not in a browser, SW
           // asleep, Phone Mirror off — fall back to a screenshot automatically so
-          // the gesture always does something. See natively-browser/README.md.
+          // the gesture always does something. See MeetFloo-browser/README.md.
           let captured = false;
           let domFailureReason = '';
           // Announce the in-flight capture so a fast follow-up ⌘Enter (the
@@ -1895,7 +1895,7 @@ export class AppState {
             // (2026-08-18 report). The notice renders as a warn-tone status pill.
             const fallbackNotice = describePageCaptureFallback(domFailureReason);
             // Target the OVERLAY window explicitly: the only listener lives in
-            // NativelyInterface, which mounts there — getMainWindow() returns
+            // MeetFlooInterface, which mounts there — getMainWindow() returns
             // the launcher in launcher mode, where the notice would be dropped
             // (same reason /dom delivery resolves the overlay window).
             const noticeWindow = () => this.windowHelper?.getOverlayWindow?.() ?? this.getMainWindow();
@@ -1923,21 +1923,21 @@ export class AppState {
               const needsHost = fallbackNotice.kind === 'needs-host-permission';
               console.error(
                 '[Main] Capture failed on BOTH paths.\n' +
-                  `  • Page context: ${domFailureReason || 'unavailable'}\n` +
-                  `  • Screenshot:   ${shotErr?.message || shotErr}\n` +
-                  (needsHost
-                    ? '  → Chrome has not granted this site to the extension. Click the Natively\n' +
-                      '    extension icon and press Capture once to grant it (one site, one click).\n'
-                    : '') +
-                  '  → Screenshot capture additionally requires Screen Recording permission\n' +
-                  '    (System Settings › Privacy & Security › Screen Recording).',
+                `  • Page context: ${domFailureReason || 'unavailable'}\n` +
+                `  • Screenshot:   ${shotErr?.message || shotErr}\n` +
+                (needsHost
+                  ? '  → Chrome has not granted this site to the extension. Click the MeetFloo\n' +
+                  '    extension icon and press Capture once to grant it (one site, one click).\n'
+                  : '') +
+                '  → Screenshot capture additionally requires Screen Recording permission\n' +
+                '    (System Settings › Privacy & Security › Screen Recording).',
               );
             }
           }
 
-        // --- STEALTH SHORTCUTS: no focus, no show, pure IPC dispatch ---
+          // --- STEALTH SHORTCUTS: no focus, no show, pure IPC dispatch ---
 
-        // Chat actions — fire into the renderer without focusing the window
+          // Chat actions — fire into the renderer without focusing the window
         } else if (actionId === 'chat:focusInput') {
           // Toggle stealth typing mode. While engaged, every keystroke is
           // captured at the OS input layer and routed to the renderer; the
@@ -2012,7 +2012,7 @@ export class AppState {
           const action = actionMap[actionId];
           this.sendToMeetingSurfaces('global-shortcut', { action });
 
-        // Window movement — move window position without focus change
+          // Window movement — move window position without focus change
         } else if (actionId === 'window:move-up') {
           this.windowHelper.moveWindowUp();
         } else if (actionId === 'window:move-down') {
@@ -2022,7 +2022,7 @@ export class AppState {
         } else if (actionId === 'window:move-right') {
           this.windowHelper.moveWindowRight();
 
-        // General actions that are now global (stealth)
+          // General actions that are now global (stealth)
         } else if (actionId === 'general:process-screenshots') {
           this.sendToMeetingSurfaces('global-shortcut', { action: 'processScreenshots' });
         } else if (actionId === 'general:reset-cancel') {
@@ -2339,7 +2339,7 @@ export class AppState {
   /**
    * Send `model-changed` to the windows that actually listen for it.
    *
-   * Two of them: the overlay (NativelyInterface renders the active model) and
+   * Two of them: the overlay (MeetFlooInterface renders the active model) and
    * the model selector (it highlights the current row before it closes).
    * Everything else on screen ignores the channel, and `broadcast()` reached all
    * of them — the revert path's own comment calls this out, that the
@@ -2463,15 +2463,15 @@ export class AppState {
           this.broadcast('ollama:pull-complete');
           // Re-resolve the embedding provider given that Ollama might now be available
           if (this.ragManager) {
-             console.log('[AppState] Ollama model ready, re-evaluating RAG pipeline provider');
-             // One shared builder — this site used to omit geminiKeys (killing key
-             // rotation) and would have omitted the Natively key the same way.
-             this.ragManager.initializeEmbeddings(buildEmbeddingConfig());
-             this.scheduleModeReferenceIndexRetry();
+            console.log('[AppState] Ollama model ready, re-evaluating RAG pipeline provider');
+            // One shared builder — this site used to omit geminiKeys (killing key
+            // rotation) and would have omitted the MeetFloo key the same way.
+            this.ragManager.initializeEmbeddings(buildEmbeddingConfig());
+            this.scheduleModeReferenceIndexRetry();
           }
         }
       } catch (err) {
-         console.error('[AppState] Failed to bootstrap Ollama:', err);
+        console.error('[AppState] Failed to bootstrap Ollama:', err);
       }
     })();
   }
@@ -2486,10 +2486,10 @@ export class AppState {
         // all assembled by buildEmbeddingConfig() now — see the note there about
         // the four sites that used to hand-roll this and had already drifted.
         this.ragManager = new RAGManager({
-            db: sqliteDb,
-            dbPath: db.getDbPath(),
-            extPath: db.getExtPath(),
-            ...buildEmbeddingConfig(),
+          db: sqliteDb,
+          dbPath: db.getDbPath(),
+          extPath: db.getExtPath(),
+          ...buildEmbeddingConfig(),
         });
         this.ragManager.setLLMHelper(this.processingHelper.getLLMHelper());
 
@@ -2560,7 +2560,7 @@ export class AppState {
           });
         }
 
-        // Company-research search provider (Tavily key → Natively API → none),
+        // Company-research search provider (Tavily key → MeetFloo API → none),
         // resolved per AOT run so keys added/changed mid-session take effect.
         // Same cascade the manual profile:research-company handler uses; without
         // this the JD-upload AOT pipeline always fell back to LLM-only dossiers.
@@ -2719,7 +2719,7 @@ export class AppState {
           // on knowledge mode being active AND a resume being present (only then
           // is a session likely imminent). Best-effort, non-blocking.
           if (this.knowledgeOrchestrator.isKnowledgeMode()) {
-            llmHelper.prewarmPromptCache().catch((_e: any): void => {});
+            llmHelper.prewarmPromptCache().catch((_e: any): void => { });
           }
         }
 
@@ -3193,7 +3193,7 @@ export class AppState {
    * The DEFAULT engine (user decision 2026-08-25): "legacy trigger, judge
    * brain" — interviewer stoppage → one judge call → dispatch/offer/silent.
    * See SimpleAutoAnswer.ts. V3 stays reachable via
-   * NATIVELY_AUTO_ANSWER_ENGINE=v3 for A/B.
+   * MEETFLOO_AUTO_ANSWER_ENGINE=v3 for A/B.
    */
   /**
    * DEV-ONLY transcript trace. Every routine log in this app carries lengths
@@ -3201,8 +3201,8 @@ export class AppState {
    * live run hard to read: you can see that a candidate was judged, not WHAT
    * was judged. This is the one deliberate exception, and it reuses the
    * Context-Intelligence content gate rather than adding a second concept —
-   * dev build AND NATIVELY_CONTEXT_DEBUG=verbose AND
-   * NATIVELY_CONTEXT_DEBUG_INCLUDE_CONTENT=1, evaluated per call so toggling
+   * dev build AND MEETFLOO_CONTEXT_DEBUG=verbose AND
+   * MEETFLOO_CONTEXT_DEBUG_INCLUDE_CONTENT=1, evaluated per call so toggling
    * the setting needs no restart, and failing CLOSED when unbound or packaged.
    */
   private contentTraceEnabled(): boolean {
@@ -3239,7 +3239,7 @@ export class AppState {
     noteCandidate: (id, gen) => this.intelligenceManager.noteAutoAnswerCandidate(id, gen),
     speculativeSnapshot: () => this.intelligenceManager.getSpeculativeSnapshot(),
     prefetchAnswer: (id, text) => this.intelligenceManager.prefetchAutoAnswer(id, text),
-    ...((process.env.NATIVELY_AUTO_ANSWER_JUDGE || '').toLowerCase() === 'off' ? {} : {
+    ...((process.env.MEETFLOO_AUTO_ANSWER_JUDGE || '').toLowerCase() === 'off' ? {} : {
       judgeCandidate: async (req) => {
         const llm = this.processingHelper?.getLLMHelper?.();
         if (!llm) return null;
@@ -3309,11 +3309,11 @@ export class AppState {
 
     let stt: STTProvider;
 
-    if (sttProvider === 'natively') {
-      const nativelyKey = CredentialsManager.getInstance().getNativelyApiKey();
-      if (!nativelyKey) {
-        // Natively is Coming Soon — no key means degrade gracefully like every other provider
-        console.warn(`[Main] No Natively API Key configured for ${speaker}, falling back to GoogleSTT`);
+    if (sttProvider === 'MeetFloo') {
+      const MeetFlooKey = CredentialsManager.getInstance().getMeetFlooApiKey();
+      if (!MeetFlooKey) {
+        // MeetFloo is Coming Soon — no key means degrade gracefully like every other provider
+        console.warn(`[Main] No MeetFloo API Key configured for ${speaker}, falling back to GoogleSTT`);
         stt = new GoogleSTT(speaker);
       } else {
         // 'system' for interviewer (system audio), 'mic' for user (microphone).
@@ -3325,14 +3325,14 @@ export class AppState {
         // SettingsManager itself and derives the control-plane base URL from
         // its own host, so the construction site stays tiny. The relay path is
         // flag-gated OFF by default — this is inert until regionalSttRelayEnabled.
-        stt = new NativelyProSTT(
-          nativelyKey,
+        stt = new MeetFlooProSTT(
+          MeetFlooKey,
           speaker === 'interviewer' ? 'system' : 'mic',
           {
             appVersion: app.getVersion(),
             platform: process.platform === 'darwin' ? 'mac'
               : process.platform === 'win32' ? 'windows'
-              : 'linux',
+                : 'linux',
           },
         );
       }
@@ -3491,12 +3491,12 @@ export class AppState {
     // local-whisper branch falls through to its settings id.
     const effectiveSttId: string =
       stt instanceof DeepgramStreamingSTT ? 'deepgram'
-      : stt instanceof SonioxStreamingSTT ? 'soniox'
-      : stt instanceof OpenAIStreamingSTT ? 'openai'
-      : stt instanceof ElevenLabsStreamingSTT ? 'elevenlabs'
-      : stt instanceof NativelyProSTT ? 'natively'
-      : stt instanceof GoogleSTT ? 'google'
-      : sttProvider;
+        : stt instanceof SonioxStreamingSTT ? 'soniox'
+          : stt instanceof OpenAIStreamingSTT ? 'openai'
+            : stt instanceof ElevenLabsStreamingSTT ? 'elevenlabs'
+              : stt instanceof MeetFlooProSTT ? 'MeetFloo'
+                : stt instanceof GoogleSTT ? 'google'
+                  : sttProvider;
 
     // Speaker diarization on the MEETING-AUDIO channel (2026-08-25). That
     // channel can carry several voices — an interviewer plus a colleague, or a
@@ -3505,10 +3505,10 @@ export class AppState {
     // verdicts. Providers that diarize surface `speakerId` per segment; the
     // Auto Answer engine passes those labels to the judge, and providers that
     // do not simply never send one (the prompt is then unchanged).
-    // NATIVELY_AUTO_ANSWER_DIARIZE=off disables it.
+    // MEETFLOO_AUTO_ANSWER_DIARIZE=off disables it.
     if (speaker === 'interviewer'
-        && (process.env.NATIVELY_AUTO_ANSWER_DIARIZE || '').toLowerCase() !== 'off'
-        && typeof (stt as any).setDiarize === 'function') {
+      && (process.env.MEETFLOO_AUTO_ANSWER_DIARIZE || '').toLowerCase() !== 'off'
+      && typeof (stt as any).setDiarize === 'function') {
       try {
         (stt as any).setDiarize(true);
         if (this._verboseLogging) console.log(`[AutoAnswer] speaker diarization requested on ${effectiveSttId}`);
@@ -3675,7 +3675,7 @@ export class AppState {
       if (isAuthError || isLocalSttUnavailable) {
         _consecutiveErrors = 0;
         _lastState = 'failed';
-        this.sendSttStatus( {
+        this.sendSttStatus({
           state: 'failed',
           provider: sttProvider,
           error: errorMessage,
@@ -3690,7 +3690,7 @@ export class AppState {
 
       if (_consecutiveErrors >= maxErrors || isQuotaError) {
         _lastState = 'failed';
-        this.sendSttStatus( {
+        this.sendSttStatus({
           state: 'failed',
           provider: sttProvider,
           error: isQuotaError
@@ -3701,7 +3701,7 @@ export class AppState {
         } as SttStatusPayload);
       } else {
         _lastState = 'reconnecting';
-        this.sendSttStatus( {
+        this.sendSttStatus({
           state: 'reconnecting',
           provider: sttProvider,
           error: errorMessage,
@@ -3718,7 +3718,7 @@ export class AppState {
         _consecutiveErrors = 0; // Success — reset counter
         if (_lastState !== 'connected') {
           _lastState = 'connected';
-          this.sendSttStatus( {
+          this.sendSttStatus({
             state: 'connected',
             provider: sttProvider,
             channel: speaker,
@@ -3762,10 +3762,10 @@ export class AppState {
       });
     }
 
-    // Auto language detection: NativelyProSTT emits 'languageDetected' when the
+    // Auto language detection: MeetFlooProSTT emits 'languageDetected' when the
     // backend resolves the language from the first audio batch. Notify the renderer
     // so the settings UI can show what was detected.
-    if (stt instanceof NativelyProSTT) {
+    if (stt instanceof MeetFlooProSTT) {
       stt.on('connected', () => {
         _consecutiveErrors = 0;
         if (_lastState !== 'connected') {
@@ -3785,14 +3785,14 @@ export class AppState {
         this.sendToWindow(helper.getLauncherWindow(), 'stt-language-auto-detected', bcp47);
       });
 
-      // Persistent-reconnect signal: NativelyProSTT now retries indefinitely
+      // Persistent-reconnect signal: MeetFlooProSTT now retries indefinitely
       // with a 30s backoff cap, but we want the user to know after ~5 attempts
       // (~30–90s of dead transcript) that the issue is sustained, not a blip.
       // Reuse the stt-status channel with state='reconnecting' and a higher
       // attempts count so the renderer's existing banner picks it up.
       stt.on('persistent-reconnect', (info: { attempts: number }) => {
         console.warn(`[Main] STT persistent reconnect (${speaker}): ${info.attempts} consecutive attempts.`);
-        this.sendSttStatus( {
+        this.sendSttStatus({
           state: 'reconnecting',
           provider: sttProvider,
           error: `Reconnecting to transcription service — ${info.attempts} consecutive attempts. Check your network connection.`,
@@ -3904,7 +3904,7 @@ export class AppState {
       ) {
         const msg = formatPermissionMessage('mac-same-device-input-output', { device: decision.device });
         console.warn(`${prefix}SystemAudioCapture ${msg}`);
-        this.sendAudioCaptureFailed( {
+        this.sendAudioCaptureFailed({
           channel: 'system',
           message: msg,
           titleKey: permissionTitleKey('mac-same-device-input-output'),
@@ -4035,7 +4035,7 @@ export class AppState {
         if (chunkCount > 0) return;
         if (!this.isMeetingActive) return;
         console.warn(`${prefix}MicrophoneCapture produced 0 chunks in ${STUCK_WATCHDOG_MS / 1000}s — likely silent capture (device contention, hot-unplug, or muted input).`);
-        this.sendAudioCaptureFailed( {
+        this.sendAudioCaptureFailed({
           channel: 'mic',
           message: `No audio detected from your microphone for ${STUCK_WATCHDOG_MS / 1000}s. Check that your input device is unmuted and not in use by another app.`,
           attempt: 0,
@@ -4113,7 +4113,7 @@ export class AppState {
               !!builtIn &&
               !!this._lastRequestedInputDeviceId &&
               this.normalizeDeviceName(builtIn.name) ===
-                this.normalizeDeviceName(this._lastRequestedInputDeviceId);
+              this.normalizeDeviceName(this._lastRequestedInputDeviceId);
 
             if (builtIn && !alreadyBuiltIn) {
               // Auto-switch to the built-in mic — the "just works" path. The BT
@@ -4167,7 +4167,7 @@ export class AppState {
         } else if (now - firstChunkAt >= ZEROFILL_OBSERVATION_MS) {
           zerofillTriggered = true;
           console.warn(`${prefix}Mic chunks all zero-filled (peak-to-peak < 100) for ${ZEROFILL_OBSERVATION_MS / 1000}s — TCC denial or device-mute suspected.`);
-          this.sendAudioCaptureFailed( {
+          this.sendAudioCaptureFailed({
             channel: 'mic',
             message: formatPermissionMessage('mic-zero-fill'),
             titleKey: permissionTitleKey('mic-zero-fill'),
@@ -4272,7 +4272,7 @@ export class AppState {
           this.systemAudioCapture = null;
           this.sendAudioCaptureFailed({
             channel: 'system',
-            message: 'System audio capture failed to initialize. The native audio module could not allocate the capture device. Restarting Natively may help; if the problem persists, file a bug.',
+            message: 'System audio capture failed to initialize. The native audio module could not allocate the capture device. Restarting MeetFloo may help; if the problem persists, file a bug.',
             attempt: 0,
             maxAttempts: 0,
             terminal: true,
@@ -4295,7 +4295,7 @@ export class AppState {
           this.microphoneCapture = null;
           this.sendAudioCaptureFailed({
             channel: 'mic',
-            message: 'Microphone capture failed to initialize. The native audio module could not open the default input device. Check that the device is connected and not in exclusive use by another app, then restart Natively.',
+            message: 'Microphone capture failed to initialize. The native audio module could not open the default input device. Check that the device is connected and not in exclusive use by another app, then restart MeetFloo.',
             attempt: 0,
             maxAttempts: 0,
             terminal: true,
@@ -4321,7 +4321,7 @@ export class AppState {
           this.googleSTT = null;
         }
         if (!this.googleSTT) {
-          this.sendAudioCaptureFailed( {
+          this.sendAudioCaptureFailed({
             channel: 'system',
             message: `Speech-to-text provider "${sttProv}" failed to initialize for the interviewer channel. Check your API key and credentials in Settings.`,
             attempt: 0,
@@ -4341,7 +4341,7 @@ export class AppState {
           this.googleSTT_User = null;
         }
         if (!this.googleSTT_User) {
-          this.sendAudioCaptureFailed( {
+          this.sendAudioCaptureFailed({
             channel: 'mic',
             message: `Speech-to-text provider "${sttProv}" failed to initialize for the microphone channel. Check your API key and credentials in Settings.`,
             attempt: 0,
@@ -4492,7 +4492,7 @@ export class AppState {
       this.microphoneCapture.start();
     } catch (err) {
       console.error('[Main] Resume: failed to restart mic capture:', err);
-      this.sendAudioCaptureFailed( {
+      this.sendAudioCaptureFailed({
         channel: 'mic',
         message: 'Microphone failed to restart after wake. Check that no other app holds the mic, then end and restart the meeting.',
         attempt: 0,
@@ -4540,7 +4540,7 @@ export class AppState {
       }
     } catch (err) {
       console.error('[Main] Resume: failed to restart system capture:', err);
-      this.sendAudioCaptureFailed( {
+      this.sendAudioCaptureFailed({
         channel: 'system',
         message: 'System audio capture failed to restart after wake. End and restart the meeting to recover.',
         attempt: 0,
@@ -4727,7 +4727,7 @@ export class AppState {
         /macbook|built[- ]?in|imac|mac\s+studio|mac\s+mini/i.test(d.name);
 
       return inputs.find(d => !isConflicting(d) && isBuiltIn(d))
-          ?? inputs.find(d => !isConflicting(d));
+        ?? inputs.find(d => !isConflicting(d));
     } catch {
       return undefined;
     }
@@ -4873,7 +4873,7 @@ export class AppState {
     // error does not surface until MicrophoneCapture.start(), long after the
     // constructor-shaped fallback ladder below has already "succeeded". So a
     // saved device that is simply gone (unplugged dock mic, a renamed
-    // interface, or the NativelySystemAudioTap aggregate that used to be
+    // interface, or the MeetFlooSystemAudioTap aggregate that used to be
     // offerable in the picker) took the mic channel down for the entire
     // meeting.
     //
@@ -4899,9 +4899,8 @@ export class AppState {
       // returned just the synthetic default row); discarding a working mic on
       // that would be treating absence of evidence as evidence of absence.
       if (resolution.status === 'missing') {
-        const reason = `Input device "${wantedInput}" is not available (found: ${
-          resolution.available.length ? resolution.available.join(', ') : 'none'
-        }).`;
+        const reason = `Input device "${wantedInput}" is not available (found: ${resolution.available.length ? resolution.available.join(', ') : 'none'
+          }).`;
         console.warn(`[Main] ${reason} Falling back to the system default microphone.`);
         unavailableInput = { requested: wantedInput, reason };
         wantedInput = undefined;
@@ -5092,7 +5091,7 @@ export class AppState {
             reason: `All ${candidates.length + 2} input devices failed: ${(lastErr as Error)?.message || 'unknown'}`,
           });
           // Surface to UI so the user knows the meeting will be system-audio-only.
-          this.sendAudioCaptureFailed( {
+          this.sendAudioCaptureFailed({
             channel: 'mic',
             message: 'No working microphone could be initialized. Disconnect and reconnect your audio devices, or restart the app.',
             attempt: 0,
@@ -5113,11 +5112,11 @@ export class AppState {
   /**
    * Serialization mutex for reconfigureSttProvider.
    *
-   * Crash/hang fix (2026-06-05): a single "save Natively API key" action can
+   * Crash/hang fix (2026-06-05): a single "save MeetFloo API key" action can
    * fire up to TWO reconfigure calls back-to-back — one from the
-   * `set-natively-api-key` handler (which auto-promotes the STT provider to
-   * 'natively' and reconfigures), and one from the renderer's follow-up
-   * `set-stt-provider('natively')` call. Each call tears down and rebuilds the
+   * `set-MeetFloo-api-key` handler (which auto-promotes the STT provider to
+   * 'MeetFloo' and reconfigures), and one from the renderer's follow-up
+   * `set-stt-provider('MeetFloo')` call. Each call tears down and rebuilds the
    * native captures (SystemAudioCapture / MicrophoneCapture → CoreAudio /
    * ScreenCaptureKit / WASAPI). Two interleaved teardown+construct sequences
    * against the same native device handles is a native-resource race that
@@ -5275,7 +5274,7 @@ export class AppState {
       // "ScreenCaptureKit access denied", "No displays found") instead of just
       // a generic STT 'reconnecting' indicator. This event is non-fatal — the
       // recovery attempt may still succeed.
-      this.sendAudioCaptureFailed( {
+      this.sendAudioCaptureFailed({
         channel: 'system',
         message: err.message,
         attempt: this._systemAudioRecoveryAttempts,
@@ -5354,7 +5353,7 @@ export class AppState {
         // for this meeting so it can stop showing "reconnecting" and surface a
         // mic-only banner instead.
         if (this._systemAudioRecoveryAttempts >= 3 && isRecoveryCurrentMeeting()) {
-          this.sendAudioCaptureFailed( {
+          this.sendAudioCaptureFailed({
             channel: 'system',
             message: `System audio capture gave up after 3 attempts. Last error: ${recoveryErr?.message || err.message}`,
             attempt: this._systemAudioRecoveryAttempts,
@@ -5946,7 +5945,7 @@ export class AppState {
 
     if (!(await ensureMacMicrophoneAccess('audio test'))) {
       // The title is prepended here, not folded back into the body. Banner
-      // copy is now remedy-only ("Enable Natively under…") because the UI
+      // copy is now remedy-only ("Enable MeetFloo under…") because the UI
       // renders the fault as a separate title; an Error carries no title, so
       // thrown/logged text would otherwise state a fix without ever naming
       // what failed.
@@ -6279,7 +6278,7 @@ export class AppState {
     // entirely for the whole meeting (see the `!this._ambientChatEnabled`
     // gate around setupSystemAudioPipeline() below) — so neither permission
     // is ever touched in that mode. Checking/warning about them here anyway
-    // used to throw on a denied mic grant (blocking "Start Natively" outright)
+    // used to throw on a denied mic grant (blocking "Start MeetFloo" outright)
     // and always surface the "Interviewer audio will not be captured" banner,
     // even though no audio was ever going to be captured by design.
     if (!this._ambientChatEnabled) {
@@ -6290,7 +6289,7 @@ export class AppState {
         // the in-overlay audio banner would not be visible) can recognise this
         // as a recoverable mic-permission denial and re-open the permissions
         // card instead of failing silently with only a console.error. Pre-fix,
-        // a denied/revoked mic grant made "Start Natively" do nothing on screen.
+        // a denied/revoked mic grant made "Start MeetFloo" do nothing on screen.
         const err = new Error(message) as Error & { code?: string; channel?: string };
         err.code = 'mic-permission-denied';
         err.channel = 'mic';
@@ -6429,7 +6428,7 @@ export class AppState {
     try {
       const llmHelper = this.processingHelper.getLLMHelper();
       if (llmHelper?.isUsingOllama?.()) {
-        llmHelper.prewarmPromptCache().catch((_e: any): void => {});
+        llmHelper.prewarmPromptCache().catch((_e: any): void => { });
       }
     } catch { /* non-fatal — warmup must never block meeting start */ }
 
@@ -6600,7 +6599,7 @@ export class AppState {
     // transcript finals from the first teardown).
     if (this._endMeetingInFlight || (!this.isMeetingActive && this._pendingTeardown)) {
       console.log('[Main] endMeeting() ignored — teardown already in flight.');
-      await this._pendingTeardown?.catch((): void => {});
+      await this._pendingTeardown?.catch((): void => { });
       return;
     }
 
@@ -6667,7 +6666,7 @@ export class AppState {
 
     // ─── UX STATE FLIP — SYNCHRONOUS ───────────────────────────────────────
     // Now flip the UX-facing meeting flag and broadcast. The launcher's
-    // "Meeting ongoing" pill reverts to "Start Natively" immediately;
+    // "Meeting ongoing" pill reverts to "Start MeetFloo" immediately;
     // trailing transcript finals are still accepted via `_isDraining`.
     this.isMeetingActive = false;
     this._meetingGeneration++;
@@ -6736,7 +6735,7 @@ export class AppState {
       Promise.resolve(dyingMicrophoneCapture?.destroy()).catch((e) => {
         console.error('[Main] Microphone capture teardown failed:', e);
       }),
-    ]).then(() => {});
+    ]).then(() => { });
 
     // Stop the default-output watcher — no point polling CoreAudio while
     // there's no active capture to rebind.
@@ -6838,7 +6837,7 @@ export class AppState {
           }
         } else {
           if (ragManager) {
-            await ragManager.stopLiveIndexing().catch((): void => {});
+            await ragManager.stopLiveIndexing().catch((): void => { });
             if (!this.isMeetingActive) ragManager.deleteMeetingData('live-meeting-current');
           }
         }
@@ -7192,7 +7191,7 @@ export class AppState {
     CredentialsManager.getInstance().setSttLanguage(key);
 
     // 'auto' is forwarded verbatim (changed 2026-08-24). The old collapse to
-    // 'english-us' for every non-Natively provider was stale: each provider
+    // 'english-us' for every non-MeetFloo provider was stale: each provider
     // implements its own 'auto' branch and has for some time —
     //   GoogleSTT            en-US + fr/es/de alternativeLanguageCodes
     //   DeepgramStreamingSTT language 'multi' (nova-3 multilingual)
@@ -7656,7 +7655,7 @@ export class AppState {
     trayIcon.setTemplateImage(iconToUse.endsWith('Template.png'));
 
     this.tray = new Tray(trayIcon)
-    this.tray.setToolTip('Natively') // This tooltip might also need update if we change global shortcut, but global shortcut is removed.
+    this.tray.setToolTip('MeetFloo') // This tooltip might also need update if we change global shortcut, but global shortcut is removed.
     this.updateTrayMenu();
 
     // Double-click to show window
@@ -7674,7 +7673,7 @@ export class AppState {
     console.log('[Main] updateTrayMenu called. Screenshot Accelerator:', screenshotAccel);
 
     // Update tooltip for verification
-    this.tray.setToolTip('Natively');
+    this.tray.setToolTip('MeetFloo');
 
     // Helper to format accelerator for display (e.g. CommandOrControl+H -> Cmd+H)
     const formatAccel = (accel: string) => {
@@ -7694,7 +7693,7 @@ export class AppState {
 
     const contextMenu = Menu.buildFromTemplate([
       {
-        label: 'Show Natively',
+        label: 'Show MeetFloo',
         click: () => {
           this.centerAndShowWindow()
         }
@@ -7917,7 +7916,7 @@ export class AppState {
 
     if (shouldApply) {
       if (wantUndetectable) {
-        const nativelyWasFocused =
+        const MeetFlooWasFocused =
           targetFocusWindow != null &&
           !targetFocusWindow.isDestroyed() &&
           targetFocusWindow.isFocused();
@@ -7930,9 +7929,9 @@ export class AppState {
         // the windows' sharingType, silently undoing screen-capture stealth.
         this.reassertAllContentProtection();
 
-        // Keep focus on Natively (win.focus(), not app.focus()) so dock.hide()'s
+        // Keep focus on MeetFloo (win.focus(), not app.focus()) so dock.hide()'s
         // implicit app-deactivation doesn't hand control to the app behind us.
-        if (nativelyWasFocused && targetFocusWindow && !targetFocusWindow.isDestroyed()) {
+        if (MeetFlooWasFocused && targetFocusWindow && !targetFocusWindow.isDestroyed()) {
           targetFocusWindow.focus();
         }
       } else {
@@ -7999,7 +7998,7 @@ export class AppState {
   // .show()+.focus() on it while the app is in accessory policy with the dock
   // tile hidden re-activates the app as a foreground app, which makes macOS
   // re-register it and REVEAL the dock tile — silently undoing app.dock.hide().
-  // This is the "Natively icon appears in the dock after Stop meeting" bug:
+  // This is the "MeetFloo icon appears in the dock after Stop meeting" bug:
   // endMeeting() swaps overlay→launcher, the activating show re-shows the tile,
   // and nothing re-asserted stealth afterward. It is intermittent because macOS
   // asynchronously coalesces and sometimes drops activation-policy/dock calls.
@@ -8210,7 +8209,7 @@ export class AppState {
   }
 
   private _applyDisguise(mode: 'terminal' | 'settings' | 'activity' | 'none'): void {
-    let appName = "Natively";
+    let appName = "MeetFloo";
     let iconPath = "";
 
     const isWin = process.platform === 'win32';
@@ -8255,11 +8254,11 @@ export class AppState {
         break;
       case 'none':
       default:
-        appName = "Natively";
+        appName = "MeetFloo";
         if (isMac) {
           iconPath = app.isPackaged
-            ? path.join(process.resourcesPath, "natively.icns")
-            : path.join(app.getAppPath(), "assets/natively.icns");
+            ? path.join(process.resourcesPath, "MeetFloo.icns")
+            : path.join(app.getAppPath(), "assets/MeetFloo.icns");
         } else if (isWin) {
           iconPath = app.isPackaged
             ? path.join(process.resourcesPath, "assets/icons/win/icon.ico")
@@ -8291,7 +8290,7 @@ export class AppState {
     // 3. Update App User Model ID (Windows Taskbar grouping)
     if (isWin) {
       // Use unique AUMID per disguise to avoid grouping with the real app
-      app.setAppUserModelId(`com.natively.assistant.${mode}`);
+      app.setAppUserModelId(`com.MeetFloo.assistant.${mode}`);
     }
 
     // 4. Update Icons
@@ -8417,15 +8416,43 @@ ensureNativeModuleAbi();
 async function initializeApp() {
   logStartupPhase('initializeApp:start');
 
+  if (process.defaultApp) {
+    if (process.argv.length >= 2) {
+      app.setAsDefaultProtocolClient('meetfloo', process.execPath, [path.resolve(process.argv[1])]);
+    }
+  } else {
+    app.setAsDefaultProtocolClient('meetfloo');
+  }
+
   // When a duplicate launch is attempted (e.g. user invokes Spotlight again
-  // while Natively is running), focus and recenter the existing window so the
+  // while MeetFloo is running), focus and recenter the existing window so the
   // launch is visibly handled instead of silently absorbed.
-  app.on('second-instance', () => {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
     try {
       const appState = AppState.getInstance();
       appState.centerAndShowWindow();
+
+      // Catch deep links on Windows/Linux (meetfloo://...)
+      const url = commandLine.find(arg => arg.startsWith('meetfloo://'));
+      if (url && appState.window) {
+        appState.window.webContents.send('oauth-token-received', url);
+      }
     } catch (err) {
       console.error('[Main] second-instance handler failed:', err);
+    }
+  });
+
+  // Catch deep links on macOS
+  app.on('open-url', (event, url) => {
+    event.preventDefault();
+    try {
+      const appState = AppState.getInstance();
+      appState.centerAndShowWindow();
+      if (url && appState.window) {
+        appState.window.webContents.send('oauth-token-received', url);
+      }
+    } catch (err) {
+      console.error('[Main] open-url handler failed:', err);
     }
   });
 
@@ -8438,11 +8465,11 @@ async function initializeApp() {
       // Use the same redaction policy as logToFile — never log secrets.
       const safeMeta = meta
         ? Object.fromEntries(
-            Object.entries(meta).map(([k, v]) => {
-              if (/key|secret|token|password|auth|credential/i.test(k)) return [k, '[REDACTED]'];
-              return [k, v];
-            })
-          )
+          Object.entries(meta).map(([k, v]) => {
+            if (/key|secret|token|password|auth|credential/i.test(k)) return [k, '[REDACTED]'];
+            return [k, v];
+          })
+        )
         : undefined;
       console.log(msg, safeMeta ?? '');
       logToFile(msg + ' ' + (safeMeta ? JSON.stringify(safeMeta) : ''));
@@ -8475,7 +8502,7 @@ async function initializeApp() {
   logStartupPhase('after-app-whenReady', { userData: app.getPath('userData') });
 
   // 2a-verify. Context OS flag-parity assertion (2026-07-14 real-app
-  // source-switch repair): no-op unless NATIVELY_VERIFICATION_MODE=1 is
+  // source-switch repair): no-op unless MEETFLOO_VERIFICATION_MODE=1 is
   // explicitly set (internal benchmark/CI/soak runs only). Fails fast and
   // loudly if this Electron process's effective flags don't match what a
   // verification run assumes — the exact class of drift that let the
@@ -8511,7 +8538,7 @@ async function initializeApp() {
   // re-register the running app's LS identity. Doing that while the app is on the
   // default 'regular' activation policy makes macOS paint a SECOND dock tile (the
   // old identity's tile lingers while the renamed one registers) — the duplicate
-  // "Natively" icon multiple users reported. We therefore drop to 'accessory'
+  // "MeetFloo" icon multiple users reported. We therefore drop to 'accessory'
   // (no dock tile) for the whole rename+window-creation window, then promote back
   // to 'regular' exactly once AFTER createWindow() so a single, correctly-named
   // tile appears together with the window. Stealth mode stays hidden via dock.hide()
@@ -8614,8 +8641,8 @@ async function initializeApp() {
   // stretch so scripts/audit/F-110-repro.mjs can prove that a mid-init throw
   // terminates the process instead of leaving a windowless zombie that holds
   // the single-instance lock.
-  if (process.env.NATIVELY_TEST_INIT_FAULT === '1') {
-    throw new Error('NATIVELY_TEST_INIT_FAULT injected init failure');
+  if (process.env.MEETFLOO_TEST_INIT_FAULT === '1') {
+    throw new Error('MEETFLOO_TEST_INIT_FAULT injected init failure');
   }
 
   // Start the in-app review session ledger. This is intentionally main-process
@@ -8628,7 +8655,7 @@ async function initializeApp() {
     const apiKey = getReviewApiKey();
     getReviewHardwareId()
       .then((hwid: string | null) => reviewService.syncWithBackend(apiKey, hwid))
-      .catch(() => {});
+      .catch(() => { });
   } catch (err) {
     console.warn('[Init] ReviewService recordSessionStart failed (non-fatal):', err);
   }
@@ -8658,7 +8685,7 @@ async function initializeApp() {
   appState.applyInitialDisguise();
 
   // Ollama is an external optional provider. Do not spawn it on startup unless
-  // the user explicitly selected/opted into it; Natively's packaged fallback
+  // the user explicitly selected/opted into it; MeetFloo's packaged fallback
   // stack must work without Ollama installed.
   try {
     const settingsManager = SettingsManager.getInstance();
@@ -8667,7 +8694,7 @@ async function initializeApp() {
       settingsManager.get('autoStartOllama') === true ||
       defaultModel.startsWith('ollama-') ||
       defaultModel.startsWith('ollama:') ||
-      process.env.NATIVELY_AUTO_START_OLLAMA === '1';
+      process.env.MEETFLOO_AUTO_START_OLLAMA === '1';
     if (shouldStartOllama) {
       OllamaManager.getInstance().ensureRunning({
         reason: settingsManager.get('autoStartOllama') === true ? 'auto-start-setting' : 'startup-selected',
@@ -8693,19 +8720,19 @@ async function initializeApp() {
   // Usage outbox — durable delivery of client-reported (BYOK) usage events.
   //
   // Started AFTER credentials are loaded, but the key is passed as a GETTER
-  // rather than a value: a user who pastes their Natively key ten minutes from
+  // rather than a value: a user who pastes their MeetFloo key ten minutes from
   // now must not need a restart before their queued events can drain.
   //
   // ON BY DEFAULT since 2026-08-27. It was gated behind an unset env var from
   // 2026-08-14 until then, which meant the whole ledger shipped inert and
   // collected nothing in production for the entire period. Setting
-  // NATIVELY_USAGE_OUTBOX_ENABLED=0 turns it back off, but only where an
+  // MEETFLOO_USAGE_OUTBOX_ENABLED=0 turns it back off, but only where an
   // environment can actually be set (dev, CI, a terminal launch) — a packaged
   // app inherits none. The production kill switch is server-side; see
   // UsageOutbox.isEnabled().
   try {
     const { usageOutbox } = require('./services/UsageOutbox');
-    usageOutbox.start(() => CredentialsManager.getInstance().getNativelyApiKey());
+    usageOutbox.start(() => CredentialsManager.getInstance().getMeetFlooApiKey());
     // Drain anything queued while the app was closed, without waiting a full
     // dispatch interval. Deliberately not awaited — startup must not block on it.
     setTimeout(() => { void usageOutbox.dispatchOnce(); }, 5000);
@@ -8839,7 +8866,7 @@ async function initializeApp() {
 
   // DEV-ONLY: thinking MATRIX (budgets × levels) on a focused problem subset.
   //   THINKING_MATRIX=1 THINKING_BENCH_MODEL=gemini-3.7-flash THINKING_BENCH_DATASET=$(pwd)/electron/services/dev/cf10.json npm run electron:build
-if (process.env.THINKING_MATRIX === '1') {
+  if (process.env.THINKING_MATRIX === '1') {
     (async () => {
       try {
         const llmHelper = appState.processingHelper?.getLLMHelper?.();
@@ -8908,11 +8935,11 @@ if (process.env.THINKING_MATRIX === '1') {
     windowCount: BrowserWindow.getAllWindows().length,
   });
 
-  // Opt-in: NATIVELY_LOG_GPU_STATUS=1 logs Chromium's GPU feature status once
+  // Opt-in: MEETFLOO_LOG_GPU_STATUS=1 logs Chromium's GPU feature status once
   // at boot (whether gpu_compositing/rasterization are 'enabled' vs.
   // 'software'/'disabled') — useful when diagnosing a renderer that freezes
   // or fails to composite. Off by default to avoid unconditional boot noise.
-  if (process.env.NATIVELY_LOG_GPU_STATUS === '1') {
+  if (process.env.MEETFLOO_LOG_GPU_STATUS === '1') {
     try {
       const status = app.getGPUFeatureStatus();
       console.log('[GPU] featureStatus', JSON.stringify(status));
@@ -8954,13 +8981,13 @@ if (process.env.THINKING_MATRIX === '1') {
     } catch (err: any) {
       console.warn('[LocalFallbackPreflight] scheduling failed (non-fatal):', err?.message || err);
     }
-  }, Number(process.env.NATIVELY_LOCAL_PREFLIGHT_DELAY_MS || '1500'));
+  }, Number(process.env.MEETFLOO_LOCAL_PREFLIGHT_DELAY_MS || '1500'));
   // Don't let the preflight timer keep the process alive past quit.
   if (preflightTimer && typeof preflightTimer.unref === 'function') preflightTimer.unref();
 
   // The zero-shot intent classifier warmup that used to sit here was removed
   // on 2026-09-05 with the classifier itself; its cache is swept above.
-  // See docs/natively-router-final-answer-2026-09-05.md.
+  // See docs/MeetFloo-router-final-answer-2026-09-05.md.
 
   // DUAL-DOCK-ICON FIX (promotion half): now that the disguised name/icon are
   // applied and the window exists, promote back to 'regular' so a SINGLE dock
@@ -8968,7 +8995,7 @@ if (process.env.THINKING_MATRIX === '1') {
   // stealth mode is never promoted (it must stay dock-tile-less). This pairs
   // with the 'accessory' clamp in step 2a above — together they ensure the LS
   // re-registration from app.setName()/setProcessDisplayName() happens while no
-  // tile is visible, so macOS never paints a second "Natively" icon.
+  // tile is visible, so macOS never paints a second "MeetFloo" icon.
   if (process.platform === 'darwin' && !appState.getUndetectable()) {
     app.setActivationPolicy('regular');
   }
@@ -9097,14 +9124,14 @@ if (process.env.THINKING_MATRIX === '1') {
   // Restore Phone Mirror service if it was enabled in a previous session.
   // Failure here is non-fatal — the user can re-enable from Settings.
   //
-  // DIAGNOSTIC (2026-07-11): NATIVELY_DISABLE_PHONE_MIRROR=1 stops the PhoneMirror
+  // DIAGNOSTIC (2026-07-11): MEETFLOO_DISABLE_PHONE_MIRROR=1 stops the PhoneMirror
   // WebSocket server from ever starting. On the Windows repro, the launcher
   // renderer's native RSS explodes (497→2008MB in ~4s, flat JS heap) within
   // seconds of `[PhoneMirror] companion extension connected` — the same trigger
   // in 3 separate logs. This flag lets the (frozen) user boot WITHOUT the WS
   // server so the phone/companion extension can't connect. If the leak vanishes,
   // PhoneMirror connect is confirmed as the trigger.
-  const disablePhoneMirrorOnBoot = process.env.NATIVELY_DISABLE_PHONE_MIRROR === '1';
+  const disablePhoneMirrorOnBoot = process.env.MEETFLOO_DISABLE_PHONE_MIRROR === '1';
   if (
     shouldStartPhoneMirrorOnBoot({
       disablePhoneMirror: disablePhoneMirrorOnBoot,
@@ -9115,13 +9142,13 @@ if (process.env.THINKING_MATRIX === '1') {
       .start({ exposeOnLan: !!SettingsManager.getInstance().get('phoneMirrorExposeOnLan'), persist: false })
       .catch((err) => console.error('[Init] PhoneMirror auto-start failed:', err));
   } else if (disablePhoneMirrorOnBoot) {
-    console.warn('[LeakTest] NATIVELY_DISABLE_PHONE_MIRROR=1 → PhoneMirror WS server NOT started this run');
+    console.warn('[LeakTest] MEETFLOO_DISABLE_PHONE_MIRROR=1 → PhoneMirror WS server NOT started this run');
   }
 
   // One-time macOS screen recording permission prompt.
   //
   // We must fire this AFTER createWindow() so that:
-  //   1. The Natively launcher window is visible and focused when the TCC dialog
+  //   1. The MeetFloo launcher window is visible and focused when the TCC dialog
   //      appears — macOS anchors the dialog to the frontmost app window on Ventura+.
   //      Without a visible window the dialog can appear behind other apps (Sequoia).
   //   2. In stealth/undetectable mode the dock icon is hidden, but the window is
@@ -9212,7 +9239,7 @@ if (process.env.THINKING_MATRIX === '1') {
             console.warn('[Init] Microphone is restricted by device policy at startup.');
             appState.sendAudioCaptureFailed({
               channel: 'mic',
-              message: 'Microphone is restricted by device policy. Contact your administrator to enable microphone access for Natively.',
+              message: 'Microphone is restricted by device policy. Contact your administrator to enable microphone access for MeetFloo.',
               attempt: 0,
               maxAttempts: 0,
               terminal: true,
@@ -9443,8 +9470,8 @@ if (process.env.THINKING_MATRIX === '1') {
         // the native-arch gate handler's pattern above).
         const { dialog } = require('electron');
         dialog.showErrorBox(
-          'Natively — display error',
-          'A window keeps crashing while rendering. Please restart Natively. ' +
+          'MeetFloo — display error',
+          'A window keeps crashing while rendering. Please restart MeetFloo. ' +
           'If this continues, update to the latest version.'
         );
       } catch { /* dialog best-effort */ }
@@ -9559,7 +9586,7 @@ if (process.env.THINKING_MATRIX === '1') {
         const apiKey = getReviewApiKey();
         getReviewHardwareId()
           .then((hwid: string | null) => reviewService.reportUsage(apiKey, hwid, totals.usage_ms))
-          .catch(() => {});
+          .catch(() => { });
       }
     } catch { /* optional */ }
 
@@ -9638,7 +9665,7 @@ if (process.env.THINKING_MATRIX === '1') {
 
     // Best-effort WAL checkpoint so a crash/force-quit followed by immediate
     // relaunch has less recovery work and fewer chances to trip over a large
-    // or stale natively.db-wal. Must be synchronous and must never block quit.
+    // or stale MeetFloo.db-wal. Must be synchronous and must never block quit.
     // 2026-07-08: now uses the new `close()` method which checkpoints AND
     // closes the better-sqlite3 connection so the file lock is released
     // before the process exits. A stale lock on a brand-new user profile

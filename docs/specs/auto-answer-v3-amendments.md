@@ -13,7 +13,7 @@ The two product invariants from V2 §52 remain the top priority and are restated
 
 V2 treats Auto Answer as a transcript problem. It is a two-channel audio problem that happens to produce transcripts.
 
-Natively captures mic (user) and system loopback (interviewer) as separate streams. No other component in the V2 spec consumes the user channel. Add it everywhere:
+MeetFloo captures mic (user) and system loopback (interviewer) as separate streams. No other component in the V2 spec consumes the user channel. Add it everywhere:
 
 **New trigger precondition.** An auto-fire requires all of:
 
@@ -41,7 +41,7 @@ V2 §15 and §37 defer any learned turn model. Keep the ordering (deterministic 
 
 - Declarative questions ("So you own that service now.") carry the question in pitch, not words. Text heuristics and the question extractor cannot see them. This is a whole category of interview follow-ups.
 - The Whisper REST providers (Groq, OpenAI) emit no endpoint signal at all; `speech_ended` starts the upload. Text-side quiet windows are the only fallback there today and they are exactly the mechanism V2 §2 says is insufficient.
-- The cost objection is empirically dead. Smart Turn v3.1 CPU (`pipecat-ai/smart-turn-v3`, BSD-2): Whisper Tiny encoder + linear head, ~8M params, 8 MB int8 ONNX, ~12 ms on a modern local CPU, 23 languages, input 16 kHz mono PCM up to 8 s. It runs once per interviewer speech-stop event. Natively already ships ONNX Runtime (IntentClassifier, bge-small), so this is one asset file and one session, no new runtime.
+- The cost objection is empirically dead. Smart Turn v3.1 CPU (`pipecat-ai/smart-turn-v3`, BSD-2): Whisper Tiny encoder + linear head, ~8M params, 8 MB int8 ONNX, ~12 ms on a modern local CPU, 23 languages, input 16 kHz mono PCM up to 8 s. It runs once per interviewer speech-stop event. MeetFloo already ships ONNX Runtime (IntentClassifier, bge-small), so this is one asset file and one session, no new runtime.
 
 **Wiring.** Keep an 8-second rolling ring buffer of interviewer-channel PCM at 16 kHz mono (256 KB). On interviewer speech-stop, run inference and feed the probability into the endpoint fusion below. Implement it behind the exact `TurnPredictor` interface V2 §37 defines, so the deterministic path keeps working when the asset is missing (V2 §38 fallback rule is preserved unchanged).
 
@@ -223,5 +223,5 @@ Decision latency after the true end of a confident question: ~250 to 350 ms (sil
 
 - Any cloud LLM in the detection path (V2 §36, reaffirmed).
 - TEN Turn Detection as a runtime dependency (7B). Its finished/unfinished/wait taxonomy is already absorbed into the V2 §14 labels.
-- VAP (stereo-native turn prediction) in this pass. It is the long-term ceiling because it natively consumes Natively's dual-channel format, but it is research-grade code. Revisit after Phase 6.
+- VAP (stereo-native turn prediction) in this pass. It is the long-term ceiling because it MeetFloo consumes MeetFloo's dual-channel format, but it is research-grade code. Revisit after Phase 6.
 - "100 percent reliable" as a spec target. The target is measured: precision-gated auto-fire, offer card for the middle band, hotkey as the floor. That combination is what reliability looks like in production.

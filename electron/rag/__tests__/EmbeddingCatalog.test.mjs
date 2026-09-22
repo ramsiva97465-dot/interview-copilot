@@ -64,12 +64,12 @@ describe('Gemini', () => {
   });
 });
 
-describe('Natively', () => {
+describe('MeetFloo', () => {
   test('exposes exactly the model the server pins, and it is not user-selectable', () => {
     // The managed tier runs voyage-4 @2048 server-side; offering a choice here
     // would be a lie the client cannot honour — /v1/embed serves this build
-    // exactly one model, the one NativelyEmbeddingProvider asks for by name.
-    const p = byId(buildEmbeddingCatalog({ hasNativelyKey: true }), 'natively');
+    // exactly one model, the one MeetFlooEmbeddingProvider asks for by name.
+    const p = byId(buildEmbeddingCatalog({ hasMeetFlooKey: true }), 'MeetFloo');
     assert.deepEqual(ids(p), ['voyage-4']);
     assert.equal(p.models[0].dimensions, 2048);
     assert.equal(p.managed, true);
@@ -84,7 +84,7 @@ describe('Built-in', () => {
   });
 
   test('adds nomic-embed-text only when Ollama is actually running', () => {
-    // Natively auto-pulls nomic-embed-text through Ollama, so it is "built in"
+    // MeetFloo auto-pulls nomic-embed-text through Ollama, so it is "built in"
     // only in the sense that it arrives without configuration — and only if
     // Ollama is there to serve it.
     const withOllama = byId(buildEmbeddingCatalog({ ollamaReachable: true }), 'local');
@@ -133,14 +133,14 @@ describe('Ollama', () => {
 
 describe('catalogue shape', () => {
   test('every provider is present so the panel never hides one silently', () => {
-    assert.deepEqual(providers(buildEmbeddingCatalog({})), ['natively', 'ollama', 'custom', 'openrouter', 'voyage', 'openai', 'gemini', 'local']);
+    assert.deepEqual(providers(buildEmbeddingCatalog({})), ['MeetFloo', 'ollama', 'custom', 'openrouter', 'voyage', 'openai', 'gemini', 'local']);
   });
 
   test('cloud providers are flagged so the panel can show where data goes', () => {
     const cat = buildEmbeddingCatalog({});
     assert.equal(byId(cat, 'openai').cloud, true);
     assert.equal(byId(cat, 'gemini').cloud, true);
-    assert.equal(byId(cat, 'natively').cloud, true);
+    assert.equal(byId(cat, 'MeetFloo').cloud, true);
     assert.equal(byId(cat, 'ollama').cloud, false);
     assert.equal(byId(cat, 'local').cloud, false);
   });
@@ -216,7 +216,7 @@ describe('models are hidden without a key', () => {
   test('a cloud provider with no key lists NO models', () => {
     // Showing a model that cannot be selected is noise, and invites a click that
     // silently does nothing.
-    for (const id of ['openai', 'gemini', 'natively']) {
+    for (const id of ['openai', 'gemini', 'MeetFloo']) {
       assert.deepEqual(byId(buildEmbeddingCatalog({}), id).models, [], `${id} must list nothing`);
     }
   });
@@ -317,7 +317,7 @@ describe('Voyage AI', () => {
   test('offers the current suite, not just one model', () => {
     const ids = voy().models.map(m => m.id);
     for (const expected of ['voyage-4', 'voyage-4-large', 'voyage-4-lite',
-                            'voyage-code-4', 'voyage-finance-2', 'voyage-law-2']) {
+      'voyage-code-4', 'voyage-finance-2', 'voyage-law-2']) {
       assert.ok(ids.includes(expected), `${expected} should be offered`);
     }
   });

@@ -1,4 +1,4 @@
--- Natively AI Assistant - Supabase Cloud Database Schema
+-- MeetFloo AI Assistant - Supabase Cloud Database Schema
 
 -- 1. Meetings Table
 CREATE TABLE IF NOT EXISTS public.meetings (

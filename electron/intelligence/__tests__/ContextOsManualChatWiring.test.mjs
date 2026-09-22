@@ -24,8 +24,8 @@ const repoRoot = path.resolve(__dirname, '../../..');
 const cjsRequire = createRequire(import.meta.url);
 
 // Flags: force the Context OS surface ON for this suite (env override wins).
-process.env.NATIVELY_CONTEXT_OS = '1';
-process.env.NATIVELY_CONTEXT_OS_MANUAL_CHAT = '1';
+process.env.MEETFLOO_CONTEXT_OS = '1';
+process.env.MEETFLOO_CONTEXT_OS_MANUAL_CHAT = '1';
 
 const co = cjsRequire(path.resolve(repoRoot, 'dist-electron/electron/intelligence/context-os/index.js'));
 
@@ -50,20 +50,20 @@ test('contract builds when umbrella + surface flags are on', () => {
 });
 
 test('umbrella off → null (legacy path untouched)', () => {
-  process.env.NATIVELY_CONTEXT_OS = '0';
+  process.env.MEETFLOO_CONTEXT_OS = '0';
   try {
     assert.equal(co.buildTurnContractIfEnabled(DOC_INPUT), null);
   } finally {
-    process.env.NATIVELY_CONTEXT_OS = '1';
+    process.env.MEETFLOO_CONTEXT_OS = '1';
   }
 });
 
 test('surface flag off → null even with umbrella on', () => {
-  process.env.NATIVELY_CONTEXT_OS_MANUAL_CHAT = '0';
+  process.env.MEETFLOO_CONTEXT_OS_MANUAL_CHAT = '0';
   try {
     assert.equal(co.buildTurnContractIfEnabled(DOC_INPUT), null);
   } finally {
-    process.env.NATIVELY_CONTEXT_OS_MANUAL_CHAT = '1';
+    process.env.MEETFLOO_CONTEXT_OS_MANUAL_CHAT = '1';
   }
 });
 
@@ -72,11 +72,11 @@ test('enforcement mode follows contextOsEnforceSourceCapabilities', () => {
   // (2026-08-30, user-directed override) — default is now 'enforce', not
   // 'observe'. An explicit OFF override must still force 'observe'.
   assert.equal(co.contextOsEnforcementMode(), 'enforce');
-  process.env.NATIVELY_CONTEXT_OS_ENFORCE_CAPABILITIES = '0';
+  process.env.MEETFLOO_CONTEXT_OS_ENFORCE_CAPABILITIES = '0';
   try {
     assert.equal(co.contextOsEnforcementMode(), 'observe');
   } finally {
-    delete process.env.NATIVELY_CONTEXT_OS_ENFORCE_CAPABILITIES;
+    delete process.env.MEETFLOO_CONTEXT_OS_ENFORCE_CAPABILITIES;
   }
 });
 

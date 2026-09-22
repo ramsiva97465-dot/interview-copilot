@@ -1,18 +1,18 @@
-# Privacy Policy for Natively Companion
+# Privacy Policy for MeetFloo Companion
 
 *Last Updated: June 13, 2026*
 
-Natively ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how the Natively Companion Chrome Extension handles user data.
+MeetFloo ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how the MeetFloo Companion Chrome Extension handles user data.
 
 ---
 
 ## 1. Information Collection and Use
 
-The Natively Companion Chrome Extension **does not collect, store, or transmit any personal data, tracking information, or browsing history** to Natively or any third-party servers.
+The MeetFloo Companion Chrome Extension **does not collect, store, or transmit any personal data, tracking information, or browsing history** to MeetFloo or any third-party servers.
 
 ### How Data is Handled:
 - **On-Demand Capture:** When you click "Capture Page" or use the capture hotkey, the extension extracts the readable text content of the active tab.
-- **Local Transmission Only:** The extracted content is sent directly to your locally running Natively desktop application via a secure local loopback connection (`http://127.0.0.1` and `ws://127.0.0.1`).
+- **Local Transmission Only:** The extracted content is sent directly to your locally running MeetFloo desktop application via a secure local loopback connection (`http://127.0.0.1` and `ws://127.0.0.1`).
 - **No Remote Processing:** No external servers are involved in extracting, transmitting, or processing this page content.
 
 ---
@@ -25,7 +25,7 @@ To perform its core functions, the extension requests the following permissions.
 - **`storage`:** Used to store your local pairing credentials (the port number and secure authorization token) so you do not have to pair the extension every time.
 - **`alarms`:** Used for local keep-alive scheduling to maintain the connection to your desktop client.
 - **`tabs`:** Used to find the correct active browser tab when you press the global shortcut on your desktop.
-- **Host Permissions (`http://127.0.0.1/*`, `ws://127.0.0.1/*`):** Needed to send data to the Natively desktop application running on your computer.
+- **Host Permissions (`http://127.0.0.1/*`, `ws://127.0.0.1/*`):** Needed to send data to the MeetFloo desktop application running on your computer.
 
 ---
 

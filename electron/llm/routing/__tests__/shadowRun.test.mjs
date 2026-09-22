@@ -38,8 +38,8 @@ describe('shadow logging is off by default', () => {
         // They answer different questions and carry different risk. Shadow
         // logging can run for two weeks on a build where the router is off.
         const shadow = fs.readFileSync(path.join(repoRoot, 'electron/llm/routing/shadowRun.ts'), 'utf8');
-        assert.ok(shadow.includes('NATIVELY_ROUTER_SHADOW'));
-        assert.ok(!shadow.includes("'NATIVELY_INTERACTION_ROUTER'"), 'the shadow run must not read the router flag');
+        assert.ok(shadow.includes('MEETFLOO_ROUTER_SHADOW'));
+        assert.ok(!shadow.includes("'MEETFLOO_INTERACTION_ROUTER'"), 'the shadow run must not read the router flag');
     });
 });
 

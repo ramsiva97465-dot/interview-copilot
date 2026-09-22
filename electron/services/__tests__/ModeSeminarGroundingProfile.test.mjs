@@ -102,19 +102,21 @@ describe('Seminar Mode: groundingProfile shape and TurnPlanner integration', () 
       'default and seminar onNoEvidence MUST differ — strict profile is the differentiator');
   });
 
-  test('planTurn (with NATIVELY_SEMINAR_MODE=1 env flag) emits SEMINAR_GROUNDING_PROFILE', () => {
-    const prev = process.env.NATIVELY_SEMINAR_MODE;
-    process.env.NATIVELY_SEMINAR_MODE = '1';
+  test('planTurn (with MEETFLOO_SEMINAR_MODE=1 env flag) emits SEMINAR_GROUNDING_PROFILE', () => {
+    const prev = process.env.MEETFLOO_SEMINAR_MODE;
+    process.env.MEETFLOO_SEMINAR_MODE = '1';
     try {
-      const plan = planTurn({ question: 'what is the method', availability: {
-        hasReferenceFiles: true, hasProfileFacts: false, hasJobDescription: false, hasLiveTranscript: true,
-      } });
+      const plan = planTurn({
+        question: 'what is the method', availability: {
+          hasReferenceFiles: true, hasProfileFacts: false, hasJobDescription: false, hasLiveTranscript: true,
+        }
+      });
       assert.equal(plan.groundingProfile.evidencePreference, 'required',
         'seminar env flag must flip the plan to required evidence preference');
       assert.equal(plan.groundingProfile.onNoEvidence, 'say_not_found_then_answer_general');
     } finally {
-      if (prev === undefined) delete process.env.NATIVELY_SEMINAR_MODE;
-      else process.env.NATIVELY_SEMINAR_MODE = prev;
+      if (prev === undefined) delete process.env.MEETFLOO_SEMINAR_MODE;
+      else process.env.MEETFLOO_SEMINAR_MODE = prev;
     }
   });
 });

@@ -58,7 +58,7 @@ async function* raceGeneratorWithDeadline(
             if (timer) clearTimeout(timer);
             if (res === DEADLINE) {
                 console.warn(`[RAGManager] Stream stalled for ${stallMs}ms — aborting.`);
-                try { const p = stream.return?.(undefined); if (p && typeof (p as any).then === 'function') (p as Promise<unknown>).catch(() => {}); } catch { /* already closed */ }
+                try { const p = stream.return?.(undefined); if (p && typeof (p as any).then === 'function') (p as Promise<unknown>).catch(() => { }); } catch { /* already closed */ }
                 return;
             }
             if (res.done) return;
@@ -69,7 +69,7 @@ async function* raceGeneratorWithDeadline(
             yield res.value as string;
         }
     } catch (e) {
-        try { const p = stream.return?.(undefined); if (p && typeof (p as any).then === 'function') (p as Promise<unknown>).catch(() => {}); } catch { /* already closed */ }
+        try { const p = stream.return?.(undefined); if (p && typeof (p as any).then === 'function') (p as Promise<unknown>).catch(() => { }); } catch { /* already closed */ }
         throw e;
     }
 }
@@ -90,7 +90,7 @@ export interface RAGManagerConfig extends Partial<AppAPIConfig> {
      * geminiKeys, ollamaUrl, providerDataScopes, explicitKeyManagement — and the
      * constructor re-listed the same six into `embeddingPipeline.initialize()`.
      * `buildEmbeddingConfig()` returns an `AppAPIConfig` with far more than
-     * that (nativelyApiKey, nativelyTrialToken, nativelyApiUrl,
+     * that (MeetFlooApiKey, MeetFlooTrialToken, MeetFlooApiUrl,
      * ollamaEmbeddingModel/Dims, the per-provider model+dims hints, and the
      * embeddingMode/embeddingProvider choice), and `main.ts` spreads it straight
      * in — so every field outside the hand-written six was SILENTLY DROPPED on a
@@ -130,7 +130,7 @@ export class RAGManager {
      * Guards against concurrent reprocessMeeting()/reindex calls for the same
      * target. Process-wide on globalThis, not per-instance: RAGManager is
      * constructor-owned (not a getInstance singleton), so a harness that
-     * constructs two instances over ONE natively.db — or co-loads two esbuild
+     * constructs two instances over ONE MeetFloo.db — or co-loads two esbuild
      * bundles — would otherwise run duplicate embedding jobs for the same
      * documents (duplicate spend; duplicate vectors if inserts aren't
      * idempotent). Same bug class as the 2026-07-31 singleton sweep, LOW
@@ -138,8 +138,8 @@ export class RAGManager {
      */
     private get _jobGuards(): { reprocess: Set<string>; reindexing: boolean } {
         const g = globalThis as unknown as Record<string, { reprocess: Set<string>; reindexing: boolean } | undefined>;
-        if (!g.__nativelyRagJobGuardsV1__) g.__nativelyRagJobGuardsV1__ = { reprocess: new Set(), reindexing: false };
-        return g.__nativelyRagJobGuardsV1__;
+        if (!g.__MeetFlooRagJobGuardsV1__) g.__MeetFlooRagJobGuardsV1__ = { reprocess: new Set(), reindexing: false };
+        return g.__MeetFlooRagJobGuardsV1__;
     }
     private get _reprocessInFlight(): Set<string> { return this._jobGuards.reprocess; }
 
@@ -154,7 +154,7 @@ export class RAGManager {
         this.embeddingPipeline.setPinnedSpaceRestoredHandler(() => this.scheduleAutoReindex());
 
         // Forward the WHOLE embedding config. Hand-listing fields here is what
-        // dropped nativelyApiKey / nativelyTrialToken / nativelyApiUrl /
+        // dropped MeetFlooApiKey / MeetFlooTrialToken / MeetFlooApiUrl /
         // ollamaEmbeddingModel / ollamaEmbeddingDims and the embeddingMode +
         // embeddingProvider choice on every normal app start — see
         // RAGManagerConfig's note. `db`/`dbPath`/`extPath` are this class's own
@@ -441,7 +441,7 @@ export class RAGManager {
             console.log('[RAGManager] Embedding pipeline not ready, skipping live indexing');
             return;
         }
-        
+
         // F-411: purge anything still sitting under this id BEFORE indexing the
         // new session. The live id is a CONSTANT ('live-meeting-current'), and
         // the only cleanup is at meeting end — guarded by !isMeetingActive, and
@@ -563,7 +563,7 @@ export class RAGManager {
 
         // 1. Delete from vector store (chunks and summaries)
         this.vectorStore.deleteChunksForMeeting(meetingId);
-        
+
         // 2. Clear embedding queue for this meeting to prevent "Chunk not found" errors on re-processing
         try {
             const info = this.db.prepare('DELETE FROM embedding_queue WHERE meeting_id = ?').run(meetingId);
@@ -573,7 +573,7 @@ export class RAGManager {
         } catch (e) {
             console.warn(`[RAGManager] Failed to clear embedding_queue for meeting ${meetingId}`, e);
         }
-        
+
         // 3. Clean up transient meeting row if it was a live session
         try {
             if (meetingId === 'live-meeting-current') {

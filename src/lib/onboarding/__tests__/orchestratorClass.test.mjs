@@ -112,7 +112,7 @@ let STAGES;
 
 // orchestrator.ts imports './persistence.ts' with an explicit .ts extension and
 // stageCatalog imports orchestrator type-only — both are exactly what Node's
-// type stripping resolves natively, so no bundling step is required.
+// type stripping resolves MeetFloo, so no bundling step is required.
 // pathToFileURL, not a bare path: on Windows an absolute path like
 // `D:\...\orchestrator.ts` is not a valid ESM specifier and import() rejects it
 // with ERR_UNSUPPORTED_ESM_URL_SCHEME.

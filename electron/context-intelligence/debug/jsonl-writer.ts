@@ -139,7 +139,7 @@ interface SharedWriterState {
   writer: ContextDebugJsonlWriter | null;
   directory: string | null;
 }
-const WRITER_KEY = '__nativelyContextDebugWriterV1__';
+const WRITER_KEY = '__MeetFlooContextDebugWriterV1__';
 function shared(): SharedWriterState {
   const g = globalThis as unknown as Record<string, unknown>;
   let s = g[WRITER_KEY] as SharedWriterState | undefined;

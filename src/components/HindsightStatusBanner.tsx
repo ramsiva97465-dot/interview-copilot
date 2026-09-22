@@ -7,7 +7,7 @@
 // states ('spawn-failed', 'unreachable'); success states are no-ops (the Settings panel
 // chip already covers them).
 //
-// The banner sits above NativelyInterface in the overlay tree with a high z-index so it's
+// The banner sits above MeetFlooInterface in the overlay tree with a high z-index so it's
 // visible during meetings too — a silently-broken memory server during a meeting would
 // otherwise be invisible until the user opens Settings.
 
@@ -24,10 +24,10 @@ type HindsightStatus =
 
 // Per-state copy. Kept short — the banner has limited horizontal space inside the overlay.
 const STATUS_BODY: Record<'spawn-failed' | 'unreachable' | 'spawning' | 'auth-failed', { title: string; body: string }> = {
-  'spawn-failed':   { title: 'Long-term memory server failed to start', body: 'The companion app couldn’t boot. Long-term memory is disabled this session.' },
-  'unreachable':    { title: 'Long-term memory server didn’t respond',  body: 'The companion started but didn’t answer the health check. Check the log.' },
-  'spawning':       { title: 'Starting long-term memory…',              body: 'First boot can take 2–3 minutes (downloading embedding models).' },
-  'auth-failed':    { title: 'Hindsight Cloud key was rejected',       body: 'The endpoint answered but your Cloud account key is invalid. Update the key below.' },
+  'spawn-failed': { title: 'Long-term memory server failed to start', body: 'The companion app couldn’t boot. Long-term memory is disabled this session.' },
+  'unreachable': { title: 'Long-term memory server didn’t respond', body: 'The companion started but didn’t answer the health check. Check the log.' },
+  'spawning': { title: 'Starting long-term memory…', body: 'First boot can take 2–3 minutes (downloading embedding models).' },
+  'auth-failed': { title: 'Hindsight Cloud key was rejected', body: 'The endpoint answered but your Cloud account key is invalid. Update the key below.' },
 };
 
 export const HindsightStatusBanner: React.FC<{ variant?: 'top-strip' | 'floating-card' }> = ({ variant = 'top-strip' }) => {

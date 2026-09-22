@@ -16,7 +16,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 // Enable the trace BEFORE importing the module (flag is read at beginTrace()).
-process.env.NATIVELY_INTELLIGENCE_TRACE = 'on';
+process.env.MEETFLOO_INTELLIGENCE_TRACE = 'on';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const tracePath = path.resolve(__dirname, '../../../dist-electron/electron/intelligence/IntelligenceTrace.js');
@@ -76,8 +76,8 @@ describe('IntelligenceTrace.setCorrelation (audit finding #9)', () => {
     const trace = beginTrace('q');
     assert.doesNotThrow(() => {
       trace.setCorrelation({ retryCount: NaN, aborted: undefined })
-           .setRouting({ answerType: 'identity_answer' })
-           .setCorrelation({ requestId: '' });
+        .setRouting({ answerType: 'identity_answer' })
+        .setCorrelation({ requestId: '' });
     });
   });
 });
@@ -85,8 +85,8 @@ describe('IntelligenceTrace.setCorrelation (audit finding #9)', () => {
 describe('IntelligenceTrace.setCorrelation on the NO-OP trace (flag off semantics)', () => {
   test('NOOP trace ignores setCorrelation and returns itself', async () => {
     // Re-import with the flag OFF to get the NOOP from beginTrace.
-    const prev = process.env.NATIVELY_INTELLIGENCE_TRACE;
-    process.env.NATIVELY_INTELLIGENCE_TRACE = 'off';
+    const prev = process.env.MEETFLOO_INTELLIGENCE_TRACE;
+    process.env.MEETFLOO_INTELLIGENCE_TRACE = 'off';
     try {
       const trace = beginTrace('q');
       assert.equal(trace.enabled, false);
@@ -94,7 +94,7 @@ describe('IntelligenceTrace.setCorrelation on the NO-OP trace (flag off semantic
       assert.equal(ret, trace, 'chainable no-op');
       assert.equal(trace.toRecord(), null, 'no-op trace produces no record');
     } finally {
-      process.env.NATIVELY_INTELLIGENCE_TRACE = prev;
+      process.env.MEETFLOO_INTELLIGENCE_TRACE = prev;
     }
   });
 });

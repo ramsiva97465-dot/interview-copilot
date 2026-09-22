@@ -2,7 +2,7 @@
 //
 // Kill-switch for verified code execution: currently TEMPORARILY DISABLED by
 // default (default OFF), but re-enableable at runtime (no redeploy) via env
-// NATIVELY_CODE_VERIFY=on. When off, the hidden <verification_spec> instruction
+// MEETFLOO_CODE_VERIFY=on. When off, the hidden <verification_spec> instruction
 // is also omitted from the coding prompt so the model wastes no tokens on a
 // spec nothing will run.
 //
@@ -21,11 +21,11 @@ describe('isCodeVerificationEnabled', () => {
   });
 
   for (const on of ['on', 'true', '1', 'enabled']) {
-    test(`env NATIVELY_CODE_VERIFY=${on} re-enables it (child process for clean cache)`, () => {
+    test(`env MEETFLOO_CODE_VERIFY=${on} re-enables it (child process for clean cache)`, () => {
       const out = execFileSync(process.execPath, [
         '--input-type=module', '-e',
         `import { isCodeVerificationEnabled } from './dist-electron/electron/llm/codeVerification/verificationEnabled.js'; process.stdout.write(String(isCodeVerificationEnabled()));`,
-      ], { cwd: process.cwd(), env: { ...process.env, NATIVELY_CODE_VERIFY: on } }).toString();
+      ], { cwd: process.cwd(), env: { ...process.env, MEETFLOO_CODE_VERIFY: on } }).toString();
       assert.equal(out, 'true');
     });
   }
@@ -34,7 +34,7 @@ describe('isCodeVerificationEnabled', () => {
     const out = execFileSync(process.execPath, [
       '--input-type=module', '-e',
       `import { isCodeVerificationEnabled } from './dist-electron/electron/llm/codeVerification/verificationEnabled.js'; process.stdout.write(String(isCodeVerificationEnabled()));`,
-    ], { cwd: process.cwd(), env: { ...process.env, NATIVELY_CODE_VERIFY: 'off' } }).toString();
+    ], { cwd: process.cwd(), env: { ...process.env, MEETFLOO_CODE_VERIFY: 'off' } }).toString();
     assert.equal(out, 'false');
   });
 });

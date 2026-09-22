@@ -3,7 +3,7 @@
 Hindsight embedded dev server (no Docker).
 
 Starts the Hindsight semantic-memory server in-process (bundled pg0 Postgres +
-pgvector) so Natively's HindsightClientAdapter can retain/recall against a real
+pgvector) so MeetFloo's HindsightClientAdapter can retain/recall against a real
 backend locally. Dev-only — production hosting (spawn-from-Electron / Cloud) is a
 separate decision.
 
@@ -12,7 +12,7 @@ Usage:
     # optional overrides:
     HINDSIGHT_PORT=8888 HINDSIGHT_LLM_MODEL=gemini-2.5-flash python3 scripts/hindsight-dev-server.py
 
-Then point Natively at it:
+Then point MeetFloo at it:
     HINDSIGHT_BASE_URL=http://localhost:8888
 
 Requires:  pip install hindsight-all -U   (Python 3.11+)
@@ -101,7 +101,7 @@ def main():
     try:
         url = getattr(server, "url", f"http://localhost:{PORT}")
         print(f"[hindsight-dev-server] READY at {url}")
-        print(f"[hindsight-dev-server] set HINDSIGHT_BASE_URL={url} for Natively")
+        print(f"[hindsight-dev-server] set HINDSIGHT_BASE_URL={url} for MeetFloo")
         print("[hindsight-dev-server] Ctrl-C to stop.")
 
         stop = {"flag": False}

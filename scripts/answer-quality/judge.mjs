@@ -8,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '../..');
 const API = 'http://127.0.0.1:8788';
 const KEY = fs.readFileSync(path.join(repoRoot, '.env'), 'utf8')
-  .split('\n').find((l) => l.startsWith('NATIVELY_API_KEY=')).split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '');
+  .split('\n').find((l) => l.startsWith('MEETFLOO_API_KEY=')).split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '');
 
 const rows = JSON.parse(fs.readFileSync(path.join(__dirname, 'results.json'), 'utf8'));
 const PAIRS = [['none', 'oracle'], ['none', 'production'], ['none', 'router']];
@@ -33,7 +33,7 @@ ${Y.text.slice(0, 2500)}
 Which is more useful to the candidate in that live moment? Weigh correctness, and whether it can actually be used while speaking. Reply with exactly one word: 1, 2, or TIE.`;
     try {
       const res = await fetch(`${API}/v1/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-natively-key': KEY },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-MeetFloo-key': KEY },
         body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] }),
       });
       const j = await res.json();

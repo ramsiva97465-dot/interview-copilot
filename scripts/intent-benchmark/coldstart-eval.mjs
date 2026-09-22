@@ -39,12 +39,12 @@ const macro = (pairs) => {
   return (f1s.reduce((a, b) => a + b, 0) / f1s.length) * 100;
 };
 
-const pre = fs.readdirSync(path.join(repoRoot, 'resources/models/natively'))
+const pre = fs.readdirSync(path.join(repoRoot, 'resources/models/MeetFloo'))
   .filter((d) => d.startsWith('router-minilm-multihead.pre-coldstart-')).sort().pop();
 
 const models = [
-  ['before augmentation', pre ? `resources/models/natively/${pre}` : null],
-  ['after augmentation ', 'resources/models/natively/router-minilm-multihead'],
+  ['before augmentation', pre ? `resources/models/MeetFloo/${pre}` : null],
+  ['after augmentation ', 'resources/models/MeetFloo/router-minilm-multihead'],
 ];
 
 const out = [];

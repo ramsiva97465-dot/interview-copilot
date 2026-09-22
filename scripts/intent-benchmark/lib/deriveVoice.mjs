@@ -23,7 +23,7 @@
 // WHY DERIVING IS CORRECT, NOT A SHORTCUT
 //
 // The Phase 1 audit already established that voice is fixed per mode by the
-// prompt (docs/natively-current-modes.md), with exactly two documented
+// prompt (docs/MeetFloo-current-modes.md), with exactly two documented
 // deviations: Team Meet switches to first person when the user is called on,
 // and Lecture switches when the student is answering. It is a function of
 // (mode, mode_intent, needs_response), and the router's per-mode `default_voice`

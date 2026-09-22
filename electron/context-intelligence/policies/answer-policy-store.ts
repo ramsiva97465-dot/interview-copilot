@@ -34,7 +34,7 @@ const FILE_NAME = 'context-intelligence-answer-policy.json';
 // never see each other's writes. Both call-site comments promise "read per
 // turn so a Settings change applies to the very next answer"; a process-wide
 // slot is what makes that promise true in every runtime.
-const CACHE_KEY = '__nativelyAnswerPolicyStoreCacheV1__';
+const CACHE_KEY = '__MeetFlooAnswerPolicyStoreCacheV1__';
 interface PolicyCache { cached: Record<string, AnswerPolicy> | null; cachedDir: string | null }
 function cacheSlot(): PolicyCache {
   const g = globalThis as unknown as Record<string, unknown>;
@@ -47,7 +47,7 @@ function resolveDir(explicitDir?: string): string {
   if (explicitDir) return explicitDir;
   // Test isolation first — the same variable every harness in this repo uses —
   // then Electron userData, then a scratch fallback for bare-node contexts.
-  if (process.env.NATIVELY_TEST_USERDATA) return process.env.NATIVELY_TEST_USERDATA;
+  if (process.env.MEETFLOO_TEST_USERDATA) return process.env.MEETFLOO_TEST_USERDATA;
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { app } = require('electron');

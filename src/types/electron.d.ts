@@ -67,14 +67,14 @@ export type DirectAssistEvent =
   | { type: 'start'; requestId: string; provider: string; model: string; trimmedFields: string[]; shortenedFields: string[] }
   | { type: 'delta'; requestId: string; sequence: number; text: string }
   | {
-      type: 'provider_switch'
-      requestId: string
-      /** SNAPSHOT of the delta counter, never a slot of its own — always 0. */
-      sequence: number
-      from: { provider: string; model: string }
-      to: { provider: string; model: string }
-      reason: string
-    }
+    type: 'provider_switch'
+    requestId: string
+    /** SNAPSHOT of the delta counter, never a slot of its own — always 0. */
+    sequence: number
+    from: { provider: string; model: string }
+    to: { provider: string; model: string }
+    reason: string
+  }
   | { type: 'done'; requestId: string; sequence: number; provider: string; model: string; fullText?: string }
   | { type: 'error'; requestId: string; sequence: number; partial: boolean; error: DirectAssistError }
   | { type: 'cancel'; requestId: string; sequence: number }
@@ -252,7 +252,7 @@ export interface ElectronAPI {
   getDisabledProviders: () => Promise<string[]>
   setDisabledProviders: (providers: string[]) => Promise<{ success: boolean; error?: string }>
   setCloudEnabledModels: (provider: string, models: string[]) => Promise<{ success: boolean; error?: string }>
-  setNativelyApiKey: (apiKey: string) => Promise<{ success: boolean; error?: string }>
+  setMeetFlooApiKey: (apiKey: string) => Promise<{ success: boolean; error?: string }>
   setAppApiKey: (apiKey: string) => Promise<{ success: boolean; error?: string }>
   setNvidiaNimSttModel: (model: string) => Promise<{ success: boolean; error?: string }>
   // ── In-app review / testimonial prompt ─────────────────────────────────
@@ -286,11 +286,11 @@ export interface ElectronAPI {
     can_use_publicly: boolean;
     display_name_publicly: boolean;
   }) => Promise<{ ok: boolean; error?: string }>
-  // See src/types/nativelyUsage.ts — one definition, shared with the preload
+  // See src/types/MeetFlooUsage.ts — one definition, shared with the preload
   // bridge. Four user-facing categories over five server-side meters.
-  getNativelyUsage: (force?: boolean) => Promise<import('./nativelyUsage').NativelyUsageResponse>
-  getNativelyPlans: () => Promise<import('./nativelyUsage').NativelyPlansResponse>
-  getStoredCredentials: () => Promise<{ hasNativelyKey?: boolean; hasSarvamKey?: boolean; sarvamApiKey?: string; hasGeminiKey: boolean; hasGroqKey: boolean; hasOpenaiKey: boolean; hasClaudeKey: boolean; hasDeepseekKey: boolean; hasNvidiaNimKey?: boolean; hasOpenrouterKey?: boolean; hasFluxionKey?: boolean; fluxionProtocol?: 'openai' | 'anthropic'; hasLitellmBaseURL?: boolean; litellmBaseURL?: string | null; litellmMaxTokens?: number | null; googleServiceAccountPath: string | null; sttProvider: 'none' | 'google' | 'groq' | 'openai' | 'deepgram' | 'elevenlabs' | 'azure' | 'ibmwatson' | 'soniox' | 'nvidia_nim' | 'natively' | 'local-whisper' | 'apple-speech' | 'sarvam'; hasSttGroqKey: boolean; hasSttOpenaiKey: boolean; hasDeepgramKey: boolean; hasElevenLabsKey: boolean; hasAzureKey: boolean; azureRegion: string; hasIbmWatsonKey: boolean; ibmWatsonRegion: string; groqSttModel?: string; hasSonioxKey?: boolean; hasTavilyKey?: boolean; geminiPreferredModel?: string; groqPreferredModel?: string; openaiPreferredModel?: string; claudePreferredModel?: string; deepseekPreferredModel?: string; nvidia_nimPreferredModel?: string; openrouterPreferredModel?: string; fluxionPreferredModel?: string; litellmPreferredModel?: string; disabledProviders?: string[]; cloudEnabledModels?: Record<string, string[]>; sttGroqKey?: string; sttOpenaiKey?: string; sttDeepgramKey?: string; sttElevenLabsKey?: string; sttAzureKey?: string; sttIbmKey?: string; sttSonioxKey?: string; openAiSttBaseUrl?: string }>
+  getMeetFlooUsage: (force?: boolean) => Promise<import('./MeetFlooUsage').MeetFlooUsageResponse>
+  getMeetFlooPlans: () => Promise<import('./MeetFlooUsage').MeetFlooPlansResponse>
+  getStoredCredentials: () => Promise<{ hasMeetFlooKey?: boolean; hasSarvamKey?: boolean; sarvamApiKey?: string; hasGeminiKey: boolean; hasGroqKey: boolean; hasOpenaiKey: boolean; hasClaudeKey: boolean; hasDeepseekKey: boolean; hasNvidiaNimKey?: boolean; hasOpenrouterKey?: boolean; hasFluxionKey?: boolean; fluxionProtocol?: 'openai' | 'anthropic'; hasLitellmBaseURL?: boolean; litellmBaseURL?: string | null; litellmMaxTokens?: number | null; googleServiceAccountPath: string | null; sttProvider: 'none' | 'google' | 'groq' | 'openai' | 'deepgram' | 'elevenlabs' | 'azure' | 'ibmwatson' | 'soniox' | 'nvidia_nim' | 'MeetFloo' | 'local-whisper' | 'apple-speech' | 'sarvam'; hasSttGroqKey: boolean; hasSttOpenaiKey: boolean; hasDeepgramKey: boolean; hasElevenLabsKey: boolean; hasAzureKey: boolean; azureRegion: string; hasIbmWatsonKey: boolean; ibmWatsonRegion: string; groqSttModel?: string; hasSonioxKey?: boolean; hasTavilyKey?: boolean; geminiPreferredModel?: string; groqPreferredModel?: string; openaiPreferredModel?: string; claudePreferredModel?: string; deepseekPreferredModel?: string; nvidia_nimPreferredModel?: string; openrouterPreferredModel?: string; fluxionPreferredModel?: string; litellmPreferredModel?: string; disabledProviders?: string[]; cloudEnabledModels?: Record<string, string[]>; sttGroqKey?: string; sttOpenaiKey?: string; sttDeepgramKey?: string; sttElevenLabsKey?: string; sttAzureKey?: string; sttIbmKey?: string; sttSonioxKey?: string; openAiSttBaseUrl?: string }>
   // R-10 resolution flow: ambiguous credential stores (names + last-4 only; null when nothing to resolve).
   getAmbiguousCredentialStores: () => Promise<{
     keyring: { keys: { name: string; last4: string }[]; mtimeIso: string | null };
@@ -301,24 +301,24 @@ export interface ElectronAPI {
   // CR-03: 'unknown' is in Electron 43's declared return union for
   // getMediaAccessStatus and win32 can return it. Omitting it here made the
   // renderer's `as PermStatus` cast unsound.
-  checkPermissions:     () => Promise<{ microphone: 'granted'|'denied'|'not-determined'|'restricted'|'unknown'; screen: 'granted'|'denied'|'not-determined'|'restricted'|'unknown'; platform: string }>
+  checkPermissions: () => Promise<{ microphone: 'granted' | 'denied' | 'not-determined' | 'restricted' | 'unknown'; screen: 'granted' | 'denied' | 'not-determined' | 'restricted' | 'unknown'; platform: string }>
   /** Resolves false off darwin: no platform but macOS can grant programmatically. */
   requestMicPermission: () => Promise<boolean>
   /** Opens the OS microphone privacy panel. The only remedy on win32. */
-  openMicSettings:      () => Promise<{ ok: boolean; reason?: string }>
+  openMicSettings: () => Promise<{ ok: boolean; reason?: string }>
 
   // Free Trial
   /** `persisted: false` = started and live for THIS session, but the credential store could not write it, so a restart loses it. The server keeps the trial and re-issues it (idempotent per hardware id). */
-  startTrial:     () => Promise<{ ok: boolean; hasToken?: boolean; persisted?: boolean; started_at?: string; expires_at?: string; expired?: boolean; already_used?: boolean; converted_to?: string | null; usage?: { ai: number; stt_seconds: number; search: number }; limits?: { duration_ms: number; ai_requests: number; stt_minutes: number; search_requests: number }; error?: string; status?: number }>
+  startTrial: () => Promise<{ ok: boolean; hasToken?: boolean; persisted?: boolean; started_at?: string; expires_at?: string; expired?: boolean; already_used?: boolean; converted_to?: string | null; usage?: { ai: number; stt_seconds: number; search: number }; limits?: { duration_ms: number; ai_requests: number; stt_minutes: number; search_requests: number }; error?: string; status?: number }>
   getTrialStatus: () => Promise<{ ok: boolean; expired?: boolean; remaining_ms?: number; started_at?: string; expires_at?: string; converted_to?: string | null; usage?: { ai: number; stt_seconds: number; search: number }; limits?: object; error?: string }>
-  getLocalTrial:  () => Promise<{ hasToken: boolean; trialClaimed?: boolean; expiresAt?: string; startedAt?: string; expired?: boolean }>
-  convertTrial:   (choice: string) => Promise<{ ok: boolean }>
-  endTrialByok:        () => Promise<{ success: boolean; error?: string }>
+  getLocalTrial: () => Promise<{ hasToken: boolean; trialClaimed?: boolean; expiresAt?: string; startedAt?: string; expired?: boolean }>
+  convertTrial: (choice: string) => Promise<{ ok: boolean }>
+  endTrialByok: () => Promise<{ success: boolean; error?: string }>
   wipeTrialProfileData: () => Promise<{ success: boolean; error?: string }>
-  onTrialEnded:   (cb: (data: { choice: string }) => void) => () => void
+  onTrialEnded: (cb: (data: { choice: string }) => void) => () => void
 
   // STT Provider Management
-  setSttProvider: (provider: 'none' | 'google' | 'groq' | 'openai' | 'deepgram' | 'elevenlabs' | 'azure' | 'ibmwatson' | 'soniox' | 'nvidia_nim' | 'natively' | 'local-whisper' | 'apple-speech' | 'sarvam') => Promise<{ success: boolean; error?: string }>
+  setSttProvider: (provider: 'none' | 'google' | 'groq' | 'openai' | 'deepgram' | 'elevenlabs' | 'azure' | 'ibmwatson' | 'soniox' | 'nvidia_nim' | 'MeetFloo' | 'local-whisper' | 'apple-speech' | 'sarvam') => Promise<{ success: boolean; error?: string }>
   getSttProvider: () => Promise<string>
   getAppleSpeechLocales: () => Promise<{ available: boolean; supported: string[]; installed: string[]; reserved: string[]; maxReserved: number }>
   installAppleSpeechLocale: (locale: string) => Promise<{ ok: boolean; error?: string }>
@@ -487,7 +487,7 @@ export interface ElectronAPI {
   }>
   getEmbeddingCatalog: () => Promise<{
     providers: Array<{
-      id: 'natively' | 'ollama' | 'custom' | 'openrouter' | 'voyage' | 'openai' | 'gemini' | 'local'
+      id: 'MeetFloo' | 'ollama' | 'custom' | 'openrouter' | 'voyage' | 'openai' | 'gemini' | 'local'
       name: string
       cloud: boolean
       managed?: boolean
@@ -555,10 +555,10 @@ export interface ElectronAPI {
     error?: string
   }>
   setRerankerConfig: (next: {
-    provider?: 'local' | 'natively' | 'openrouter' | 'jina'
+    provider?: 'local' | 'MeetFloo' | 'openrouter' | 'jina'
     openrouterModel?: string
     jinaModel?: string
-    nativelyModel?: string
+    MeetFlooModel?: string
     candidateCount?: number
     fallbackToLocal?: boolean
   }) => Promise<{ success: boolean; reranker?: unknown; error?: string }>
@@ -729,7 +729,7 @@ export interface ElectronAPI {
   forceRestartOllama: () => Promise<{ success: boolean; reason?: string }>;
   isOllamaReachable: () => Promise<boolean>;
   /** Start the local Ollama daemon when Ollama is the selected provider. */
-  ensureOllamaRunning: () => Promise<{ success: boolean; reason?: string; [k: string]: unknown }>;
+  ensureOllamaRunning: () => Promise<{ success: boolean; reason?: string;[k: string]: unknown }>;
 
   // Settings Window
   toggleSettingsWindow: (coords?: { x: number; y: number }) => Promise<void>;
@@ -746,7 +746,7 @@ export interface ElectronAPI {
   codexCliDoctor: (config?: any) => Promise<{ success: boolean; action: string; output?: string; error?: string; resolvedPath?: string; config?: any }>;
   getCodexCliModels: () => Promise<{ source: 'codex-cli' | 'unavailable'; models: { id: string; name: string }[]; fetchedAt?: string; clientVersion?: string }>;
   // ChatGPT OAuth (PKCE) — replaces the old `codex login` CLI subprocess.
-  codexLoginStatus: () => Promise<{ success: boolean; signedIn: boolean; source?: 'natively' | 'codex-cli' | null; cliLogin?: 'ok' | 'expired' | 'missing' | 'api-key' | 'invalid'; email?: string; expiresAt?: number; error?: string }>;
+  codexLoginStatus: () => Promise<{ success: boolean; signedIn: boolean; source?: 'MeetFloo' | 'codex-cli' | null; cliLogin?: 'ok' | 'expired' | 'missing' | 'api-key' | 'invalid'; email?: string; expiresAt?: number; error?: string }>;
   antigravityStatus: () => Promise<{ signedIn: boolean; inProgress: boolean; expiresAt?: number; projectId?: string; error?: string }>;
   antigravityStartLogin: () => Promise<{ success: boolean; error?: string }>;
   antigravityCancelLogin: () => Promise<void>;
@@ -911,7 +911,7 @@ export interface ElectronAPI {
   setTavilyApiKey: (apiKey: string) => Promise<{ success: boolean; error?: string }>
 
   // Dynamic Model Discovery
-  fetchProviderModels: (provider: 'gemini' | 'groq' | 'openai' | 'claude' | 'deepseek' | 'nvidia_nim' | 'openrouter' | 'fluxion', apiKey: string) => Promise<{ success: boolean; models?: {id: string, label: string}[]; error?: string }>
+  fetchProviderModels: (provider: 'gemini' | 'groq' | 'openai' | 'claude' | 'deepseek' | 'nvidia_nim' | 'openrouter' | 'fluxion', apiKey: string) => Promise<{ success: boolean; models?: { id: string, label: string }[]; error?: string }>
   setProviderPreferredModel: (provider: 'gemini' | 'groq' | 'openai' | 'claude' | 'deepseek' | 'nvidia_nim' | 'openrouter' | 'fluxion' | 'litellm', modelId: string) => Promise<void>
 
   // License Management
@@ -935,7 +935,7 @@ export interface ElectronAPI {
   exportDebugLogs: () => Promise<{ success: boolean; path?: string; files?: string[]; error?: string }>;
 
   // Windows shortcut guard — the always-on WH_KEYBOARD_LL hook that swallows
-  // and self-dispatches Natively's own chords. Default on; an explicit false is
+  // and self-dispatches MeetFloo's own chords. Default on; an explicit false is
   // the opt-out for EDR/AV-sensitive setups. No-op off Windows.
   getStealthShortcutGuard: () => Promise<boolean>;
   setStealthShortcutGuard: (enabled: boolean) => Promise<{ success: boolean }>;
@@ -1085,7 +1085,7 @@ export interface DomCaptureMeta {
 
 /* ─────────────── Smart Browser Context v2 (RENDERER mirror) ───────────────
  * Duplicated per subsystem (the extension package + electron compile separately
- * and can't share a file). Canonical source: natively-browser/src/capture/types.ts;
+ * and can't share a file). Canonical source: MeetFloo-browser/src/capture/types.ts;
  * desktop mirror: electron/services/browser-context/types.ts. A drift-guard test
  * in each suite string-compares the union literals across all three copies. Keep
  * these in sync when editing a union.
@@ -1174,12 +1174,12 @@ export interface CodingProblemPayload {
 
 export interface NotesPayload {
   editorType:
-    | 'google_docs'
-    | 'notion'
-    | 'textarea'
-    | 'contenteditable'
-    | 'prosemirror'
-    | 'unknown';
+  | 'google_docs'
+  | 'notion'
+  | 'textarea'
+  | 'contenteditable'
+  | 'prosemirror'
+  | 'unknown';
   selectedText?: string;
   visibleText?: string;
 }

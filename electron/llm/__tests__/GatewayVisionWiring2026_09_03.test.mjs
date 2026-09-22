@@ -2,7 +2,7 @@
 //
 // The LiteLLM / NVIDIA NIM image path, pinned at the four places it was broken.
 //
-// WHAT WAS WRONG (all four reproduced in a live Natively session against a
+// WHAT WAS WRONG (all four reproduced in a live MeetFloo session against a
 // recording proxy, 2026-09-03):
 //
 //   1. `_streamChatInner` routes EVERY image-bearing request into

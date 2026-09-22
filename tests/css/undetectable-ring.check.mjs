@@ -67,7 +67,7 @@ const INDEX_CSS = resolve(process.cwd(), 'src/index.css');
 const RING_START = '/* @undetectable-ring:start */';
 const RING_END = '/* @undetectable-ring:end */';
 
-// Copied from the real card in src/components/NativelyInterface.tsx. The class
+// Copied from the real card in src/components/MeetFlooInterface.tsx. The class
 // list matters: `overlay-shell-surface` is the element every theme block
 // re-declares with !important, so a fixture that omitted it would under-test.
 const CARD_CLASS =
@@ -102,8 +102,8 @@ function loadCss(withRing) {
   if (!existsSync(INDEX_CSS)) {
     throw new Error(
       `stylesheet not found at ${INDEX_CSS} — run this from the repo root ` +
-        `(npm run test:css:undetectable-ring), not from a subdirectory. This is a ` +
-        `harness problem, not a CSS regression.`,
+      `(npm run test:css:undetectable-ring), not from a subdirectory. This is a ` +
+      `harness problem, not a CSS regression.`,
     );
   }
   const css = readFileSync(INDEX_CSS, 'utf8');
@@ -112,7 +112,7 @@ function loadCss(withRing) {
   if (start === -1 || end === -1) {
     throw new Error(
       `undetectable-ring fences not found in index.css (${RING_START} … ${RING_END}). ` +
-        `The ring block was renamed or removed — update this check rather than deleting it.`,
+      `The ring block was renamed or removed — update this check rather than deleting it.`,
     );
   }
   if (withRing) return css;
@@ -153,7 +153,7 @@ async function measure() {
   const win = new BrowserWindow({ width: 800, height: 600, show: false });
   const written = [];
   const load = async (withRing) => {
-    const fixture = join(tmpdir(), `natively-undetectable-ring-${withRing}.html`);
+    const fixture = join(tmpdir(), `MeetFloo-undetectable-ring-${withRing}.html`);
     writeFileSync(fixture, page(loadCss(withRing)));
     written.push(fixture);
     await win.loadFile(fixture);
@@ -216,7 +216,7 @@ app.whenReady().then(async () => {
         check(
           on.style === 'dashed',
           `${where}: outline-style resolved "${on.style}" with undetectable mode ON, ` +
-            `expected "dashed" — the mode has no visual tell in this theme`,
+          `expected "dashed" — the mode has no visual tell in this theme`,
         );
         check(
           on.width === '2px',
@@ -233,26 +233,26 @@ app.whenReady().then(async () => {
         check(
           parseFloat(on.offset) + parseFloat(on.width) <= GUTTER_PX,
           `${where}: offset ${on.offset} + width ${on.width} exceeds the ${GUTTER_PX}px ` +
-            `panel gutter — the ring paints past the window edge and is clipped away. ` +
-            `Raise OVERLAY_PANEL_INSET (and contentRef's padding with it) or shrink the ring`,
+          `panel gutter — the ring paints past the window edge and is clipped away. ` +
+          `Raise OVERLAY_PANEL_INSET (and contentRef's padding with it) or shrink the ring`,
         );
 
         const alpha = parseAlpha(on.color);
         check(
           alpha !== null,
           `${where}: outline-color "${on.color}" could not be parsed — ` +
-            `getComputedStyle's colour format changed, update parseAlpha`,
+          `getComputedStyle's colour format changed, update parseAlpha`,
         );
         check(
           alpha === null || alpha >= MIN_ALPHA,
           `${where}: outline-color "${on.color}" has alpha ${alpha}, below the ${MIN_ALPHA} ` +
-            `floor — the ring resolves but is too faint to read as an indicator. ` +
-            `--overlay-undetectable-ring is probably unset for this theme and falling ` +
-            `back to a hairline border colour`,
+          `floor — the ring resolves but is too faint to read as an indicator. ` +
+          `--overlay-undetectable-ring is probably unset for this theme and falling ` +
+          `back to a hairline border colour`,
         );
 
         // Off and unset must both be inert. `unset` is the real boot state:
-        // NativelyInterface mirrors the attribute asynchronously, so the very
+        // MeetFlooInterface mirrors the attribute asynchronously, so the very
         // first frames have no attribute at all.
         // Off and unset must both be INVISIBLE — not absent. The ring is
         // permanently in the box as `2px dashed transparent` so that the colour
@@ -264,13 +264,13 @@ app.whenReady().then(async () => {
           check(
             m.style === 'dashed',
             `${where}: outline-style resolved "${m.style}" with undetectable ${mode}, ` +
-              `expected "dashed" — the ring must stay in the box at alpha 0 so the colour ` +
-              `channel can fade it in; removing it turns the fade back into a cut`,
+            `expected "dashed" — the ring must stay in the box at alpha 0 so the colour ` +
+            `channel can fade it in; removing it turns the fade back into a cut`,
           );
           check(
             a === 0,
             `${where}: outline-color "${m.color}" (alpha ${a}) with undetectable ${mode}, ` +
-              `expected fully transparent — the ring is leaking into normal mode`,
+            `expected fully transparent — the ring is leaking into normal mode`,
           );
         }
 
@@ -279,9 +279,9 @@ app.whenReady().then(async () => {
         check(
           baseline[`${colorTheme}/on`][it].style === 'none',
           `${where}: baseline (ring block cut) resolved outline-style ` +
-            `"${baseline[`${colorTheme}/on`][it].style}", expected "none" — the ring is ` +
-            `coming from somewhere other than the block under test, so the passing ` +
-            `case is vacuous`,
+          `"${baseline[`${colorTheme}/on`][it].style}", expected "none" — the ring is ` +
+          `coming from somewhere other than the block under test, so the passing ` +
+          `case is vacuous`,
         );
       }
 
@@ -295,8 +295,8 @@ app.whenReady().then(async () => {
           ? /^rgba?\(0, 0, 0/.test(def)
           : /^rgba?\(255, 255, 255/.test(def),
         `[data-theme=${colorTheme}][data-interface-theme=default]: ring colour "${def}" is ` +
-          `not the ${colorTheme}-theme value — the ${colorTheme} override for ` +
-          `--overlay-undetectable-ring is not being reached`,
+        `not the ${colorTheme}-theme value — the ${colorTheme} override for ` +
+        `--overlay-undetectable-ring is not being reached`,
       );
     }
 
@@ -308,8 +308,8 @@ app.whenReady().then(async () => {
       check(
         /^rgba?\(255, 255, 255/.test(c),
         `[data-theme=light][data-interface-theme=${it}]: ring colour "${c}" inherited the ` +
-          `light theme's dark ring, but this theme paints a DARK panel in light mode — ` +
-          `the ring is invisible. Re-declare --overlay-undetectable-ring in the ${it} block`,
+        `light theme's dark ring, but this theme paints a DARK panel in light mode — ` +
+        `the ring is invisible. Re-declare --overlay-undetectable-ring in the ${it} block`,
       );
     }
 
@@ -322,9 +322,9 @@ app.whenReady().then(async () => {
     }
     console.log(
       `✓ undetectable-ring check passed (dashed 2px ring at offset +3px in ` +
-        `${INTERFACE_THEMES.length} interface themes x ${COLOR_THEMES.length} colour themes, ` +
-        `transparent when off/unset, baseline clean, Electron ${process.versions.electron} / ` +
-        `Chrome ${process.versions.chrome})`,
+      `${INTERFACE_THEMES.length} interface themes x ${COLOR_THEMES.length} colour themes, ` +
+      `transparent when off/unset, baseline clean, Electron ${process.versions.electron} / ` +
+      `Chrome ${process.versions.chrome})`,
     );
     app.exit(0);
   } catch (err) {

@@ -1,6 +1,6 @@
 // electron/llm/__tests__/CodingRepairNonDestructive2026_08_10.test.mjs
 //
-// USER-REPORTED, reproduced against the LIVE natively-api backend: a correct,
+// USER-REPORTED, reproduced against the LIVE MeetFloo-api backend: a correct,
 // complete coding answer is replaced by one that is strictly WORSE.
 //
 // This is NOT the deadline case (DeadlineTruncatedCodingNoScaffold2026_08_10).

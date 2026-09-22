@@ -13,7 +13,7 @@
 //
 // THE WORKER RULE IS NOT NEGOTIABLE, INCLUDING HERE.
 //
-// Natively already learned this the hard way: multiple ONNX Runtime sessions on
+// MeetFloo already learned this the hard way: multiple ONNX Runtime sessions on
 // the Electron main thread caused fatal BFCArena::Extend aborts on macOS. The
 // production loaders (IntentClassifier, LocalEmbeddingProvider, LocalReranker,
 // Whisper) each run in their own worker_threads.Worker, behind an
@@ -65,10 +65,10 @@ export const SCORED_AXES = [
 /** Base class. Subclasses override load/classify/unload/meta. */
 export class Provider {
   constructor(id) { this.id = id; }
-  async load() {}
+  async load() { }
   // eslint-disable-next-line no-unused-vars
   async classify(_input) { throw new Error(`${this.id}: classify not implemented`); }
-  async unload() {}
+  async unload() { }
   meta() { return { family: 'unknown', params: 0, sizeOnDiskMB: 0, runtime: 'rules' }; }
 }
 

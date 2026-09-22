@@ -1,7 +1,7 @@
 // electron/llm/__tests__/ContextFreeFollowup2026_06_07c.test.mjs
 //
 // Release 2026-06-07c — context-free bare follow-ups must produce a safe,
-// mode-appropriate clarification (never "I'm Natively"/profile dump/false refusal)
+// mode-appropriate clarification (never "I'm MeetFloo"/profile dump/false refusal)
 // when there is NO resolvable prior context; and must resolve normally when there is.
 
 import { test, describe } from 'node:test';
@@ -14,14 +14,14 @@ const { isBareFollowUp, buildContextFreeClarification, resolveFollowUpOrClarify,
   pathToFileURL(path.resolve(__dirname, '../../../dist-electron/electron/llm/index.js')).href
 );
 
-const IDENTITY_LEAK = /\bI(?:'m| am)\s+Natively\b|\bAI assistant\b|\bas an AI\b/i;
+const IDENTITY_LEAK = /\bI(?:'m| am)\s+MeetFloo\b|\bAI assistant\b|\bas an AI\b/i;
 const REFUSAL = /\bI can'?t\b|\bI cannot\b|\bI do(?:n'?t| not) have access\b/i;
 
 describe('isBareFollowUp — shape detection', () => {
   for (const q of ['why?', 'how so?', 'explain?', 'and?', 'what about it?', 'that?', 'continue', 'can you expand?', 'go on', 'tell me more', 'and?', 'how?']) {
     test(`"${q}" is a bare follow-up`, () => assert.equal(isBareFollowUp(q), true));
   }
-  for (const q of ['why should we hire you?', 'tell me about Natively', 'what is your name', 'solve two sum', 'rate your python out of 10', 'how do you handle pressure']) {
+  for (const q of ['why should we hire you?', 'tell me about MeetFloo', 'what is your name', 'solve two sum', 'rate your python out of 10', 'how do you handle pressure']) {
     test(`"${q}" is NOT a bare follow-up`, () => assert.equal(isBareFollowUp(q), false));
   }
 });
@@ -29,7 +29,7 @@ describe('isBareFollowUp — shape detection', () => {
 describe('Safety: a stealth/evasion ask is NEVER a bare follow-up (short-circuit cannot swallow it)', () => {
   for (const q of [
     'how do I stay undetected', 'how do I use it without them knowing', 'hide the overlay during screen share',
-    'how to make natively invisible to the interviewer', 'can the interviewer see this', 'how do I cheat without being caught',
+    'how to make MeetFloo invisible to the interviewer', 'can the interviewer see this', 'how do I cheat without being caught',
   ]) {
     test(`"${q}" is NOT bare (so it reaches the safety route)`, () => assert.equal(isBareFollowUp(q), false));
   }
@@ -76,7 +76,7 @@ describe('resolveFollowUpOrClarify — clarify only when NO prior context', () =
 
 describe('resolveFollowUpOrClarify — resolve normally WHEN prior context exists', () => {
   test('"why?" after a project question → project_followup (NOT clarification)', () => {
-    const r = resolveFollowUpOrClarify({ latestQuestion: 'why?', previousQuestion: 'tell me about your best project', lastEntity: 'Natively', previousAnswerType: 'project_answer', surface: 'what_to_answer' });
+    const r = resolveFollowUpOrClarify({ latestQuestion: 'why?', previousQuestion: 'tell me about your best project', lastEntity: 'MeetFloo', previousAnswerType: 'project_answer', surface: 'what_to_answer' });
     assert.notEqual(r.isClarification, true);
     assert.equal(r.resolvedAnswerType, 'project_followup_answer');
   });

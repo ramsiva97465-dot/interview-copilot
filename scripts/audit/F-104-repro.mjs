@@ -33,7 +33,7 @@ try {
 
 const app = await electron.launch({
   args: ['dist-electron/electron/main.js'],
-  env: { ...process.env, NODE_ENV: 'production', NATIVELY_DEV_BYPASS_SCREEN_TCC: '1' },
+  env: { ...process.env, NODE_ENV: 'production', MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1' },
   timeout: 60_000,
 });
 await app.firstWindow({ timeout: 30_000 }).catch(() => null);
@@ -61,8 +61,8 @@ const result = await app.evaluate(async () => {
   };
 
   const sttStub = () => ({
-    write() {}, setSampleRate() {}, setAudioChannelCount() {}, notifySpeechEnded() {},
-    stop() {}, removeAllListeners() {}, start() {},
+    write() { }, setSampleRate() { }, setAudioChannelCount() { }, notifySpeechEnded() { },
+    stop() { }, removeAllListeners() { }, start() { },
   });
   s.isMeetingActive = true;
   s._isQuitting = false;
@@ -75,7 +75,7 @@ const result = await app.evaluate(async () => {
   s.googleSTT_User = sttStub();
 
   // Run 1 — obtain a REAL SystemAudioCapture wrapper in the field.
-  s.systemAudioCapture = { destroy: async () => {} };
+  s.systemAudioCapture = { destroy: async () => { } };
   await s.handleDefaultOutputChanged('AUDIT-ROUTE-1');
   const old = s.systemAudioCapture;
   if (!old || !wired.includes(old)) {

@@ -135,7 +135,7 @@ test('createWindow applies the native aspect lock via the shared constant', () =
     windowHelperSource,
     /this\.setLauncherAspectLock\(true\)/,
     'BUG: createWindow must arm the aspect lock — without it, user drags are unconstrained and ' +
-      'the 3:2 lock only exists on paper.',
+    'the 3:2 lock only exists on paper.',
   );
   assert.match(
     windowHelperSource,
@@ -146,7 +146,7 @@ test('createWindow applies the native aspect lock via the shared constant', () =
     windowHelperSource,
     /minWidth:\s*LAUNCHER_MIN_WIDTH[\s\S]{0,160}minHeight:\s*LAUNCHER_MIN_HEIGHT/,
     'BUG: min size must come from the 3:2-derived constants; a hand-typed non-3:2 minimum ' +
-      'fights the aspect lock at the smallest corner drag.',
+    'fights the aspect lock at the smallest corner drag.',
   );
 });
 
@@ -160,13 +160,13 @@ test('the in-app maximize button is the ONE sanctioned exemption from 3:2', () =
     maximizeBody,
     /animateLauncherBounds\([\s\S]{0,40}this\.getDisplayWorkArea\(/,
     "BUG: the maximize button must fill the work area at the display's own shape — that is the " +
-      'one deliberate exception to the 3:2 lock.',
+    'one deliberate exception to the 3:2 lock.',
   );
   assert.match(
     maximizeBody,
     /this\.launcherFilled = true/,
     'BUG: the fill is a setBounds, so the OS has no "maximized" state to read back — the flag is ' +
-      'the only record of it.',
+    'the only record of it.',
   );
 });
 
@@ -182,15 +182,15 @@ test('maximize/restore must NOT use native maximize (it flickers on a transparen
   assert.ok(
     !/win\.maximize\(\)/.test(maximizeBody),
     'BUG: native maximize() re-introduces the flickering OS transition on a transparent frameless ' +
-      'window. Fill via setBounds instead.',
+    'window. Fill via setBounds instead.',
   );
   // The one unmaximize() that remains is defensive: leaving an OS-initiated
   // maximized state before filling.
   assert.match(
     maximizeBody,
     /if \(win\.isMaximized\(\)\) win\.unmaximize\(\);/,
-    'BUG: an OS-initiated maximize must be unwound first, or the window is both natively ' +
-      'maximized and filled.',
+    'BUG: an OS-initiated maximize must be unwound first, or the window is both MeetFloo ' +
+    'maximized and filled.',
   );
 });
 
@@ -203,7 +203,7 @@ test('the fill state is reported as "maximized" to the renderer', () => {
     isMaxBody,
     /this\.launcherFilled \|\| this\.launcherZoomed \|\| win\.isMaximized\(\)/,
     'BUG: WindowControls reads this for its restore/maximize icon. A setBounds fill leaves ' +
-      'win.isMaximized() false, so omitting the flag shows the wrong icon.',
+    'win.isMaximized() false, so omitting the flag shows the wrong icon.',
   );
 });
 
@@ -216,7 +216,7 @@ test('the ratio enforcement stands down while the fill is in effect', () => {
     enforceBody,
     /if \(this\.launcherFilled\) return;/,
     'BUG: without this the enforcement immediately claws the filled window back to 3:2 and the ' +
-      'maximize button appears to do nothing.',
+    'maximize button appears to do nothing.',
   );
 });
 
@@ -229,6 +229,6 @@ test('programmatic launcher resizes are normalized to 3:2', () => {
     setDims,
     /clampSizeToAspectRatio\(/,
     'BUG: setWindowDimensions() can target the launcher, and setAspectRatio does not apply to ' +
-      'programmatic setBounds — the size must be clamped onto 3:2 here.',
+    'programmatic setBounds — the size must be clamped onto 3:2 here.',
   );
 });

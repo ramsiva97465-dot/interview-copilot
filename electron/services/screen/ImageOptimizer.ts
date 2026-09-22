@@ -13,7 +13,7 @@
 //
 // Notes:
 //   - Sharp is already a project dep (used elsewhere for OCR preprocessing and
-//     Natively-API image compression). We centralize provider-ready optimization
+//     MeetFloo-API image compression). We centralize provider-ready optimization
 //     here so the vision pipeline has a single source of truth for sizes/quality.
 //   - We do NOT delete optimized files immediately — VisionProviderFallbackChain
 //     may retry the same payload across providers in one request. Callers should
@@ -33,7 +33,7 @@ export type ProviderHint =
   | 'gemini'
   | 'groq'
   | 'ollama'
-  | 'natively'
+  | 'MeetFloo'
   | 'codex'
   | 'custom'
   | 'generic';
@@ -66,10 +66,10 @@ export interface OptimizedImage {
 
 // Profile defaults — tuned for vision LLM quality vs payload size.
 const PROFILE_DEFAULTS: Record<OptimizationProfile, { maxLongEdgePx: number; quality: number; format: 'jpeg' | 'webp' | 'png' }> = {
-  fast:      { maxLongEdgePx: 1024, quality: 78, format: 'jpeg' },
-  balanced:  { maxLongEdgePx: 1280, quality: 85, format: 'jpeg' },
+  fast: { maxLongEdgePx: 1024, quality: 78, format: 'jpeg' },
+  balanced: { maxLongEdgePx: 1280, quality: 85, format: 'jpeg' },
   technical: { maxLongEdgePx: 1536, quality: 88, format: 'jpeg' }, // code text needs clarity
-  best:      { maxLongEdgePx: 1920, quality: 90, format: 'jpeg' },
+  best: { maxLongEdgePx: 1920, quality: 90, format: 'jpeg' },
 };
 
 // Provider overrides — only when a provider has known stricter constraints.
@@ -81,9 +81,9 @@ function applyProviderTweaks(
     case 'ollama':
       // Local — keep buffer reasonable so base64 payload doesn't choke HTTP.
       return { ...base, format: 'jpeg' };
-    case 'natively':
+    case 'MeetFloo':
       // Server enforces a 4 MB body cap; the per-image quality bump used in
-      // streamWithNatively (q=85, 1920px) is consistent with the 'best' profile.
+      // streamWithMeetFloo (q=85, 1920px) is consistent with the 'best' profile.
       return base;
     case 'gemini':
     case 'openai':
@@ -121,7 +121,7 @@ export class ImageOptimizer {
   private ownedFiles = new Map<string, string>();
 
   constructor(tempDirOverride?: string) {
-    this.tempDir = tempDirOverride || path.join(os.tmpdir(), 'natively-vision-optimized');
+    this.tempDir = tempDirOverride || path.join(os.tmpdir(), 'MeetFloo-vision-optimized');
   }
 
   async ensureTempDir(): Promise<void> {

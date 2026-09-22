@@ -12,7 +12,7 @@
  * CommonJS, which means TypeScript rewrites `import()` to `require()`.
  * We bypass this by loading the package through `new Function(...)` so
  * the compiler never sees the import expression and Node.js handles it
- * natively as a true dynamic ESM import at runtime.
+ * MeetFloo as a true dynamic ESM import at runtime.
  */
 import { parentPort } from 'worker_threads';
 import { WhisperProgressAggregator } from './whisperProgressAggregator';
@@ -527,27 +527,27 @@ parentPort.on('message', async (msg: any) => {
       // thresholds to suppress repetition loops on long segments.
       const opts: any = streaming
         ? {
-            sampling_rate: 16000,
-            task: 'transcribe',
-            temperature: 0,
-            no_speech_threshold: 0.6,
-            // Whisper's anti-loop check — drops outputs whose token gzip
-            // ratio exceeds 2.4 (typical of "thank you. thank you. thank
-            // you..." hallucinations on near-silent windows). Final pass
-            // uses the same threshold; streaming should match for
-            // consistency in what reaches the user.
-            compression_ratio_threshold: 2.4,
-            condition_on_previous_text: false,
-            return_timestamps: false,
-          }
+          sampling_rate: 16000,
+          task: 'transcribe',
+          temperature: 0,
+          no_speech_threshold: 0.6,
+          // Whisper's anti-loop check — drops outputs whose token gzip
+          // ratio exceeds 2.4 (typical of "thank you. thank you. thank
+          // you..." hallucinations on near-silent windows). Final pass
+          // uses the same threshold; streaming should match for
+          // consistency in what reaches the user.
+          compression_ratio_threshold: 2.4,
+          condition_on_previous_text: false,
+          return_timestamps: false,
+        }
         : {
-            sampling_rate: 16000,
-            task: 'transcribe',
-            condition_on_previous_text: false,
-            compression_ratio_threshold: 2.4,
-            logprob_threshold: -1.0,
-            no_speech_threshold: 0.6,
-          };
+          sampling_rate: 16000,
+          task: 'transcribe',
+          condition_on_previous_text: false,
+          compression_ratio_threshold: 2.4,
+          logprob_threshold: -1.0,
+          no_speech_threshold: 0.6,
+        };
       // `task` is set unconditionally in BOTH opts branches above, so an
       // English-only model must have it stripped here — fixing only the
       // `language` line would still throw on `task`.

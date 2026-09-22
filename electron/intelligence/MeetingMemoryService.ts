@@ -84,7 +84,7 @@ export function isMemoryEligibleSegment(
     // dev-only test harness carry origin 'test' and count as meeting evidence
     // ONLY under the same explicit env opt-in that enables injection at all.
     // Without the env, 'test' stays ineligible — production behavior unchanged.
-    if (seg.origin === 'test' && process.env.NATIVELY_TEST_TRANSCRIPT_INJECTION === '1') return true;
+    if (seg.origin === 'test' && process.env.MEETFLOO_TEST_TRANSCRIPT_INJECTION === '1') return true;
     return false;
   }
   const speaker = String(seg.speaker || '').trim().toLowerCase();
@@ -361,27 +361,27 @@ export function buildPersistedMeetingMemory(
 
   const meetingMemory: PersistedMeetingMemory = zeroEligibleGuardApplied
     ? {
-        topics: [], questionsAsked: [], decisions: [], actionItems: [], risks: [], entities: [],
-        skillsDiscussed: [], companiesDiscussed: [], participants: [],
-        decisionsMeta: [], actionItemsMeta: [],
-        sourceQuality: 0,
-        schemaVersion: MEETING_MEMORY_SCHEMA_VERSION,
-      }
+      topics: [], questionsAsked: [], decisions: [], actionItems: [], risks: [], entities: [],
+      skillsDiscussed: [], companiesDiscussed: [], participants: [],
+      decisionsMeta: [], actionItemsMeta: [],
+      sourceQuality: 0,
+      schemaVersion: MEETING_MEMORY_SCHEMA_VERSION,
+    }
     : {
-        topics: record.topics,
-        questionsAsked: record.questionsAsked,
-        decisions: record.decisions,
-        actionItems: record.actionItems,
-        risks: record.risks,
-        entities: record.entities,
-        skillsDiscussed: record.skillsDiscussed,
-        companiesDiscussed: record.companiesDiscussed,
-        participants: record.participants,
-        decisionsMeta: record.decisionsMeta || [],
-        actionItemsMeta: record.actionItemsMeta || [],
-        sourceQuality: record.sourceQuality,
-        schemaVersion: MEETING_MEMORY_SCHEMA_VERSION,
-      };
+      topics: record.topics,
+      questionsAsked: record.questionsAsked,
+      decisions: record.decisions,
+      actionItems: record.actionItems,
+      risks: record.risks,
+      entities: record.entities,
+      skillsDiscussed: record.skillsDiscussed,
+      companiesDiscussed: record.companiesDiscussed,
+      participants: record.participants,
+      decisionsMeta: record.decisionsMeta || [],
+      actionItemsMeta: record.actionItemsMeta || [],
+      sourceQuality: record.sourceQuality,
+      schemaVersion: MEETING_MEMORY_SCHEMA_VERSION,
+    };
 
   return {
     meetingMemory,

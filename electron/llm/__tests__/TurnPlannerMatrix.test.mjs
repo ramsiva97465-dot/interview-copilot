@@ -45,9 +45,11 @@ describe('TurnPlanner matrix: question_kind × availability × profile', () => {
     });
 
     test('cell[profile_question × NO profile × default] = profile, empty probe, label general', () => {
-        const p = tp("What's your name?", { availability: {
-            hasReferenceFiles: false, hasProfileFacts: false, hasJobDescription: false, hasLiveTranscript: true,
-        } });
+        const p = tp("What's your name?", {
+            availability: {
+                hasReferenceFiles: false, hasProfileFacts: false, hasJobDescription: false, hasLiveTranscript: true,
+            }
+        });
         assert.equal(p.questionKind, 'profile_question');
         assert.deepEqual(p.evidenceSourcesToProbe, []);
         assert.equal(p.groundingProfile.onNoEvidence, 'answer_general_labeled',
@@ -65,9 +67,11 @@ describe('TurnPlanner matrix: question_kind × availability × profile', () => {
     });
 
     test('cell[jd_question × NO jd × default] = jd, probe profile only (no JD loaded)', () => {
-        const p = tp('What is the job regarding?', { availability: {
-            hasReferenceFiles: false, hasProfileFacts: true, hasJobDescription: false, hasLiveTranscript: true,
-        } });
+        const p = tp('What is the job regarding?', {
+            availability: {
+                hasReferenceFiles: false, hasProfileFacts: true, hasJobDescription: false, hasLiveTranscript: true,
+            }
+        });
         assert.equal(p.questionKind, 'jd_question');
         assert.deepEqual(p.evidenceSourcesToProbe, ['profile_resume']);
     });
@@ -84,9 +88,11 @@ describe('TurnPlanner matrix: question_kind × availability × profile', () => {
     });
 
     test('cell[general × no availability × default] = general, empty probe, general-labeled', () => {
-        const p = tp("What's your salary expectation?", { availability: {
-            hasReferenceFiles: false, hasProfileFacts: false, hasJobDescription: false, hasLiveTranscript: true,
-        } });
+        const p = tp("What's your salary expectation?", {
+            availability: {
+                hasReferenceFiles: false, hasProfileFacts: false, hasJobDescription: false, hasLiveTranscript: true,
+            }
+        });
         assert.equal(p.questionKind, 'general');
         assert.deepEqual(p.evidenceSourcesToProbe, []);
         assert.equal(p.answerDirectives.seedCandidateBackground, false);
@@ -96,9 +102,11 @@ describe('TurnPlanner matrix: question_kind × availability × profile', () => {
 
     // ── DOC_QUESTION ─────────────────────────────────────────────────
     test('cell[doc_question × refs available] = doc, probe reference_files only', () => {
-        const p = tp('summarize the deck', { answerType: 'lecture_answer', availability: {
-            hasReferenceFiles: true, hasProfileFacts: true, hasJobDescription: true, hasLiveTranscript: true,
-        } });
+        const p = tp('summarize the deck', {
+            answerType: 'lecture_answer', availability: {
+                hasReferenceFiles: true, hasProfileFacts: true, hasJobDescription: true, hasLiveTranscript: true,
+            }
+        });
         assert.equal(p.questionKind, 'doc_question');
         assert.deepEqual(p.evidenceSourcesToProbe, ['reference_files']);
     });
@@ -113,26 +121,26 @@ describe('TurnPlanner matrix: question_kind × availability × profile', () => {
 
 describe('TurnPlanner matrix: SEMINAR profile', () => {
     // Force seminar by writing the env flag before any planTurn call in this
-    // suite. (TurnPlanner reads process.env.NATIVELY_SEMINAR_MODE === '1'.)
+    // suite. (TurnPlanner reads process.env.MEETFLOO_SEMINAR_MODE === '1'.)
     // Set/unset inside each test (node test runner doesn't guarantee setup
     // ordering across describe blocks).
     test('seminar profile = required / say_not_found_then_answer_general (strict)', () => {
-        const prev = process.env.NATIVELY_SEMINAR_MODE;
-        process.env.NATIVELY_SEMINAR_MODE = '1';
+        const prev = process.env.MEETFLOO_SEMINAR_MODE;
+        process.env.MEETFLOO_SEMINAR_MODE = '1';
         try {
             const p = tp('what does the paper say about X?');
             assert.equal(p.groundingProfile.evidencePreference, 'required');
             assert.equal(p.groundingProfile.onNoEvidence, 'say_not_found_then_answer_general');
             assert.equal(p.groundingProfile.labelStyle, 'badge');
         } finally {
-            if (prev === undefined) delete process.env.NATIVELY_SEMINAR_MODE;
-            else process.env.NATIVELY_SEMINAR_MODE = prev;
+            if (prev === undefined) delete process.env.MEETFLOO_SEMINAR_MODE;
+            else process.env.MEETFLOO_SEMINAR_MODE = prev;
         }
     });
 
     test('seminar off-file question: seedBG respects kind; profile = strict; (no answerless invariant)', () => {
-        const prev = process.env.NATIVELY_SEMINAR_MODE;
-        process.env.NATIVELY_SEMINAR_MODE = '1';
+        const prev = process.env.MEETFLOO_SEMINAR_MODE;
+        process.env.MEETFLOO_SEMINAR_MODE = '1';
         try {
             const p = tp('who is the CEO?', {
                 answerType: 'general_meeting_answer',
@@ -144,8 +152,8 @@ describe('TurnPlanner matrix: SEMINAR profile', () => {
             assert.equal(p.answerDirectives.seminarNotFoundPreamble, true,
                 'seminar profile must flag the not-in-files preamble');
         } finally {
-            if (prev === undefined) delete process.env.NATIVELY_SEMINAR_MODE;
-            else process.env.NATIVELY_SEMINAR_MODE = prev;
+            if (prev === undefined) delete process.env.MEETFLOO_SEMINAR_MODE;
+            else process.env.MEETFLOO_SEMINAR_MODE = prev;
         }
     });
 });
@@ -183,15 +191,15 @@ describe('TurnPlanner matrix: source badge strings (founder §2.6)', () => {
     });
 
     test('seminar + off-file → seminarNotFoundPreamble=true (the §2.6 "Not in your reference files" badge)', () => {
-        const prev = process.env.NATIVELY_SEMINAR_MODE;
-        process.env.NATIVELY_SEMINAR_MODE = '1';
+        const prev = process.env.MEETFLOO_SEMINAR_MODE;
+        process.env.MEETFLOO_SEMINAR_MODE = '1';
         try {
             const p = tp('what is the square root of pi?', { answerType: 'general' });
             assert.equal(p.groundingProfile.onNoEvidence, 'say_not_found_then_answer_general');
             assert.equal(p.answerDirectives.seminarNotFoundPreamble, true);
         } finally {
-            if (prev === undefined) delete process.env.NATIVELY_SEMINAR_MODE;
-            else process.env.NATIVELY_SEMINAR_MODE = prev;
+            if (prev === undefined) delete process.env.MEETFLOO_SEMINAR_MODE;
+            else process.env.MEETFLOO_SEMINAR_MODE = prev;
         }
     });
 });

@@ -1,5 +1,5 @@
 // Screenshot memory — the reported bug is "I sent a screenshot and a few turns
-// later Natively can't remember it".
+// later MeetFloo can't remember it".
 //
 // The mechanism for it already existed on the main (V3) path: a conversation
 // ring of {q, a, screen} turns rendered as "[screen attached that turn] …".
@@ -42,7 +42,7 @@ const available = (over = {}) => ({
 test('the screen description includes errors, and puts them first', () => {
   const text = composeScreenDescription(available({
     visibleSummary: 'A failing build log.',
-    extractedText: 'Compiling natively v2.9.0',
+    extractedText: 'Compiling MeetFloo v2.9.0',
     errors: ['error LNK2019: unresolved external symbol _main'],
     codeBlocks: ['int main() {}'],
     tables: [{ markdown: '| a | b |' }],
@@ -133,7 +133,7 @@ test('a turn with no screenshot is unchanged and carries no screen key', () => {
 // was in it. A speech window structurally cannot contain screen text: no
 // microphone records a screenshot.
 
-process.env.NATIVELY_TEST_USERDATA = (await import('node:fs')).default.mkdtempSync(
+process.env.MEETFLOO_TEST_USERDATA = (await import('node:fs')).default.mkdtempSync(
   path.join((await import('node:os')).default.tmpdir(), 'v3-screenmem-'),
 );
 

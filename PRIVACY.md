@@ -2,32 +2,32 @@
 
 _Last updated: August 15th 2026_
 
-This policy describes how **Natively** — the desktop application, the **Natively Pro** licensed features, and the **Natively API** managed service — handles your data. We've tried to write it like a person, not a lawyer.
+This policy describes how **MeetFloo** — the desktop application, the **MeetFloo Pro** licensed features, and the **MeetFloo API** managed service — handles your data. We've tried to write it like a person, not a lawyer.
 
-If anything's unclear, email **natively.contact@gmail.com**. We aim to reply within 24–72 hours on weekdays.
+If anything's unclear, email **MeetFloo.contact@gmail.com**. We aim to reply within 24–72 hours on weekdays.
 
 ---
 
 ## 1. Who we are
 
-Natively is built and operated by a single developer based in **Kochi, Kerala, India**. For the purposes of applicable data-protection law (including India's Digital Personal Data Protection Act, 2023, and the EU General Data Protection Regulation where it applies):
+MeetFloo is built and operated by a single developer based in **Kochi, Kerala, India**. For the purposes of applicable data-protection law (including India's Digital Personal Data Protection Act, 2023, and the EU General Data Protection Regulation where it applies):
 
-- **Data fiduciary / controller:** Evin John, the developer of Natively.
-- **Contact:** natively.contact@gmail.com
-- **Grievance Officer (India IT Rules 2021):** Evin John — natively.contact@gmail.com — we acknowledge complaints within 72 hours on weekdays and aim to resolve them within 30 days.
+- **Data fiduciary / controller:** Evin John, the developer of MeetFloo.
+- **Contact:** MeetFloo.contact@gmail.com
+- **Grievance Officer (India IT Rules 2021):** Evin John — MeetFloo.contact@gmail.com — we acknowledge complaints within 72 hours on weekdays and aim to resolve them within 30 days.
 
-If you're using Natively on behalf of an organisation (under a bulk or team licence), that organisation is a separate data controller for the data of its own users, and you should also consult its own privacy policy.
+If you're using MeetFloo on behalf of an organisation (under a bulk or team licence), that organisation is a separate data controller for the data of its own users, and you should also consult its own privacy policy.
 
 ---
 
 ## 2. The short version
 
-We've designed Natively to keep as much of your data on your device as possible. In practice that means:
+We've designed MeetFloo to keep as much of your data on your device as possible. In practice that means:
 
-- **Audio you capture, screen content, transcripts, notes, and meeting history are stored locally on your device** in a SQLite database. They are **not** uploaded to a Natively-operated server.
-- When **Apple Speech** is selected, microphone and system audio are transcribed by Apple's on-device speech framework. The audio is not sent to Natively or a cloud speech provider. macOS may contact Apple to download the selected language's speech asset.
+- **Audio you capture, screen content, transcripts, notes, and meeting history are stored locally on your device** in a SQLite database. They are **not** uploaded to a MeetFloo-operated server.
+- When **Apple Speech** is selected, microphone and system audio are transcribed by Apple's on-device speech framework. The audio is not sent to MeetFloo or a cloud speech provider. macOS may contact Apple to download the selected language's speech asset.
 - When you use a cloud AI, speech-to-text, or search feature, **the relevant text or audio leaves your device only to be processed by the provider you've chosen** (e.g., OpenAI, Anthropic, Google, Groq, Deepgram, ElevenLabs, Azure, IBM, Soniox, Tavily). The result comes back to your device.
-- For **paid products** (Natively Pro, Natively API), we **do** store a small amount of operational data on our servers — your license key, hardware identifier, plan, billing email, and quota counters. We need this to make billing and licensing actually work. We do not store the content you generate.
+- For **paid products** (MeetFloo Pro, MeetFloo API), we **do** store a small amount of operational data on our servers — your license key, hardware identifier, plan, billing email, and quota counters. We need this to make billing and licensing actually work. We do not store the content you generate.
 - For the **Free Trial**, we additionally store anti-abuse signals (rate-limited IP, trial tokens, basic usage counters).
 - We **do not sell** your data. We **do not use your content to train AI models**. We don't use third-party analytics or marketing trackers inside the desktop app.
 
@@ -50,11 +50,11 @@ These never leave your device unless you choose a feature that sends a specific 
 - **Settings &amp; preferences** (stored via `electron-store` in the standard OS application-support directory).
 - **Your custom context files** (resumes, notes, JDs, knowledge base).
 - **Local SQLite database** containing meeting history.
-- **Your bring-your-own-key (BYOK) provider API keys** when you use the desktop app outside the Natively API. These are stored locally on your device. We do not transmit them to our servers, and we strongly recommend keeping your computer protected by full-disk encryption — `electron-store` itself stores its data as readable JSON, so anyone with file-system access to your device could otherwise read those keys.
+- **Your bring-your-own-key (BYOK) provider API keys** when you use the desktop app outside the MeetFloo API. These are stored locally on your device. We do not transmit them to our servers, and we strongly recommend keeping your computer protected by full-disk encryption — `electron-store` itself stores its data as readable JSON, so anyone with file-system access to your device could otherwise read those keys.
 
 ### 3.2 What we store on our servers — only for paid products and the Free Trial
 
-For Natively Pro, the Natively API, and the Free Trial we maintain a small operational record. Specifically:
+For MeetFloo Pro, the MeetFloo API, and the Free Trial we maintain a small operational record. Specifically:
 
 | Data | Purpose | Retained for |
 |---|---|---|
@@ -78,7 +78,7 @@ This applies to the usage ledger too. The ledger records **that** something happ
 through which endpoint, on which model, whether it succeeded, and how much of your quota it
 used. It never records **what** it was about. No prompt text, answer text, résumé or
 job-description content, meeting transcript, document content, clipboard content, keystroke
-or screenshot is written to it, and neither is any provider API key: your Natively key
+or screenshot is written to it, and neither is any provider API key: your MeetFloo key
 appears only as a one-way hash that cannot be reversed back into the key.
 
 The installation identifier is a random value generated on your device the first time the app
@@ -115,17 +115,17 @@ When you pair the desktop app with a phone via the Phone Mirror beta feature, a 
 
 This is the most important section of the policy, so it's spelled out in detail.
 
-When you use a feature that calls a third-party provider, the relevant input — usually a transcript, a prompt, or an audio chunk — is sent **directly from your device to that provider** to be processed, and the provider's response is sent back to your device. We do not relay this content through our servers (with one exception: the Natively API, where we relay through our infrastructure to provide a single managed endpoint).
+When you use a feature that calls a third-party provider, the relevant input — usually a transcript, a prompt, or an audio chunk — is sent **directly from your device to that provider** to be processed, and the provider's response is sent back to your device. We do not relay this content through our servers (with one exception: the MeetFloo API, where we relay through our infrastructure to provide a single managed endpoint).
 
 The data sent to a provider is **not anonymised** — transcripts and prompts contain whatever you spoke or typed, including names, places, employer details, and the content of conversations. Please be mindful of what you send to a provider, just as you would be with any cloud service.
 
 ### 4.1 Speech-to-text providers
 
-**Apple Speech** and the local Whisper models process captured audio on your device. Apple Speech uses the speech assets managed by macOS; the operating system may contact Apple to download a language asset the first time it is needed, but Natively does not send captured audio to Apple for transcription.
+**Apple Speech** and the local Whisper models process captured audio on your device. Apple Speech uses the speech assets managed by macOS; the operating system may contact Apple to download a language asset the first time it is needed, but MeetFloo does not send captured audio to Apple for transcription.
 
 If you select a cloud speech-to-text provider instead, audio chunks may be sent to one of:
 
-- **Natively STT** (operated by us, billed via the Natively API)
+- **MeetFloo STT** (operated by us, billed via the MeetFloo API)
 - **Google Cloud Speech-to-Text**
 - **Groq** (Whisper via Groq)
 - **OpenAI** (Whisper)
@@ -141,7 +141,7 @@ Each of these providers has its own privacy policy and data-retention behaviour.
 
 Depending on your settings, prompts and transcripts may be sent to one of:
 
-- **Natively AI** (operated by us, billed via the Natively API; routes to one or more underlying models)
+- **MeetFloo AI** (operated by us, billed via the MeetFloo API; routes to one or more underlying models)
 - **OpenAI** (GPT family) — does not train on API data by default
 - **Anthropic** (Claude family) — does not train on API data by default
 - **Google** (Gemini family) — different defaults for free-tier vs paid; see Google's terms
@@ -154,15 +154,15 @@ By default, OpenAI, Anthropic, and Groq do not use API content to train their mo
 
 The search feature (where enabled) calls **Tavily** or, where you've configured it, another search provider. The query you've entered is sent to the search provider; the results are returned to your device.
 
-### 4.4 Natively-managed services
+### 4.4 MeetFloo-managed services
 
-When you use the **Natively API** (instead of BYOK), your inputs flow through our infrastructure to one or more of the providers listed above, and the response flows back. We do **not** persist the content of these requests. We do log request metadata (timestamp, plan, quota usage, status) for billing, abuse prevention, and quality monitoring; that metadata is retained for up to 90 days.
+When you use the **MeetFloo API** (instead of BYOK), your inputs flow through our infrastructure to one or more of the providers listed above, and the response flows back. We do **not** persist the content of these requests. We do log request metadata (timestamp, plan, quota usage, status) for billing, abuse prevention, and quality monitoring; that metadata is retained for up to 90 days.
 
 ---
 
 ## 5. International transfers
 
-The third-party providers listed above operate globally. Depending on the provider and your location, your data may be processed in jurisdictions outside your country of residence — most commonly in the **United States** (OpenAI, Anthropic, Google, Groq, Deepgram, ElevenLabs, IBM, Tavily), the **European Economic Area** (Azure where you've selected an EU region), and **India** (Natively-operated services).
+The third-party providers listed above operate globally. Depending on the provider and your location, your data may be processed in jurisdictions outside your country of residence — most commonly in the **United States** (OpenAI, Anthropic, Google, Groq, Deepgram, ElevenLabs, IBM, Tavily), the **European Economic Area** (Azure where you've selected an EU region), and **India** (MeetFloo-operated services).
 
 By using the Service you acknowledge that your data may be transferred to and processed in these jurisdictions. Where a transfer is from the EEA / UK to a country without an adequacy decision, the receiving provider's standard contractual safeguards apply.
 
@@ -170,7 +170,7 @@ By using the Service you acknowledge that your data may be transferred to and pr
 
 ## 6. Cookies and the website
 
-The Natively desktop application does **not** use cookies (it isn't a web app). The marketing website at **natively.software** may use:
+The MeetFloo desktop application does **not** use cookies (it isn't a web app). The marketing website at **MeetFloo.software** may use:
 
 - **Essential cookies** required for the site to function (e.g., session, CSRF, language).
 - **Analytics cookies** to understand which pages are visited (the specific tool, if any, is documented on the website's cookie banner).
@@ -197,13 +197,13 @@ We request the minimum necessary set for the features you've enabled.
 
 We follow industry-standard practices for the limited data we do hold:
 
-- **In transit:** all communication with our license server, the Natively API, and any third-party provider is over **HTTPS / TLS**. The desktop app rejects unencrypted endpoints for these services.
+- **In transit:** all communication with our license server, the MeetFloo API, and any third-party provider is over **HTTPS / TLS**. The desktop app rejects unencrypted endpoints for these services.
 - **At rest (on our servers):** the metadata we store (license keys, hardware IDs, billing email, quota counters) sits behind authentication on managed infrastructure. Backups are encrypted at rest.
-- **At rest (on your device):** local data (the SQLite meeting database, transcripts, settings via `electron-store`) is **not** encrypted by Natively at the application layer. Please use full-disk encryption (FileVault on macOS, BitLocker on Windows, LUKS on Linux) to protect your local data.
+- **At rest (on your device):** local data (the SQLite meeting database, transcripts, settings via `electron-store`) is **not** encrypted by MeetFloo at the application layer. Please use full-disk encryption (FileVault on macOS, BitLocker on Windows, LUKS on Linux) to protect your local data.
 - **Secrets in code:** API keys and secrets are never embedded in shipped builds.
 - **Access:** as a single-developer project, server-side data is accessible only to the developer, and only for legitimate operational purposes (handling support requests, debugging billing issues, fraud prevention).
 
-For information on how to report a security vulnerability, see our [Security Policy](https://github.com/evinjohnn/natively-cluely-ai-assistant/blob/main/SECURITY.md).
+For information on how to report a security vulnerability, see our [Security Policy](https://github.com/evinjohnn/MeetFloo-cluely-ai-assistant/blob/main/SECURITY.md).
 
 ---
 
@@ -219,7 +219,7 @@ You have the following rights in respect of personal data we hold about you:
 - **Object** — you can object to processing that relies on legitimate interest (e.g., anti-abuse).
 - **Complain** — you can lodge a complaint with the relevant data-protection authority (in India, the Data Protection Board under the DPDP Act 2023; in the EU/UK, your local supervisory authority).
 
-To exercise any of these rights, email **natively.contact@gmail.com** with your order ID and a description of your request. We aim to respond within **30 days**.
+To exercise any of these rights, email **MeetFloo.contact@gmail.com** with your order ID and a description of your request. We aim to respond within **30 days**.
 
 If you're in California, you may have additional rights under the California Consumer Privacy Act (CCPA) — including the right to know, the right to delete, and the right to opt out of "sale" of personal information. **We do not sell personal information.** You can exercise CCPA rights by emailing the same address.
 
@@ -241,7 +241,7 @@ By using paid products you'll receive **operational emails** related to your pur
 
 ## 12. Source transparency
 
-The desktop application source is available on GitHub at <https://github.com/evinjohnn/natively-cluely-ai-assistant> under the Natively Personal Use Source License v1.0. You are welcome to audit the code to verify the claims in this policy.
+The desktop application source is available on GitHub at <https://github.com/evinjohnn/MeetFloo-cluely-ai-assistant> under the MeetFloo Personal Use Source License v1.0. You are welcome to audit the code to verify the claims in this policy.
 
 A small caveat: source availability does **not** by itself guarantee that the binaries we distribute are byte-for-byte produced from that source — reproducible builds are a separate effort we don't currently provide. If you require reproducible binaries, build from source.
 
@@ -259,8 +259,8 @@ We don't make adverse changes (e.g., expanding what we collect or share) without
 
 For privacy questions, data-rights requests, complaints, or anything else covered by this policy:
 
-**Email:** natively.contact@gmail.com
+**Email:** MeetFloo.contact@gmail.com
 
-**Grievance Officer:** Evin John — natively.contact@gmail.com — acknowledgements within 72 hours on weekdays, resolution targets of 30 days.
+**Grievance Officer:** Evin John — MeetFloo.contact@gmail.com — acknowledgements within 72 hours on weekdays, resolution targets of 30 days.
 
 We may not respond on weekends or Indian public holidays — if you write in over a weekend, please expect a reply early the following week.

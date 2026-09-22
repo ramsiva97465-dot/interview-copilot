@@ -14,16 +14,16 @@ const collect = async (stream) => { let text = ''; for await (const chunk of str
 
 test('reinitializing Antigravity IPC replaces owned lifecycle listeners and preserves other listeners', () => {
   const { initializeAntigravityLifecycle } = require(path.join(root, 'dist-electron/electron/services/AntigravityService.js'));
-  const previous = globalThis.__nativelyAntigravityServiceV1__;
+  const previous = globalThis.__MeetFlooAntigravityServiceV1__;
   const app = new EventEmitter();
   const service = new EventEmitter();
   let disposed = 0, oldBroadcasts = 0, broadcasts = 0, models = 0, unrelatedQuit = 0;
   service.initialize = () => service.emit('status-changed', {});
   service.dispose = () => disposed++;
-  const unrelatedStatus = () => {};
+  const unrelatedStatus = () => { };
   service.on('status-changed', unrelatedStatus);
   app.on('before-quit', () => unrelatedQuit++);
-  globalThis.__nativelyAntigravityServiceV1__ = service;
+  globalThis.__MeetFlooAntigravityServiceV1__ = service;
   try {
     initializeAntigravityLifecycle(app, () => oldBroadcasts++, () => oldBroadcasts++);
     initializeAntigravityLifecycle(app, () => broadcasts++, () => models++);
@@ -37,7 +37,7 @@ test('reinitializing Antigravity IPC replaces owned lifecycle listeners and pres
     app.emit('before-quit');
     assert.equal(disposed, 1);
     assert.equal(unrelatedQuit, 1);
-  } finally { globalThis.__nativelyAntigravityServiceV1__ = previous; }
+  } finally { globalThis.__MeetFlooAntigravityServiceV1__ = previous; }
 });
 
 function helper(policy = {}) {
@@ -47,7 +47,7 @@ function helper(policy = {}) {
   h.useOllama = false;
   h.isProviderDisabled = () => false;
   h.getProviderScopePolicy = () => policy;
-  h.assertOutboundImagesAllowed = () => {};
+  h.assertOutboundImagesAllowed = () => { };
   h.processImage = async () => ({ mimeType: 'image/png', data: 'prepared-image' });
   return h;
 }
@@ -65,9 +65,9 @@ test('Antigravity model selection stays distinct from API-key Gemini and accepts
 });
 
 test('streaming preserves model, prompt, prepared images, budget and cancellation', async () => {
-  const previous = globalThis.__nativelyAntigravityServiceV1__;
+  const previous = globalThis.__MeetFlooAntigravityServiceV1__;
   const calls = [];
-  globalThis.__nativelyAntigravityServiceV1__ = {
+  globalThis.__MeetFlooAntigravityServiceV1__ = {
     async *stream(input) { calls.push(input); yield 'answer'; yield ' text'; },
   };
   try {
@@ -79,14 +79,14 @@ test('streaming preserves model, prompt, prepared images, budget and cancellatio
     assert.equal(calls[0].systemPrompt, 'system');
     assert.deepEqual(calls[0].images, [{ mimeType: 'image/png', data: 'prepared-image' }]);
     assert.equal(calls[0].signal, signal);
-    assert.ok(calls[0].maxOutputTokens > 192, 'Natively must retain its own answer budget');
-  } finally { globalThis.__nativelyAntigravityServiceV1__ = previous; }
+    assert.ok(calls[0].maxOutputTokens > 192, 'MeetFloo must retain its own answer budget');
+  } finally { globalThis.__MeetFlooAntigravityServiceV1__ = previous; }
 });
 
 test('disabled provider, local-only and denied scopes prevent outbound calls', async () => {
-  const previous = globalThis.__nativelyAntigravityServiceV1__;
+  const previous = globalThis.__MeetFlooAntigravityServiceV1__;
   let calls = 0;
-  globalThis.__nativelyAntigravityServiceV1__ = { async *stream() { calls++; yield 'unexpected'; } };
+  globalThis.__MeetFlooAntigravityServiceV1__ = { async *stream() { calls++; yield 'unexpected'; } };
   try {
     const disabled = helper();
     disabled.isProviderDisabled = (provider) => provider === 'antigravity';
@@ -97,7 +97,7 @@ test('disabled provider, local-only and denied scopes prevent outbound calls', a
     await assert.rejects(collect(helper({ screenshots: false }).streamWithAntigravity('question', '', ['screen.png'])), /scope/i);
     await assert.rejects(collect(helper({ transcript: false }).streamWithAntigravity('question')), /scope/i);
     assert.equal(calls, 0);
-  } finally { globalThis.__nativelyAntigravityServiceV1__ = previous; }
+  } finally { globalThis.__MeetFlooAntigravityServiceV1__ = previous; }
 });
 
 test('Direct Assist dispatch uses the selected Antigravity model exactly once', async () => {
@@ -128,13 +128,15 @@ test('switching to local or custom models clears Antigravity selection and capab
 });
 
 test('Direct Assist can answer a typed question when meeting transcript sharing is disabled', async () => {
-  const previous = globalThis.__nativelyAntigravityServiceV1__;
-  globalThis.__nativelyAntigravityServiceV1__ = { async *stream() { yield 'answer'; } };
+  const previous = globalThis.__MeetFlooAntigravityServiceV1__;
+  globalThis.__MeetFlooAntigravityServiceV1__ = { async *stream() { yield 'answer'; } };
   try {
     const h = helper({ transcript: false });
-    assert.equal(await collect(h.streamDirectAssist({ requestId: 'private-check', selection: h.getDirectAssistSelection(),
-      userPrompt: 'CURRENT REQUEST:\nExplain queues', systemPrompt: 'Answer the question', imagePaths: [] })), 'answer');
-  } finally { globalThis.__nativelyAntigravityServiceV1__ = previous; }
+    assert.equal(await collect(h.streamDirectAssist({
+      requestId: 'private-check', selection: h.getDirectAssistSelection(),
+      userPrompt: 'CURRENT REQUEST:\nExplain queues', systemPrompt: 'Answer the question', imagePaths: []
+    })), 'answer');
+  } finally { globalThis.__MeetFlooAntigravityServiceV1__ = previous; }
 });
 
 test('Direct Assist auth errors give a safe recovery action without upstream text', () => {

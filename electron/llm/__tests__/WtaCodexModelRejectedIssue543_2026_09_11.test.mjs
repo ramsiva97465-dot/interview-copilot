@@ -50,7 +50,7 @@ const { isProviderTransportError } = require(dist('llm/answerPolish.js'));
 
 // Same seam CodexVisionPayload2026_08_05 uses: the CodexOAuthService copy
 // inlined into the LLMHelper bundle reads tokens through this global slot.
-const CRED_SLOT = '__nativelyCredentialsManagerV1__';
+const CRED_SLOT = '__MeetFlooCredentialsManagerV1__';
 // Every other credential getter the answer path touches (Antigravity tokens,
 // provider keys, …) reads as "not configured".
 const seedSignedIn = () => {

@@ -129,7 +129,7 @@ function makeHost({ allowedHosts = ['api.example.com'], permissions = ['network.
       manifest: {
         id: 'probe', name: 'Probe', version: '1.0.0', apiVersion: '1', type: 'reranker',
         entrypoint: 'dist/index.js', author: 'a', homepage: 'https://x.example',
-        engines: { natively: '*' }, permissions, allowedHosts, models: [],
+        engines: { MeetFloo: '*' }, permissions, allowedHosts, models: [],
       },
       extensionDir: '/tmp/probe',
       modelDir: '/tmp/probe-models',
@@ -143,8 +143,8 @@ function makeHost({ allowedHosts = ['api.example.com'], permissions = ['network.
         },
       },
       config: {},
-      logger: { debug() {}, info() {}, warn() {}, error() {} },
-      onCrash: () => {},
+      logger: { debug() { }, info() { }, warn() { }, error() { } },
+      onCrash: () => { },
     }),
   };
 }

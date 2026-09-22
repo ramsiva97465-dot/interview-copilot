@@ -1,8 +1,8 @@
 // Regression test for: every window evaluated the entire app bundle.
 //
-// THE BUG. All Natively windows load the same index.html with a different
+// THE BUG. All MeetFloo windows load the same index.html with a different
 // `?window=` param, and main.tsx mounted `App` for every one of them. `App`
-// statically imports NativelyInterface, which pulls react-markdown,
+// statically imports MeetFlooInterface, which pulls react-markdown,
 // react-syntax-highlighter and KaTeX. So the 36px overlay resize toggle
 // evaluated the whole application to render thirty DOM nodes.
 //
@@ -68,10 +68,10 @@ test('the light routes mount AuxRoot instead of App', () => {
 });
 
 test('AuxRoot never reaches the heavy renderer surface', () => {
-    // The point of the split. NativelyInterface is the component that drags in
+    // The point of the split. MeetFlooInterface is the component that drags in
     // markdown + KaTeX + the syntax highlighter; App is what drags in
     // everything else.
-    for (const forbidden of ['./App', 'NativelyInterface', 'react-markdown', 'katex', 'react-syntax-highlighter']) {
+    for (const forbidden of ['./App', 'MeetFlooInterface', 'react-markdown', 'katex', 'react-syntax-highlighter']) {
         assert.doesNotMatch(
             auxSource,
             new RegExp(`from\\s+['"][^'"]*${forbidden.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`),
@@ -117,7 +117,7 @@ test('the split panels keep the provider stack App gave them', () => {
 });
 
 test('the overlay is deliberately NOT split', () => {
-    // It renders NativelyInterface, whose import graph genuinely needs
+    // It renders MeetFlooInterface, whose import graph genuinely needs
     // react-syntax-highlighter and katex to show meeting answers. Splitting it
     // would either break rendering or just move the same weight.
     const mainSrc = readFileSync(path.join(repoRoot, 'src/main.tsx'), 'utf8');

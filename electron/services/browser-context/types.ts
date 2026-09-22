@@ -2,7 +2,7 @@
  * Smart Browser Context v2 — shared type vocabulary (DESKTOP mirror).
  *
  * Duplicated by design (the extension package + renderer can't cross-import this
- * file). Canonical source is `natively-browser/src/capture/types.ts`; the
+ * file). Canonical source is `MeetFloo-browser/src/capture/types.ts`; the
  * renderer copy lives in `src/types/electron.d.ts`. A drift-guard test
  * (BrowserContextTypeParity.test.mjs) string-compares the union literals across
  * all three copies. Keep BROWSER_CONTEXT_PARITY below in sync if you edit a union.
@@ -155,12 +155,12 @@ export interface CodingProblemPayload {
 
 export interface NotesPayload {
   editorType:
-    | 'google_docs'
-    | 'notion'
-    | 'textarea'
-    | 'contenteditable'
-    | 'prosemirror'
-    | 'unknown';
+  | 'google_docs'
+  | 'notion'
+  | 'textarea'
+  | 'contenteditable'
+  | 'prosemirror'
+  | 'unknown';
   selectedText?: string;
   visibleText?: string;
 }

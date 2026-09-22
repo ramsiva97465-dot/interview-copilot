@@ -123,7 +123,7 @@ class KnowledgeIndexQueueImpl extends EventEmitter {
 // KnowledgeManager.ts's — the progress listener registered in ipcHandlers.ts
 // would never fire for jobs enqueued via KnowledgeManager.ts. Anchor to
 // globalThis so every bundle shares the same singleton within the process.
-const GLOBAL_KEY = '__natively_okf_knowledge_index_queue__';
+const GLOBAL_KEY = '__MeetFloo_okf_knowledge_index_queue__';
 function getGlobalQueue(): KnowledgeIndexQueueImpl {
   const g = globalThis as unknown as Record<string, KnowledgeIndexQueueImpl | undefined>;
   if (!g[GLOBAL_KEY]) g[GLOBAL_KEY] = new KnowledgeIndexQueueImpl();

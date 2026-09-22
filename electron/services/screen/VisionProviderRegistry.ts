@@ -35,7 +35,7 @@ export interface VisionProviderBuildInputs {
 
 /**
  * Produce the ordered list of vision providers for the given mode. Order is:
- *   vision_first / vision_only: Natively → OpenAI → Gemini Flash-Lite →
+ *   vision_first / vision_only: MeetFloo → OpenAI → Gemini Flash-Lite →
  *                                Gemini Flash → Claude → Gemini Pro → Groq Scout
  *                                → LiteLLM → NVIDIA NIM → Ollama → Codex → Custom
  *   private_vision: Ollama → Codex → local Custom only
@@ -58,9 +58,9 @@ export function buildVisionProviders(inputs: VisionProviderBuildInputs): VisionP
     providers.push(nvidiaNim(credentials, inputs));
     providers.push(openrouter(credentials, inputs));
     providers.push(fluxion(credentials, inputs));
-    // Fallback providers (Sarvam AI & Natively)
+    // Fallback providers (Sarvam AI & MeetFloo)
     providers.push(sarvam(credentials, inputs));
-    providers.push(natively(credentials, inputs));
+    providers.push(MeetFloo(credentials, inputs));
   }
 
   // Local providers — always allowed, including in private_vision.
@@ -88,18 +88,18 @@ function sarvam(creds: CredentialsManager, _inputs: VisionProviderBuildInputs): 
   };
 }
 
-function natively(creds: CredentialsManager, _inputs: VisionProviderBuildInputs): VisionProviderConfig {
-  const apiKey = creds.getNativelyApiKey();
+function MeetFloo(creds: CredentialsManager, _inputs: VisionProviderBuildInputs): VisionProviderConfig {
+  const apiKey = creds.getMeetFlooApiKey();
   return {
-    id: 'natively',
-    displayName: 'Natively API',
-    modelId: 'natively',
+    id: 'MeetFloo',
+    displayName: 'MeetFloo API',
+    modelId: 'MeetFloo',
     isLocal: false,
     isConfigured: !!apiKey,
     supportsVision: !!apiKey,
     scopeAllowsScreenshots: true,
-    hint: 'natively',
-    invoke: async (p) => callLLMHelperVision('natively', p),
+    hint: 'MeetFloo',
+    invoke: async (p) => callLLMHelperVision('MeetFloo', p),
   };
 }
 
@@ -422,9 +422,9 @@ async function callLLMHelperVision(providerId: string, params: VisionInvocationP
   // builds an AbortController per attempt and arms it with perProviderTimeoutMs
   // (12s), but this hand-off dropped both, so the chain's budget and its
   // cancellation were INERT for every cloud rung — whatever inner deadline the
-  // provider method happened to carry was the real one. For the Natively rung
-  // that was generateWithNatively's 8s text default, which is why every
-  // screenshot in natively_debug (3).log failed at exactly 8.0s and the
+  // provider method happened to carry was the real one. For the MeetFloo rung
+  // that was generateWithMeetFloo's 8s text default, which is why every
+  // screenshot in MeetFloo_debug (3).log failed at exactly 8.0s and the
   // chain's 12s never appeared anywhere.
   return helper.runVisionRequest(
     providerId,
@@ -498,9 +498,9 @@ async function callOllamaVision(baseUrl: string, model: string, params: VisionIn
  */
 async function getActiveLLMHelper(): Promise<any | null> {
   const g = global as any;
-  if (typeof g.__nativelyGetLLMHelper === 'function') {
+  if (typeof g.__MeetFlooGetLLMHelper === 'function') {
     try {
-      return g.__nativelyGetLLMHelper();
+      return g.__MeetFlooGetLLMHelper();
     } catch {
       return null;
     }

@@ -23,8 +23,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '../../../..');
 const distRoot = path.join(repoRoot, 'dist-electron', 'electron');
 const isElectronRuntime = Boolean(process.versions?.electron) || process.env.ELECTRON_RUN_AS_NODE === '1';
-if (!process.env.NATIVELY_TEST_USERDATA) {
-  process.env.NATIVELY_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'okf-profile-flagoff-'));
+if (!process.env.MEETFLOO_TEST_USERDATA) {
+  process.env.MEETFLOO_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'okf-profile-flagoff-'));
 }
 async function load(rel) {
   return import(pathToFileURL(path.join(distRoot, rel)).href);
@@ -32,7 +32,7 @@ async function load(rel) {
 const guard = { skip: !isElectronRuntime && !process.env.FORCE_DB_TEST };
 
 test('flag OFF: generateForProfile no-ops (skipped_flag_off)', guard, async () => {
-  process.env.NATIVELY_OKF_PROFILE_PACKS = '0';
+  process.env.MEETFLOO_OKF_PROFILE_PACKS = '0';
   const { DatabaseManager } = await load('db/DatabaseManager.js');
   DatabaseManager.getInstance();
   const { ProfilePackBuilder } = await load('services/knowledge/ProfilePackBuilder.js');
@@ -43,7 +43,7 @@ test('flag OFF: generateForProfile no-ops (skipped_flag_off)', guard, async () =
 });
 
 test('flag OFF: retrieval blocked (blockedReason flag_off) even with plan + policy required', guard, async () => {
-  process.env.NATIVELY_OKF_PROFILE_HYBRID_RETRIEVAL = '0';
+  process.env.MEETFLOO_OKF_PROFILE_HYBRID_RETRIEVAL = '0';
   const { retrieveProfileEvidence } = await load('services/knowledge/OkfProfileRetriever.js');
   const r = retrieveProfileEvidence({
     question: 'What are my strongest programming languages?',

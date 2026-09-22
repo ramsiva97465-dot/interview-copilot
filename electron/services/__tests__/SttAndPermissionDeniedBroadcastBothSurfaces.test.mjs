@@ -31,7 +31,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '../../..');
 const mainPath = path.join(root, 'electron/main.ts');
-const interfacePath = path.join(root, 'src/components/NativelyInterface.tsx');
+const interfacePath = path.join(root, 'src/components/MeetFlooInterface.tsx');
 const source = fs.readFileSync(mainPath, 'utf8');
 const interfaceSource = fs.readFileSync(interfacePath, 'utf8');
 
@@ -63,17 +63,17 @@ describe('B8b: stt-status and system-audio-permission-denied must reach BOTH lau
       body,
       /sendToMeetingSurfaces\(\s*['"]stt-status['"]/,
       'BUG: sendSttStatus must use this.sendToMeetingSurfaces(\'stt-status\', ...). ' +
-        'See B8b fix (2026-05-28): pre-fix it used sendToOverlay, and a destroyed overlay ' +
-        '(launcher↔overlay swap race / meeting end/start transition) made the STT status ' +
-        'indicator silently disappear.',
+      'See B8b fix (2026-05-28): pre-fix it used sendToOverlay, and a destroyed overlay ' +
+      '(launcher↔overlay swap race / meeting end/start transition) made the STT status ' +
+      'indicator silently disappear.',
     );
 
     assert.ok(
       !/sendToOverlay\(\s*['"]stt-status['"]/.test(body),
       'BUG: sendSttStatus reverted to sendToOverlay(\'stt-status\', ...). ' +
-        'This re-introduces the silent-invisibility bug — if the overlay BrowserWindow is ' +
-        'destroyed by a race, the status indicator never reaches the launcher and the user ' +
-        'sees a stale/missing state.',
+      'This re-introduces the silent-invisibility bug — if the overlay BrowserWindow is ' +
+      'destroyed by a race, the status indicator never reaches the launcher and the user ' +
+      'sees a stale/missing state.',
     );
   });
 
@@ -84,17 +84,17 @@ describe('B8b: stt-status and system-audio-permission-denied must reach BOTH lau
       body,
       /sendToMeetingSurfaces\(\s*['"]system-audio-permission-denied['"]/,
       'BUG: sendSystemAudioPermissionDenied must use ' +
-        'this.sendToMeetingSurfaces(\'system-audio-permission-denied\', ...). ' +
-        'The TCC permission-denied banner is one of the most user-actionable diagnostic ' +
-        'signals — losing it to an overlay-destroy race defeats the entire permission ' +
-        'recovery path (HIGH severity sister bug to B8).',
+      'this.sendToMeetingSurfaces(\'system-audio-permission-denied\', ...). ' +
+      'The TCC permission-denied banner is one of the most user-actionable diagnostic ' +
+      'signals — losing it to an overlay-destroy race defeats the entire permission ' +
+      'recovery path (HIGH severity sister bug to B8).',
     );
 
     assert.ok(
       !/sendToOverlay\(\s*['"]system-audio-permission-denied['"]/.test(body),
       'BUG: sendSystemAudioPermissionDenied reverted to ' +
-        'sendToOverlay(\'system-audio-permission-denied\', ...). ' +
-        'This re-introduces the HIGH-severity silent-invisibility bug for TCC banners.',
+      'sendToOverlay(\'system-audio-permission-denied\', ...). ' +
+      'This re-introduces the HIGH-severity silent-invisibility bug for TCC banners.',
     );
   });
 
@@ -105,12 +105,12 @@ describe('B8b: stt-status and system-audio-permission-denied must reach BOTH lau
     assert.ok(
       /sendToMeetingSurfaces\(\s*['"]stt-status['"]/.test(source),
       'BUG: the literal channel name \'stt-status\' must not be changed — ' +
-        'preload.ts onSttStatusChanged subscribes on this exact string.',
+      'preload.ts onSttStatusChanged subscribes on this exact string.',
     );
     assert.ok(
       /sendToMeetingSurfaces\(\s*['"]system-audio-permission-denied['"]/.test(source),
       'BUG: the literal channel name \'system-audio-permission-denied\' must not be changed — ' +
-        'preload.ts onSystemAudioPermissionDenied subscribes on this exact string.',
+      'preload.ts onSystemAudioPermissionDenied subscribes on this exact string.',
     );
   });
 
@@ -121,7 +121,7 @@ describe('B8b: stt-status and system-audio-permission-denied must reach BOTH lau
     assert.ok(
       !/this\.broadcast\s*\(/.test(sttBody),
       'BUG: sendSttStatus must not use this.broadcast(...) — it would leak the status ' +
-        'indicator to settings/cropper/modelSelector windows that should never receive it.',
+      'indicator to settings/cropper/modelSelector windows that should never receive it.',
     );
     assert.ok(
       !/BrowserWindow\.getAllWindows\s*\(/.test(sttBody),
@@ -131,7 +131,7 @@ describe('B8b: stt-status and system-audio-permission-denied must reach BOTH lau
     assert.ok(
       !/this\.broadcast\s*\(/.test(permBody),
       'BUG: sendSystemAudioPermissionDenied must not use this.broadcast(...) — it would leak ' +
-        'the permission banner to unrelated surfaces.',
+      'the permission banner to unrelated surfaces.',
     );
     assert.ok(
       !/BrowserWindow\.getAllWindows\s*\(/.test(permBody),
@@ -139,7 +139,7 @@ describe('B8b: stt-status and system-audio-permission-denied must reach BOTH lau
     );
   });
 
-  it('subscriber side intact: NativelyInterface.tsx still subscribes to both channels', () => {
+  it('subscriber side intact: MeetFlooInterface.tsx still subscribes to both channels', () => {
     // Structural confidence that the rendering paths match the sender
     // channels. If the subscriber side regresses, the broadcast still
     // succeeds but no UI updates.
@@ -149,16 +149,16 @@ describe('B8b: stt-status and system-audio-permission-denied must reach BOTH lau
     assert.match(
       interfaceSource,
       /window\.electronAPI\??\.onSttStatusChanged(?:\?\.)?\s*\(/,
-      'BUG: NativelyInterface.tsx must still subscribe via ' +
-        'window.electronAPI.onSttStatusChanged(...). Without this, the stt-status IPC ' +
-        'is broadcast successfully but no renderer renders it.',
+      'BUG: MeetFlooInterface.tsx must still subscribe via ' +
+      'window.electronAPI.onSttStatusChanged(...). Without this, the stt-status IPC ' +
+      'is broadcast successfully but no renderer renders it.',
     );
     assert.match(
       interfaceSource,
       /window\.electronAPI\??\.onSystemAudioPermissionDenied(?:\?\.)?\s*\(/,
-      'BUG: NativelyInterface.tsx must still subscribe via ' +
-        'window.electronAPI.onSystemAudioPermissionDenied(...). Without this, the TCC ' +
-        'permission banner IPC is broadcast successfully but no banner is rendered.',
+      'BUG: MeetFlooInterface.tsx must still subscribe via ' +
+      'window.electronAPI.onSystemAudioPermissionDenied(...). Without this, the TCC ' +
+      'permission banner IPC is broadcast successfully but no banner is rendered.',
     );
   });
 

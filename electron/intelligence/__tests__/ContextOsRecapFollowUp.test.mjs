@@ -81,8 +81,8 @@ test('WIRING: follow-up source switch emits a source-honest line instead of sile
 
 // ── Contract behavior on the recap/follow-up surface ────────────────────────
 
-process.env.NATIVELY_CONTEXT_OS = '1';
-process.env.NATIVELY_CONTEXT_OS_RECAP_FOLLOWUP = '1';
+process.env.MEETFLOO_CONTEXT_OS = '1';
+process.env.MEETFLOO_CONTEXT_OS_RECAP_FOLLOWUP = '1';
 
 test('recap surface contract builds under the recapFollowup flag', () => {
   const c = co.buildTurnContractIfEnabled({
@@ -102,7 +102,7 @@ test('recap surface contract builds under the recapFollowup flag', () => {
 });
 
 test('recap/follow-up surface flag off → null (legacy mode-blind behavior)', () => {
-  process.env.NATIVELY_CONTEXT_OS_RECAP_FOLLOWUP = '0';
+  process.env.MEETFLOO_CONTEXT_OS_RECAP_FOLLOWUP = '0';
   try {
     const c = co.buildTurnContractIfEnabled({
       surface: 'follow_up',
@@ -117,6 +117,6 @@ test('recap/follow-up surface flag off → null (legacy mode-blind behavior)', (
     });
     assert.equal(c, null);
   } finally {
-    process.env.NATIVELY_CONTEXT_OS_RECAP_FOLLOWUP = '1';
+    process.env.MEETFLOO_CONTEXT_OS_RECAP_FOLLOWUP = '1';
   }
 });

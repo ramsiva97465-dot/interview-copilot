@@ -396,8 +396,8 @@ export function tabularChunks(content: string, rowsPerChunk?: number): string[] 
     // "United States population" — ranks that entity's chunk highly). Large tables
     // grow rows-per-chunk to stay under MAX_TABLE_CHUNKS (index memory/OOM bound).
     // Every chunk repeats the header so rows stay labelled + findable.
-    const MAX_TABLE_CHUNKS = Number(process.env.NATIVELY_MAX_TABLE_CHUNKS) || 120;
-    const MIN_ROWS = Number(process.env.NATIVELY_TABLE_MIN_ROWS_PER_CHUNK) || 10;
+    const MAX_TABLE_CHUNKS = Number(process.env.MEETFLOO_MAX_TABLE_CHUNKS) || 120;
+    const MIN_ROWS = Number(process.env.MEETFLOO_TABLE_MIN_ROWS_PER_CHUNK) || 10;
     // Base target: ~10 rows/chunk for finer specific-entity recall; but never so many
     // chunks that a large table blows the cap.
     const base = rowsPerChunk ?? MIN_ROWS;
@@ -814,7 +814,7 @@ function resolveByContent(query: string, map: DocumentMap, qOrdinals: Set<string
             const freq = sf.get(w) || total;
             score += Math.log((total + 1) / (freq + 1));
         }
-            // Title-word tiebreak: a section whose HEADING contains a content word is
+        // Title-word tiebreak: a section whose HEADING contains a content word is
         // the authoritative source for that concept — a strong bonus so that
         // §3.2.3 "Preprocessing and RLDS format" decisively outranks §3.3 for
         // "what format was the dataset stored in?", and §3.2.1 "Robotic Task

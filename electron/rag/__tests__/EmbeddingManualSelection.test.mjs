@@ -3,9 +3,9 @@
 // Choosing a provider in Settings must actually switch to it.
 //
 // THE BUG: buildCandidates() ordered candidates purely by which credentials
-// existed (natively -> custom -> openai -> gemini -> ollama -> local) and
+// existed (MeetFloo -> custom -> openai -> gemini -> ollama -> local) and
 // resolve() took the first AVAILABLE one. The user's explicit choice was written
-// to settings and then ignored, so clicking MiniLM, Gemini or Natively changed
+// to settings and then ignored, so clicking MiniLM, Gemini or MeetFloo changed
 // nothing whenever some higher-priority provider was also configured.
 //
 // Selecting a provider is an EXPLICIT act. It outranks the automatic chain, and
@@ -26,7 +26,7 @@ const names = (c) => EmbeddingProviderResolver.buildCandidates(c).map(p => p.nam
 
 /** Every provider configured at once — so the chain would otherwise decide. */
 const ALL = {
-  nativelyApiKey: 'nk_live',
+  MeetFlooApiKey: 'nk_live',
   openaiKey: 'sk-openai',
   geminiKey: 'gem-key',
   ollamaUrl: 'http://localhost:11434',
@@ -37,13 +37,13 @@ const ALL = {
 
 describe('automatic mode is unchanged', () => {
   test('with no explicit choice, the priority chain still decides', () => {
-    assert.deepEqual(names(ALL), ['natively', 'custom', 'openai', 'gemini', 'ollama']);
+    assert.deepEqual(names(ALL), ['MeetFloo', 'custom', 'openai', 'gemini', 'ollama']);
   });
 });
 
 describe('an explicit choice wins over the chain', () => {
-  test('choosing Gemini yields ONLY Gemini, even though Natively ranks higher', () => {
-    // The headline bug: natively is first in the chain, so picking gemini did nothing.
+  test('choosing Gemini yields ONLY Gemini, even though MeetFloo ranks higher', () => {
+    // The headline bug: MeetFloo is first in the chain, so picking gemini did nothing.
     assert.deepEqual(names({ ...ALL, embeddingMode: 'manual', embeddingProvider: 'gemini' }), ['gemini']);
   });
 
@@ -59,8 +59,8 @@ describe('an explicit choice wins over the chain', () => {
     assert.deepEqual(names({ ...ALL, embeddingMode: 'manual', embeddingProvider: 'custom' }), ['custom']);
   });
 
-  test('choosing Natively yields ONLY Natively', () => {
-    assert.deepEqual(names({ ...ALL, embeddingMode: 'manual', embeddingProvider: 'natively' }), ['natively']);
+  test('choosing MeetFloo yields ONLY MeetFloo', () => {
+    assert.deepEqual(names({ ...ALL, embeddingMode: 'manual', embeddingProvider: 'MeetFloo' }), ['MeetFloo']);
   });
 
   test('choosing Built-in yields NO candidate, so resolve falls to the bundled model', () => {
@@ -91,10 +91,10 @@ describe('a manual choice never silently substitutes another provider', () => {
 describe('mode gating', () => {
   test("a provider named without manual mode does not pin the chain", () => {
     // 'auto' means "you decide" — a stale provider field must not silently pin.
-    assert.deepEqual(names({ ...ALL, embeddingMode: 'auto', embeddingProvider: 'gemini' }), ['natively', 'custom', 'openai', 'gemini', 'ollama']);
+    assert.deepEqual(names({ ...ALL, embeddingMode: 'auto', embeddingProvider: 'gemini' }), ['MeetFloo', 'custom', 'openai', 'gemini', 'ollama']);
   });
 
   test('manual mode with no provider named falls back to the chain', () => {
-    assert.deepEqual(names({ ...ALL, embeddingMode: 'manual' }), ['natively', 'custom', 'openai', 'gemini', 'ollama']);
+    assert.deepEqual(names({ ...ALL, embeddingMode: 'manual' }), ['MeetFloo', 'custom', 'openai', 'gemini', 'ollama']);
   });
 });

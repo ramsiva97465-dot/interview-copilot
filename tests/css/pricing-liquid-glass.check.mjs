@@ -10,7 +10,7 @@
 //
 //   1. THE DEFAULT THEME IS THE SHIPPING ONE. getMeetingInterfaceTheme()
 //      returns 'default' (src/lib/meetingInterfaceTheme.ts:17) unless the user
-//      picks otherwise, and NativelyApiSettings / NativelyProSettings write it
+//      picks otherwise, and MeetFlooApiSettings / MeetFlooProSettings write it
 //      straight onto their roots. `default` matches [data-interface-theme]
 //      (presence) and matches NEITHER ="liquid-glass" NOR ="modern". Half of
 //      the pricing CSS is anchored on those two values, and everything anchored
@@ -67,8 +67,8 @@ function loadCss() {
   if (!existsSync(SOURCE)) {
     throw new Error(
       `stylesheet not found at ${SOURCE} — run this from the repo root ` +
-        `(npm run test:css:pricing-liquid-glass), not from a subdirectory. This is a ` +
-        `harness problem, not a CSS regression.`,
+      `(npm run test:css:pricing-liquid-glass), not from a subdirectory. This is a ` +
+      `harness problem, not a CSS regression.`,
     );
   }
   // The three @tailwind directives are the only thing in this file a browser
@@ -92,19 +92,19 @@ const surfaces = (theme) => `
 <div data-interface-theme="${theme}">
   <div class="pricing-card-yearly" id="cardY" style="width:${CARD_W}px;height:${CARD_H}px"></div>
   <div class="pricing-card-lifetime" id="cardL" style="width:${CARD_W}px;height:${CARD_H}px"></div>
-  <div class="natively-api-detail-card natively-api-detail-card-pro" id="cardApi" style="width:${WIDE_W}px;height:220px"></div>
+  <div class="MeetFloo-api-detail-card MeetFloo-api-detail-card-pro" id="cardApi" style="width:${WIDE_W}px;height:220px"></div>
   <!-- all four tiers, resting and active: the per-tier hue moved out of the
        border and onto the rim, and the luminance ladder those alphas encode
        has to survive the move. -->
-  ${['standard','pro','max','ultra'].map((t) => `
-  <div class="natively-api-detail-card natively-api-detail-card-${t}" id="tier-${t}" style="width:${WIDE_W}px;height:220px">
-    <button class="natively-api-pricing-cta" id="tierCta-${t}" style="width:240px"></button>
-    <span class="natively-api-fill-pill" id="tierPill-${t}" style="display:inline-flex;padding:3px 10px;border-radius:999px">BEST VALUE</span>
+  ${['standard', 'pro', 'max', 'ultra'].map((t) => `
+  <div class="MeetFloo-api-detail-card MeetFloo-api-detail-card-${t}" id="tier-${t}" style="width:${WIDE_W}px;height:220px">
+    <button class="MeetFloo-api-pricing-cta" id="tierCta-${t}" style="width:240px"></button>
+    <span class="MeetFloo-api-fill-pill" id="tierPill-${t}" style="display:inline-flex;padding:3px 10px;border-radius:999px">BEST VALUE</span>
   </div>
-  <div class="natively-api-detail-card natively-api-detail-card-${t}" id="tierA-${t}" data-active="true" style="width:${WIDE_W}px;height:220px"></div>`).join('')}
-  <button class="natively-api-pricing-cta natively-api-pricing-cta-max" id="apiCta" style="width:240px"></button>
-  <button class="natively-api-pricing-cta natively-api-pricing-cta-neutral" id="apiCtaN" style="width:240px"></button>
-  <div class="natively-api-selector-bar"><button class="natively-api-selector-tab active" id="apiTab"></button></div>
+  <div class="MeetFloo-api-detail-card MeetFloo-api-detail-card-${t}" id="tierA-${t}" data-active="true" style="width:${WIDE_W}px;height:220px"></div>`).join('')}
+  <button class="MeetFloo-api-pricing-cta MeetFloo-api-pricing-cta-max" id="apiCta" style="width:240px"></button>
+  <button class="MeetFloo-api-pricing-cta MeetFloo-api-pricing-cta-neutral" id="apiCtaN" style="width:240px"></button>
+  <div class="MeetFloo-api-selector-bar"><button class="MeetFloo-api-selector-tab active" id="apiTab"></button></div>
   <button class="pricing-cta-yearly" id="ctaY" style="width:${CTA_W}px;height:${CTA_H}px;border-radius:9999px"></button>
   <!-- the CTA in its real 3D stack: an InteractiveCard is .perspective-1000 and
        the card sets preserve-3d, so the inline translateZ on the button is a
@@ -129,14 +129,14 @@ const surfaces = (theme) => `
 // is how the plan switcher, the tier CTA and the Pro card buttons all shipped as
 // native OS controls. A usage meter must not depend on it at all.
 const meters = `
-  <div class="natively-meter-track" id="mTrack" style="height:3px;width:300px">
-    <div class="natively-meter-fill" id="mFill" style="width:63%"></div>
+  <div class="MeetFloo-meter-track" id="mTrack" style="height:3px;width:300px">
+    <div class="MeetFloo-meter-fill" id="mFill" style="width:63%"></div>
   </div>
-  <div class="natively-meter-track" style="height:3px;width:300px">
-    <div class="natively-meter-fill natively-meter-fill--high" id="mHigh" style="width:86%"></div>
+  <div class="MeetFloo-meter-track" style="height:3px;width:300px">
+    <div class="MeetFloo-meter-fill MeetFloo-meter-fill--high" id="mHigh" style="width:86%"></div>
   </div>
-  <div class="natively-meter-track" style="height:3px;width:300px">
-    <div class="natively-meter-fill natively-meter-fill--over" id="mOver" style="width:100%"></div>
+  <div class="MeetFloo-meter-track" style="height:3px;width:300px">
+    <div class="MeetFloo-meter-fill MeetFloo-meter-fill--over" id="mOver" style="width:100%"></div>
   </div>`;
 
 const page = (css) => `<meta charset="utf-8"><style>
@@ -202,7 +202,7 @@ const opaqueEnd = (vertical) => !/rgba\([^)]*,\s*0\s*\)/.test(lastStop(vertical)
 
 async function measure() {
   const win = new BrowserWindow({ width: 1100, height: 900, show: false });
-  const fixture = join(tmpdir(), 'natively-pricing-liquid-glass.html');
+  const fixture = join(tmpdir(), 'MeetFloo-pricing-liquid-glass.html');
   writeFileSync(fixture, page(loadCss()));
   try {
     await win.loadFile(fixture);
@@ -303,7 +303,7 @@ app.whenReady().then(async () => {
   for (const [name, x, wantR] of [
     ['.pricing-card-yearly', dark.cardY, 28],
     ['.pricing-card-lifetime', dark.cardL, 28],
-    ['.natively-api-detail-card', dark.cardApi, 26],
+    ['.MeetFloo-api-detail-card', dark.cardApi, 26],
     ['.pro-teaser', dark.teaser, 20],
   ]) {
     if (!x) { fail(`${name}: not in the fixture`); continue; }
@@ -350,7 +350,7 @@ app.whenReady().then(async () => {
       fail(`the translateZ(28px) fixture measures ${lifted}px against a flat ${flat}px — the 3D stack is not reproducing, so the assertion below is vacuous. Check .perspective-1000 and preserve-3d in the fixture.`);
     } else {
       for (const [name, x] of [['.pricing-cta-yearly', dark.ctaY], ['.pricing-cta-lifetime', dark.ctaL]]) {
-        if (x && x.zToken !== '28px') fail(`${name} declares --lgc-z: ${x.zToken || '(nothing)'}, expected 28px — it must mirror the inline translateZ in NativelyProSettings.tsx, or every transform below drops the button out of the card's 3D stack.`);
+        if (x && x.zToken !== '28px') fail(`${name} declares --lgc-z: ${x.zToken || '(nothing)'}, expected 28px — it must mirror the inline translateZ in MeetFlooProSettings.tsx, or every transform below drops the button out of the card's 3D stack.`);
       }
       if (m.transformRules.some((r) => r.transform === 'MARKER-MISSING')) {
         fail('no rule declares --lgc-z, so the transform scan found no starting point and asserted nothing. The block that owns the pricing CTAs was renamed or removed; update this check rather than deleting it.');
@@ -369,7 +369,7 @@ app.whenReady().then(async () => {
   // ── 2. the cap fade: lengths, radius-derived, width-invariant ──────────────
   const capChecks = [
     ['.pricing-card-yearly', dark.cardY, 28],
-    ['.natively-api-detail-card', dark.cardApi, 26],
+    ['.MeetFloo-api-detail-card', dark.cardApi, 26],
     ['.pro-teaser', dark.teaser, 20],
     ['.pricing-cta-lifetime', dark.ctaL, 22],
   ];
@@ -409,7 +409,7 @@ app.whenReady().then(async () => {
   const rimPairs = [
     ['.pricing-card-yearly', 'after', dark.cardY, light.cardY],
     ['.pricing-card-lifetime', 'after', dark.cardL, light.cardL],
-    ['.natively-api-detail-card', 'after', dark.cardApi, light.cardApi],
+    ['.MeetFloo-api-detail-card', 'after', dark.cardApi, light.cardApi],
     ['.pro-teaser', 'after', dark.teaser, light.teaser],
     ['.pricing-cta-lifetime', 'before', dark.ctaL, light.ctaL],
   ];
@@ -421,7 +421,7 @@ app.whenReady().then(async () => {
     if (opaqueEnd(lv)) fail(`${name}: light rim mask ends opaque (last stop: ${lastStop(lv)}) — on a light ground there is no bounce to catch; the specular stays on the top face and a contact shadow does the rest (design.md, "Light mode is derived, not measured").`);
   }
   // A light BODY inverts for the same reason a light ground does, even in dark
-  // theme — .lg-sky and .natively-api-pricing-cta-neutral already do this.
+  // theme — .lg-sky and .MeetFloo-api-pricing-cta-neutral already do this.
   for (const [name, x] of [['.pricing-cta-yearly', dark.ctaY], ['.pro-teaser-cta', dark.teaserCta]]) {
     if (!x) continue;
     const v = layers(x.beforeMask).vertical;
@@ -476,9 +476,9 @@ app.whenReady().then(async () => {
     const seen = new Set();
     for (const t of TIERS) {
       const rest = root['tier-' + t], act = root['tierA-' + t];
-      if (!rest || !act) { fail(`${tname} .natively-api-detail-card-${t}: not in the fixture`); continue; }
+      if (!rest || !act) { fail(`${tname} .MeetFloo-api-detail-card-${t}: not in the fixture`); continue; }
       if (Number.parseFloat(rest.borderW) !== 0) {
-        fail(`${tname} .natively-api-detail-card-${t} still has a ${rest.borderW} ${rest.borderStyle} perimeter border — a uniform ring is the construction this material replaces, and it buries the masked rim underneath it. It is also a 1.5px length that floors to 1px at DPR 1 (the Windows default).`);
+        fail(`${tname} .MeetFloo-api-detail-card-${t} still has a ${rest.borderW} ${rest.borderStyle} perimeter border — a uniform ring is the construction this material replaces, and it buries the masked rim underneath it. It is also a 1.5px length that floors to 1px at DPR 1 (the Windows default).`);
       }
       const rim = rgb(String(rest.afterShadow).match(/rgba?\([^)]*\)/)?.[0]);
       const rimA = rgb(String(act.afterShadow).match(/rgba?\([^)]*\)/)?.[0]);
@@ -492,7 +492,7 @@ app.whenReady().then(async () => {
       if (!(rimA.a > rim.a)) fail(`${tname} ${t}: active rim alpha ${rimA.a} is not above resting ${rim.a} — the ladder that told a selected tier from an unselected one lived in those alphas.`);
     }
   }
-  for (const [name, x] of [['.natively-api-pricing-cta', dark.apiCta], ['…-neutral', dark.apiCtaN]]) {
+  for (const [name, x] of [['.MeetFloo-api-pricing-cta', dark.apiCta], ['…-neutral', dark.apiCtaN]]) {
     if (!x) continue;
     const rings = countRings(x.beforeShadow);
     if (rings !== 1) fail(`${name}::before has ${rings} inset rings at ${Math.round(x.h)}px, expected 1 — three stacked rings read as a raised plastic bezel beside the flat pills on the Pro cards.`);
@@ -501,8 +501,8 @@ app.whenReady().then(async () => {
   }
   if (dark.apiTab) {
     const bg = rgb(dark.apiTab.bg);
-    if (bg && bg.a !== 0) fail(`.natively-api-selector-tab paints ${dark.apiTab.bg} on the default theme — that is the native OS button face (rgb(239,239,239)); every rule for this tab is anchored on ="liquid-glass"/="modern". It is the control that has to be pressed before any pricing can be read.`);
-    if (Number.parseFloat(dark.apiTab.borderW) !== 0) fail(`.natively-api-selector-tab has a ${dark.apiTab.borderW} ${dark.apiTab.borderStyle} border — the native button bevel.`);
+    if (bg && bg.a !== 0) fail(`.MeetFloo-api-selector-tab paints ${dark.apiTab.bg} on the default theme — that is the native OS button face (rgb(239,239,239)); every rule for this tab is anchored on ="liquid-glass"/="modern". It is the control that has to be pressed before any pricing can be read.`);
+    if (Number.parseFloat(dark.apiTab.borderW) !== 0) fail(`.MeetFloo-api-selector-tab has a ${dark.apiTab.borderW} ${dark.apiTab.borderStyle} border — the native button bevel.`);
   }
 
   // ── the CTA carries no tier weight ───────────────────────────────────────
@@ -538,7 +538,7 @@ app.whenReady().then(async () => {
   // enough — it has to be the SAME one.
   for (const [name, x] of [
     ['.pricing-card-yearly', dark.cardY], ['.pricing-card-lifetime', dark.cardL],
-    ['.natively-api-detail-card', dark.cardApi], ['.pro-teaser', dark.teaser],
+    ['.MeetFloo-api-detail-card', dark.cardApi], ['.pro-teaser', dark.teaser],
   ]) {
     if (!x) continue;
     const img = String(x.beforeImage || '');
@@ -550,7 +550,7 @@ app.whenReady().then(async () => {
     // value — which it did on the first run of this assertion.
     const sizes = String(x.beforeSize || '').split(',').map((v) => v.trim());
     if (!/linear-gradient/.test(img) || sizes.length < 2 || !sizes.every((v) => v === '24px 24px')) {
-      fail(`${name} has no 24px blueprint grid on ::before (image: ${img.slice(0, 60)}, size: ${x.beforeSize}) — the texture the rest of this app never stopped drawing (.natively-key-card, .about-jelly-card).`);
+      fail(`${name} has no 24px blueprint grid on ::before (image: ${img.slice(0, 60)}, size: ${x.beforeSize}) — the texture the rest of this app never stopped drawing (.MeetFloo-key-card, .about-jelly-card).`);
     }
   }
 
@@ -562,14 +562,14 @@ app.whenReady().then(async () => {
     // [data-interface-theme] wrapper, so a rule that grew that prefix would
     // leave the track unpainted here exactly as it did on the real default theme.
     if (!/inset/.test(String(t.shadow))) {
-      fail(`${tname}: .natively-meter-track has no inset shadow (${t.shadow}) — either the recess is gone, or the rule grew a [data-interface-theme] prefix and stopped matching outside one.`);
+      fail(`${tname}: .MeetFloo-meter-track has no inset shadow (${t.shadow}) — either the recess is gone, or the rule grew a [data-interface-theme] prefix and stopped matching outside one.`);
     }
     // An outer box-shadow inside overflow:hidden is simply deleted.
     if (t.overflow === 'hidden') {
-      fail(`${tname}: .natively-meter-track is overflow:hidden — that silently clips the fill's bloom, which is the half of the material that says the bar is lit rather than painted.`);
+      fail(`${tname}: .MeetFloo-meter-track is overflow:hidden — that silently clips the fill's bloom, which is the half of the material that says the bar is lit rather than painted.`);
     }
     if (!/0px 1px 0px 0px inset|inset 0px 1px 0px/.test(String(f.shadow).replace(/rgba?\([^)]*\)\s*/g, ''))) {
-      fail(`${tname}: .natively-meter-fill has no top-face specular (${f.shadow}) — a 3px rod has no underside to catch a bounce, so the top face is the whole rim.`);
+      fail(`${tname}: .MeetFloo-meter-fill has no top-face specular (${f.shadow}) — a 3px rod has no underside to catch a bounce, so the top face is the whole rim.`);
     }
   }
   // The hue is ONE token driving body and bloom together. Tailwind fills would

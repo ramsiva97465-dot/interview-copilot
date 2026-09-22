@@ -11,14 +11,14 @@
 // the real parser proved flaky (module warm-up work happens before the
 // timed section, so the real parse can finish inside a 1ms window).
 //
-// PARSE_TIMEOUT_MS is test-overridable via NATIVELY_PARSE_TIMEOUT_MS, read
+// PARSE_TIMEOUT_MS is test-overridable via MEETFLOO_PARSE_TIMEOUT_MS, read
 // once at module load — so it must be set BEFORE the compiled module is
 // imported, which is why this lives in its own file/process rather than
 // alongside SafeDocumentTextExtractor.test.mjs's default-timeout tests.
 //
 // Run with: npm run build:electron && node --test electron/services/__tests__/SafeDocumentTextExtractorPdfTimeout.test.mjs
 
-process.env.NATIVELY_PARSE_TIMEOUT_MS = '5';
+process.env.MEETFLOO_PARSE_TIMEOUT_MS = '5';
 
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';

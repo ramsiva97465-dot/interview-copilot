@@ -35,7 +35,7 @@ describe('ModeHybridRetriever', () => {
         all: mock.fn(() => []),
         run: mock.fn()
       })),
-      exec: mock.fn(() => {})
+      exec: mock.fn(() => { })
     };
 
     mockVectorStore = {
@@ -339,8 +339,8 @@ describe('ModeHybridRetriever', () => {
   // the whole turn (~7s deadline abort → false refusal). With the fix the
   // structurally-selected nav chunk is high-confidence, so the gate does not trip.
   test('document-grounded ToC navigation query is NOT flagged low-confidence (no needless rerank escalation)', async () => {
-    const prevGate = process.env.NATIVELY_RAG_CONFIDENCE_GATE;
-    process.env.NATIVELY_RAG_CONFIDENCE_GATE = '1'; // surfaces the observe-only confidence field
+    const prevGate = process.env.MEETFLOO_RAG_CONFIDENCE_GATE;
+    process.env.MEETFLOO_RAG_CONFIDENCE_GATE = '1'; // surfaces the observe-only confidence field
     try {
       const { ModeHybridRetriever } = await loadRetriever();
       // Embeddings AVAILABLE (as in the real benchmark) so `lexical_degraded`
@@ -400,8 +400,8 @@ describe('ModeHybridRetriever', () => {
       assert.ok(!reasons.includes('flat_margin'), `nav chunk must not be judged flat_margin (reasons: ${reasons.join(',')})`);
       assert.ok(result.confidence.topScore >= 0.32, `nav chunk top confidence ${result.confidence.topScore} must reflect the structural boost, not bare fts/vector (~0)`);
     } finally {
-      if (prevGate === undefined) delete process.env.NATIVELY_RAG_CONFIDENCE_GATE;
-      else process.env.NATIVELY_RAG_CONFIDENCE_GATE = prevGate;
+      if (prevGate === undefined) delete process.env.MEETFLOO_RAG_CONFIDENCE_GATE;
+      else process.env.MEETFLOO_RAG_CONFIDENCE_GATE = prevGate;
     }
   });
 

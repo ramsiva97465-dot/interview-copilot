@@ -136,7 +136,7 @@ const hasExactMarkdownSectionOrder = (answer: string): boolean => {
 };
 
 const containsForbiddenCodingContext = (answer: string): boolean =>
-  /\b(resume|job description|salary|compensation|negotiation|Natively|as an AI|AI assistant)\b/i.test(answer);
+  /\b(resume|job description|salary|compensation|negotiation|MeetFloo|as an AI|AI assistant)\b/i.test(answer);
 
 /**
  * Deterministic, content-free coding scaffold for IMMEDIATE display while the
@@ -289,7 +289,7 @@ const MISSING_CODE_MARKER = '// The model did not return code. Regenerate for a 
 // "This runs in O(n) time." be removed whole (no stranded "This.").
 const COMPLEXITY_CONNECTOR = `(?:(?:\\b(?:this|it|that)\\b\\s+(?:is\\s+)?)?,?\\s*(?:which is|which runs? in|running in|that runs? in|runs? in|giving|yielding|for a|with|in)\\s+)?`;
 // Trailing complementary term so "O(n) time and O(1) space" is captured whole.
-const COMPLEXITY_TAIL = `(?:\\s*(?:time|space))?(?:\\s*(?:and|,)\\s*`+'`?'+`O\\s*\\([^)]*\\)`+'`?'+`(?:\\s*(?:time|space))?)?(?:[^.\\n]*?(?:because|due to)[^.\\n]*)?`;
+const COMPLEXITY_TAIL = `(?:\\s*(?:time|space))?(?:\\s*(?:and|,)\\s*` + '`?' + `O\\s*\\([^)]*\\)` + '`?' + `(?:\\s*(?:time|space))?)?(?:[^.\\n]*?(?:because|due to)[^.\\n]*)?`;
 
 // Matches the full complexity CLAUSE (connector + Big-O(s) + tail), not a whole
 // line and not a bare token. Two entry shapes: a labelled "Time/Space …O(...)"
@@ -437,7 +437,7 @@ export const repairCodingMarkdown = (rawResponse: string, question?: string, lan
   // if there's no complexity section AND no extractable bound do we use the
   // honest O(?) placeholder.
   const complexitySection = (parsed.sections.complexity || '').trim();
-  // Live regression (2026-08-10, real natively-api answer): the model stated
+  // Live regression (2026-08-10, real MeetFloo-api answer): the model stated
   // "runs in O(n) time and O(1) space" in prose that sat AFTER its own bold
   // heading, so it landed in a parsed section rather than the preamble — and
   // scanning only the preamble missed it, overwriting a correct bound with the
@@ -461,9 +461,9 @@ export const repairCodingMarkdown = (rawResponse: string, question?: string, lan
   const interviewerFollowUpPoints = followUpsSection
     ? followUpsSection.split('\n').map(l => l.replace(/^[-*•]\s*/, '').trim()).filter(Boolean)
     : [
-        'Clarify edge cases such as empty input, duplicates, and boundary values.',
-        'Be ready to justify the time and space complexity.',
-      ];
+      'Clarify edge cases such as empty input, duplicates, and boundary values.',
+      'Be ready to justify the time and space complexity.',
+    ];
 
   return renderCodingAnswerMarkdown({
     approach,
@@ -495,7 +495,7 @@ export const validateCodingMarkdown = (response: string): AnswerValidationResult
     && !leaksContext;
 
   // SUBSTANTIVELY COMPLETE ANSWERS ARE NOT REWRITTEN (live regression,
-  // 2026-08-10). Reproduced against the real natively-api backend on a healthy
+  // 2026-08-10). Reproduced against the real MeetFloo-api backend on a healthy
   // ~1.7s answer — no deadline, nothing malformed: the model simply wrote a
   // correct, complete solution in its OWN format (bold pseudo-headings) instead
   // of the six `##` headings. The reformat then LOST content — it dropped the

@@ -1,6 +1,6 @@
 // electron/llm/performance/priors.ts
 //
-// Shipped priors — what Natively expects from a provider it has never measured.
+// Shipped priors — what MeetFloo expects from a provider it has never measured.
 //
 // THE PRIOR IS THE CURRENT BEHAVIOUR, and that is the whole design. Phase 0
 // rule 20 says "preserve current behavior as the fallback when calibration has
@@ -114,7 +114,7 @@ export const STREAM_IDLE_MIN_SAMPLES_TO_NARROW = 5;
  *
  * `server_cascade` is pinned: min === max === the shipped value. This is not
  * conservatism, it is the F-301 invariant. That route's 13000 is derived as
- * "natively-api's 10s provider cutover + 3s for the next leg", and narrowing it
+ * "MeetFloo-api's 10s provider cutover + 3s for the next leg", and narrowing it
  * would put the client back to abandoning turns before the server can rotate —
  * the exact defect `DeadlineBudgetOrdering2026_08_10` exists to prevent.
  * Measurement has nothing to correct on a route whose number is derived from a

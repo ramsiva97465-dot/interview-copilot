@@ -9,7 +9,7 @@ import { normalizeCustomBaseUrl } from './providers/CustomEmbeddingProvider';
 
 const LIST_TIMEOUT_MS = 5_000;
 const PROBE_TIMEOUT_MS = 20_000;
-const DIMENSION_PROBE_TEXT = 'natively embedding dimension probe';
+const DIMENSION_PROBE_TEXT = 'MeetFloo embedding dimension probe';
 
 export interface CustomEmbeddingModel {
   id: string;

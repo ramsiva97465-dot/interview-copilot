@@ -77,7 +77,7 @@ describe('SPOKEN_ANSWER_CONTRACT — content (3-tier model)', () => {
   });
 
   test('carries no profile facts (style-only)', () => {
-    assert.doesNotMatch(prompts.SPOKEN_ANSWER_CONTRACT, /\bEvin\b|\bNatively\b|PriceX|resume says/i);
+    assert.doesNotMatch(prompts.SPOKEN_ANSWER_CONTRACT, /\bEvin\b|\bMeetFloo\b|PriceX|resume says/i);
   });
 });
 

@@ -1,6 +1,6 @@
 // node:test — ProfileTreeService (deterministic Profile Tree facade).
 // Validates spec Phase 2 + acceptance criteria: identity/projects/experience/skills/
-// education/intro/role-fit are deterministic; NEVER "I am Natively"; NEVER "I don't
+// education/intro/role-fit are deterministic; NEVER "I am MeetFloo"; NEVER "I don't
 // know" when a profile exists; candidate first-person voice; Alice/Bob isolation.
 //
 // UPDATED 2026-07-11 (Context OS ownership audit): ProfileTreeService.get*() no
@@ -47,7 +47,7 @@ const JD = {
   requirements: ['Python', 'PyTorch', 'distributed systems'],
 };
 
-const NATIVELY_LEAK = /\bi'?m natively\b|\bi am natively\b|\ban ai assistant\b/i;
+const MEETFLOO_LEAK = /\bi'?m MeetFloo\b|\bi am MeetFloo\b|\ban ai assistant\b/i;
 const DONT_KNOW = /\bi don'?t (know|have access)\b|\bi'?m not sure\b|\bi cannot help\b/i;
 
 describe('ProfileTreeService', () => {
@@ -58,7 +58,7 @@ describe('ProfileTreeService', () => {
     assert.equal(id.available, true);
     assert.match(id.answer, /<source_owner>profile<\/source_owner>/);
     assert.match(id.answer, /value=Alice Chen/);
-    assert.doesNotMatch(id.answer, NATIVELY_LEAK);
+    assert.doesNotMatch(id.answer, MEETFLOO_LEAK);
   });
 
   test('getInterviewIntro is grounded in the candidate\'s own facts, never the assistant identity', () => {
@@ -68,7 +68,7 @@ describe('ProfileTreeService', () => {
     assert.match(intro, /<source_owner>profile<\/source_owner>/);
     assert.match(intro, /value=Alice Chen/);
     assert.match(intro, /value=Senior ML Engineer/, 'intro evidence must include real experience facts');
-    assert.doesNotMatch(intro, NATIVELY_LEAK);
+    assert.doesNotMatch(intro, MEETFLOO_LEAK);
     assert.doesNotMatch(intro, DONT_KNOW);
   });
 
@@ -124,7 +124,7 @@ describe('ProfileTreeService', () => {
     const block = tree.getCompactIdentityBlock();
     assert.ok(block);
     assert.match(block, /Alice/);
-    assert.doesNotMatch(block, NATIVELY_LEAK);
+    assert.doesNotMatch(block, MEETFLOO_LEAK);
   });
 
   test('NEVER "I don\'t know" when a profile exists — across all getters', () => {
@@ -132,7 +132,7 @@ describe('ProfileTreeService', () => {
     for (const v of [tree.getIdentity().answer, tree.getInterviewIntro(), tree.getProjects(), tree.getExperience(), tree.getSkills(), tree.getEducation(), tree.getRoleFit()]) {
       assert.ok(v, 'every facet present in the fixture must produce an answer');
       assert.doesNotMatch(v, DONT_KNOW);
-      assert.doesNotMatch(v, NATIVELY_LEAK);
+      assert.doesNotMatch(v, MEETFLOO_LEAK);
     }
   });
 
@@ -159,7 +159,7 @@ describe('ProfileTreeService', () => {
     assert.match(best, /RecoEngine/);
   });
 
-  test('getCandidatePerspectiveGuard blocks "I am Natively" in candidate-voice modes', () => {
+  test('getCandidatePerspectiveGuard blocks "I am MeetFloo" in candidate-voice modes', () => {
     for (const mode of ['technical-interview', 'looking-for-work', '', 'general']) {
       const v = ProfileTreeService.getCandidatePerspectiveGuard(mode, 'introduce yourself');
       assert.equal(v.expectCandidateVoice, true, `mode=${mode} should expect candidate voice`);
@@ -169,7 +169,7 @@ describe('ProfileTreeService', () => {
   });
 
   test('getCandidatePerspectiveGuard exempts genuine app-identity questions', () => {
-    for (const q of ['are you an AI?', 'what is Natively?', 'what model are you?']) {
+    for (const q of ['are you an AI?', 'what is MeetFloo?', 'what model are you?']) {
       const v = ProfileTreeService.getCandidatePerspectiveGuard('technical-interview', q);
       assert.equal(v.isAppIdentityQuestion, true, `"${q}" is an app question`);
       assert.equal(v.assistantIdentityWouldLeak, false, `"${q}" may answer as the assistant`);

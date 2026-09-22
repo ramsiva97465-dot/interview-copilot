@@ -3,11 +3,11 @@
 // Phase 2 persistence validation: the 10 modes generated live by MiniMax
 // (test-results/modes-autopilot/generated-modes/*.json) must persist through the
 // REAL ModesManager + DatabaseManager (SQLite on disk), be independently
-// readable from a SECOND raw connection to the same natively.db file (proving
+// readable from a SECOND raw connection to the same MeetFloo.db file (proving
 // on-disk durability, i.e. "survives a restart"), and be editable/re-savable.
 //
 // Runs under ELECTRON_RUN_AS_NODE=1 electron --test (native better-sqlite3 ABI).
-// Uses an isolated temp userData dir (NATIVELY_TEST_USERDATA) so it never
+// Uses an isolated temp userData dir (MEETFLOO_TEST_USERDATA) so it never
 // touches real user modes.
 //
 // Gated on the generated-modes artifacts existing (Phase 2 generation run).
@@ -52,9 +52,9 @@ let DatabaseManager;
 
 describe('Generated mode persistence', { skip: !HAVE ? `skip: expected 10 generated modes in ${GEN_DIR}, found ${DRAFTS.length}` : false }, () => {
   before(async () => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-genmode-'));
-    process.env.NATIVELY_TEST_USERDATA = tmpDir;
-    dbPath = path.join(tmpDir, 'natively.db');
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-genmode-'));
+    process.env.MEETFLOO_TEST_USERDATA = tmpDir;
+    dbPath = path.join(tmpDir, 'MeetFloo.db');
     const dbMod = await import(pathToFileURL(path.join(REPO, 'dist-electron/electron/db/DatabaseManager.js')).href);
     const mmMod = await import(pathToFileURL(path.join(REPO, 'dist-electron/electron/services/ModesManager.js')).href);
     DatabaseManager = dbMod.DatabaseManager;
@@ -86,7 +86,7 @@ describe('Generated mode persistence', { skip: !HAVE ? `skip: expected 10 genera
   });
 
   test('generated modes are durable on disk (independent raw connection sees them)', () => {
-    // Open a SECOND connection to the same natively.db — this proves the rows are
+    // Open a SECOND connection to the same MeetFloo.db — this proves the rows are
     // physically committed to disk, i.e. a fresh app process would read them back.
     assert.ok(fs.existsSync(dbPath), `db file exists at ${dbPath}`);
     const Database = require('better-sqlite3');

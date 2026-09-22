@@ -5,7 +5,7 @@
 // detection scores a missing '?' as negative evidence (extractor confidence
 // 0.95 with mark+lead vs 0.4 without). Only Deepgram (smart_format) and
 // Google (enableAutomaticPunctuation) request punctuation; the local models
-// emit it model-inherently; Soniox/OpenAI/ElevenLabs/NativelyPro/REST
+// emit it model-inherently; Soniox/OpenAI/ElevenLabs/MeetFlooPro/REST
 // providers do not guarantee it. MRDA research: stripping punctuation+casing
 // roughly DOUBLES dialogue-act segmentation error, so the scorer must know
 // which condition it is in.
@@ -49,7 +49,7 @@ describe('punctuationSourceFor: provider capability map', () => {
     ['soniox', false, 'unavailable'],
     ['openai', true, 'unavailable'],
     ['elevenlabs', true, 'unavailable'],
-    ['natively', true, 'unavailable'],
+    ['MeetFloo', true, 'unavailable'],
     ['groq', true, 'unavailable'],
     ['azure', true, 'unavailable'],
     ['ibmwatson', true, 'unavailable'],

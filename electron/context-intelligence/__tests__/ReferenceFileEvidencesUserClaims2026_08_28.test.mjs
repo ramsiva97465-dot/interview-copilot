@@ -42,7 +42,7 @@ const { classifyTurn } = await import(pathToFileURL(path.join(base, 'question/tu
 const { MODE_POLICIES, MODE_IDS } = await import(pathToFileURL(path.join(base, 'policies/mode-policy-registry.js')).href);
 const { sourceTypeForFile } = await import(pathToFileURL(path.join(base, 'retrieval/mode-retrieval-port.js')).href);
 
-const ENV = 'NATIVELY_RETRIEVAL_REFERENCE_FILES_EVIDENCE_USER_CLAIMS';
+const ENV = 'MEETFLOO_RETRIEVAL_REFERENCE_FILES_EVIDENCE_USER_CLAIMS';
 const withFlag = (value, fn) => {
   const original = process.env[ENV];
   process.env[ENV] = value;

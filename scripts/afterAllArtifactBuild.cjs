@@ -6,7 +6,7 @@
  *
  *  (1) electron-builder's own DMG-creation CORRUPTS the embedded app signature.
  *      Apple's notary log on the eb-built DMG reported:
- *        "The signature of the binary is invalid" @ Natively.app/Contents/MacOS/Natively
+ *        "The signature of the binary is invalid" @ MeetFloo.app/Contents/MacOS/MeetFloo
  *      Verified: the standalone .app and the .app inside the ZIP pass
  *      `codesign --verify --deep --strict`, but the .app inside the eb DMG does NOT
  *      (even after ditto-copying it back out) — so eb's DMG layout step breaks it.
@@ -39,7 +39,7 @@
  *
  * Credentials (no plaintext secrets in source): prefers App Store Connect API key
  * (CI), then Apple ID + app-specific password, then the local keychain profile
- * (APPLE_KEYCHAIN_PROFILE, e.g. `natively-notary`). No-op if none are present.
+ * (APPLE_KEYCHAIN_PROFILE, e.g. `MeetFloo-notary`). No-op if none are present.
  */
 
 const { execFileSync, execSync } = require('child_process');
@@ -50,16 +50,16 @@ const crypto = require('crypto');
 const { notarytoolSubmitWithRetry, isTransientNetworkMessage } = require('./lib/notary-transient.cjs');
 const { stapleWithRetry } = require('./staple-with-retry');
 
-const VOLNAME = 'Natively';
+const VOLNAME = 'MeetFloo';
 const BACKGROUND = path.resolve(__dirname, '..', 'assets', 'dmg-background.png');
-const VOLICON = path.resolve(__dirname, '..', 'assets', 'natively.icns');
+const VOLICON = path.resolve(__dirname, '..', 'assets', 'MeetFloo.icns');
 
 function sha512base64(file) {
   return crypto.createHash('sha512').update(fs.readFileSync(file)).digest('base64');
 }
 
 function resolveDeveloperIdIdentity() {
-  if (process.env.NATIVELY_SIGN_IDENTITY) return process.env.NATIVELY_SIGN_IDENTITY;
+  if (process.env.MEETFLOO_SIGN_IDENTITY) return process.env.MEETFLOO_SIGN_IDENTITY;
   if (process.env.CSC_NAME) return process.env.CSC_NAME;
   try {
     const out = execSync('security find-identity -v -p codesigning', { encoding: 'utf8' });
@@ -83,7 +83,7 @@ function notarytoolArgs() {
     }
     console.warn(
       `[dmg-notarize] APPLE_API_KEY points at a file that does not exist: ${e.APPLE_API_KEY} — ` +
-        'ignoring the api-key strategy and falling through (apple-id, then keychain-profile).'
+      'ignoring the api-key strategy and falling through (apple-id, then keychain-profile).'
     );
   }
   if (e.APPLE_ID && e.APPLE_APP_SPECIFIC_PASSWORD && e.APPLE_TEAM_ID) {
@@ -229,7 +229,7 @@ function dmgHasStapledTicket(dmgPath) {
       if (attempt < STAPLER_VALIDATE_ATTEMPTS) {
         console.warn(
           `[dmg] stapler validate could not reach Apple for ${path.basename(dmgPath)} ` +
-            `(attempt ${attempt}/${STAPLER_VALIDATE_ATTEMPTS}) — retrying in ${STAPLER_RETRY_MS / 1000}s.`
+          `(attempt ${attempt}/${STAPLER_VALIDATE_ATTEMPTS}) — retrying in ${STAPLER_RETRY_MS / 1000}s.`
         );
         sleepSync(STAPLER_RETRY_MS);
       }
@@ -237,8 +237,8 @@ function dmgHasStapledTicket(dmgPath) {
   }
   console.warn(
     `[dmg] stapler validate never reached Apple for ${path.basename(dmgPath)} — ` +
-      `treating as NOT stapled so the DMG is rebuilt and stapled rather than shipped unverified. ` +
-      `Last output: ${lastOut.trim().slice(0, 200)}`
+    `treating as NOT stapled so the DMG is rebuilt and stapled rather than shipped unverified. ` +
+    `Last output: ${lastOut.trim().slice(0, 200)}`
   );
   return false;
 }
@@ -290,8 +290,8 @@ function verifyZipManifest(outDir) {
  */
 function buildStyledDmg({ appPath, outDmg, identity }) {
   // Stage ONLY the .app in an isolated temp dir so create-dmg's window contains
-  // exactly [Natively.app, Applications-droplink] and nothing stray.
-  const stage = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-dmg-'));
+  // exactly [MeetFloo.app, Applications-droplink] and nothing stray.
+  const stage = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-dmg-'));
   const stagedApp = path.join(stage, path.basename(appPath));
   execFileSync('ditto', [appPath, stagedApp], { stdio: 'inherit' }); // ditto preserves signatures
 
@@ -313,7 +313,7 @@ function buildStyledDmg({ appPath, outDmg, identity }) {
   // but create-dmg/Finder lays a non-@2x image 1:1 point-for-pixel into the 660×400-pt
   // window, so the artwork renders off-scale/mis-positioned relative to the icon/drop-link.
   // Ship the default white DMG window unless a correctly-sized background is explicitly enabled.
-  if (process.env.NATIVELY_DMG_BACKGROUND === '1' && fs.existsSync(BACKGROUND)) {
+  if (process.env.MEETFLOO_DMG_BACKGROUND === '1' && fs.existsSync(BACKGROUND)) {
     args.push('--background', BACKGROUND);
   }
   if (identity) args.push('--codesign', identity); // sign the DMG container itself

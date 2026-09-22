@@ -34,8 +34,8 @@ describe('isLightweightSpace', () => {
     assert.equal(isLightweightSpace('ollama:nomic-embed-text:768'), false);
   });
 
-  test('a managed Natively space is not flagged', () => {
-    assert.equal(isLightweightSpace('natively:gemini-embedding-2:768'), false);
+  test('a managed MeetFloo space is not flagged', () => {
+    assert.equal(isLightweightSpace('MeetFloo:gemini-embedding-2:768'), false);
   });
 
   test('an Ollama-hosted MiniLM IS flagged — the model is what matters, not the host', () => {
@@ -61,7 +61,7 @@ describe('describeEmbeddingProvider', () => {
   test('classifies where the embedding actually happens', () => {
     assert.equal(describeEmbeddingProvider({ name: 'local', model: 'x', dimensions: 384, space: 'local:x:384' }).location, 'on-device');
     assert.equal(describeEmbeddingProvider({ name: 'ollama', model: 'x', dimensions: 768, space: 'ollama:x:768' }).location, 'on-device');
-    assert.equal(describeEmbeddingProvider({ name: 'natively', model: 'x', dimensions: 768, space: 'natively:x:768' }).location, 'cloud');
+    assert.equal(describeEmbeddingProvider({ name: 'MeetFloo', model: 'x', dimensions: 768, space: 'MeetFloo:x:768' }).location, 'cloud');
     assert.equal(describeEmbeddingProvider({ name: 'openai', model: 'x', dimensions: 1536, space: 'openai:x:1536' }).location, 'cloud');
   });
 
@@ -88,7 +88,7 @@ describe('shouldWarnAboutLightweightEmbeddings', () => {
 
   test('does not warn when embeddings are already strong', () => {
     assert.equal(shouldWarnAboutLightweightEmbeddings({
-      embeddingSpace: 'natively:gemini-embedding-2:768',
+      embeddingSpace: 'MeetFloo:gemini-embedding-2:768',
       generationProvider: 'openrouter',
     }), false);
   });
@@ -162,7 +162,7 @@ describe('recommendEmbeddingModels', () => {
   });
 
   test('makes no claim about how much better one model is', () => {
-    // Explicitly out of scope until measured on Natively's own workload.
+    // Explicitly out of scope until measured on MeetFloo's own workload.
     const recs = recommendEmbeddingModels(installed);
     for (const r of recs) {
       assert.doesNotMatch(JSON.stringify(r), /\d+\s*%|better than|outperforms/i);

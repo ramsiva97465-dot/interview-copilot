@@ -24,14 +24,14 @@ const repoRoot = path.resolve(__dirname, '..', '..', '..');
 const dist = (rel) => path.join(repoRoot, 'dist-electron', rel);
 
 const GLOBAL_KEYS = [
-  '__nativelyProviderStatusRegistryV1__',
-  '__nativelyOnnxSemaphoreV1__',
-  '__nativelyLegacyTraceSinkV1__',
-  '__nativelyIntelAttributionV1__',
-  '__nativelySettingsManagerV1__',
-  '__nativelyCredentialsManagerV1__',
-  '__nativelyOllamaManagerV1__',
-  '__nativelyHindsightManagerV1__',
+  '__MeetFlooProviderStatusRegistryV1__',
+  '__MeetFlooOnnxSemaphoreV1__',
+  '__MeetFlooLegacyTraceSinkV1__',
+  '__MeetFlooIntelAttributionV1__',
+  '__MeetFlooSettingsManagerV1__',
+  '__MeetFlooCredentialsManagerV1__',
+  '__MeetFlooOllamaManagerV1__',
+  '__MeetFlooHindsightManagerV1__',
 ];
 
 function twoCopies(rel) {
@@ -86,14 +86,14 @@ describe('singleton state is process-wide, not per-bundle (2026-07-31 sweep)', (
 
   test('legacy-trace: a turn recorded through copy B is visible in copy A\'s sink', () => {
     const [A, B] = twoCopies('electron/context-intelligence/observability/legacy-trace.js');
-    // Recording is env-gated (NATIVELY_CI_V3_TRACE); the shared-sink property
+    // Recording is env-gated (MEETFLOO_CI_V3_TRACE); the shared-sink property
     // is what's under test, not the gate.
-    process.env.NATIVELY_CI_V3_TRACE = '1';
+    process.env.MEETFLOO_CI_V3_TRACE = '1';
     try {
       assert.equal(A.getTraceSink(), B.getTraceSink(),
         'two copies hold two sinks — the observability split is back');
       B.recordLegacyTurn?.({ requestId: 'xbundle-probe', legacyPath: 'test' });
-    } finally { delete process.env.NATIVELY_CI_V3_TRACE; }
+    } finally { delete process.env.MEETFLOO_CI_V3_TRACE; }
     const seen = A.getTraceSink().all().some((t) => t.requestId === 'xbundle-probe');
     assert.ok(seen,
       'copy A\'s sink is empty after copy B recorded — the observability layer lies again');

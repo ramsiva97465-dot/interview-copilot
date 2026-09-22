@@ -101,7 +101,7 @@ describe('score = P(yes) / (P(yes) + P(no))', () => {
 
 describe('the measured agreement is recorded', () => {
   const REFERENCE = [0.000043, 0.984219, 0.000024, 0.119824];   // fp32, transformers
-  const NATIVELY  = [0.000040, 0.906807, 0.000041, 0.076290];   // Q4_K_M, llama.cpp
+  const MEETFLOO = [0.000040, 0.906807, 0.000041, 0.076290];   // Q4_K_M, llama.cpp
 
   test('the ranking agrees where the scores are distinguishable', () => {
     const rank = (xs) => xs.map((s, i) => [s, i]).sort((a, b) => b[0] - a[0]).map((x) => x[1]);
@@ -111,14 +111,14 @@ describe('the measured agreement is recorded', () => {
     // resolution, so 4-bit flips them. Asserting a total order here would be
     // demanding agreement the arithmetic cannot carry. What must hold is the
     // relevant/irrelevant split and the order WITHIN the relevant pair.
-    assert.deepEqual(rank(NATIVELY).slice(0, 2), [1, 3], 'the relevant pair keeps its order');
-    assert.deepEqual(rank(NATIVELY).slice(2).sort(), [0, 2], 'both irrelevant documents rank last');
+    assert.deepEqual(rank(MEETFLOO).slice(0, 2), [1, 3], 'the relevant pair keeps its order');
+    assert.deepEqual(rank(MEETFLOO).slice(2).sort(), [0, 2], 'both irrelevant documents rank last');
   });
 
   test('every document agrees within quantisation noise', () => {
     // Absolute tolerance, because the interesting scores span four orders of
     // magnitude and a relative bound would be meaningless near zero.
-    NATIVELY.forEach((s, i) => {
+    MEETFLOO.forEach((s, i) => {
       assert.ok(Math.abs(s - REFERENCE[i]) < 0.1,
         `doc ${i}: ${s} vs reference ${REFERENCE[i]}`);
     });
@@ -128,6 +128,6 @@ describe('the measured agreement is recorded', () => {
     // The property that actually matters for retrieval: whatever the exact
     // numbers, the two Kubernetes passages must clear the other two by orders
     // of magnitude.
-    assert.ok(Math.min(NATIVELY[1], NATIVELY[3]) > Math.max(NATIVELY[0], NATIVELY[2]) * 100);
+    assert.ok(Math.min(MEETFLOO[1], MEETFLOO[3]) > Math.max(MEETFLOO[0], MEETFLOO[2]) * 100);
   });
 });

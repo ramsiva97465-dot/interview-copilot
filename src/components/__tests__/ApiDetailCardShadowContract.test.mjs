@@ -43,13 +43,13 @@ function detailCardRules() {
     while ((m = re.exec(LIVE))) {
         const selector = m[1].trim().split('\n').map((s) => s.trim()).join(' ');
         const body = m[2];
-        if (!/\.natively-api-detail-card(-standard|-pro|-max|-ultra)?\b/.test(selector)) continue;
+        if (!/\.MeetFloo-api-detail-card(-standard|-pro|-max|-ultra)?\b/.test(selector)) continue;
         // Descendant rules (the CTA, the fill pill, the "current plan" tag) are
         // separate elements with their own shadow vocabulary and their own
         // transitions — the contract is about the card surface itself, which is
         // the only thing whose rest and hover shadows have to interpolate
         // against each other.
-        if (/\.natively-api-(pricing-cta|fill-pill|features-panel|active-tag)/.test(selector)) continue;
+        if (/\.MeetFloo-api-(pricing-cta|fill-pill|features-panel|active-tag)/.test(selector)) continue;
         if (/::(before|after)/.test(selector)) continue;
         const shadow = body.match(/box-shadow:([^;]*);/);
         if (!shadow) continue;
@@ -178,7 +178,7 @@ describe('API detail card — four-slot box-shadow contract', () => {
         let m;
         while ((m = re.exec(LIVE))) {
             const selector = m[1].trim().split('\n').map((s) => s.trim()).join(' ');
-            if (!/\.natively-api-(detail-card|pricing-cta)/.test(selector)) continue;
+            if (!/\.MeetFloo-api-(detail-card|pricing-cta)/.test(selector)) continue;
             const rings = ringsIn(m[2]);
             if (rings === null) continue;
             blocks.set(selector, rings);
@@ -203,7 +203,7 @@ describe('API detail card — four-slot box-shadow contract', () => {
         // every frame; a CSS transition on the same property re-smooths each
         // write and makes the press lag.
         for (const theme of ['liquid-glass', 'modern']) {
-            const sel = `[data-interface-theme="${theme}"] .natively-api-detail-card {`;
+            const sel = `[data-interface-theme="${theme}"] .MeetFloo-api-detail-card {`;
             const i = LIVE.indexOf(sel);
             assert.notEqual(i, -1, `${sel} not found`);
             const block = LIVE.slice(i, LIVE.indexOf('}', i));

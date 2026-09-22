@@ -38,16 +38,16 @@ let dbMgr;
 describe('DatabaseManager — foreign_keys cascade without premium (2026-07-10)', () => {
   beforeEach(() => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'fk-cascade-test-'));
-    process.env.NATIVELY_TEST_USERDATA = tmp;
-    try { delete require.cache[DB_PATH]; } catch {}
+    process.env.MEETFLOO_TEST_USERDATA = tmp;
+    try { delete require.cache[DB_PATH]; } catch { }
     DatabaseManager = require(DB_PATH).DatabaseManager;
     dbMgr = DatabaseManager.getInstance();
   });
 
   afterEach(() => {
-    try { dbMgr?.close?.(); } catch {}
-    try { delete require.cache[DB_PATH]; } catch {}
-    delete process.env.NATIVELY_TEST_USERDATA;
+    try { dbMgr?.close?.(); } catch { }
+    try { delete require.cache[DB_PATH]; } catch { }
+    delete process.env.MEETFLOO_TEST_USERDATA;
   });
 
   test('PRAGMA foreign_keys is ON on the shared connection (no premium)', () => {

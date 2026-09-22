@@ -1,6 +1,6 @@
 // benchmark/harness/migration-compare.mjs
 //
-// 2026-09-17 migration regression: natively-api's DeepSeek model id changed from
+// 2026-09-17 migration regression: MeetFloo-api's DeepSeek model id changed from
 // the legacy alias `deepseek-v4-flash` to `deepseek-flash` (thinking still
 // disabled). Compares the new runs (ds-flash-migrated) with the main benchmark's
 // ds-flash-prod runs on the SAME conversations.
@@ -120,12 +120,12 @@ fs.writeFileSync(path.join(RESULTS, 'migration-compare.json'), JSON.stringify(ou
 const row = (label, a, b) => `| ${label} | ${a} | ${b} |`
 const md = [
   '# DeepSeek model-id migration regression (2026-09-17)', '',
-  `Conversations: ${convs.join(', ')} · 3 runs each · same pipeline bundle, prompts, corpus and deadline overrides as the main benchmark. Only natively-api's \`DEEPSEEK_MODEL\` differs.`, '',
+  `Conversations: ${convs.join(', ')} · 3 runs each · same pipeline bundle, prompts, corpus and deadline overrides as the main benchmark. Only MeetFloo-api's \`DEEPSEEK_MODEL\` differs.`, '',
   `| Metric | Before: \`deepseek-v4-flash\` (${BASE}, 2026-09-16) | After: \`deepseek-flash\` (${NEW}, 2026-09-16/17) |`, '|---|---|---|',
   row('Runs / summaries produced', `${base.n} / ${base.succeeded}`, `${neu.n} / ${neu.succeeded}`),
   row('Model-call errors · dropped chunks · blocked Gemini fallbacks', `${base.model_call_errors} · ${base.chunks_dropped} · ${base.blocked_fallback_calls}`, `${neu.model_call_errors} · ${neu.chunks_dropped} · ${neu.blocked_fallback_calls}`),
   row('Production deadline breaches (calls)', base.prod_deadline_violations, neu.prod_deadline_violations),
-  row('Model id sent by natively-api', base.requested_models.join(', '), neu.requested_models.join(', ')),
+  row('Model id sent by MeetFloo-api', base.requested_models.join(', '), neu.requested_models.join(', ')),
   row('Model reported by DeepSeek', base.response_models.join(', '), neu.response_models.join(', ')),
   row('`thinking` sent · reasoning tokens', `${base.thinking_sent.join(', ')} · ${base.reasoning_tokens}`, `${neu.thinking_sent.join(', ')} · ${neu.reasoning_tokens}`),
   row('All verification checks pass', base.verify_all, neu.verify_all),
@@ -145,7 +145,7 @@ const md = [
   '- DeepSeek documents `deepseek-v4-flash` as a retired alias served by DeepSeek-V4.1-Flash, and both arms report `deepseek-flash` as the answering model, so differences here are run-to-run sampling noise (no temperature is set on either side), not a model change.',
   '- Anchor retention, unsupported numbers and superseded-value leaks are deterministic text checks, applied identically to both arms. They are coarser than the judge: the superseded-value check counts any occurrence of a number unique to a correction\'s initial value, so it over-counts (a "9" elsewhere in the summary matches). Use them for before/after deltas only.',
   '- Hallucinated non-numeric content, speaker attribution and decision correctness were not checked: they need the LLM judge, whose Gemini key has no prepaid credits.',
-  '- A Gemini Flash-Lite arm was not run for the same reason (the key returns 429 RESOURCE_EXHAUSTED), and because Flash-Lite is not the summary generator in natively-api: it is only the fallback leg after DeepSeek.',
+  '- A Gemini Flash-Lite arm was not run for the same reason (the key returns 429 RESOURCE_EXHAUSTED), and because Flash-Lite is not the summary generator in MeetFloo-api: it is only the fallback leg after DeepSeek.',
   '- Both arms ran in the DeepSeek off-peak window (before: 2026-09-16 20:04-20:48 UTC; after: 23:34-23:37 UTC), from the same machine.',
   '',
 ]

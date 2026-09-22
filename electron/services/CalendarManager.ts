@@ -8,7 +8,7 @@ import { EventEmitter } from 'events';
 // Configuration
 // GOOGLE_CLIENT_SECRET is intentionally NOT referenced here — the desktop app
 // only needs the (non-secret) client ID to construct the auth URL. Token
-// exchange and refresh are proxied through natively-api, which holds the secret.
+// exchange and refresh are proxied through MeetFloo-api, which holds the secret.
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "YOUR_CLIENT_ID_HERE";
 const REDIRECT_URI = "http://localhost:11111/auth/callback";
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
@@ -165,9 +165,9 @@ export class CalendarManager extends EventEmitter {
 
     private async exchangeCodeForToken(code: string) {
         try {
-            // Proxied through natively-api so GOOGLE_CLIENT_SECRET never ships in the desktop app.
+            // Proxied through MeetFloo-api so GOOGLE_CLIENT_SECRET never ships in the desktop app.
             // Fetch (vs. axios) so this call shares the global keep-alive pool with every other
-            // request to api.natively.software and exposes the same error shape (res.ok / res.status)
+            // request to api.MeetFloo.software and exposes the same error shape (res.ok / res.status)
             // as the rest of the codebase.
             const response = await fetch(`${MEETFLOO_API_URL}/api/calendar/exchange`, {
                 method: 'POST',
@@ -235,7 +235,7 @@ export class CalendarManager extends EventEmitter {
         }
 
         try {
-            // Proxied through natively-api so GOOGLE_CLIENT_SECRET never ships in the desktop app.
+            // Proxied through MeetFloo-api so GOOGLE_CLIENT_SECRET never ships in the desktop app.
             const response = await fetch(`${MEETFLOO_API_URL}/api/calendar/refresh`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -343,7 +343,7 @@ export class CalendarManager extends EventEmitter {
         const { Notification } = require('electron');
         const notif = new Notification({
             title: 'Meeting starting soon',
-            body: `"${event.title}" starts in 2 minutes. Start Natively?`,
+            body: `"${event.title}" starts in 2 minutes. Start MeetFloo?`,
             actions: [
                 { type: 'button', text: 'Start Meeting' },
                 { type: 'button', text: 'Dismiss' }

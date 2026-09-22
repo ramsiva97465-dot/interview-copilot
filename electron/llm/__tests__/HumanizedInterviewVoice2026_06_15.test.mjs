@@ -40,7 +40,7 @@ describe('HUMAN_SPOKEN_ANSWER_CONTRACT — content', () => {
     const c = prompts.HUMAN_SPOKEN_ANSWER_CONTRACT;
     assert.ok(c.includes('what the team is trying to improve')); // business objectives →
     // It must NOT encode any profile fact, company, or role.
-    assert.doesNotMatch(c, /\bEvin\b|\bNatively\b.*built with|resume says/i);
+    assert.doesNotMatch(c, /\bEvin\b|\bMeetFloo\b.*built with|resume says/i);
   });
 });
 

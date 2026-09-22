@@ -104,7 +104,7 @@ test('Phase3: references/ are POINTER concepts — no raw resume text copied in'
   assert.ok(resumeRef, 'resume reference exists');
   // The full resume summary sentence must NOT be present (pointer only).
   assert.ok(!resumeRef.content.includes('Backend-leaning full-stack engineer with 6 years'), 'no raw resume summary copied');
-  assert.match(resumeRef.content, /natively:\/\/profile-doc\//, 'pointer resource URI present');
+  assert.match(resumeRef.content, /MeetFloo:\/\/profile-doc\//, 'pointer resource URI present');
   assert.match(resumeRef.content, /pii: true/, 'reference marked pii');
 });
 

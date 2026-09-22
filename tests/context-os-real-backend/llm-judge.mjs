@@ -21,8 +21,8 @@
 // The judge is advisory-additive: it can only UPGRADE a deterministic near-miss
 // to a semantic pass, never downgrade a deterministic pass.
 
-const API_BASE = process.env.NATIVELY_API_BASE || 'http://127.0.0.1:3000';
-const LOCAL_TOKEN = process.env.NATIVELY_LOCAL_TEST_TOKEN || process.env.NATIVELY_E2E_LOCAL_TEST_TOKEN || 'local-test';
+const API_BASE = process.env.MEETFLOO_API_BASE || 'http://127.0.0.1:3000';
+const LOCAL_TOKEN = process.env.MEETFLOO_LOCAL_TEST_TOKEN || process.env.MEETFLOO_E2E_LOCAL_TEST_TOKEN || 'local-test';
 const JUDGE_MODEL = process.env.CTXOS_JUDGE_MODEL || '';
 
 const JUDGE_SYSTEM = [
@@ -77,7 +77,7 @@ export async function judgeAnswer(question, requiredFacts, answer, opts = {}) {
   try {
     const res = await fetch(`${API_BASE}/v1/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-natively-local-test': LOCAL_TOKEN },
+      headers: { 'Content-Type': 'application/json', 'x-MeetFloo-local-test': LOCAL_TOKEN },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(opts.timeoutMs || 60000),
     });

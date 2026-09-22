@@ -1,7 +1,7 @@
 // F-203 repro: Google/Soniox/Deepgram lack the stale-connection identity
-// guard that NativelyProSTT documents as CRITICAL.
+// guard that MeetFlooProSTT documents as CRITICAL.
 //
-// NativelyProSTT wraps every handler in `if (ws !== this.ws) return;` because
+// MeetFlooProSTT wraps every handler in `if (ws !== this.ws) return;` because
 // "a delayed event from a previously-closed WebSocket can mutate
 // this.isConnected / this.isConnecting / fire scheduleReconnect against the
 // new ws's state". Google, Soniox and Deepgram close over `this` only.
@@ -63,7 +63,7 @@ const fakeClient = {
 
 const { GoogleSTT } = await import(pathToFileURL(path.join(distRoot, 'GoogleSTT.js')).href);
 const stt = new GoogleSTT('audit');
-stt.on('error', () => {});
+stt.on('error', () => { });
 stt.client = fakeClient; // swap transport, keep all real logic
 
 stt.start();

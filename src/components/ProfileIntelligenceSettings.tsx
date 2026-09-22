@@ -1149,10 +1149,10 @@ const Divider = () => (
 // ─── IndexBadge (ported from ModesSettings) ───────────────────────────────────
 const MIN_INDEXING_MS = 2000;
 const PI_INDEX_BADGES: Record<string, { label: string; color: string; bg: string; title: string }> = {
-    uploading:  { label: 'Uploading…',  color: '#3b82f6', bg: 'rgba(59,130,246,0.14)',  title: 'Uploading file' },
-    processing: { label: 'Processing…', color: '#3b82f6', bg: 'rgba(59,130,246,0.14)',  title: 'Extracting profile data' },
-    ready:      { label: 'Ready',       color: '#22c55e', bg: 'rgba(34,197,94,0.14)',    title: 'Profile data extracted' },
-    failed:     { label: 'Failed',      color: '#ef4444', bg: 'rgba(239,68,68,0.14)',    title: 'Upload failed' },
+    uploading: { label: 'Uploading…', color: '#3b82f6', bg: 'rgba(59,130,246,0.14)', title: 'Uploading file' },
+    processing: { label: 'Processing…', color: '#3b82f6', bg: 'rgba(59,130,246,0.14)', title: 'Extracting profile data' },
+    ready: { label: 'Ready', color: '#22c55e', bg: 'rgba(34,197,94,0.14)', title: 'Profile data extracted' },
+    failed: { label: 'Failed', color: '#ef4444', bg: 'rgba(239,68,68,0.14)', title: 'Upload failed' },
 };
 
 function useDisplayedStatus(rawStatus: string | undefined): string | undefined {
@@ -1183,7 +1183,7 @@ function useDisplayedStatus(rawStatus: string | undefined): string | undefined {
         }
         setDisplayed(rawStatus);
         indexingStartRef.current = null;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [rawStatus]);
     useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
     return displayed;
@@ -1317,8 +1317,8 @@ const FileUploadEmpty = ({ hint, hasAccess, onBrowse, onNeedUpgrade, enterClass 
 // polling, adoptTick), and a state-derived className would let reconciliation
 // wipe .is-enter-start / .is-exit mid-transition. That failure only shows up
 // under load, so keep the props constant.
-const THINK_SWAP_MS  = 150;   // keep in sync with --think-swap
-const THINK_GAP_MS   = 50;    // keep in sync with --think-gap
+const THINK_SWAP_MS = 150;   // keep in sync with --think-swap
+const THINK_GAP_MS = 50;    // keep in sync with --think-gap
 
 /** One stage of a sequence. `hold` is how long this line stays before the swap
  *  to the next one starts; the LAST stage's hold is never read. */
@@ -1433,12 +1433,12 @@ const ThinkingStates = ({ stages, sizer, paused }: { stages: ThinkStage[]; sizer
 // Step 8 of the ingest generates STAR stories (an LLM call) and is the résumé
 // tail, so it gets the terminal line rather than indexing.
 const RESUME_INGEST_STAGES: ThinkStage[] = [
-    { text: 'Reading your resume…',           hold: 1200 },
-    { text: 'Pulling out your experience…',   hold: 2500 },
-    { text: 'Mapping your skills…',           hold: 4000 },
+    { text: 'Reading your resume…', hold: 1200 },
+    { text: 'Pulling out your experience…', hold: 2500 },
+    { text: 'Mapping your skills…', hold: 4000 },
     { text: 'Noting projects and education…', hold: 6000 },
-    { text: 'Indexing it for recall…',        hold: 9000 },
-    { text: 'Writing up your best stories…',  hold: 0 },
+    { text: 'Indexing it for recall…', hold: 9000 },
+    { text: 'Writing up your best stories…', hold: 0 },
 ];
 
 // Sums to 65.7s at the last line vs a 69.3s median. Lines 6-10 are the AOT
@@ -1447,14 +1447,14 @@ const RESUME_INGEST_STAGES: ThinkStage[] = [
 // two of its outputs in sequence describes work that IS running in that window,
 // which is what a progress line is for.
 const JD_INGEST_STAGES: ThinkStage[] = [
-    { text: 'Reading the job description…',        hold: 1200 },
-    { text: 'Pulling out the requirements…',       hold: 2500 },
-    { text: 'Noting the responsibilities…',        hold: 4000 },
-    { text: 'Picking up the tech stack…',          hold: 6000 },
-    { text: 'Indexing it for recall…',             hold: 8000 },
-    { text: 'Researching the company…',            hold: 12000 },
-    { text: 'Matching it against your resume…',    hold: 11000 },
-    { text: 'Sketching your negotiation angle…',   hold: 11000 },
+    { text: 'Reading the job description…', hold: 1200 },
+    { text: 'Pulling out the requirements…', hold: 2500 },
+    { text: 'Noting the responsibilities…', hold: 4000 },
+    { text: 'Picking up the tech stack…', hold: 6000 },
+    { text: 'Indexing it for recall…', hold: 8000 },
+    { text: 'Researching the company…', hold: 12000 },
+    { text: 'Matching it against your resume…', hold: 11000 },
+    { text: 'Sketching your negotiation angle…', hold: 11000 },
     { text: 'Drafting the questions they’ll ask…', hold: 10000 },
     { text: 'Mapping your stories to their values…', hold: 0 },
 ];
@@ -1473,10 +1473,10 @@ const JD_INGEST_STAGES: ThinkStage[] = [
 const JD_SIZER = JD_INGEST_STAGES.reduce((a, b) => (b.text.length > a.length ? b.text : a), '');
 
 const JD_INGEST_STAGES_NO_RESUME: ThinkStage[] = [
-    { text: 'Reading the job description…',  hold: 1200 },
+    { text: 'Reading the job description…', hold: 1200 },
     { text: 'Pulling out the requirements…', hold: 2000 },
-    { text: 'Indexing it for recall…',       hold: 3600 },
-    { text: 'Researching the company…',      hold: 0 },
+    { text: 'Indexing it for recall…', hold: 3600 },
+    { text: 'Researching the company…', hold: 0 },
 ];
 
 // ─── FileUploadIndexing — in-flight ingest ────────────────────────────────────
@@ -1508,15 +1508,15 @@ const FileUploadIndexing = ({ stages, sizer, settling }: { stages: ThinkStage[];
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-    { id: 'identity',    label: 'Identity',           Icon: User },
-    { id: 'insights',    label: 'Profile',            Icon: FileText },
+    { id: 'identity', label: 'Identity', Icon: User },
+    { id: 'insights', label: 'Profile', Icon: FileText },
     // Role Insight reads the résumé and JD that Profile owns, so it sits
     // directly after it — ahead of the outbound artifacts (Company Intel,
     // Cover Letter) that come later in the user's actual sequence.
-    { id: 'roleinsight', label: 'Role Insight',       Icon: Target },
-    { id: 'company',     label: 'Company Intel',      Icon: Building2 },
-    { id: 'coverletter', label: 'Cover Letter',       Icon: Mail },
-    { id: 'tavily',      label: 'Tavily Search',      Icon: Globe },
+    { id: 'roleinsight', label: 'Role Insight', Icon: Target },
+    { id: 'company', label: 'Company Intel', Icon: Building2 },
+    { id: 'coverletter', label: 'Cover Letter', Icon: Mail },
+    { id: 'tavily', label: 'Tavily Search', Icon: Globe },
 ];
 
 // ─── Pro Gate ─────────────────────────────────────────────────────────────────
@@ -1532,21 +1532,21 @@ const PI_GATE_FEATURES: Array<{
     row: string;
     type: 'hero' | 'wide' | 'small';
 }> = [
-    { key: 'identity', label: 'Identity', desc: 'Who you are, extracted from your resume.', hex: '#a78bfa', Icon: User, col: '1 / 3', row: '1 / 3', type: 'hero' },
-    // NOTE: wide-card descriptions must reliably render as ONE line at 11px in
-    // the ~170px text column (see ModesProGate reference, which uses the same
-    // single-line rule). Row 1 and row 3 are now sized to that one-line content
-    // (see PI_GATE_ROW_PX below), not a fixed budget copied from Modes — a
-    // wrapped second line is now guarded by WebkitLineClamp: 1 (it will
-    // ellipsize instead of crowding the card). Keep these short; verify with
-    // the pi-gate screenshot/measurement script before lengthening any of them
-    // again.
-    { key: 'profile', label: 'Profile', desc: 'Every skill and role mapped.', hex: '#34d399', Icon: FileText, col: '3 / 5', row: '1 / 2', type: 'wide' },
-    { key: 'company', label: 'Company Intel', hex: '#fbbf24', Icon: Building2, col: '3 / 4', row: '2 / 3', type: 'small' },
-    { key: 'cover', label: 'Cover Letter', hex: '#fb7185', Icon: Mail, col: '4 / 5', row: '2 / 3', type: 'small' },
-    { key: 'talking', label: 'Talking Points', desc: 'Every fit gap answered.', hex: '#f472b6', Icon: MessageSquare, col: '1 / 3', row: '3 / 4', type: 'wide' },
-    { key: 'search', label: 'Web Search', desc: 'Live research, on demand.', hex: '#38bdf8', Icon: Globe, col: '3 / 5', row: '3 / 4', type: 'wide' },
-];
+        { key: 'identity', label: 'Identity', desc: 'Who you are, extracted from your resume.', hex: '#a78bfa', Icon: User, col: '1 / 3', row: '1 / 3', type: 'hero' },
+        // NOTE: wide-card descriptions must reliably render as ONE line at 11px in
+        // the ~170px text column (see ModesProGate reference, which uses the same
+        // single-line rule). Row 1 and row 3 are now sized to that one-line content
+        // (see PI_GATE_ROW_PX below), not a fixed budget copied from Modes — a
+        // wrapped second line is now guarded by WebkitLineClamp: 1 (it will
+        // ellipsize instead of crowding the card). Keep these short; verify with
+        // the pi-gate screenshot/measurement script before lengthening any of them
+        // again.
+        { key: 'profile', label: 'Profile', desc: 'Every skill and role mapped.', hex: '#34d399', Icon: FileText, col: '3 / 5', row: '1 / 2', type: 'wide' },
+        { key: 'company', label: 'Company Intel', hex: '#fbbf24', Icon: Building2, col: '3 / 4', row: '2 / 3', type: 'small' },
+        { key: 'cover', label: 'Cover Letter', hex: '#fb7185', Icon: Mail, col: '4 / 5', row: '2 / 3', type: 'small' },
+        { key: 'talking', label: 'Talking Points', desc: 'Every fit gap answered.', hex: '#f472b6', Icon: MessageSquare, col: '1 / 3', row: '3 / 4', type: 'wide' },
+        { key: 'search', label: 'Web Search', desc: 'Live research, on demand.', hex: '#38bdf8', Icon: Globe, col: '3 / 5', row: '3 / 4', type: 'wide' },
+    ];
 
 // Row heights are content-sized (measured against real rendered card content
 // via the getBoundingClientRect verification harness), NOT copy-pasted from
@@ -1728,8 +1728,8 @@ const PI_GATE_CSS = `
     }
 `;
 
-function ProfileIntelligenceProGate({ onOpenNativelyAPI, onClose }: {
-    onOpenNativelyAPI?: () => void;
+function ProfileIntelligenceProGate({ onOpenMeetFlooAPI, onClose }: {
+    onOpenMeetFlooAPI?: () => void;
     onClose?: () => void;
 }) {
     const theme = useResolvedTheme();
@@ -1768,7 +1768,7 @@ function ProfileIntelligenceProGate({ onOpenNativelyAPI, onClose }: {
                         letterSpacing: '-0.04em', lineHeight: 1.1,
                         color: 'var(--pig-hero)',
                     }}>
-                        Every answer.<br/>Grounded in you.
+                        Every answer.<br />Grounded in you.
                     </h1>
                     <p className="pig-sub" style={{
                         margin: 0, fontSize: 15, lineHeight: 1.4, fontWeight: 400,
@@ -1889,15 +1889,15 @@ function ProfileIntelligenceProGate({ onOpenNativelyAPI, onClose }: {
                 flexShrink: 0, background: 'var(--pig-bg)',
             }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
-                    {onOpenNativelyAPI && (
-                        <button className="pig-text-btn" onClick={onOpenNativelyAPI}>
+                    {onOpenMeetFlooAPI && (
+                        <button className="pig-text-btn" onClick={onOpenMeetFlooAPI}>
                             I have a license <ChevronRight size={12} />
                         </button>
                     )}
                 </div>
 
                 <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--pig-sub-low)', letterSpacing: '-0.01em', lineHeight: 1.4 }}>
-                    Currently your answers carry no personal context.<br/>
+                    Currently your answers carry no personal context.<br />
                     <span style={{ color: '#fbbf24' }}>Unlock Pro to ground every answer in your identity, experience, and research.</span>
                 </div>
 
@@ -1917,10 +1917,10 @@ function ProfileIntelligenceProGate({ onOpenNativelyAPI, onClose }: {
 // ─── Main export ──────────────────────────────────────────────────────────────
 export function ProfileIntelligenceSettings({
     onClose,
-    onOpenNativelyAPI,
+    onOpenMeetFlooAPI,
 }: {
     onClose: () => void;
-    onOpenNativelyAPI?: () => void;
+    onOpenMeetFlooAPI?: () => void;
 }) {
     const cachedPremium = readPremiumCache();
     const piToggleInit = useToggleInit();
@@ -2079,12 +2079,12 @@ export function ProfileIntelligenceSettings({
                 if (plan) setPremiumPlan(plan);
                 else if (!live) setPremiumPlan('');
                 writePremiumCache(live, plan);
-            }).catch(() => {}).finally(() => setLicenseLoaded(true));
+            }).catch(() => { }).finally(() => setLicenseLoaded(true));
         } else {
             window.electronAPI?.licenseCheckPremium?.().then((live: boolean) => {
                 setIsPremium(!!live);
                 writePremiumCache(!!live, premiumPlan);
-            }).catch(() => {}).finally(() => setLicenseLoaded(true));
+            }).catch(() => { }).finally(() => setLicenseLoaded(true));
         }
         // Adopt any ingest still running in main. Closing the panel unmounts this
         // component but does NOT cancel the upload — main runs it to completion —
@@ -2105,7 +2105,7 @@ export function ProfileIntelligenceSettings({
             if (status?.resume_indexing_in_flight || status?.jd_indexing_in_flight) {
                 setAdoptTick(t => t + 1);
             }
-        }).catch(() => {});
+        }).catch(() => { });
         window.electronAPI?.profileGetProfile?.().then((data: any) => {
             setProfileData(data);
             if (data?.coverLetter) setCoverLetter(data.coverLetter);
@@ -2126,18 +2126,18 @@ export function ProfileIntelligenceSettings({
             if (!data?.companyDossier) {
                 window.electronAPI?.profileGetCompanyDossier?.().then(d => {
                     if (d) setCompanyDossier(d?.dossier ?? d);
-                }).catch(() => {});
+                }).catch(() => { });
             }
-        }).catch(() => {});
+        }).catch(() => { });
         window.electronAPI?.getStoredCredentials?.().then((creds: any) => {
             if (creds?.hasTavilyKey) setHasStoredTavilyKey(true);
-        }).catch(() => {});
+        }).catch(() => { });
         window.electronAPI?.profileGetSupplementaryText?.().then((res: any) => {
             if (res && typeof res.text === 'string') {
                 setSupplementaryText(res.text);
                 lastSavedSupplementaryRef.current = res.text;
             }
-        }).catch(() => {});
+        }).catch(() => { });
     }, []);
 
     // Finalize an ADOPTED ingest. Only runs for uploads this mount inherited —
@@ -2383,50 +2383,50 @@ export function ProfileIntelligenceSettings({
         const isActive = profileStatus.profileMode && hasProfileAccess;
         const isDisabled = !profileStatus.hasProfile || !hasProfileAccess;
         return (
-        <>
-            {/* Persona Engine toggle card — hidden under Context Intelligence
+            <>
+                {/* Persona Engine toggle card — hidden under Context Intelligence
                 V3 (source authority replaces the global override, §6). */}
-            {!ciV3Enabled && (
-            <div
-                className="pi-toggle-card"
-                data-on={isActive ? 'true' : 'false'}
-                style={{ marginBottom: 20 }}
-            >
-                <div>
-                    <h3 className="pi-section-label" style={{ margin: 0 }}>Persona Engine</h3>
-                    <p style={{ fontSize: 12, color: 'var(--pi-secondary)', margin: '4px 0 0' }}>
-                        {profileStatus.profileMode
-                            ? 'Answers rewired around your profile, the role, and your voice.'
-                            : 'Dormant. Your profile is loaded but not shaping answers yet.'}
-                    </p>
-                </div>
-                <button
-                    type="button"
-                    role="switch"
-                    data-on={String(!!(profileStatus.profileMode && hasProfileAccess))}
-                    aria-checked={!!(profileStatus.profileMode && hasProfileAccess)}
-                    aria-disabled={(!profileStatus.hasProfile || !hasProfileAccess) ? true : undefined}
-                    aria-label="Persona Engine"
-                    onClick={async () => {
-                        if (!profileStatus.hasProfile || !hasProfileAccess) return;
-                        const newState = !profileStatus.profileMode;
-                        try {
-                            await window.electronAPI?.profileSetMode?.(newState);
-                            // Armed next to the state change, not before the
-                            // await: data-on only flips when this resolves, and
-                            // is-init must not land in an earlier render.
-                            piToggleInit.arm();
-                            setProfileStatus(prev => ({ ...prev, profileMode: newState }));
-                        } catch { /**/ }
-                    }}
-                    className={`t-toggle t-toggle-lg w-11 h-6 shrink-0 rounded-full p-[3px] flex items-center ${piToggleInit.className}`}
-                >
-                    <span className="t-toggle-thumb" aria-hidden="true" />
-                </button>
-            </div>
-            )}
+                {!ciV3Enabled && (
+                    <div
+                        className="pi-toggle-card"
+                        data-on={isActive ? 'true' : 'false'}
+                        style={{ marginBottom: 20 }}
+                    >
+                        <div>
+                            <h3 className="pi-section-label" style={{ margin: 0 }}>Persona Engine</h3>
+                            <p style={{ fontSize: 12, color: 'var(--pi-secondary)', margin: '4px 0 0' }}>
+                                {profileStatus.profileMode
+                                    ? 'Answers rewired around your profile, the role, and your voice.'
+                                    : 'Dormant. Your profile is loaded but not shaping answers yet.'}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            role="switch"
+                            data-on={String(!!(profileStatus.profileMode && hasProfileAccess))}
+                            aria-checked={!!(profileStatus.profileMode && hasProfileAccess)}
+                            aria-disabled={(!profileStatus.hasProfile || !hasProfileAccess) ? true : undefined}
+                            aria-label="Persona Engine"
+                            onClick={async () => {
+                                if (!profileStatus.hasProfile || !hasProfileAccess) return;
+                                const newState = !profileStatus.profileMode;
+                                try {
+                                    await window.electronAPI?.profileSetMode?.(newState);
+                                    // Armed next to the state change, not before the
+                                    // await: data-on only flips when this resolves, and
+                                    // is-init must not land in an earlier render.
+                                    piToggleInit.arm();
+                                    setProfileStatus(prev => ({ ...prev, profileMode: newState }));
+                                } catch { /**/ }
+                            }}
+                            className={`t-toggle t-toggle-lg w-11 h-6 shrink-0 rounded-full p-[3px] flex items-center ${piToggleInit.className}`}
+                        >
+                            <span className="t-toggle-thumb" aria-hidden="true" />
+                        </button>
+                    </div>
+                )}
 
-            {/* Resume — header + descriptor, same shape as Company Intel's so the
+                {/* Resume — header + descriptor, same shape as Company Intel's so the
                 two sections read as one product. The descriptor says what the file
                 *powers*; the faint hint inside the dropzone stays the CTA. Three
                 type levels (hero / secondary / tertiary) keep them from colliding.
@@ -2436,350 +2436,350 @@ export function ProfileIntelligenceSettings({
                 section's descriptor. Kept to a single line: at 12px the content
                 column is wide enough that one sentence never wraps, so the header
                 block stays a tight two-line unit above the card. */}
-            <div style={{ marginBottom: 10 }}>
-                <h3 className="pi-section-label" style={{ margin: 0 }}>Resume</h3>
-                <p style={{ fontSize: 12, color: 'var(--pi-secondary)', margin: '4px 0 0', lineHeight: 1.5 }}>
-                    Grounds every answer in what you've actually done, instead of generic advice.
-                </p>
-            </div>
-            {profileIndexing || profileHandoff.settling ? (
-                <FileUploadIndexing stages={RESUME_INGEST_STAGES} settling={profileHandoff.settling} />
-            ) : !profileStatus.hasProfile ? (
-                <FileUploadEmpty
-                    hint="Add your resume as real-time context."
-                    hasAccess={hasProfileAccess}
-                    onBrowse={browseResume}
-                    onNeedUpgrade={() => setIsPremiumModalOpen(true)}
-                    enterClass={profileHandoff.arriving ? 'pi-handoff-in-self' : undefined}
-                />
-            ) : (
-                <div className={profileHandoff.arriving ? 'pi-handoff-in' : undefined} style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '13px 1fr 100px 20px', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--pi-btn-bg)', border: '1px solid var(--pi-btn-border)', borderRadius: 'var(--pi-r-md)' }}>
-                        <FileText size={13} style={{ color: 'var(--pi-secondary)', flexShrink: 0 }} />
-                        <span style={{ fontSize: 12, color: 'var(--pi-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {profileData?.identity?.name || 'Resume.pdf'}
-                        </span>
-                        <PIIndexBadge status={profileUploadStatus} />
-                        <button
-                            className="pi-press-soft"
-                            disabled={profileUploading}
-                            title={profileUploading
-                                ? 'Indexing — this finishes in the background and cannot be stopped. Delete it once it completes.'
-                                : 'Delete resume'}
-                            style={{ background: 'none', border: 'none', cursor: profileUploading ? 'not-allowed' : 'pointer', opacity: profileUploading ? 0.4 : 1, color: 'var(--pi-tertiary)', padding: 4, display: 'flex', borderRadius: 4, transition: 'color 180ms ease' }}
-                            onMouseEnter={e => { if (!profileUploading) e.currentTarget.style.color = 'var(--pi-danger)'; }}
-                            onMouseLeave={e => (e.currentTarget.style.color = 'var(--pi-tertiary)')}
-                            onClick={async () => {
-                                // Previously this set profileAbortRef.cancelled and rendered
-                                // { hasProfile: false } — but that flag only silences this
-                                // renderer. Main runs ingestDocument to completion and then
-                                // enables knowledge mode, so "cancel" produced a UI claiming
-                                // no profile while the resume was in fact saved and live.
-                                // The button is disabled mid-ingest rather than lying.
-                                if (profileUploading) return;
-                                if (!confirm('Delete your resume and its extracted data?')) return;
-                                try {
-                                    await window.electronAPI?.profileDelete?.();
-                                    setProfileStatus({ hasProfile: false, profileMode: false });
-                                    const freshData = await window.electronAPI?.profileGetProfile?.();
-                                    setProfileData(freshData ?? null);
-                                    setSupplementaryText('');
-                                } catch { /**/ }
-                            }}
-                        >
-                            <X size={12} />
-                        </button>
-                    </div>
-                    {/* Candidate snapshot — shown once extraction is done */}
-                    {profileStatus.hasProfile && !profileUploading && profileData?.identity && (() => {
-                        const id = profileData.identity;
-                        const latestExp = profileData.experience?.[0];
-                        const topSkills: string[] = (profileData.skillsFlat ?? []).slice(0, 4);
-                        // Resume summary: cap at 30 words, snap to sentence terminator inside the
-                        // cap. See utils/resumeSummary.ts — pure function, unit-tested.
-                        const summary = truncateResumeSummary(id.summary);
-                        return (
-                            <div style={{ padding: '10px 12px', border: '1px solid var(--pi-border)', borderRadius: 'var(--pi-r-md)', background: 'rgba(255,255,255,0.015)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                {latestExp && (
-                                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--pi-primary)', lineHeight: 1.3 }}>
-                                        {latestExp.role}
-                                        {latestExp.company && <span style={{ fontWeight: 400, color: 'var(--pi-secondary)' }}> · {latestExp.company}</span>}
-                                    </div>
-                                )}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                                    {id.location && (
-                                        <span style={{ fontSize: 11, color: 'var(--pi-tertiary)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                                            <Globe size={10} /> {id.location}
-                                        </span>
+                <div style={{ marginBottom: 10 }}>
+                    <h3 className="pi-section-label" style={{ margin: 0 }}>Resume</h3>
+                    <p style={{ fontSize: 12, color: 'var(--pi-secondary)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                        Grounds every answer in what you've actually done, instead of generic advice.
+                    </p>
+                </div>
+                {profileIndexing || profileHandoff.settling ? (
+                    <FileUploadIndexing stages={RESUME_INGEST_STAGES} settling={profileHandoff.settling} />
+                ) : !profileStatus.hasProfile ? (
+                    <FileUploadEmpty
+                        hint="Add your resume as real-time context."
+                        hasAccess={hasProfileAccess}
+                        onBrowse={browseResume}
+                        onNeedUpgrade={() => setIsPremiumModalOpen(true)}
+                        enterClass={profileHandoff.arriving ? 'pi-handoff-in-self' : undefined}
+                    />
+                ) : (
+                    <div className={profileHandoff.arriving ? 'pi-handoff-in' : undefined} style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '13px 1fr 100px 20px', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--pi-btn-bg)', border: '1px solid var(--pi-btn-border)', borderRadius: 'var(--pi-r-md)' }}>
+                            <FileText size={13} style={{ color: 'var(--pi-secondary)', flexShrink: 0 }} />
+                            <span style={{ fontSize: 12, color: 'var(--pi-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {profileData?.identity?.name || 'Resume.pdf'}
+                            </span>
+                            <PIIndexBadge status={profileUploadStatus} />
+                            <button
+                                className="pi-press-soft"
+                                disabled={profileUploading}
+                                title={profileUploading
+                                    ? 'Indexing — this finishes in the background and cannot be stopped. Delete it once it completes.'
+                                    : 'Delete resume'}
+                                style={{ background: 'none', border: 'none', cursor: profileUploading ? 'not-allowed' : 'pointer', opacity: profileUploading ? 0.4 : 1, color: 'var(--pi-tertiary)', padding: 4, display: 'flex', borderRadius: 4, transition: 'color 180ms ease' }}
+                                onMouseEnter={e => { if (!profileUploading) e.currentTarget.style.color = 'var(--pi-danger)'; }}
+                                onMouseLeave={e => (e.currentTarget.style.color = 'var(--pi-tertiary)')}
+                                onClick={async () => {
+                                    // Previously this set profileAbortRef.cancelled and rendered
+                                    // { hasProfile: false } — but that flag only silences this
+                                    // renderer. Main runs ingestDocument to completion and then
+                                    // enables knowledge mode, so "cancel" produced a UI claiming
+                                    // no profile while the resume was in fact saved and live.
+                                    // The button is disabled mid-ingest rather than lying.
+                                    if (profileUploading) return;
+                                    if (!confirm('Delete your resume and its extracted data?')) return;
+                                    try {
+                                        await window.electronAPI?.profileDelete?.();
+                                        setProfileStatus({ hasProfile: false, profileMode: false });
+                                        const freshData = await window.electronAPI?.profileGetProfile?.();
+                                        setProfileData(freshData ?? null);
+                                        setSupplementaryText('');
+                                    } catch { /**/ }
+                                }}
+                            >
+                                <X size={12} />
+                            </button>
+                        </div>
+                        {/* Candidate snapshot — shown once extraction is done */}
+                        {profileStatus.hasProfile && !profileUploading && profileData?.identity && (() => {
+                            const id = profileData.identity;
+                            const latestExp = profileData.experience?.[0];
+                            const topSkills: string[] = (profileData.skillsFlat ?? []).slice(0, 4);
+                            // Resume summary: cap at 30 words, snap to sentence terminator inside the
+                            // cap. See utils/resumeSummary.ts — pure function, unit-tested.
+                            const summary = truncateResumeSummary(id.summary);
+                            return (
+                                <div style={{ padding: '10px 12px', border: '1px solid var(--pi-border)', borderRadius: 'var(--pi-r-md)', background: 'rgba(255,255,255,0.015)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                    {latestExp && (
+                                        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--pi-primary)', lineHeight: 1.3 }}>
+                                            {latestExp.role}
+                                            {latestExp.company && <span style={{ fontWeight: 400, color: 'var(--pi-secondary)' }}> · {latestExp.company}</span>}
+                                        </div>
                                     )}
-                                    {profileStatus.totalExperienceYears != null && profileStatus.totalExperienceYears > 0 && (
-                                        <span style={{ fontSize: 11, color: 'var(--pi-tertiary)' }}>
-                                            {profileStatus.totalExperienceYears}y exp
-                                        </span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                        {id.location && (
+                                            <span style={{ fontSize: 11, color: 'var(--pi-tertiary)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                                                <Globe size={10} /> {id.location}
+                                            </span>
+                                        )}
+                                        {profileStatus.totalExperienceYears != null && profileStatus.totalExperienceYears > 0 && (
+                                            <span style={{ fontSize: 11, color: 'var(--pi-tertiary)' }}>
+                                                {profileStatus.totalExperienceYears}y exp
+                                            </span>
+                                        )}
+                                    </div>
+                                    {summary && (
+                                        <p style={{
+                                            fontSize: 11, color: 'var(--pi-secondary)', margin: 0,
+                                            lineHeight: 1.55,
+                                            // Lock the summary to ≥3 lines so the card silhouette
+                                            // stays stable. If the summary is longer than 3 lines
+                                            // the card grows — we never chop the text.
+                                            minHeight: `calc(1.55em * 3)`,
+                                        }}>{summary}</p>
+                                    )}
+                                    {topSkills.length > 0 && (
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 2 }}>
+                                            {topSkills.map(s => (
+                                                <span key={s} style={{ fontSize: 10, padding: '2px 7px', borderRadius: 'var(--pi-r-pill)', background: 'var(--pi-btn-bg)', border: '1px solid var(--pi-btn-border)', color: 'var(--pi-secondary)' }}>{s}</span>
+                                            ))}
+                                        </div>
                                     )}
                                 </div>
-                                {summary && (
-                                    <p style={{
-                                        fontSize: 11, color: 'var(--pi-secondary)', margin: 0,
-                                        lineHeight: 1.55,
-                                        // Lock the summary to ≥3 lines so the card silhouette
-                                        // stays stable. If the summary is longer than 3 lines
-                                        // the card grows — we never chop the text.
-                                        minHeight: `calc(1.55em * 3)`,
-                                    }}>{summary}</p>
-                                )}
-                                {topSkills.length > 0 && (
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 2 }}>
-                                        {topSkills.map(s => (
-                                            <span key={s} style={{ fontSize: 10, padding: '2px 7px', borderRadius: 'var(--pi-r-pill)', background: 'var(--pi-btn-bg)', border: '1px solid var(--pi-btn-border)', color: 'var(--pi-secondary)' }}>{s}</span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })()}
-                </div>
-            )}
-            {profileError && (
-                <div style={{ fontSize: 11, color: 'var(--pi-danger)', padding: '6px 10px', borderRadius: 6, background: 'var(--pi-danger-bg)', marginBottom: 12 }}>
-                    {profileError}
-                </div>
-            )}
-
-            {/* Supplementary Resume Notes & Paragraphs (missed content / extra details) */}
-            <div style={{
-                marginBottom: 20,
-                padding: '12px 14px',
-                borderRadius: 'var(--pi-r-md)',
-                background: 'var(--pi-btn-bg)',
-                border: '1px solid var(--pi-border)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
-            }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                    <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--pi-primary)' }}>
-                                Supplementary Resume Notes & Text
-                            </span>
-                            <span style={{
-                                fontSize: 9,
-                                fontWeight: 600,
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.04em',
-                                padding: '1px 6px',
-                                borderRadius: 'var(--pi-r-pill)',
-                                background: 'var(--pi-accent-subtle)',
-                                color: 'var(--pi-accent)',
-                                border: '1px solid var(--pi-accent-border)',
-                            }}>
-                                Live AI Context
-                            </span>
-                        </div>
-                        <p style={{ fontSize: 11, color: 'var(--pi-secondary)', margin: '3px 0 0', lineHeight: 1.45 }}>
-                            If PDF parsing missed tables, unlisted metrics, or recent projects, type or paste paragraphs here. The live interview AI uses this directly to answer questions.
-                        </p>
+                            );
+                        })()}
                     </div>
-                </div>
-
-                <textarea
-                    value={supplementaryText}
-                    onChange={e => handleSupplementaryChange(e.target.value)}
-                    placeholder="e.g. Key achievements: Spearheaded migration from Monolith to Go microservices, reducing AWS cloud bill by 32%. Developed low-latency WebSocket gateway handling 150k concurrent users..."
-                    rows={4}
-                    style={{
-                        width: '100%',
-                        boxSizing: 'border-box',
-                        padding: '9px 12px',
-                        fontSize: 12,
-                        lineHeight: 1.5,
-                        fontFamily: 'inherit',
-                        color: 'var(--pi-primary)',
-                        background: 'var(--pi-input-bg)',
-                        border: '1px solid var(--pi-input-border)',
-                        borderRadius: 8,
-                        resize: 'vertical',
-                        minHeight: 84,
-                        outline: 'none',
-                        transition: 'border-color 150ms ease, background 150ms ease',
-                    }}
-                    onFocus={e => {
-                        e.currentTarget.style.borderColor = 'var(--pi-accent)';
-                    }}
-                    onBlur={e => {
-                        e.currentTarget.style.borderColor = 'var(--pi-input-border)';
-                        if (supplementaryDebounceTimerRef.current) {
-                            clearTimeout(supplementaryDebounceTimerRef.current);
-                        }
-                        handleSaveSupplementaryText();
-                    }}
-                />
-
-                {supplementaryError && (
-                    <div style={{ fontSize: 11, color: 'var(--pi-danger)', display: 'flex', alignItems: 'center', gap: 5 }}>
-                        <AlertCircle size={12} />
-                        <span>{supplementaryError}</span>
+                )}
+                {profileError && (
+                    <div style={{ fontSize: 11, color: 'var(--pi-danger)', padding: '6px 10px', borderRadius: 6, background: 'var(--pi-danger-bg)', marginBottom: 12 }}>
+                        {profileError}
                     </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 10.5, color: 'var(--pi-tertiary)' }}>
-                            {supplementaryText.trim() ? `${supplementaryText.trim().split(/\s+/).filter(Boolean).length} words` : '0 words'}
-                        </span>
-                        {supplementarySaving && (
-                            <span style={{ fontSize: 10, color: 'var(--pi-accent)', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                                <RefreshCw size={9} className="pi-spinner" /> Auto-saving…
-                            </span>
-                        )}
-                        {!supplementarySaving && supplementarySaved && (
-                            <span style={{ fontSize: 10, color: '#22c55e', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                                <Check size={10} /> Auto-saved to Profile
-                            </span>
-                        )}
+                {/* Supplementary Resume Notes & Paragraphs (missed content / extra details) */}
+                <div style={{
+                    marginBottom: 20,
+                    padding: '12px 14px',
+                    borderRadius: 'var(--pi-r-md)',
+                    background: 'var(--pi-btn-bg)',
+                    border: '1px solid var(--pi-border)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--pi-primary)' }}>
+                                    Supplementary Resume Notes & Text
+                                </span>
+                                <span style={{
+                                    fontSize: 9,
+                                    fontWeight: 600,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.04em',
+                                    padding: '1px 6px',
+                                    borderRadius: 'var(--pi-r-pill)',
+                                    background: 'var(--pi-accent-subtle)',
+                                    color: 'var(--pi-accent)',
+                                    border: '1px solid var(--pi-accent-border)',
+                                }}>
+                                    Live AI Context
+                                </span>
+                            </div>
+                            <p style={{ fontSize: 11, color: 'var(--pi-secondary)', margin: '3px 0 0', lineHeight: 1.45 }}>
+                                If PDF parsing missed tables, unlisted metrics, or recent projects, type or paste paragraphs here. The live interview AI uses this directly to answer questions.
+                            </p>
+                        </div>
                     </div>
 
-                    <button
-                        className="pi-pill-btn pi-press"
-                        disabled={supplementarySaving || !hasProfileAccess}
-                        onClick={() => handleSaveSupplementaryText()}
+                    <textarea
+                        value={supplementaryText}
+                        onChange={e => handleSupplementaryChange(e.target.value)}
+                        placeholder="e.g. Key achievements: Spearheaded migration from Monolith to Go microservices, reducing AWS cloud bill by 32%. Developed low-latency WebSocket gateway handling 150k concurrent users..."
+                        rows={4}
                         style={{
-                            padding: '6px 14px',
-                            fontSize: 11.5,
-                            fontWeight: 500,
+                            width: '100%',
+                            boxSizing: 'border-box',
+                            padding: '9px 12px',
+                            fontSize: 12,
+                            lineHeight: 1.5,
+                            fontFamily: 'inherit',
+                            color: 'var(--pi-primary)',
+                            background: 'var(--pi-input-bg)',
+                            border: '1px solid var(--pi-input-border)',
                             borderRadius: 8,
-                            cursor: supplementarySaving ? 'not-allowed' : 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 6,
-                            background: supplementarySaved ? 'rgba(34,197,94,0.12)' : undefined,
-                            borderColor: supplementarySaved ? 'rgba(34,197,94,0.3)' : undefined,
-                            color: supplementarySaved ? '#22c55e' : undefined,
+                            resize: 'vertical',
+                            minHeight: 84,
+                            outline: 'none',
+                            transition: 'border-color 150ms ease, background 150ms ease',
                         }}
-                    >
-                        {supplementarySaving ? (
-                            <>
-                                <RefreshCw size={12} className="pi-spinner" />
-                                <span>Saving & Indexing…</span>
-                            </>
-                        ) : supplementarySaved ? (
-                            <>
-                                <Check size={12} />
-                                <span>Synced with Live AI</span>
-                            </>
-                        ) : (
-                            <>
-                                <Sparkles size={12} />
-                                <span>Save & Sync with Live AI</span>
-                            </>
-                        )}
-                    </button>
-                </div>
-            </div>
+                        onFocus={e => {
+                            e.currentTarget.style.borderColor = 'var(--pi-accent)';
+                        }}
+                        onBlur={e => {
+                            e.currentTarget.style.borderColor = 'var(--pi-input-border)';
+                            if (supplementaryDebounceTimerRef.current) {
+                                clearTimeout(supplementaryDebounceTimerRef.current);
+                            }
+                            handleSaveSupplementaryText();
+                        }}
+                    />
 
-            {/* Job Description — same header + descriptor pattern. Company Intel
-                keys off this JD's extracted company name, so the descriptor names
-                that downstream payoff rather than restating the upload CTA. */}
-            <div style={{ marginBottom: 10 }}>
-                <h3 className="pi-section-label" style={{ margin: 0 }}>Job Description</h3>
-                <p style={{ fontSize: 12, color: 'var(--pi-secondary)', margin: '4px 0 0', lineHeight: 1.5 }}>
-                    Frames answers around what this specific role asks for, and powers Company Intel.
-                </p>
-            </div>
-            {jdIndexing || jdHandoff.settling ? (
-                <FileUploadIndexing stages={profileStatus.hasProfile ? JD_INGEST_STAGES : JD_INGEST_STAGES_NO_RESUME} sizer={JD_SIZER} settling={jdHandoff.settling} />
-            ) : !profileData?.hasActiveJD ? (
-                <FileUploadEmpty
-                    hint="Add a job description as real-time context."
-                    hasAccess={hasProfileAccess}
-                    onBrowse={browseJD}
-                    onNeedUpgrade={() => setIsPremiumModalOpen(true)}
-                    enterClass={jdHandoff.arriving ? 'pi-handoff-in-self' : undefined}
-                />
-            ) : (
-                <div className={jdHandoff.arriving ? 'pi-handoff-in' : undefined} style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '13px 1fr 100px 20px', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--pi-btn-bg)', border: '1px solid var(--pi-btn-border)', borderRadius: 'var(--pi-r-md)' }}>
-                        <FileText size={13} style={{ color: 'var(--pi-secondary)', flexShrink: 0 }} />
-                        <span style={{ fontSize: 12, color: 'var(--pi-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {profileData?.activeJD?.title
-                                ? `${profileData.activeJD.title}${profileData.activeJD.company ? ` @ ${profileData.activeJD.company}` : ''}`
-                                : 'Job Description'}
-                        </span>
-                        <PIIndexBadge status={jdUploadStatus} />
+                    {supplementaryError && (
+                        <div style={{ fontSize: 11, color: 'var(--pi-danger)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <AlertCircle size={12} />
+                            <span>{supplementaryError}</span>
+                        </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ fontSize: 10.5, color: 'var(--pi-tertiary)' }}>
+                                {supplementaryText.trim() ? `${supplementaryText.trim().split(/\s+/).filter(Boolean).length} words` : '0 words'}
+                            </span>
+                            {supplementarySaving && (
+                                <span style={{ fontSize: 10, color: 'var(--pi-accent)', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                                    <RefreshCw size={9} className="pi-spinner" /> Auto-saving…
+                                </span>
+                            )}
+                            {!supplementarySaving && supplementarySaved && (
+                                <span style={{ fontSize: 10, color: '#22c55e', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                                    <Check size={10} /> Auto-saved to Profile
+                                </span>
+                            )}
+                        </div>
+
                         <button
-                            className="pi-press-soft"
-                            disabled={jdUploading}
-                            title={jdUploading
-                                ? 'Indexing — this finishes in the background and cannot be stopped. Delete it once it completes.'
-                                : 'Delete job description'}
-                            style={{ background: 'none', border: 'none', cursor: jdUploading ? 'not-allowed' : 'pointer', opacity: jdUploading ? 0.4 : 1, color: 'var(--pi-tertiary)', padding: 4, display: 'flex', borderRadius: 4, transition: 'color 180ms ease' }}
-                            onMouseEnter={e => { if (!jdUploading) e.currentTarget.style.color = 'var(--pi-danger)'; }}
-                            onMouseLeave={e => (e.currentTarget.style.color = 'var(--pi-tertiary)')}
-                            onClick={async () => {
-                                // Same lie as the resume X — the abort flag only silenced
-                                // this renderer while main finished the JD ingest.
-                                if (jdUploading) return;
-                                try {
-                                    await window.electronAPI?.profileDeleteJD?.();
-                                    const data = await window.electronAPI?.profileGetProfile?.();
-                                    setProfileData(data ?? null);
-                                    setCompanyDossier(null);
-                                } catch { /**/ }
+                            className="pi-pill-btn pi-press"
+                            disabled={supplementarySaving || !hasProfileAccess}
+                            onClick={() => handleSaveSupplementaryText()}
+                            style={{
+                                padding: '6px 14px',
+                                fontSize: 11.5,
+                                fontWeight: 500,
+                                borderRadius: 8,
+                                cursor: supplementarySaving ? 'not-allowed' : 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 6,
+                                background: supplementarySaved ? 'rgba(34,197,94,0.12)' : undefined,
+                                borderColor: supplementarySaved ? 'rgba(34,197,94,0.3)' : undefined,
+                                color: supplementarySaved ? '#22c55e' : undefined,
                             }}
                         >
-                            <X size={12} />
+                            {supplementarySaving ? (
+                                <>
+                                    <RefreshCw size={12} className="pi-spinner" />
+                                    <span>Saving & Indexing…</span>
+                                </>
+                            ) : supplementarySaved ? (
+                                <>
+                                    <Check size={12} />
+                                    <span>Synced with Live AI</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles size={12} />
+                                    <span>Save & Sync with Live AI</span>
+                                </>
+                            )}
                         </button>
                     </div>
-                    {/* JD snapshot — shown once extraction is done */}
-                    {profileData?.hasActiveJD && !jdUploading && profileData?.activeJD && (() => {
-                        const jd = profileData.activeJD;
-                        const reqs: string[] = (jd.requirements ?? []).slice(0, 3);
-                        const techs: string[] = (jd.technologies ?? []).slice(0, 4);
-                        return (
-                            <div style={{ padding: '10px 12px', border: '1px solid var(--pi-border)', borderRadius: 'var(--pi-r-md)', background: 'rgba(255,255,255,0.015)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                                    {jd.min_years_experience > 0 && (
-                                        <span style={{ fontSize: 11, color: 'var(--pi-tertiary)' }}>{jd.min_years_experience}+ yrs</span>
+                </div>
+
+                {/* Job Description — same header + descriptor pattern. Company Intel
+                keys off this JD's extracted company name, so the descriptor names
+                that downstream payoff rather than restating the upload CTA. */}
+                <div style={{ marginBottom: 10 }}>
+                    <h3 className="pi-section-label" style={{ margin: 0 }}>Job Description</h3>
+                    <p style={{ fontSize: 12, color: 'var(--pi-secondary)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                        Frames answers around what this specific role asks for, and powers Company Intel.
+                    </p>
+                </div>
+                {jdIndexing || jdHandoff.settling ? (
+                    <FileUploadIndexing stages={profileStatus.hasProfile ? JD_INGEST_STAGES : JD_INGEST_STAGES_NO_RESUME} sizer={JD_SIZER} settling={jdHandoff.settling} />
+                ) : !profileData?.hasActiveJD ? (
+                    <FileUploadEmpty
+                        hint="Add a job description as real-time context."
+                        hasAccess={hasProfileAccess}
+                        onBrowse={browseJD}
+                        onNeedUpgrade={() => setIsPremiumModalOpen(true)}
+                        enterClass={jdHandoff.arriving ? 'pi-handoff-in-self' : undefined}
+                    />
+                ) : (
+                    <div className={jdHandoff.arriving ? 'pi-handoff-in' : undefined} style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '13px 1fr 100px 20px', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--pi-btn-bg)', border: '1px solid var(--pi-btn-border)', borderRadius: 'var(--pi-r-md)' }}>
+                            <FileText size={13} style={{ color: 'var(--pi-secondary)', flexShrink: 0 }} />
+                            <span style={{ fontSize: 12, color: 'var(--pi-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {profileData?.activeJD?.title
+                                    ? `${profileData.activeJD.title}${profileData.activeJD.company ? ` @ ${profileData.activeJD.company}` : ''}`
+                                    : 'Job Description'}
+                            </span>
+                            <PIIndexBadge status={jdUploadStatus} />
+                            <button
+                                className="pi-press-soft"
+                                disabled={jdUploading}
+                                title={jdUploading
+                                    ? 'Indexing — this finishes in the background and cannot be stopped. Delete it once it completes.'
+                                    : 'Delete job description'}
+                                style={{ background: 'none', border: 'none', cursor: jdUploading ? 'not-allowed' : 'pointer', opacity: jdUploading ? 0.4 : 1, color: 'var(--pi-tertiary)', padding: 4, display: 'flex', borderRadius: 4, transition: 'color 180ms ease' }}
+                                onMouseEnter={e => { if (!jdUploading) e.currentTarget.style.color = 'var(--pi-danger)'; }}
+                                onMouseLeave={e => (e.currentTarget.style.color = 'var(--pi-tertiary)')}
+                                onClick={async () => {
+                                    // Same lie as the resume X — the abort flag only silenced
+                                    // this renderer while main finished the JD ingest.
+                                    if (jdUploading) return;
+                                    try {
+                                        await window.electronAPI?.profileDeleteJD?.();
+                                        const data = await window.electronAPI?.profileGetProfile?.();
+                                        setProfileData(data ?? null);
+                                        setCompanyDossier(null);
+                                    } catch { /**/ }
+                                }}
+                            >
+                                <X size={12} />
+                            </button>
+                        </div>
+                        {/* JD snapshot — shown once extraction is done */}
+                        {profileData?.hasActiveJD && !jdUploading && profileData?.activeJD && (() => {
+                            const jd = profileData.activeJD;
+                            const reqs: string[] = (jd.requirements ?? []).slice(0, 3);
+                            const techs: string[] = (jd.technologies ?? []).slice(0, 4);
+                            return (
+                                <div style={{ padding: '10px 12px', border: '1px solid var(--pi-border)', borderRadius: 'var(--pi-r-md)', background: 'rgba(255,255,255,0.015)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                                        {jd.min_years_experience > 0 && (
+                                            <span style={{ fontSize: 11, color: 'var(--pi-tertiary)' }}>{jd.min_years_experience}+ yrs</span>
+                                        )}
+                                        {jd.location && (
+                                            <span style={{ fontSize: 11, color: 'var(--pi-tertiary)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                                                <Globe size={10} /> {jd.location}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {jd.compensation_hint && (
+                                        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--pi-hero)' }}>{jd.compensation_hint}</div>
                                     )}
-                                    {jd.location && (
-                                        <span style={{ fontSize: 11, color: 'var(--pi-tertiary)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                                            <Globe size={10} /> {jd.location}
-                                        </span>
+                                    {reqs.length > 0 && (
+                                        <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                            {reqs.map((r, i) => (
+                                                <li key={i} style={{ fontSize: 11, color: 'var(--pi-secondary)', display: 'flex', alignItems: 'flex-start', gap: 5, lineHeight: 1.4 }}>
+                                                    <span style={{ color: 'var(--pi-accent)', flexShrink: 0, marginTop: 1 }}>·</span>
+                                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                    {techs.length > 0 && (
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 2 }}>
+                                            {techs.map(t => (
+                                                <span key={t} style={{ fontSize: 10, padding: '2px 7px', borderRadius: 'var(--pi-r-pill)', background: 'var(--pi-btn-bg)', border: '1px solid var(--pi-btn-border)', color: 'var(--pi-secondary)' }}>{t}</span>
+                                            ))}
+                                        </div>
                                     )}
                                 </div>
-                                {jd.compensation_hint && (
-                                    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--pi-hero)' }}>{jd.compensation_hint}</div>
-                                )}
-                                {reqs.length > 0 && (
-                                    <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 3 }}>
-                                        {reqs.map((r, i) => (
-                                            <li key={i} style={{ fontSize: 11, color: 'var(--pi-secondary)', display: 'flex', alignItems: 'flex-start', gap: 5, lineHeight: 1.4 }}>
-                                                <span style={{ color: 'var(--pi-accent)', flexShrink: 0, marginTop: 1 }}>·</span>
-                                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                                {techs.length > 0 && (
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 2 }}>
-                                        {techs.map(t => (
-                                            <span key={t} style={{ fontSize: 10, padding: '2px 7px', borderRadius: 'var(--pi-r-pill)', background: 'var(--pi-btn-bg)', border: '1px solid var(--pi-btn-border)', color: 'var(--pi-secondary)' }}>{t}</span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })()}
-                </div>
-            )}
-            {jdError && (
-                <div style={{ fontSize: 11, color: 'var(--pi-danger)', padding: '6px 10px', borderRadius: 6, background: 'var(--pi-danger-bg)' }}>
-                    {jdError}
-                </div>
-            )}
+                            );
+                        })()}
+                    </div>
+                )}
+                {jdError && (
+                    <div style={{ fontSize: 11, color: 'var(--pi-danger)', padding: '6px 10px', borderRadius: 6, background: 'var(--pi-danger-bg)' }}>
+                        {jdError}
+                    </div>
+                )}
 
-            {/* Scope note — applies to BOTH files above, so it closes the section
+                {/* Scope note — applies to BOTH files above, so it closes the section
                 rather than sitting under either card. Deliberately borderless: a
                 third bordered box after two would read as another upload target.
                 11px/tertiary puts it below the cards' own hint text in the type
@@ -2793,18 +2793,18 @@ export function ProfileIntelligenceSettings({
                 Custom modes fall back to 'general', so they get nothing either.
                 If that registry gains a profile-aware mode, this line must move
                 with it. */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, marginTop: 2 }}>
-                <Info size={12} style={{ color: 'var(--pi-tertiary)', flexShrink: 0, marginTop: 1 }} />
-                <p style={{ fontSize: 11, color: 'var(--pi-tertiary)', margin: 0, lineHeight: 1.5 }}>
-                    Used only in{' '}
-                    <span style={{ color: 'var(--pi-secondary)', fontWeight: 500 }}>Looking for work</span>{' '}
-                    and{' '}
-                    <span style={{ color: 'var(--pi-secondary)', fontWeight: 500 }}>Technical Interview</span>{' '}
-                    modes. Other modes never receive them.
-                </p>
-            </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, marginTop: 2 }}>
+                    <Info size={12} style={{ color: 'var(--pi-tertiary)', flexShrink: 0, marginTop: 1 }} />
+                    <p style={{ fontSize: 11, color: 'var(--pi-tertiary)', margin: 0, lineHeight: 1.5 }}>
+                        Used only in{' '}
+                        <span style={{ color: 'var(--pi-secondary)', fontWeight: 500 }}>Looking for work</span>{' '}
+                        and{' '}
+                        <span style={{ color: 'var(--pi-secondary)', fontWeight: 500 }}>Technical Interview</span>{' '}
+                        modes. Other modes never receive them.
+                    </p>
+                </div>
 
-        </>
+            </>
         );
     };
 
@@ -2921,175 +2921,175 @@ export function ProfileIntelligenceSettings({
                     Mirrors how Cover Letter / Company Intel hide their content
                     cards while still rendering the section header. */}
                 {hasProfile && (
-                <>
-                {/* Quiet notice — only when the resume was read without AI */}
-                {profileStatus.extractionMode === 'heuristic' && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, padding: '10px 12px', borderRadius: 'var(--pi-r-md)', border: '1px solid rgba(245,158,11,0.20)', background: 'rgba(245,158,11,0.06)' }}>
-                        <Info size={14} style={{ color: '#f59e0b', flexShrink: 0 }} />
-                        <span style={{ fontSize: 12, color: 'var(--pi-secondary)', lineHeight: 1.5, flex: 1 }}>Read without AI, so some details may be missing.</span>
-                        <button className="pi-pill-btn pi-press" style={{ flexShrink: 0 }} onClick={browseResume}><RefreshCw size={12} /> Re-upload</button>
-                    </div>
-                )}
+                    <>
+                        {/* Quiet notice — only when the resume was read without AI */}
+                        {profileStatus.extractionMode === 'heuristic' && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, padding: '10px 12px', borderRadius: 'var(--pi-r-md)', border: '1px solid rgba(245,158,11,0.20)', background: 'rgba(245,158,11,0.06)' }}>
+                                <Info size={14} style={{ color: '#f59e0b', flexShrink: 0 }} />
+                                <span style={{ fontSize: 12, color: 'var(--pi-secondary)', lineHeight: 1.5, flex: 1 }}>Read without AI, so some details may be missing.</span>
+                                <button className="pi-pill-btn pi-press" style={{ flexShrink: 0 }} onClick={browseResume}><RefreshCw size={12} /> Re-upload</button>
+                            </div>
+                        )}
 
-                {/* Hero stat — total experience.
+                        {/* Hero stat — total experience.
                     Shows precise decimal (e.g. "0.4") when sub-year, rounded whole
                     years once >= 1. The big number + label is the same component for
                     both ranges; we just toggle the displayed value. */}
-                {yrsKnown ? (
-                    <div className="pi-list-item" style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 28 }}>
-                        <span style={{ fontSize: 40, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1, color: 'var(--pi-hero)', fontVariantNumeric: 'tabular-nums' }}>{heroDisplay}</span>
-                        <span style={{ fontSize: 13, color: 'var(--pi-secondary)' }}>
-                            {heroDisplay === '1' ? 'year of experience' : 'years of experience'}
-                            {roleClause && (
-                                <span style={{ color: 'var(--pi-tertiary)' }}> · {roleClause}</span>
-                            )}
-                        </span>
-                    </div>
-                ) : roleClause ? (
-                    <div className="pi-list-item" style={{ fontSize: 13, color: 'var(--pi-secondary)', marginBottom: 28 }}>
-                        {roleClause}
-                    </div>
-                ) : null}
+                        {yrsKnown ? (
+                            <div className="pi-list-item" style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 28 }}>
+                                <span style={{ fontSize: 40, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1, color: 'var(--pi-hero)', fontVariantNumeric: 'tabular-nums' }}>{heroDisplay}</span>
+                                <span style={{ fontSize: 13, color: 'var(--pi-secondary)' }}>
+                                    {heroDisplay === '1' ? 'year of experience' : 'years of experience'}
+                                    {roleClause && (
+                                        <span style={{ color: 'var(--pi-tertiary)' }}> · {roleClause}</span>
+                                    )}
+                                </span>
+                            </div>
+                        ) : roleClause ? (
+                            <div className="pi-list-item" style={{ fontSize: 13, color: 'var(--pi-secondary)', marginBottom: 28 }}>
+                                {roleClause}
+                            </div>
+                        ) : null}
 
-                {/* Experience */}
-                {experience.length > 0 && (
-                    <div className="pi-section-card">
-                        <div className="pi-section-header">
-                            <span className="pi-section-header-icon"><Briefcase size={12} /></span>
-                            <h4 className="pi-section-header-label">Experience</h4>
-                        </div>
-                        <div className="pi-stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                            {experience.slice(0, EXP_CAP).map((exp, i) => {
-                                const range = dateRange(exp?.start_date, exp?.end_date);
-                                return (
-                                    <div key={i} className="pi-list-item" style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
-                                        <div style={{ minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                                            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--pi-primary)' }}>{exp?.role || 'Role'}</span>
-                                            {exp?.company && (
-                                                <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--pi-secondary)' }}> · {exp.company}</span>
-                                            )}
-                                        </div>
-                                        {range && (
-                                            <span style={{ fontSize: 11, color: 'var(--pi-tertiary)', flexShrink: 0, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{range}</span>
+                        {/* Experience */}
+                        {experience.length > 0 && (
+                            <div className="pi-section-card">
+                                <div className="pi-section-header">
+                                    <span className="pi-section-header-icon"><Briefcase size={12} /></span>
+                                    <h4 className="pi-section-header-label">Experience</h4>
+                                </div>
+                                <div className="pi-stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                    {experience.slice(0, EXP_CAP).map((exp, i) => {
+                                        const range = dateRange(exp?.start_date, exp?.end_date);
+                                        return (
+                                            <div key={i} className="pi-list-item" style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
+                                                <div style={{ minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                                                    <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--pi-primary)' }}>{exp?.role || 'Role'}</span>
+                                                    {exp?.company && (
+                                                        <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--pi-secondary)' }}> · {exp.company}</span>
+                                                    )}
+                                                </div>
+                                                {range && (
+                                                    <span style={{ fontSize: 11, color: 'var(--pi-tertiary)', flexShrink: 0, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{range}</span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                    {experience.length > EXP_CAP && (
+                                        <div className="pi-chip-overflow" style={{ fontSize: 11, color: 'var(--pi-tertiary)' }}>+{experience.length - EXP_CAP} more</div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Skills */}
+                        {(hasCategorizedSkills || skillsFlat.length > 0) && (
+                            <div className="pi-section-card">
+                                <div className="pi-section-header">
+                                    <span className="pi-section-header-icon"><Layers size={12} /></span>
+                                    <h4 className="pi-section-header-label">Skills</h4>
+                                </div>
+                                {hasCategorizedSkills ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                        {skillCategories.map(({ name, items }) => {
+                                            if (chipsUsed >= SKILL_CAP) return null;
+                                            const remaining = SKILL_CAP - chipsUsed;
+                                            const shown = items.slice(0, remaining);
+                                            chipsUsed += shown.length;
+                                            return (
+                                                <div key={name}>
+                                                    <div style={{ ...categoryLabel, marginBottom: 7 }}>{name}</div>
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                                                        {shown.map(s => (
+                                                            <span key={s} className="pi-chip">{s}</span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                        {chipsUsed < seenSkill.size && (
+                                            <div className="pi-chip-overflow"><span className="pi-chip pi-chip--more">+{seenSkill.size - chipsUsed} more</span></div>
                                         )}
                                     </div>
-                                );
-                            })}
-                            {experience.length > EXP_CAP && (
-                                <div className="pi-chip-overflow" style={{ fontSize: 11, color: 'var(--pi-tertiary)' }}>+{experience.length - EXP_CAP} more</div>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* Skills */}
-                {(hasCategorizedSkills || skillsFlat.length > 0) && (
-                    <div className="pi-section-card">
-                        <div className="pi-section-header">
-                            <span className="pi-section-header-icon"><Layers size={12} /></span>
-                            <h4 className="pi-section-header-label">Skills</h4>
-                        </div>
-                        {hasCategorizedSkills ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                {skillCategories.map(({ name, items }) => {
-                                    if (chipsUsed >= SKILL_CAP) return null;
-                                    const remaining = SKILL_CAP - chipsUsed;
-                                    const shown = items.slice(0, remaining);
-                                    chipsUsed += shown.length;
-                                    return (
-                                        <div key={name}>
-                                            <div style={{ ...categoryLabel, marginBottom: 7 }}>{name}</div>
-                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                                                {shown.map(s => (
-                                                    <span key={s} className="pi-chip">{s}</span>
-                                                ))}
-                                            </div>
+                                ) : (
+                                    <>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                                            {skillsFlat.slice(0, SKILL_CAP).map(s => (
+                                                <span key={s} className="pi-chip">{s}</span>
+                                            ))}
                                         </div>
-                                    );
-                                })}
-                                {chipsUsed < seenSkill.size && (
-                                    <div className="pi-chip-overflow"><span className="pi-chip pi-chip--more">+{seenSkill.size - chipsUsed} more</span></div>
+                                        {skillsFlat.length > SKILL_CAP && (
+                                            <div className="pi-chip-overflow"><span className="pi-chip pi-chip--more">+{skillsFlat.length - SKILL_CAP} more</span></div>
+                                        )}
+                                    </>
                                 )}
                             </div>
-                        ) : (
-                            <>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                                    {skillsFlat.slice(0, SKILL_CAP).map(s => (
-                                        <span key={s} className="pi-chip">{s}</span>
-                                    ))}
-                                </div>
-                                {skillsFlat.length > SKILL_CAP && (
-                                    <div className="pi-chip-overflow"><span className="pi-chip pi-chip--more">+{skillsFlat.length - SKILL_CAP} more</span></div>
-                                )}
-                            </>
                         )}
-                    </div>
-                )}
 
-                {/* Projects */}
-                {projects.length > 0 && (
-                    <div className="pi-section-card">
-                        <div className="pi-section-header">
-                            <span className="pi-section-header-icon"><FolderKanban size={12} /></span>
-                            <h4 className="pi-section-header-label">Projects</h4>
-                        </div>
-                        <div className="pi-stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                            {projects.slice(0, PROJ_CAP).map((proj, i) => {
-                                const title = proj?.name || proj?.title;
-                                const desc = proj?.description;
-                                if (!title && !desc) return null;
-                                return (
-                                    <div key={i} className="pi-list-item" style={{ minWidth: 0 }}>
-                                        {title && (
-                                            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--pi-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
-                                        )}
-                                        {desc && (
-                                            <div style={{ fontSize: 11, color: 'var(--pi-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{desc}</div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                            {projects.length > PROJ_CAP && (
-                                <div className="pi-chip-overflow" style={{ fontSize: 11, color: 'var(--pi-tertiary)' }}>+{projects.length - PROJ_CAP} more</div>
-                            )}
-                        </div>
-                    </div>
-                )}
+                        {/* Projects */}
+                        {projects.length > 0 && (
+                            <div className="pi-section-card">
+                                <div className="pi-section-header">
+                                    <span className="pi-section-header-icon"><FolderKanban size={12} /></span>
+                                    <h4 className="pi-section-header-label">Projects</h4>
+                                </div>
+                                <div className="pi-stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                    {projects.slice(0, PROJ_CAP).map((proj, i) => {
+                                        const title = proj?.name || proj?.title;
+                                        const desc = proj?.description;
+                                        if (!title && !desc) return null;
+                                        return (
+                                            <div key={i} className="pi-list-item" style={{ minWidth: 0 }}>
+                                                {title && (
+                                                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--pi-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
+                                                )}
+                                                {desc && (
+                                                    <div style={{ fontSize: 11, color: 'var(--pi-secondary)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{desc}</div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                    {projects.length > PROJ_CAP && (
+                                        <div className="pi-chip-overflow" style={{ fontSize: 11, color: 'var(--pi-tertiary)' }}>+{projects.length - PROJ_CAP} more</div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
-                {/* Education */}
-                {education.length > 0 && (
-                    <div className="pi-section-card">
-                        <div className="pi-section-header">
-                            <span className="pi-section-header-icon"><GraduationCap size={12} /></span>
-                            <h4 className="pi-section-header-label">Education</h4>
-                        </div>
-                        <div className="pi-stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                            {education.map((ed, i) => {
-                                const primary = [ed?.degree, ed?.field ? `in ${ed.field}` : '']
-                                    .filter(Boolean).join(' ');
-                                const end = fmtDate(ed?.end_date);
-                                if (!primary && !ed?.institution && !end) return null;
-                                return (
-                                    <div key={i} className="pi-list-item" style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
-                                        <div style={{ minWidth: 0, overflow: 'hidden' }}>
-                                            {primary && (
-                                                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--pi-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{primary}</div>
-                                            )}
-                                            {ed?.institution && (
-                                                <div style={{ fontSize: 11, color: 'var(--pi-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ed.institution}</div>
-                                            )}
-                                        </div>
-                                        {end && (
-                                            <span style={{ fontSize: 11, color: 'var(--pi-tertiary)', flexShrink: 0, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{end}</span>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
+                        {/* Education */}
+                        {education.length > 0 && (
+                            <div className="pi-section-card">
+                                <div className="pi-section-header">
+                                    <span className="pi-section-header-icon"><GraduationCap size={12} /></span>
+                                    <h4 className="pi-section-header-label">Education</h4>
+                                </div>
+                                <div className="pi-stagger" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                    {education.map((ed, i) => {
+                                        const primary = [ed?.degree, ed?.field ? `in ${ed.field}` : '']
+                                            .filter(Boolean).join(' ');
+                                        const end = fmtDate(ed?.end_date);
+                                        if (!primary && !ed?.institution && !end) return null;
+                                        return (
+                                            <div key={i} className="pi-list-item" style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
+                                                <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                                                    {primary && (
+                                                        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--pi-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{primary}</div>
+                                                    )}
+                                                    {ed?.institution && (
+                                                        <div style={{ fontSize: 11, color: 'var(--pi-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ed.institution}</div>
+                                                    )}
+                                                </div>
+                                                {end && (
+                                                    <span style={{ fontSize: 11, color: 'var(--pi-tertiary)', flexShrink: 0, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{end}</span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
-                </>
-            )}
             </>
         );
     };
@@ -3460,9 +3460,9 @@ export function ProfileIntelligenceSettings({
                                         above the bar — no per-step labels under the bar. */}
                                     {companyDossier.interview_difficulty && (() => {
                                         const LEVEL: Array<{ key: string; label: string; color: string }> = [
-                                            { key: 'easy',      label: 'Easy',    color: '#22c55e' },
-                                            { key: 'medium',    label: 'Medium',  color: '#f59e0b' },
-                                            { key: 'hard',      label: 'Hard',    color: '#fb923c' },
+                                            { key: 'easy', label: 'Easy', color: '#22c55e' },
+                                            { key: 'medium', label: 'Medium', color: '#f59e0b' },
+                                            { key: 'hard', label: 'Hard', color: '#fb923c' },
                                             { key: 'very_hard', label: 'Extreme', color: '#ef4444' },
                                         ];
                                         const idx = LEVEL.findIndex(l => l.key === companyDossier.interview_difficulty);
@@ -3815,8 +3815,8 @@ export function ProfileIntelligenceSettings({
     // ── CTA class ─────────────────────────────────────────────────────────────
     const ctaClass = [
         'pi-cta',
-        isTrialActive && !isPremium  ? 'pi-cta--trial'   : '',
-        !isPremium && !isTrialActive  ? 'pi-cta--shimmer' : '',
+        isTrialActive && !isPremium ? 'pi-cta--trial' : '',
+        !isPremium && !isTrialActive ? 'pi-cta--shimmer' : '',
     ].filter(Boolean).join(' ');
 
     // ── Shared premium-modal lifecycle handlers (used by both the gate and the
@@ -3844,7 +3844,7 @@ export function ProfileIntelligenceSettings({
         if (!licenseLoaded) return null;
         return (
             <ProfileIntelligenceProGate
-                onOpenNativelyAPI={onOpenNativelyAPI}
+                onOpenMeetFlooAPI={onOpenMeetFlooAPI}
                 onClose={onClose}
             />
         );

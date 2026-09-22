@@ -26,7 +26,7 @@ import {
   type ConversationState, type ResolvedReference,
 } from './conversation-state';
 
-const STORE_KEY = '__nativelyV3ConversationStateV1__';
+const STORE_KEY = '__MeetFlooV3ConversationStateV1__';
 const MAX_SESSIONS = 32;
 
 type Store = Map<string, ConversationState>;

@@ -29,7 +29,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-process.env.NATIVELY_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'v3-multiturn-'));
+process.env.MEETFLOO_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'v3-multiturn-'));
 
 const base = path.resolve(process.cwd(), 'dist-electron/electron/context-intelligence');
 const { advance, emptyState, MAX_HISTORY_TURNS } = await import(
@@ -363,15 +363,15 @@ describe('the flag registry entry', () => {
   test('the env var is an operator kill switch, both directions', async () => {
     const flags = await import(pathToFileURL(path.resolve(
       process.cwd(), 'dist-electron/electron/intelligence/intelligenceFlags.js')).href);
-    const prev = process.env.NATIVELY_CHAT_HISTORY_MULTI_TURN;
+    const prev = process.env.MEETFLOO_CHAT_HISTORY_MULTI_TURN;
     try {
-      process.env.NATIVELY_CHAT_HISTORY_MULTI_TURN = '0';
+      process.env.MEETFLOO_CHAT_HISTORY_MULTI_TURN = '0';
       assert.equal(flags.isIntelligenceFlagEnabled('chatHistoryMultiTurn'), false);
-      process.env.NATIVELY_CHAT_HISTORY_MULTI_TURN = '1';
+      process.env.MEETFLOO_CHAT_HISTORY_MULTI_TURN = '1';
       assert.equal(flags.isIntelligenceFlagEnabled('chatHistoryMultiTurn'), true);
     } finally {
-      if (prev === undefined) delete process.env.NATIVELY_CHAT_HISTORY_MULTI_TURN;
-      else process.env.NATIVELY_CHAT_HISTORY_MULTI_TURN = prev;
+      if (prev === undefined) delete process.env.MEETFLOO_CHAT_HISTORY_MULTI_TURN;
+      else process.env.MEETFLOO_CHAT_HISTORY_MULTI_TURN = prev;
     }
   });
 });

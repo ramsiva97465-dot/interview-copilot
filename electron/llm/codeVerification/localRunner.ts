@@ -215,7 +215,7 @@ export const runCase = async (
   await acquire();
   let tmpDir = '';
   try {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-verify-'));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-verify-'));
     const scriptPath = path.join(tmpDir, `main.${driver.ext}`);
     fs.writeFileSync(scriptPath, driver.source, { encoding: 'utf8' });
 
@@ -317,7 +317,7 @@ const runCppCase = async (code: string, entry: string, tc: TestCase): Promise<Ru
   await acquire();
   let tmpDir = '';
   try {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-verify-'));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-verify-'));
     const srcPath = path.join(tmpDir, 'main.cpp');
     const binPath = path.join(tmpDir, 'a.out');
     fs.writeFileSync(srcPath, program, { encoding: 'utf8' });
@@ -365,7 +365,7 @@ const runJavaCase = async (code: string, entry: string, tc: TestCase): Promise<R
   await acquire();
   let tmpDir = '';
   try {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-verify-'));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-verify-'));
     const srcPath = path.join(tmpDir, 'Main.java');
     fs.writeFileSync(srcPath, program, { encoding: 'utf8' });
 
@@ -421,7 +421,7 @@ export const runSqlCase = async (query: string, spec: SqlSpec): Promise<RunResul
   await acquire();
   let tmpDir = '';
   try {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-verify-'));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-verify-'));
     const scriptPath = path.join(tmpDir, 'script.sql');
     fs.writeFileSync(scriptPath, script, { encoding: 'utf8' });
 
@@ -465,7 +465,7 @@ const runGoCase = async (code: string, entry: string, tc: TestCase): Promise<Run
   await acquire();
   let tmpDir = '';
   try {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-verify-'));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-verify-'));
     const srcPath = path.join(tmpDir, 'main.go');
     fs.writeFileSync(srcPath, program, { encoding: 'utf8' });
     // GOCACHE/HOME land in the throwaway temp dir (spawnCmd sets HOME/TMPDIR=cwd);

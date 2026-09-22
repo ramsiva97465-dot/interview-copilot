@@ -85,8 +85,8 @@ describe('prewarm: provider routing', () => {
     assert.strictEqual(await p.prewarm(), 'ollama');
   });
 
-  test('skips server-side providers (Natively/custom) with no client-side cache', async () => {
-    const p = makePrewarmer({ model: 'natively', clients: {} });
+  test('skips server-side providers (MeetFloo/custom) with no client-side cache', async () => {
+    const p = makePrewarmer({ model: 'MeetFloo', clients: {} });
     assert.strictEqual(await p.prewarm(), 'skip:server-side');
   });
 });

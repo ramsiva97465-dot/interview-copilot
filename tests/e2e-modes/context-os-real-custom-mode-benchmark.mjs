@@ -10,7 +10,7 @@
 //      test-only fields — only {modeId, fileName, content}, exactly what a
 //      real parsed PDF/TXT produces),
 //   3. RESTARTS the Electron app (closes and relaunches against the SAME
-//      on-disk SQLite DB, via NATIVELY_TEST_USERDATA) to prove the mode's
+//      on-disk SQLite DB, via MEETFLOO_TEST_USERDATA) to prove the mode's
 //      source contract survives — not an in-memory fixture,
 //   4. reactivates the mode and asks the full benchmark through BOTH manual
 //      chat (`streamGeminiChat`) and What-to-Answer (`__e2e__:ask`) — the
@@ -37,28 +37,28 @@ const repoRoot = path.resolve(__dirname, '..', '..');
 const FIXTURE_DIR = path.join(repoRoot, 'tests/fixtures/modes/custom/seminar-presentation');
 
 // Isolated, persistent-across-restart userData dir — never the developer's
-// real dev DB. Deleted at the end unless NATIVELY_BENCHMARK_KEEP_USERDATA=1.
+// real dev DB. Deleted at the end unless MEETFLOO_BENCHMARK_KEEP_USERDATA=1.
 const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxos-real-mode-benchmark-'));
 
 const baseEnv = {
   ...process.env,
-  NATIVELY_E2E: '1',
+  MEETFLOO_E2E: '1',
   NODE_ENV: 'development',
-  NATIVELY_DEV_BYPASS_SCREEN_TCC: '1',
-  NATIVELY_E2E_LOCAL_TEST_TOKEN: 'local-test',
-  NATIVELY_TEST_USERDATA: userDataDir,
+  MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1',
+  MEETFLOO_E2E_LOCAL_TEST_TOKEN: 'local-test',
+  MEETFLOO_TEST_USERDATA: userDataDir,
   // Real-custom-mode-repair Phase 7: enforcement flags must be armed for the
   // verdict rule "enforcement=enforce for the test configuration". These now
   // default ON in isInternalDevTestContext() (NODE_ENV=development above
   // already satisfies that), set explicitly here for clarity/robustness.
-  NATIVELY_CONTEXT_OS: '1',
-  NATIVELY_CONTEXT_OS_MANUAL_CHAT: '1',
-  NATIVELY_CONTEXT_OS_WTA: '1',
-  NATIVELY_CONTEXT_OS_EVIDENCE_PACK: '1',
-  NATIVELY_CONTEXT_OS_MEMORY_SAFETY: '1',
-  NATIVELY_CONTEXT_OS_ENFORCE_CAPABILITIES: '1',
-  NATIVELY_CONTEXT_OS_PROPERTY_VALIDATION: '1',
-  NATIVELY_INTELLIGENCE_TRACE: '1',
+  MEETFLOO_CONTEXT_OS: '1',
+  MEETFLOO_CONTEXT_OS_MANUAL_CHAT: '1',
+  MEETFLOO_CONTEXT_OS_WTA: '1',
+  MEETFLOO_CONTEXT_OS_EVIDENCE_PACK: '1',
+  MEETFLOO_CONTEXT_OS_MEMORY_SAFETY: '1',
+  MEETFLOO_CONTEXT_OS_ENFORCE_CAPABILITIES: '1',
+  MEETFLOO_CONTEXT_OS_PROPERTY_VALIDATION: '1',
+  MEETFLOO_INTELLIGENCE_TRACE: '1',
   OLLAMA_URL: 'http://127.0.0.1:1',
 };
 
@@ -115,27 +115,27 @@ const QUESTIONS = [
   { q: 'Now return to the uploaded thesis. What robot platform does it use?', kind: 'return_to_doc', expectSubstr: ['mercury x1'] },
 ];
 
-const FORBIDDEN_PROFILE_LEAK_RE = /\bestrotech\b|\baetherbot\b|\bredismart\b|\bnatively\b(?!\s+(?:the|integrated|combines))/i;
+const FORBIDDEN_PROFILE_LEAK_RE = /\bestrotech\b|\baetherbot\b|\bredismart\b|\bMeetFloo\b(?!\s+(?:the|integrated|combines))/i;
 
 async function main() {
   console.log(`[BENCHMARK] userData: ${userDataDir}`);
   console.log(`[BENCHMARK] Phase A: launch app, create mode through REAL IPC (modesCreate/modesUpdate)...`);
 
   // --user-data-dir isolates Electron's OWN singleton-lock/profile path (a
-  // real dev Natively.app may be running concurrently on this machine and
-  // holds the DEFAULT userData path's singleton lock — NATIVELY_TEST_USERDATA
+  // real dev MeetFloo.app may be running concurrently on this machine and
+  // holds the DEFAULT userData path's singleton lock — MEETFLOO_TEST_USERDATA
   // alone only redirects DatabaseManager's DB path, not Electron's own lock
   // file, so both must be set to the same isolated directory).
   const launchArgs = ['dist-electron/electron/main.js', `--user-data-dir=${userDataDir}`];
   let app = await electron.launch({ args: launchArgs, env: baseEnv, timeout: 60000 });
   let win = await app.firstWindow({ timeout: 30000 });
-  await win.waitForLoadState('domcontentloaded').catch(() => {});
+  await win.waitForLoadState('domcontentloaded').catch(() => { });
 
   const RAW = async (fn, arg) => {
     for (let attempt = 0; attempt < 6; attempt++) {
       try {
         const w = app.windows()[0] || (await app.firstWindow());
-        await w.waitForLoadState('domcontentloaded').catch(() => {});
+        await w.waitForLoadState('domcontentloaded').catch(() => { });
         return await w.evaluate(fn, arg);
       } catch (e) {
         if (attempt === 5) throw e;
@@ -144,7 +144,7 @@ async function main() {
     }
   };
 
-  await RAW(async () => { const api = window.electronAPI || window.api; await api.e2eInvoke?.('__e2e__:enable-pro'); }).catch(() => {});
+  await RAW(async () => { const api = window.electronAPI || window.api; await api.e2eInvoke?.('__e2e__:enable-pro'); }).catch(() => { });
 
   // Phase A — create the mode via the REAL modesCreate/modesUpdate IPC (the
   // exact functions premium/src/ModesSettings.tsx's Save button calls).
@@ -190,20 +190,20 @@ async function main() {
   await RAW(async ({ modeId }) => {
     const api = window.electronAPI || window.api;
     await api.e2eInvoke?.('__e2e__:prewarm-mode', modeId);
-  }, { modeId }).catch(() => {});
+  }, { modeId }).catch(() => { });
 
   // Phase C — RESTART. Close the app, relaunch against the SAME userData dir
   // (same on-disk SQLite DB), and reload/reactivate the mode. This is the
   // exact round-trip the incident brief requires: create -> save -> DATABASE
   // -> restart -> reload -> activate -> runtime snapshot.
   console.log('[BENCHMARK] Phase C: RESTARTING the app against the same on-disk DB...');
-  await app.close().catch(() => {});
+  await app.close().catch(() => { });
   // Give the OS a moment to release the singleton lock file before relaunch.
   await new Promise((r) => setTimeout(r, 1000));
   app = await electron.launch({ args: launchArgs, env: baseEnv, timeout: 60000 });
   win = await app.firstWindow({ timeout: 30000 });
-  await win.waitForLoadState('domcontentloaded').catch(() => {});
-  await RAW(async () => { const api = window.electronAPI || window.api; await api.e2eInvoke?.('__e2e__:enable-pro'); }).catch(() => {});
+  await win.waitForLoadState('domcontentloaded').catch(() => { });
+  await RAW(async () => { const api = window.electronAPI || window.api; await api.e2eInvoke?.('__e2e__:enable-pro'); }).catch(() => { });
 
   const reloadedModes = await RAW(async () => {
     const api = window.electronAPI || window.api;
@@ -415,8 +415,8 @@ async function main() {
   console.log(JSON.stringify(verdict, null, 2));
   console.log('CTXOS_REAL_BENCHMARK_VERDICT_END');
 
-  await app.close().catch(() => {});
-  if (process.env.NATIVELY_BENCHMARK_KEEP_USERDATA !== '1') {
+  await app.close().catch(() => { });
+  if (process.env.MEETFLOO_BENCHMARK_KEEP_USERDATA !== '1') {
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch { /* best-effort cleanup */ }
   }
   console.log('BENCHMARK_CLOSED');

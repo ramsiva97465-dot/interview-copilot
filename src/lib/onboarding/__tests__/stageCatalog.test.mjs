@@ -57,7 +57,7 @@ test('INVARIANT: every gate-only stage is onceEver — stageCatalog.ts (producti
 const DEFAULT_USER_STATE = {
   isPremium: false,
   hasProfile: false,
-  hasNativelyKey: false,
+  hasMeetFlooKey: false,
   hasTrialToken: false,
   extensionConnected: false,
   extensionSupported: true,
@@ -211,9 +211,9 @@ test('modes_manager: skipped when activeModeSet', () => {
 
 // ─── Trial promo ──────────────────────────────────────────────────
 
-test('trial_promo: skipped when hasNativelyKey', () => {
+test('trial_promo: skipped when hasMeetFlooKey', () => {
   const ctx = makeCtx({
-    userState: { ...DEFAULT_USER_STATE, hasNativelyKey: true },
+    userState: { ...DEFAULT_USER_STATE, hasMeetFlooKey: true },
     completed: { permissions: 1, browser_extension: 2, profile_intelligence: 3, modes_manager: 4 },
     homepageMountedFor: 7_000,
   });

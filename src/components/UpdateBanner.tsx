@@ -14,7 +14,7 @@ type ParsedReleaseNotes = {
     url?: string;
 };
 
-const LATEST_RELEASE_URL = 'https://github.com/Natively-AI-assistant/natively-cluely-ai-assistant/releases/latest';
+const LATEST_RELEASE_URL = 'https://github.com/MeetFloo-AI-assistant/MeetFloo-cluely-ai-assistant/releases/latest';
 
 const UpdateBanner: React.FC = () => {
     const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
@@ -109,13 +109,13 @@ const UpdateBanner: React.FC = () => {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!import.meta.env.DEV) return;
-            
+
             if (e.metaKey && !e.shiftKey && e.key.toLowerCase() === 'i') {
                 e.preventDefault();
                 console.log("[UpdateBanner] Cmd+I pressed: Triggering Test Release Fetch...");
                 window.electronAPI?.testReleaseFetch?.().catch(console.error);
             }
-            
+
             if (e.metaKey && !e.shiftKey && e.key.toLowerCase() === 'j') {
                 e.preventDefault();
                 console.log("[UpdateBanner] Cmd+J pressed: Triggering Instruction UI mock...");
@@ -156,7 +156,7 @@ const UpdateBanner: React.FC = () => {
                 const dmgSuffix = isArm ? 'arm64' : 'x64';
                 setInstructionsArch(dmgSuffix);
                 const version = updateInfo.version.replace('v', '');
-                const url = `https://github.com/Natively-AI-assistant/natively-cluely-ai-assistant/releases/download/v${version}/Natively-${version}-${dmgSuffix}.dmg`;
+                const url = `https://github.com/MeetFloo-AI-assistant/MeetFloo-cluely-ai-assistant/releases/download/v${version}/MeetFloo-${version}-${dmgSuffix}.dmg`;
                 window.electronAPI.openExternal(url);
                 setStatus('instructions');
             } catch (err) {

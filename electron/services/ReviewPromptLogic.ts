@@ -3,7 +3,7 @@
 // booting Electron. Both the desktop ReviewService and the renderer-side
 // ReviewPromptHost can call these.
 //
-// The matching backend helper lives in natively-api/reviews.js — keep them
+// The matching backend helper lives in MeetFloo-api/reviews.js — keep them
 // in sync. (Tested via the review test suite — drift would surface as a
 // disagreeing eligibility answer between client and server.)
 

@@ -8,7 +8,7 @@
 // that decides whether the classifier is worth having at all.
 //
 // Four conditions on the same real questions, through the real /v1/chat
-// endpoint against a LOCAL natively-api, because the notes are explicit about
+// endpoint against a LOCAL MeetFloo-api, because the notes are explicit about
 // never load testing production:
 //
 //   oracle      the ground truth label's shape. The ceiling.
@@ -29,9 +29,9 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '../..');
-const API = process.env.NATIVELY_API_URL || 'http://127.0.0.1:8788';
+const API = process.env.MEETFLOO_API_URL || 'http://127.0.0.1:8788';
 const KEY = fs.readFileSync(path.join(repoRoot, '.env'), 'utf8')
-  .split('\n').find((l) => l.startsWith('NATIVELY_API_KEY='))?.split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '');
+  .split('\n').find((l) => l.startsWith('MEETFLOO_API_KEY='))?.split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '');
 
 // The REAL shapes, copied verbatim from electron/llm/IntentClassifier.ts.
 const SHAPES = {
@@ -49,7 +49,7 @@ async function ask(question, shape) {
   const content = `You are helping a candidate in a live technical interview. Answer the interviewer's question.\n\nANSWER SHAPE: ${SHAPES[shape]}\n\nInterviewer said: "${question}"`;
   const r = await fetch(`${API}/v1/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-natively-key': KEY },
+    headers: { 'Content-Type': 'application/json', 'x-MeetFloo-key': KEY },
     body: JSON.stringify({ messages: [{ role: 'user', content }] }),
   });
   if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);

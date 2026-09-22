@@ -13,7 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const REPO = '/tmp/natively-land-wt';
+const REPO = '/tmp/MeetFloo-land-wt';
 const SRC = fs.readFileSync(path.join(REPO, 'electron/ipcHandlers.ts'), 'utf8');
 const KEY = fs.readFileSync(path.join(REPO, '.env'), 'utf8')
   .split('\n').find((l) => l.startsWith('DEEPSEEK_API_KEY='))
@@ -26,7 +26,7 @@ const lift = (anchor) => {
   return eval(line.slice(line.indexOf('=') + 1, line.lastIndexOf('.test(')).trim());
 };
 const looksMetaRe = lift('const looksMeta =');
-const hasFenceRe  = lift('const hasCodeFence =');
+const hasFenceRe = lift('const hasCodeFence =');
 
 const CONTRACT = `You are a coding assistant. Follow <answer_contract> exactly.
 <answer_contract>
@@ -54,11 +54,11 @@ const ask = async (user) => {
 
 // expectCode=false => this SHOULD be caught as a meta-reply.
 const CASES = [
-  ['truncated request',      'Implement the function described above for the case where n is', false],
-  ['refers to missing code', 'Fix the bug in the code I pasted earlier.',                      false],
-  ['ambiguous referent',     'Write the function for the thing we discussed.',                 false],
-  ['normal DSA question',    'Implement an LRU cache with O(1) get and put.',                  true ],
-  ['the BFS phrasing',       'Write a BFS shortest-path function for an unweighted graph.',    true ],
+  ['truncated request', 'Implement the function described above for the case where n is', false],
+  ['refers to missing code', 'Fix the bug in the code I pasted earlier.', false],
+  ['ambiguous referent', 'Write the function for the thing we discussed.', false],
+  ['normal DSA question', 'Implement an LRU cache with O(1) get and put.', true],
+  ['the BFS phrasing', 'Write a BFS shortest-path function for an unweighted graph.', true],
 ];
 
 console.log(`model=${MODEL}\n`);

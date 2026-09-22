@@ -95,9 +95,9 @@ export const STAGES = [
       requiresMeetingInactive: true,
     },
     requiresStages: ['modes_manager'],
-    skipWhen: (s) => s.hasNativelyKey || s.hasTrialToken || s.isPremium,
+    skipWhen: (s) => s.hasMeetFlooKey || s.hasTrialToken || s.isPremium,
     cooldownMs: () => 21 * 24 * 60 * 60 * 1000,
-    reEligibility: (s) => !s.hasNativelyKey && !s.hasTrialToken && !s.isPremium,
+    reEligibility: (s) => !s.hasMeetFlooKey && !s.hasTrialToken && !s.isPremium,
   },
   {
     id: 'support',

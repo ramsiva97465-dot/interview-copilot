@@ -4,7 +4,7 @@
 // reasoning across two screenshots.
 import fs from 'node:fs'
 import path from 'node:path'
-import sharp from '../../../natively-api/node_modules/sharp/dist/index.cjs'
+import sharp from '../../../MeetFloo-api/node_modules/sharp/dist/index.cjs'
 
 const OUT = path.resolve(process.argv[2])
 fs.mkdirSync(OUT, { recursive: true })
@@ -71,14 +71,14 @@ const LOG = Array.from({ length: 34 }, (_, i) => {
   return [t, lv, ['billing.worker', 'stt.relay', 'api.http', 'reconciler'][i % 4], msgs[i % msgs.length]]
 })
 const logSvg = () => `<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900"><rect width="1440" height="900" fill="#0d1117"/>
-  ${txt(14, 22, 'production logs — natively-api — tail -f', 12, '#8b949e')}
+  ${txt(14, 22, 'production logs — MeetFloo-api — tail -f', 12, '#8b949e')}
   ${LOG.map((l, i) => {
-    const y = 48 + i * 24
-    const colour = l[1] === 'ERROR' ? '#ff7b72' : l[1] === 'WARN' ? '#d29922' : '#8b949e'
-    return txt(14, y, String(i + 1).padStart(2, ' '), 11, '#484f58', 'Menlo', 'xml:space="preserve"') +
-      txt(48, y, l[0], 11, '#6e7681', 'Menlo') + txt(232, y, l[1].padEnd(5), 11, colour, 'Menlo', 'xml:space="preserve"') +
-      txt(290, y, l[2].padEnd(16), 11, '#58a6ff', 'Menlo', 'xml:space="preserve"') + txt(430, y, l[3], 11, l[1] === 'ERROR' ? '#ff7b72' : '#c9d1d9', 'Menlo')
-  }).join('')}</svg>`
+  const y = 48 + i * 24
+  const colour = l[1] === 'ERROR' ? '#ff7b72' : l[1] === 'WARN' ? '#d29922' : '#8b949e'
+  return txt(14, y, String(i + 1).padStart(2, ' '), 11, '#484f58', 'Menlo', 'xml:space="preserve"') +
+    txt(48, y, l[0], 11, '#6e7681', 'Menlo') + txt(232, y, l[1].padEnd(5), 11, colour, 'Menlo', 'xml:space="preserve"') +
+    txt(290, y, l[2].padEnd(16), 11, '#58a6ff', 'Menlo', 'xml:space="preserve"') + txt(430, y, l[3], 11, l[1] === 'ERROR' ? '#ff7b72' : '#c9d1d9', 'Menlo')
+}).join('')}</svg>`
 
 // ── 4. Two-screenshot pair: a diff, and the failing test it caused ──────────
 const diffSvg = () => {
@@ -96,11 +96,11 @@ const diffSvg = () => {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900"><rect width="1440" height="900" fill="#fff"/>
     ${txt(40, 54, 'Files changed · lib/retryAfter.js · +2 −2', 20, '#202124')}
     ${lines.map(([k, s], i) => {
-      const y = 120 + i * 30
-      const bg = k === 'add' ? '#e6ffec' : k === 'del' ? '#ffebe9' : '#fff'
-      return `<rect x="40" y="${y - 20}" width="1360" height="28" fill="${bg}"/>` +
-        txt(50, y, String(31 + i), 12, '#8c959f', 'Menlo') + txt(100, y, s, 15, '#1f2328', 'Menlo', 'xml:space="preserve"')
-    }).join('')}
+    const y = 120 + i * 30
+    const bg = k === 'add' ? '#e6ffec' : k === 'del' ? '#ffebe9' : '#fff'
+    return `<rect x="40" y="${y - 20}" width="1360" height="28" fill="${bg}"/>` +
+      txt(50, y, String(31 + i), 12, '#8c959f', 'Menlo') + txt(100, y, s, 15, '#1f2328', 'Menlo', 'xml:space="preserve"')
+  }).join('')}
     ${txt(40, 420, 'Reviewers: 1 approval · CI: 1 failing check', 15, '#5f6368')}</svg>`
 }
 const failSvg = () => `<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900"><rect width="1440" height="900" fill="#0d1117"/>

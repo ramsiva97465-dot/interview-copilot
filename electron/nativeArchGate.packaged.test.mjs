@@ -11,7 +11,7 @@
  *
  * What this test asserts:
  *   1. PRODUCTION PATH: with `resourcesPath` pointing at the already-shipped
- *      `release/mac-arm64/Natively.app/Contents/Resources` AND the current
+ *      `release/mac-arm64/MeetFloo.app/Contents/Resources` AND the current
  *      Mac being arm64, `verifyAll(undefined, { resourcesPath, packaged })`
  *      returns `ok:true`. This is the exact call the boot gate makes after
  *      the v2.8.2 fix — if it ever fires `ok:false` on this binary, the
@@ -54,8 +54,8 @@ const cjs = require('./lib/nativeArch.cjs');
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 // HERE = <repo>/electron  →  REPO_ROOT = <repo>. One `..` is enough.
 const REPO_ROOT = path.resolve(HERE, '..');
-const SHIPPED_ARM64_RESOURCES = path.join(REPO_ROOT, 'release', 'mac-arm64', 'Natively.app', 'Contents', 'Resources');
-const SHIPPED_X64_RESOURCES = path.join(REPO_ROOT, 'release', 'mac', 'Natively.app', 'Contents', 'Resources');
+const SHIPPED_ARM64_RESOURCES = path.join(REPO_ROOT, 'release', 'mac-arm64', 'MeetFloo.app', 'Contents', 'Resources');
+const SHIPPED_X64_RESOURCES = path.join(REPO_ROOT, 'release', 'mac', 'MeetFloo.app', 'Contents', 'Resources');
 const SHIPPED_RESOURCES = SHIPPED_ARM64_RESOURCES;
 const SHIPPED_SQLITE = path.join(SHIPPED_ARM64_RESOURCES, 'app.asar.unpacked', 'node_modules', 'better-sqlite3', 'build', 'Release', 'better_sqlite3.node');
 const SHIPPED_KEYTAR = path.join(SHIPPED_ARM64_RESOURCES, 'app.asar.unpacked', 'node_modules', 'keytar', 'build', 'Release', 'keytar.node');
@@ -127,7 +127,7 @@ describe('nativeArch packaged resolution (v2.8.2 fix)', () => {
     // the actual `file -b` probe and avoids the previous inert monkey-patch
     // false positive (verifyAll calls the local lexical binaryArch binding,
     // not module.exports.binaryArch).
-    const tmpResources = mkdtempSync(path.join(os.tmpdir(), 'natively-arch-test-'));
+    const tmpResources = mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-arch-test-'));
     try {
       const sqliteDir = path.join(tmpResources, 'app.asar.unpacked', 'node_modules', 'better-sqlite3', 'build', 'Release');
       const keytarDir = path.join(tmpResources, 'app.asar.unpacked', 'node_modules', 'keytar', 'build', 'Release');
@@ -156,7 +156,7 @@ describe('nativeArch packaged resolution (v2.8.2 fix)', () => {
     // A fresh install before the rebuild step won't have unpacked binaries
     // yet — the gate must not block the app on infra absence. The
     // postinstall verify-native-arch script handles that case separately.
-    const tmpResources = mkdtempSync(path.join(os.tmpdir(), 'natively-arch-test-empty-'));
+    const tmpResources = mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-arch-test-empty-'));
     try {
       mkdirSync(path.join(tmpResources, 'app.asar.unpacked'), { recursive: true });
       const result = cjs.verifyAll(undefined, {

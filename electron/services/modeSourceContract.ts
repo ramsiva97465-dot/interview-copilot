@@ -163,7 +163,7 @@ export interface ModeSourceContract {
  * Resolution order in TurnPlanner.groundingProfileFor() (iter12):
  *   1. Explicit `sourceContract.groundingProfile` (per-mode override)
  *   2. `sourceContract.templateType === 'seminar'` (per-mode signal)
- *   3. `NATIVELY_SEMINAR_MODE` env flag (legacy / migration window)
+ *   3. `MEETFLOO_SEMINAR_MODE` env flag (legacy / migration window)
  *   4. `DEFAULT_GROUNDING_PROFILE` (the 7 built-in modes)
  *
  * @see {@link SEMINAR_GROUNDING_PROFILE} — the strictest preset (founder spec)

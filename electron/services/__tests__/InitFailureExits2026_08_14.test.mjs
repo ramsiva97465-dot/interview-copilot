@@ -6,7 +6,7 @@
 // single-instance lock (on macOS still 'accessory', so no dock tile);
 // every relaunch signaled the zombie and showed nothing. The repo itself
 // named this hazard at assertVerificationFlagsOrThrow. Live-reproduced via
-// the NATIVELY_TEST_INIT_FAULT hook in scripts/audit/F-110-repro.mjs
+// the MEETFLOO_TEST_INIT_FAULT hook in scripts/audit/F-110-repro.mjs
 // (process alive 15s post-failure pre-fix; exit code 1 post-fix).
 //
 // Contracts pinned here: the catch ends in app.exit(1), and the
@@ -53,7 +53,7 @@ test('initializeApp catch terminates the half-initialized process', () => {
 
 test('init fault-injection hook remains available for the repro', () => {
   assert.ok(
-    source.includes("process.env.NATIVELY_TEST_INIT_FAULT === '1'"),
-    'NATIVELY_TEST_INIT_FAULT hook missing — scripts/audit/F-110-repro.mjs would be untestable'
+    source.includes("process.env.MEETFLOO_TEST_INIT_FAULT === '1'"),
+    'MEETFLOO_TEST_INIT_FAULT hook missing — scripts/audit/F-110-repro.mjs would be untestable'
   );
 });

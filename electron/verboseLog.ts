@@ -26,7 +26,7 @@
  */
 import { setLogRedactionLevel } from './utils/redactForLog';
 
-const FLAG_KEY = '__nativelyVerboseLoggingV1__';
+const FLAG_KEY = '__MeetFlooVerboseLoggingV1__';
 
 interface FlagHolder { on: boolean }
 
@@ -34,7 +34,7 @@ interface FlagHolder { on: boolean }
 // "debug logs are essential for diagnosing the user-launches-and-it-dies
 // class of crash" (2026-07-09) — but ON now also means FULL CONTENT CAPTURE,
 // and defaulting that ON would write every user's transcripts, questions and
-// answers verbatim to ~/Documents/natively_debug.log with no action on their
+// answers verbatim to ~/Documents/MeetFloo_debug.log with no action on their
 // part. Recording someone's conversations has to be opt-in.
 //
 // The crash rationale survives the change: main.ts's console patch writes
@@ -44,11 +44,11 @@ interface FlagHolder { on: boolean }
 // install still leaves the full crash breadcrumb trail — just with user
 // content redacted.
 //
-// NATIVELY_VERBOSE_LOGGING=1 opts in from a terminal; =0 remains an explicit
+// MEETFLOO_VERBOSE_LOGGING=1 opts in from a terminal; =0 remains an explicit
 // off for anything that used to set it.
 function envDefault(): boolean {
     try {
-        const v = (process.env.NATIVELY_VERBOSE_LOGGING || '').trim().toLowerCase();
+        const v = (process.env.MEETFLOO_VERBOSE_LOGGING || '').trim().toLowerCase();
         return v === '1' || v === 'true';
     } catch { return false; }
 }

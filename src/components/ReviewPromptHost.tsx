@@ -15,7 +15,7 @@
 // DEV-ONLY FORCE-SHOW:
 //   ?review=force  in URL query string  → modal opens immediately + every reopen
 //   window.reviewForceShow()             → same flag, callable from devtools
-//   Set NativelyReviewService.recordSessionStart()/recordSessionEnd()  in devtools
+//   Set MeetFlooReviewService.recordSessionStart()/recordSessionEnd()  in devtools
 //   to re-arm threshold-based eligibility checks without restarting.
 //
 // Honors the existing 4 product semantics even in force mode:

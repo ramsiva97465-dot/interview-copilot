@@ -26,7 +26,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 // flat `true` in the 2026-08-30 promotion batch. That is a deliberate product
 // decision; what it must not do is silently delete this file's coverage of the
 // A9 repro. Turned off explicitly so the turn reaches the generator.
-process.env.NATIVELY_CONTEXT_OS_PROPERTY_VALIDATION = '0';
+process.env.MEETFLOO_CONTEXT_OS_PROPERTY_VALIDATION = '0';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const enginePath = path.resolve(__dirname, '../../../dist-electron/electron/IntelligenceEngine.js');
@@ -35,7 +35,7 @@ const require = createRequire(import.meta.url);
 
 function makeHelper() {
   return {
-    setNegotiationCoachingHandler() {},
+    setNegotiationCoachingHandler() { },
   };
 }
 

@@ -87,7 +87,7 @@ const PlatformMark: React.FC = () => (
     </span>
 );
 
-type RerankerProvider = 'local' | 'natively' | 'openrouter' | 'jina';
+type RerankerProvider = 'local' | 'MeetFloo' | 'openrouter' | 'jina';
 type ModelGroup = 'recommended' | 'quality' | 'fast' | 'multimodal' | 'other';
 
 interface CatalogModel {
@@ -106,7 +106,7 @@ interface RerankerStatus {
     provider: RerankerProvider;
     openrouterModel: string | null;
     jinaModel: string | null;
-    nativelyModel: string | null;
+    MeetFlooModel: string | null;
     /** The model id for whichever hosted provider is selected. */
     hostedModel: string | null;
     candidateCount: number | null;
@@ -120,7 +120,7 @@ interface RerankerStatus {
     ineligibleMessage: string | null;
     builtIn: { id: string; name: string; bundled: boolean; cached?: boolean; available?: boolean };
     selectedLocal: { id: string; name: string } | null;
-    effective: { kind: 'local' | 'extension' | 'natively' | 'openrouter' | 'jina'; id: string | null };
+    effective: { kind: 'local' | 'extension' | 'MeetFloo' | 'openrouter' | 'jina'; id: string | null };
     lastTest: { at: string; model: string; latencyMs: number; ok: boolean; failure?: string } | null;
 }
 
@@ -467,7 +467,7 @@ const INITIAL_STATUS: RerankerStatus = {
     provider: 'local',
     openrouterModel: null,
     jinaModel: null,
-    nativelyModel: null,
+    MeetFlooModel: null,
     hostedModel: null,
     candidateCount: null,
     // The retriever's ceiling. Replaced by the real value on the first IPC
@@ -560,7 +560,7 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
     const [busyCatalogId, setBusyCatalogId] = useState<string | null>(null);
     const [catalogError, setCatalogError] = useState<string | null>(null);
     const [hostedProviders, setHostedProviders] = useState<Array<{
-        id: 'natively' | 'openrouter' | 'jina'; name: string; keyUrl: string; keyPlaceholder: string;
+        id: 'MeetFloo' | 'openrouter' | 'jina'; name: string; keyUrl: string; keyPlaceholder: string;
         staticCatalogue: boolean; hasApiKey: boolean;
         models: Array<{ id: string; label: string; note?: string; recommended?: boolean }>;
     }>>([]);
@@ -591,12 +591,12 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
         // switch that governs both. Models stay empty on this path — a name and
         // a key field is the useful degradation; the catalogue is not.
         setHostedProviders(cur => (cur.length ? cur : [{
-            // Natively is listed here for the same reason Jina is: leaving a
+            // MeetFloo is listed here for the same reason Jina is: leaving a
             // provider out of THIS list is what makes its card vanish when
             // discovery degrades, and the managed reranker is the one a customer
             // can use without going and getting a second account.
-            id: 'natively', name: 'MeetFloo',
-            keyUrl: '', keyPlaceholder: 'natively_sk_…',
+            id: 'MeetFloo', name: 'MeetFloo',
+            keyUrl: '', keyPlaceholder: 'MeetFloo_sk_…',
             staticCatalogue: true, hasApiKey: false, models: [],
         }, {
             id: 'openrouter', name: 'OpenRouter',
@@ -711,7 +711,7 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
     }, [status?.builtIn.name, status?.hasApiKey, catalogModels, extensions, catalog, hostedProviders, t]);
 
     const activeOptionId = useMemo(() => {
-        if (status?.effective.kind === 'natively'
+        if (status?.effective.kind === 'MeetFloo'
             || status?.effective.kind === 'openrouter'
             || status?.effective.kind === 'jina') {
             return `${status.effective.kind}::${status.effective.id ?? ''}`;
@@ -727,12 +727,12 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
         setBusyCatalogId(optionId);
         setCatalogError(null);
         try {
-            if (kind === 'natively') {
+            if (kind === 'MeetFloo') {
                 // Its own arm, not the trailing `else`. Without one, picking the
                 // managed reranker fell through to the local branch and silently
                 // set provider:'local' — the picker would show a selection the
                 // app was not using.
-                await window.electronAPI.setRerankerConfig?.({ provider: 'natively', nativelyModel: id });
+                await window.electronAPI.setRerankerConfig?.({ provider: 'MeetFloo', MeetFlooModel: id });
             } else if (kind === 'openrouter') {
                 await window.electronAPI.setRerankerConfig?.({ provider: 'openrouter', openrouterModel: id });
             } else if (kind === 'jina') {
@@ -763,10 +763,10 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
         if (!status) return '';
         const parts: string[] = [];
 
-        if (status.effective.kind === 'natively') {
+        if (status.effective.kind === 'MeetFloo') {
             // Says where the text goes, the question this option raises. The
             // billing half ("Uses your plan's Knowledge allowance") is NOT
-            // repeated here — the Natively provider card below already states
+            // repeated here — the MeetFloo provider card below already states
             // it, and on the combined Retrieval page this line sits directly
             // above that card.
             parts.push(t('Hosted'), t('Document text is sent to MeetFloo'));
@@ -1488,14 +1488,14 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
                 const draft = keyDrafts[p.id] ?? '';
                 const saving = savingKeyFor === p.id;
                 const saved = savedKeyFor === p.id;
-                const selectedModel = p.id === 'natively'
-                    ? status.nativelyModel
+                const selectedModel = p.id === 'MeetFloo'
+                    ? status.MeetFlooModel
                     : p.id === 'jina' ? status.jinaModel : status.openrouterModel;
-                // Natively runs on the API key the user already configured, so
+                // MeetFloo runs on the API key the user already configured, so
                 // this card must not offer a key field. Rendering one would
                 // invite a paste that reranker:set-hosted-key now refuses
                 // ('not_byok'), and a Remove button that would delete nothing.
-                const byok = p.id !== 'natively';
+                const byok = p.id !== 'MeetFloo';
                 // A live catalogue arrives from OpenRouter; a static one ships
                 // with the app and is listed even before a key exists, so the
                 // user can see what a key would buy them.
@@ -1542,53 +1542,53 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
 
                         {/* API Key Credential Row matching EmbeddingSettings */}
                         {byok && (
-                        <div className="aip-provider-row">
-                            <div className="aip-provider-field">
-                                <div className="aip-field">
-                                    <KeyRound size={13} strokeWidth={1.75} className="aip-field-icon" aria-hidden="true" />
-                                    <input
-                                        type="password"
-                                        className="aip-input"
-                                        value={draft}
-                                        placeholder={hasKey ? '••••••••••••••••' : p.keyPlaceholder}
-                                        onChange={(e) => {
-                                            const v = e.target.value;
-                                            setKeyDrafts(prev => ({ ...prev, [p.id]: v }));
-                                            setSavedKeyFor(cur => (cur === p.id ? null : cur));
-                                        }}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') void saveKey(p.id, p.staticCatalogue); }}
-                                        autoComplete="off"
-                                        spellCheck={false}
-                                        aria-label={`${p.name} ${t('API key')}`}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => void saveKey(p.id, p.staticCatalogue)}
-                                        disabled={saving || !draft.trim()}
-                                        className="aip-btn-seg aip-field-seg"
-                                        data-tone={saved ? 'ok' : undefined}
-                                    >
-                                        {saving
-                                            ? <><Loader2 size={12} strokeWidth={1.75} className="aip-spinner" /> {t('Saving...')}</>
-                                            : saved
-                                                ? <><Check size={12} strokeWidth={2} className="aip-check" /> {t('Saved')}</>
-                                                : t('Save')}
-                                    </button>
+                            <div className="aip-provider-row">
+                                <div className="aip-provider-field">
+                                    <div className="aip-field">
+                                        <KeyRound size={13} strokeWidth={1.75} className="aip-field-icon" aria-hidden="true" />
+                                        <input
+                                            type="password"
+                                            className="aip-input"
+                                            value={draft}
+                                            placeholder={hasKey ? '••••••••••••••••' : p.keyPlaceholder}
+                                            onChange={(e) => {
+                                                const v = e.target.value;
+                                                setKeyDrafts(prev => ({ ...prev, [p.id]: v }));
+                                                setSavedKeyFor(cur => (cur === p.id ? null : cur));
+                                            }}
+                                            onKeyDown={(e) => { if (e.key === 'Enter') void saveKey(p.id, p.staticCatalogue); }}
+                                            autoComplete="off"
+                                            spellCheck={false}
+                                            aria-label={`${p.name} ${t('API key')}`}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => void saveKey(p.id, p.staticCatalogue)}
+                                            disabled={saving || !draft.trim()}
+                                            className="aip-btn-seg aip-field-seg"
+                                            data-tone={saved ? 'ok' : undefined}
+                                        >
+                                            {saving
+                                                ? <><Loader2 size={12} strokeWidth={1.75} className="aip-spinner" /> {t('Saving...')}</>
+                                                : saved
+                                                    ? <><Check size={12} strokeWidth={2} className="aip-check" /> {t('Saved')}</>
+                                                    : t('Save')}
+                                        </button>
+                                    </div>
+                                    {hasKey && (
+                                        <button
+                                            type="button"
+                                            onClick={() => void removeKey(p.id, p.staticCatalogue)}
+                                            className="aip-btn shrink-0"
+                                            data-icon="true"
+                                            data-variant="danger-ghost"
+                                            title={t('Remove API Key')}
+                                        >
+                                            <Trash2 size={14} strokeWidth={1.75} />
+                                        </button>
+                                    )}
                                 </div>
-                                {hasKey && (
-                                    <button
-                                        type="button"
-                                        onClick={() => void removeKey(p.id, p.staticCatalogue)}
-                                        className="aip-btn shrink-0"
-                                        data-icon="true"
-                                        data-variant="danger-ghost"
-                                        title={t('Remove API Key')}
-                                    >
-                                        <Trash2 size={14} strokeWidth={1.75} />
-                                    </button>
-                                )}
                             </div>
-                        </div>
                         )}
 
                         {/* Action Row: Test Connection & Model List Selector matching EmbeddingSettings */}
@@ -1633,7 +1633,7 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
                                             p.id === 'jina' ? { provider: 'jina', jinaModel: id } : { provider: 'openrouter', openrouterModel: id })}
                                         onSetDefault={(id) => void setConfig(
                                             p.id === 'jina' ? { provider: 'jina', jinaModel: id } : { provider: 'openrouter', openrouterModel: id })}
-                                        onReset={() => {}}
+                                        onReset={() => { }}
                                         refreshing={p.staticCatalogue ? false : refreshing}
                                         onRefresh={p.staticCatalogue
                                             ? undefined
@@ -1673,7 +1673,7 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
             {/* Provider Card 4: Community Extensions — High-End Minimalist Design */}
             <div className="aip-card aip-provider space-y-3">
                 <div className="aip-provider-head">
-                    <AipProviderMark provider="natively" name={t('Reranker Extensions')} />
+                    <AipProviderMark provider="MeetFloo" name={t('Reranker Extensions')} />
                     <h4 className="aip-card-title truncate min-w-0">{t('Reranker Extensions')}</h4>
                     <div className="ml-auto flex items-center gap-2 shrink-0">
                         <button
@@ -1977,34 +1977,34 @@ export const RerankerSettings: React.FC<RerankerSettingsProps> = ({ renderParts 
                 batches its forward passes well inside its budget, where every
                 choice here would only cost recall. See rerankCandidateControl. */}
             {candidateControlApplies(status.effective.kind) && (
-            <div className="aip-card p-5 space-y-3">
-                <div className="flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
-                    <div>
-                        <label className="block text-xs font-medium uppercase tracking-wide aip-hero">
-                            {t('Candidates to rerank')}
-                        </label>
-                        <p className="text-[10px] aip-muted mt-0.5">
-                            {t(candidateControlRationale(status.effective.kind)
-                                || 'Number of initial retrieved passages scored by the reranker.')}
-                        </p>
+                <div className="aip-card p-5 space-y-3">
+                    <div className="flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
+                        <div>
+                            <label className="block text-xs font-medium uppercase tracking-wide aip-hero">
+                                {t('Candidates to rerank')}
+                            </label>
+                            <p className="text-[10px] aip-muted mt-0.5">
+                                {t(candidateControlRationale(status.effective.kind)
+                                    || 'Number of initial retrieved passages scored by the reranker.')}
+                            </p>
+                        </div>
+
+                        <CandidatesSlidingTabs
+                            value={candidateCount}
+                            choices={CANDIDATE_CHOICES}
+                            onChange={(n) => void setConfig({ candidateCount: n })}
+                        />
                     </div>
 
-                    <CandidatesSlidingTabs
-                        value={candidateCount}
-                        choices={CANDIDATE_CHOICES}
-                        onChange={(n) => void setConfig({ candidateCount: n })}
-                    />
+                    <div className="pt-2 border-t border-white/5 text-[10.5px] aip-muted">
+                        {candidateCount <= 5 && t('Fast & low latency — best for quick queries.')}
+                        {candidateCount > 5 && candidateCount <= 10 && t('Balanced speed and recall.')}
+                        {candidateCount > 10 && candidateCount < status.candidateCountDefault
+                            && t('A smaller pool than the default — less to pay for and less to wait on with a hosted reranker, at some cost to recall.')}
+                        {candidateCount >= status.candidateCountDefault
+                            && t('The full pool — every candidate retrieval found. This is the default.')}
+                    </div>
                 </div>
-
-                <div className="pt-2 border-t border-white/5 text-[10.5px] aip-muted">
-                    {candidateCount <= 5 && t('Fast & low latency — best for quick queries.')}
-                    {candidateCount > 5 && candidateCount <= 10 && t('Balanced speed and recall.')}
-                    {candidateCount > 10 && candidateCount < status.candidateCountDefault
-                        && t('A smaller pool than the default — less to pay for and less to wait on with a hosted reranker, at some cost to recall.')}
-                    {candidateCount >= status.candidateCountDefault
-                        && t('The full pool — every candidate retrieval found. This is the default.')}
-                </div>
-            </div>
             )}
 
             {/* Provider Card 6: Privacy Notice */}

@@ -670,7 +670,7 @@ test('empty upstream stream is INCOMPLETE_STREAM and never done', async () => {
   const { DirectAssistService } = await loadDirectAssist();
   const service = new DirectAssistService({
     streamDirectAssist() {
-      return (async function* () {})();
+      return (async function* () { })();
     },
   });
   const { events, result } = await collect(service.stream(baseInput()));
@@ -806,7 +806,7 @@ test('screenshot current-turn speech still carries the CURRENT_TURN_SPEECH marke
   assert.match(prepared.userPrompt, /CURRENT TURN SPEECH \(PART OF CURRENT REQUEST\)/);
 });
 
-test('Direct private-vision guard blocks cloud images before Natively transport', () => {
+test('Direct private-vision guard blocks cloud images before MeetFloo transport', () => {
   const source = fs.readFileSync(path.resolve(root, 'electron/LLMHelper.ts'), 'utf8');
   const policyStart = source.indexOf('private assertOutboundImagesAllowed(');
   const policyEnd = source.indexOf('\n  /**', policyStart + 20);
@@ -817,7 +817,7 @@ test('Direct private-vision guard blocks cloud images before Natively transport'
   const localClassification = boundary.indexOf('const directProviderIsLocal =');
   const imagePolicyGuard = boundary.indexOf('this.assertOutboundImagesAllowed(provider, true);');
   const providerSwitch = boundary.indexOf('switch (provider)');
-  const nativelyTransport = boundary.indexOf('this.streamWithNatively(');
+  const MeetFlooTransport = boundary.indexOf('this.streamWithMeetFloo(');
 
   assert.ok(policyStart >= 0 && policyEnd > policyStart);
   assert.match(
@@ -827,7 +827,7 @@ test('Direct private-vision guard blocks cloud images before Natively transport'
   assert.ok(start >= 0 && end > start);
   assert.ok(localClassification >= 0 && localClassification < imagePolicyGuard);
   assert.ok(imagePolicyGuard >= 0 && imagePolicyGuard < providerSwitch);
-  assert.ok(providerSwitch < nativelyTransport, 'Natively transport must remain behind the common guard');
+  assert.ok(providerSwitch < MeetFlooTransport, 'MeetFloo transport must remain behind the common guard');
   assert.match(
     boundary,
     /if \(imagePaths\.length > 0 && !directProviderIsLocal\) \{\s*this\.assertOutboundImagesAllowed\(provider, true\);\s*\}/,
@@ -909,17 +909,17 @@ test('LiteLLM and NVIDIA streaming adapters preserve processed image MIME types'
   }
 });
 
-test('Direct Natively diagnostics never log or rethrow raw server error content', () => {
+test('Direct MeetFloo diagnostics never log or rethrow raw server error content', () => {
   const source = fs.readFileSync(path.resolve(root, 'electron/LLMHelper.ts'), 'utf8');
-  const start = source.indexOf('private async * streamWithNatively(');
+  const start = source.indexOf('private async * streamWithMeetFloo(');
   const end = source.indexOf('private async * streamWithGroq(', start);
-  const natively = source.slice(start, end);
+  const MeetFloo = source.slice(start, end);
 
   assert.ok(start >= 0 && end > start);
-  assert.match(natively, /error: directMode \? '\[omitted for Direct Assist\]' : chunk\.error/);
-  assert.match(natively, /if \(directMode\) \{\s*throw new DirectAssistError\(\s*'PROVIDER_ERROR',\s*'The selected provider reported a streaming failure\.'/);
-  assert.match(natively, /error: directMode \? '\[omitted for Direct Assist\]' : summarizeFetchError\(streamErr\)/);
-  assert.match(natively, /if \(streamErr instanceof DirectAssistError\) throw streamErr/);
+  assert.match(MeetFloo, /error: directMode \? '\[omitted for Direct Assist\]' : chunk\.error/);
+  assert.match(MeetFloo, /if \(directMode\) \{\s*throw new DirectAssistError\(\s*'PROVIDER_ERROR',\s*'The selected provider reported a streaming failure\.'/);
+  assert.match(MeetFloo, /error: directMode \? '\[omitted for Direct Assist\]' : summarizeFetchError\(streamErr\)/);
+  assert.match(MeetFloo, /if \(streamErr instanceof DirectAssistError\) throw streamErr/);
 });
 
 test('custom provider carries split SSE lines and Direct system instructions safely', () => {
@@ -960,7 +960,7 @@ test('custom vision injection follows optimized MIME and restores raw fallback M
   assert.doesNotMatch(custom, /injectImageIntoMessages\(body, base64Image, imagePaths\[0\]\)/);
 });
 
-test('the Direct natively dispatch gets its own connect budget, not the live path\'s hand-off deadline', () => {
+test('the Direct MeetFloo dispatch gets its own connect budget, not the live path\'s hand-off deadline', () => {
   const helperSource = fs.readFileSync(path.resolve(root, 'electron/LLMHelper.ts'), 'utf8');
 
   // Slice ONLY the dispatch arm, so this cannot pass on a comment elsewhere in
@@ -969,8 +969,8 @@ test('the Direct natively dispatch gets its own connect budget, not the live pat
   // Line-ending agnostic on purpose: a CRLF checkout (Windows default with
   // core.autocrlf) would make a literal "\n" search silently find nothing and
   // this assertion would pass vacuously on an empty slice.
-  const armMatch = /case 'natively':\s*\r?\n\s*yield\* this\.streamWithNatively\(/.exec(helperSource);
-  assert.ok(armMatch, 'Direct Assist natively dispatch arm not found');
+  const armMatch = /case 'MeetFloo':\s*\r?\n\s*yield\* this\.streamWithMeetFloo\(/.exec(helperSource);
+  assert.ok(armMatch, 'Direct Assist MeetFloo dispatch arm not found');
   const armEnd = helperSource.indexOf("case 'gemini':", armMatch.index);
   assert.ok(armEnd > armMatch.index, 'Direct Assist dispatch arm end not found');
   const arm = helperSource.slice(armMatch.index, armEnd);
@@ -1109,7 +1109,7 @@ test('a truncated file says so by name, and the system prompt forbids extrapolat
 
 // ── Screenshots that outlive the turn they were sent on ──────────────────────
 // Reported symptom: a user attaches a screenshot, asks about it two turns
-// later, and Natively cannot see it. The renderer clears its attachment tray
+// later, and MeetFloo cannot see it. The renderer clears its attachment tray
 // the instant a turn dispatches, and history was {role, content} only — so the
 // image was unreachable and nothing in the prompt even said one had existed.
 
@@ -1520,7 +1520,7 @@ test('normalizeDirectAssistError unwraps an engine aggregate to the first rung e
   // proves nothing: the classifier would match the SENTENCE and never reach
   // the unwrap. Without the unwrap this fixture is PROVIDER_ERROR.
   const first = new DirectAssistError('RATE_LIMITED', 'The selected provider is rate limited.', true);
-  const aggregate = new Error('All providers failed: rung natively | rung gemini');
+  const aggregate = new Error('All providers failed: rung MeetFloo | rung gemini');
   aggregate.firstProviderError = first;
 
   const normalized = normalizeDirectAssistError(aggregate);
@@ -1598,13 +1598,13 @@ function rungCaller(overrides = {}) {
 
 const directAssistTextRequest = {
   requestId: 'r1',
-  selection: { provider: 'natively', model: 'natively' },
+  selection: { provider: 'MeetFloo', model: 'MeetFloo' },
   systemPrompt: 's', userPrompt: 'u', imagePaths: [], historyImagePaths: [],
 };
 
 test('the selected provider is always rung 0', async () => {
   const rungs = rungCaller()(directAssistTextRequest);
-  assert.equal(rungs[0].provider, 'natively');
+  assert.equal(rungs[0].provider, 'MeetFloo');
   assert.equal(rungs[0].priority, 0);
   assert.equal(rungs[0].isFallback, false);
 });
@@ -1718,7 +1718,7 @@ test('streamDirectAssist honours the rung over request.selection', async () => {
   });
   const gen = LLMHelper.prototype.streamDirectAssist.call(
     self,
-    { ...directAssistTextRequest, selection: { provider: 'natively', model: 'natively' } },
+    { ...directAssistTextRequest, selection: { provider: 'MeetFloo', model: 'MeetFloo' } },
     undefined,
     { provider: 'gemini', model: 'gemini-3.7-flash', priority: 1, isFallback: true },
   );
@@ -1739,8 +1739,8 @@ function ladderTransport(script) {
   return {
     calls,
     listDirectAssistRungs: () => script.map((_, i) => ({
-      provider: i === 0 ? 'natively' : 'gemini',
-      model: i === 0 ? 'natively' : 'gemini-3.7-flash',
+      provider: i === 0 ? 'MeetFloo' : 'gemini',
+      model: i === 0 ? 'MeetFloo' : 'gemini-3.7-flash',
       priority: i,
       isFallback: i > 0,
     })),
@@ -1764,7 +1764,7 @@ function ladderTransport(script) {
 }
 
 const timeoutErr = () => Object.assign(new Error('connect timeout'), { code: 'CONNECT_TIMEOUT' });
-const svcOpts = () => ({ timerScheduler: createFakeTimerScheduler().scheduler, sleep: async () => {} });
+const svcOpts = () => ({ timerScheduler: createFakeTimerScheduler().scheduler, sleep: async () => { } });
 
 test('a solo rung is retried rather than failing on the first error', async () => {
   const { DirectAssistService } = await loadDirectAssist();
@@ -1797,7 +1797,7 @@ test('the selected rung gets its full attempt budget and a fallback rung gets it
  * isFallback: FALSE — see electron/LLMHelper.ts's `selectedRung` /
  * DIRECT_ASSIST_LADDER_INELIGIBLE_PROVIDERS early-return. `ladderTransport`
  * above can't stand in for this: it hardcodes its rung names to
- * natively/gemini regardless of what the caller selected, so it can never
+ * MeetFloo/gemini regardless of what the caller selected, so it can never
  * produce the isFallback:false + ladder-ineligible-provider combination the
  * bug lives in. Counts DISPATCHES (transport.calls.length), not rungs — the
  * regression this guards against passed a rung-count assertion while still
@@ -1871,7 +1871,7 @@ test('an exhausted rung walks to the next and announces the switch', async () =>
   assert.equal(events.find((e) => e.type === 'done').provider, 'gemini');
   const switches = events.filter((e) => e.type === 'provider_switch');
   assert.equal(switches.length, 1);
-  assert.equal(switches[0].from.provider, 'natively');
+  assert.equal(switches[0].from.provider, 'MeetFloo');
   assert.equal(switches[0].to.provider, 'gemini');
   assert.equal(switches[0].reason, 'CONNECT_TIMEOUT');
   // Snapshot, never a slot: a switch is pre-commit by construction.
@@ -1996,7 +1996,7 @@ test('each service instance keeps its own provider health map, structurally isol
 
   await collect(first.stream(baseInput()));
   // The engine really did record breaker state for both failed rungs...
-  assert.deepEqual([...first.health.keys()].sort(), ['gemini:gemini-3.7-flash', 'natively:natively']);
+  assert.deepEqual([...first.health.keys()].sort(), ['gemini:gemini-3.7-flash', 'MeetFloo:MeetFloo']);
   // ...and none of it reached the other instance.
   assert.equal(second.health.size, 0);
 
@@ -2022,7 +2022,7 @@ test('the idle watchdog no longer caps the whole pre-first-token walk', async ()
   const opened = [];
   const transport = {
     listDirectAssistRungs: () => ([
-      { provider: 'natively', model: 'natively', priority: 0, isFallback: false },
+      { provider: 'MeetFloo', model: 'MeetFloo', priority: 0, isFallback: false },
       { provider: 'gemini', model: 'gemini-3.7-flash', priority: 1, isFallback: true },
     ]),
     async *streamDirectAssist(_request, _signal, rung) {
@@ -2036,7 +2036,7 @@ test('the idle watchdog no longer caps the whole pre-first-token walk', async ()
   };
   const { events, result } = await collect(new DirectAssistService(transport, {
     streamIdleTimeoutMs: 60,
-    sleep: async () => {},
+    sleep: async () => { },
   }).stream(baseInput()));
 
   assert.deepEqual(opened, [0, 0, 1], 'the walk must survive longer than one silence window');
@@ -2055,7 +2055,7 @@ test('the idle watchdog still fires when ONE attempt goes silent for its whole w
         await new Promise((resolve) => signal.addEventListener('abort', resolve, { once: true }));
       })();
     },
-  }, { streamIdleTimeoutMs: 25, sleep: async () => {} });
+  }, { streamIdleTimeoutMs: 25, sleep: async () => { } });
   const { events, result } = await collect(service.stream(baseInput()));
   assert.equal(result.state, 'failed');
   assert.equal(events.at(-1).error.code, 'STREAM_IDLE_TIMEOUT');
@@ -2071,7 +2071,7 @@ test('a switch forced by the engine own TTFT guard reports CONNECT_TIMEOUT, not 
   const opened = [];
   const transport = {
     listDirectAssistRungs: () => ([
-      { provider: 'natively', model: 'natively', priority: 0, isFallback: false },
+      { provider: 'MeetFloo', model: 'MeetFloo', priority: 0, isFallback: false },
       { provider: 'gemini', model: 'gemini-3.7-flash', priority: 1, isFallback: true },
     ]),
     async *streamDirectAssist(_request, signal, rung) {
@@ -2085,7 +2085,7 @@ test('a switch forced by the engine own TTFT guard reports CONNECT_TIMEOUT, not 
     },
   };
   const { events, result } = await collect(new DirectAssistService(transport, {
-    sleep: async () => {},
+    sleep: async () => { },
     fallbackConfigOverrides: { ttftTimeoutMs: 20 },
   }).stream(baseInput()));
 
@@ -2105,20 +2105,20 @@ test('an UNCOOPERATIVE rung that never observes the abort still reports CONNECT_
   const opened = [];
   const transport = {
     listDirectAssistRungs: () => ([
-      { provider: 'natively', model: 'natively', priority: 0, isFallback: false },
+      { provider: 'MeetFloo', model: 'MeetFloo', priority: 0, isFallback: false },
       { provider: 'gemini', model: 'gemini-3.7-flash', priority: 1, isFallback: true },
     ]),
     async *streamDirectAssist(_request, _signal, rung) {
       opened.push(rung.priority);
       if (rung.priority === 0) {
-        await new Promise(() => {});   // never settles, never observes the abort
+        await new Promise(() => { });   // never settles, never observes the abort
         return;
       }
       yield 'answer';
     },
   };
   const { events, result } = await collect(new DirectAssistService(transport, {
-    sleep: async () => {},
+    sleep: async () => { },
     fallbackConfigOverrides: { ttftTimeoutMs: 20, cleanupTimeoutMs: 10 },
   }).stream(baseInput()));
 

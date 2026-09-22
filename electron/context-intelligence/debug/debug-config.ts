@@ -10,8 +10,8 @@
 
 import type { ContextDebugLevel } from './debug-types';
 
-export const CONTEXT_DEBUG_ENV = 'NATIVELY_CONTEXT_DEBUG';
-export const CONTEXT_DEBUG_CONTENT_ENV = 'NATIVELY_CONTEXT_DEBUG_INCLUDE_CONTENT';
+export const CONTEXT_DEBUG_ENV = 'MEETFLOO_CONTEXT_DEBUG';
+export const CONTEXT_DEBUG_CONTENT_ENV = 'MEETFLOO_CONTEXT_DEBUG_INCLUDE_CONTENT';
 
 export function parseDebugLevel(raw: unknown): ContextDebugLevel | null {
   if (typeof raw !== 'string') return null;
@@ -67,7 +67,7 @@ interface BoundConfig {
   readStoredLevel: (() => string | null | undefined) | null;
   isProductionBuild: boolean | null;
 }
-const CONFIG_KEY = '__nativelyContextDebugConfigV1__';
+const CONFIG_KEY = '__MeetFlooContextDebugConfigV1__';
 function bound(): BoundConfig {
   const g = globalThis as unknown as Record<string, unknown>;
   let s = g[CONFIG_KEY] as BoundConfig | undefined;

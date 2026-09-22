@@ -8,7 +8,7 @@
 //
 // Guards:
 //   1. Defaults disable CPU mem arena and memory pattern.
-//   2. NATIVELY_ONNX_ENABLE_CPU_MEM_ARENA / NATIVELY_ONNX_ENABLE_MEM_PATTERN
+//   2. MEETFLOO_ONNX_ENABLE_CPU_MEM_ARENA / MEETFLOO_ONNX_ENABLE_MEM_PATTERN
 //      flip them on for emergency opt-out / perf experiments.
 //   3. Every local ONNX consumer still routes through the helper (no
 //      accidental bypass that would silently revert the change).
@@ -47,8 +47,8 @@ function withEnv(overrides, fn) {
 
 test('defaults disable CPU memory arena and memory pattern', () => {
   withEnv({
-    NATIVELY_ONNX_ENABLE_CPU_MEM_ARENA: undefined,
-    NATIVELY_ONNX_ENABLE_MEM_PATTERN: undefined,
+    MEETFLOO_ONNX_ENABLE_CPU_MEM_ARENA: undefined,
+    MEETFLOO_ONNX_ENABLE_MEM_PATTERN: undefined,
   }, () => {
     const opts = getBoundedOnnxSessionOptions();
     assert.equal(opts.enableCpuMemArena, false, 'expected CPU memory arena to be disabled by default');
@@ -63,8 +63,8 @@ test('defaults disable CPU memory arena and memory pattern', () => {
 
 test('env overrides flip the arena/mem-pattern flags', () => {
   withEnv({
-    NATIVELY_ONNX_ENABLE_CPU_MEM_ARENA: '1',
-    NATIVELY_ONNX_ENABLE_MEM_PATTERN: '1',
+    MEETFLOO_ONNX_ENABLE_CPU_MEM_ARENA: '1',
+    MEETFLOO_ONNX_ENABLE_MEM_PATTERN: '1',
   }, () => {
     const opts = getBoundedOnnxSessionOptions();
     assert.equal(opts.enableCpuMemArena, true);
@@ -72,8 +72,8 @@ test('env overrides flip the arena/mem-pattern flags', () => {
   });
 
   withEnv({
-    NATIVELY_ONNX_ENABLE_CPU_MEM_ARENA: 'false',
-    NATIVELY_ONNX_ENABLE_MEM_PATTERN: '0',
+    MEETFLOO_ONNX_ENABLE_CPU_MEM_ARENA: 'false',
+    MEETFLOO_ONNX_ENABLE_MEM_PATTERN: '0',
   }, () => {
     const opts = getBoundedOnnxSessionOptions();
     assert.equal(opts.enableCpuMemArena, false);
@@ -81,8 +81,8 @@ test('env overrides flip the arena/mem-pattern flags', () => {
   });
 
   withEnv({
-    NATIVELY_ONNX_ENABLE_CPU_MEM_ARENA: 'bogus',
-    NATIVELY_ONNX_ENABLE_MEM_PATTERN: 'bogus',
+    MEETFLOO_ONNX_ENABLE_CPU_MEM_ARENA: 'bogus',
+    MEETFLOO_ONNX_ENABLE_MEM_PATTERN: 'bogus',
   }, () => {
     // Unknown values must fall back to the safe default (false) — never
     // silently flip ON. A misparse here would re-open the BFCArena path

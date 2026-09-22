@@ -1,6 +1,6 @@
 // A startup demotion is not permanent for the session (2026-09-11).
 //
-// Measured on a phone-hotspot network: the pinned natively provider failed
+// Measured on a phone-hotspot network: the pinned MeetFloo provider failed
 // 2/3 startup probes, the resolver fell through to the bundled model, and the
 // whole session ran 384-d MiniLM — every persisted voyage-4 vector stranded,
 // every reference-file query lexical, "the meeting notes weren't retrieved for
@@ -26,7 +26,7 @@ require.cache[electronId] = { id: electronId, filename: electronId, loaded: true
 const { EmbeddingProviderResolver } = await import(pathToFileURL(
   path.resolve(root, 'dist-electron/electron/rag/EmbeddingProviderResolver.js')).href);
 
-const pinnedNatively = { embeddingMode: 'manual', embeddingProvider: 'natively', nativelyApiKey: 'nk_test_key_1234567890' };
+const pinnedMeetFloo = { embeddingMode: 'manual', embeddingProvider: 'MeetFloo', MeetFlooApiKey: 'nk_test_key_1234567890' };
 
 function withProbe(outcomeByName) {
   const original = EmbeddingProviderResolver.probeAvailable;
@@ -35,43 +35,43 @@ function withProbe(outcomeByName) {
 }
 
 describe('resolveWithDemotion names the pinned provider that failed transiently', () => {
-  test('pinned natively, transient failure → bundled model now, natively handed back for re-probing', async () => {
-    const restore = withProbe({ natively: 'transient' });
+  test('pinned MeetFloo, transient failure → bundled model now, MeetFloo handed back for re-probing', async () => {
+    const restore = withProbe({ MeetFloo: 'transient' });
     try {
-      const r = await EmbeddingProviderResolver.resolveWithDemotion(pinnedNatively);
+      const r = await EmbeddingProviderResolver.resolveWithDemotion(pinnedMeetFloo);
       assert.equal(r.provider.name, 'local');
-      assert.equal(r.demotedPinned?.name, 'natively', 'the pinned provider is returned so the pipeline can re-probe it');
+      assert.equal(r.demotedPinned?.name, 'MeetFloo', 'the pinned provider is returned so the pipeline can re-probe it');
     } finally { restore(); }
   });
-  test('pinned natively, PERMANENT auth failure → nothing to wait for', async () => {
-    const restore = withProbe({ natively: 'permanent' });
+  test('pinned MeetFloo, PERMANENT auth failure → nothing to wait for', async () => {
+    const restore = withProbe({ MeetFloo: 'permanent' });
     try {
-      const r = await EmbeddingProviderResolver.resolveWithDemotion(pinnedNatively);
+      const r = await EmbeddingProviderResolver.resolveWithDemotion(pinnedMeetFloo);
       assert.equal(r.provider.name, 'local');
       assert.equal(r.demotedPinned, null);
     } finally { restore(); }
   });
-  test('pinned natively, available → selected, nothing demoted', async () => {
-    const restore = withProbe({ natively: 'available' });
+  test('pinned MeetFloo, available → selected, nothing demoted', async () => {
+    const restore = withProbe({ MeetFloo: 'available' });
     try {
-      const r = await EmbeddingProviderResolver.resolveWithDemotion(pinnedNatively);
-      assert.equal(r.provider.name, 'natively');
+      const r = await EmbeddingProviderResolver.resolveWithDemotion(pinnedMeetFloo);
+      assert.equal(r.provider.name, 'MeetFloo');
       assert.equal(r.demotedPinned, null);
     } finally { restore(); }
   });
   test('auto mode (nothing pinned) never hands a provider back', async () => {
-    const restore = withProbe({ natively: 'transient' });
+    const restore = withProbe({ MeetFloo: 'transient' });
     try {
-      const r = await EmbeddingProviderResolver.resolveWithDemotion({ embeddingMode: 'auto', nativelyApiKey: 'nk_test_key_1234567890' });
+      const r = await EmbeddingProviderResolver.resolveWithDemotion({ embeddingMode: 'auto', MeetFlooApiKey: 'nk_test_key_1234567890' });
       assert.equal(r.provider.name, 'local');
       assert.equal(r.demotedPinned, null);
     } finally { restore(); }
   });
   test('resolve() is unchanged for every existing caller', async () => {
-    const restore = withProbe({ natively: 'available' });
+    const restore = withProbe({ MeetFloo: 'available' });
     try {
-      const p = await EmbeddingProviderResolver.resolve(pinnedNatively);
-      assert.equal(p.name, 'natively');
+      const p = await EmbeddingProviderResolver.resolve(pinnedMeetFloo);
+      assert.equal(p.name, 'MeetFloo');
     } finally { restore(); }
   });
 });

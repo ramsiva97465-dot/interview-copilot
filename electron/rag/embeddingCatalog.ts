@@ -37,11 +37,11 @@ export interface EmbeddingCatalogModel {
 }
 
 export interface EmbeddingCatalogProvider {
-  id: 'natively' | 'ollama' | 'custom' | 'openrouter' | 'voyage' | 'openai' | 'gemini' | 'local';
+  id: 'MeetFloo' | 'ollama' | 'custom' | 'openrouter' | 'voyage' | 'openai' | 'gemini' | 'local';
   name: string;
   /** Embedding calls leave the machine. */
   cloud: boolean;
-  /** Natively picks the model server-side; the user does not choose one. */
+  /** MeetFloo picks the model server-side; the user does not choose one. */
   managed?: boolean;
   available: boolean;
   unavailableReason?: 'no_key' | 'not_running' | 'blocked_by_policy' | 'not_configured';
@@ -102,12 +102,12 @@ export const STATIC_EMBEDDING_MODELS = Object.freeze({
     Object.freeze({ id: 'gemini-embedding-2', label: 'gemini-embedding-2', dimensions: 3072, dimensionsVerified: true, supportedDimensions: [768, 1536, 3072], recommended: true, note: 'Current model, and multimodal — accepts text, images, audio and video.' }),
     Object.freeze({ id: 'gemini-embedding-001', label: 'gemini-embedding-001', dimensions: 3072, dimensionsVerified: true, supportedDimensions: [768, 1536, 3072], note: 'Text only. Supports 128-3072 dimensions; 768, 1536 and 3072 are recommended.' }),
   ]),
-  natively: Object.freeze([
-    // Must match NativelyEmbeddingProvider — this is what the settings panel
+  MeetFloo: Object.freeze([
+    // Must match MeetFlooEmbeddingProvider — this is what the settings panel
     // tells the user they are storing vectors in, and a catalogue that names a
     // different model or width than the provider actually uses is a label on the
     // wrong box.
-    Object.freeze({ id: 'voyage-4', label: 'voyage-4', dimensions: 2048, dimensionsVerified: true, recommended: true, note: 'Managed by Natively. Nothing to configure.' }),
+    Object.freeze({ id: 'voyage-4', label: 'voyage-4', dimensions: 2048, dimensionsVerified: true, recommended: true, note: 'Managed by MeetFloo. Nothing to configure.' }),
   ]),
   /** The model bundled with the app — always present, needs no network. */
   local: Object.freeze([
@@ -166,7 +166,7 @@ export interface CatalogInput {
   ollamaModels?: Array<{ name: string; dimensionsHint?: number | null; dimensionsVerified?: boolean }>;
   hasOpenaiKey?: boolean;
   hasGeminiKey?: boolean;
-  hasNativelyKey?: boolean;
+  hasMeetFlooKey?: boolean;
   hasOpenrouterKey?: boolean;
   includeDownloadable?: boolean;
   cachedEmbeddingModels?: Set<string>;
@@ -197,7 +197,7 @@ const clone = <T,>(models: readonly T[]): T[] => models.map(m => ({ ...(m as obj
  * Availability is about CREDENTIALS AND REACHABILITY, not existence: a provider
  * with no key is still listed (so the user can see it exists and why it is off)
  * but is not selectable. Silently omitting it would leave the user wondering
- * whether Natively supports it at all.
+ * whether MeetFloo supports it at all.
  */
 export function buildEmbeddingCatalog(input: CatalogInput): EmbeddingCatalogProvider[] {
   const cloudBlocked = !!input.cloudBlocked;
@@ -216,14 +216,14 @@ export function buildEmbeddingCatalog(input: CatalogInput): EmbeddingCatalogProv
     dimensionsVerified: !!m.dimensionsVerified,
   }));
 
-  const natively: EmbeddingCatalogProvider = {
-    id: 'natively',
-    name: 'Natively',
+  const MeetFloo: EmbeddingCatalogProvider = {
+    id: 'MeetFloo',
+    name: 'MeetFloo',
     cloud: true,
     managed: true,
-    available: !cloudBlocked && !!input.hasNativelyKey,
-    unavailableReason: cloudReason(!!input.hasNativelyKey),
-    models: (cloudBlocked || !input.hasNativelyKey) ? [] : clone(STATIC_EMBEDDING_MODELS.natively),
+    available: !cloudBlocked && !!input.hasMeetFlooKey,
+    unavailableReason: cloudReason(!!input.hasMeetFlooKey),
+    models: (cloudBlocked || !input.hasMeetFlooKey) ? [] : clone(STATIC_EMBEDDING_MODELS.MeetFloo),
   };
 
   const ollama: EmbeddingCatalogProvider = {
@@ -242,7 +242,7 @@ export function buildEmbeddingCatalog(input: CatalogInput): EmbeddingCatalogProv
     name: 'Custom endpoint',
     // Runs wherever the user pointed it. Treated as on-device because the whole
     // point is self-hosting (LM Studio, llama.cpp) — a remote proxy is possible
-    // but is the user's own deliberate choice, not something Natively routes to.
+    // but is the user's own deliberate choice, not something MeetFloo routes to.
     cloud: false,
     available: customEndpoint.length > 0 && customModels.length > 0,
     // A saved endpoint whose server is down previously left `available: false`
@@ -272,7 +272,7 @@ export function buildEmbeddingCatalog(input: CatalogInput): EmbeddingCatalogProv
    *
    * Showing a model you cannot select is noise, and worse, it invites a click
    * that silently does nothing. The card still appears — with the reason — so
-   * "Natively does not support this" stays distinguishable from "you have not
+   * "MeetFloo does not support this" stays distinguishable from "you have not
    * added a key".
    */
   const cloudModels = (
@@ -356,5 +356,5 @@ export function buildEmbeddingCatalog(input: CatalogInput): EmbeddingCatalogProv
     models: localModels,
   };
 
-  return [natively, ollama, custom, openrouter, voyage, openai, gemini, local];
+  return [MeetFloo, ollama, custom, openrouter, voyage, openai, gemini, local];
 }

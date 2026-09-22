@@ -11,42 +11,42 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Monitor, Mic, Settings } from 'lucide-react';
-import nativelyIcon from '../../../assets/icon.png';
+import MeetFlooIcon from '../../../assets/icon.png';
 import { useResolvedTheme } from '../../hooks/useResolvedTheme';
 import { classifyMicStatus } from '../../lib/micPermissionPolicy.mjs';
 
-const STORAGE_KEY  = 'natively_perms_shown_v1';
+const STORAGE_KEY = 'MeetFloo_perms_shown_v1';
 
 // ─── Design tokens ────────────────────────────────────────────
 const T = {
-  font:    '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif',
-  blue:    '#007AFF',
-  blueG:   'rgba(0,122,255,0.15)',
-  green:   '#34D399',
-  red:     '#F87171',
+  font: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif',
+  blue: '#007AFF',
+  blueG: 'rgba(0,122,255,0.15)',
+  green: '#34D399',
+  red: '#F87171',
 };
 
 type PermStatus = 'granted' | 'denied' | 'not-determined' | 'restricted' | 'unknown' | 'loading';
 
 interface Props {
-  isOpen:    boolean;
+  isOpen: boolean;
   onDismiss: () => void;
 }
 
 // ─── Spring configs for Apple-like feel ───────────────────────
 const SPRING = {
-  gentle:  { type: 'spring' as const, stiffness: 180, damping: 22, mass: 0.9 },
-  snappy:  { type: 'spring' as const, stiffness: 350, damping: 28, mass: 0.7 },
-  smooth:  { duration: 0.35, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] },
+  gentle: { type: 'spring' as const, stiffness: 180, damping: 22, mass: 0.9 },
+  snappy: { type: 'spring' as const, stiffness: 350, damping: 28, mass: 0.7 },
+  smooth: { duration: 0.35, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
 };
 
 const FADE = { enter: { opacity: 0, y: 12, filter: 'blur(4px)' }, in: { opacity: 1, y: 0, filter: 'blur(0px)' }, exit: { opacity: 0, scale: 0.97, filter: 'blur(3px)' } };
 
 export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
-  const [visible,    setVisible]    = useState(false);
-  const [platform,   setPlatform]   = useState<string>('darwin');
-  const [micStatus,  setMicStatus]  = useState<PermStatus>('loading');
-  const [scrStatus,  setScrStatus]  = useState<PermStatus>('loading');
+  const [visible, setVisible] = useState(false);
+  const [platform, setPlatform] = useState<string>('darwin');
+  const [micStatus, setMicStatus] = useState<PermStatus>('loading');
+  const [scrStatus, setScrStatus] = useState<PermStatus>('loading');
   const [requesting, setRequesting] = useState(false);
   const reduced = useReducedMotion() ?? false;
 
@@ -63,8 +63,8 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
 
   // Dynamic style tokens based on light/dark mode
   const colors = {
-    cardBg: isLight 
-      ? 'linear-gradient(160deg, #FFFFFF 0%, #FAFAFC 100%)' 
+    cardBg: isLight
+      ? 'linear-gradient(160deg, #FFFFFF 0%, #FAFAFC 100%)'
       : 'linear-gradient(160deg, rgba(24,24,32,0.98) 0%, rgba(16,16,22,0.99) 100%)',
     boxShadow: isLight
       ? '0 32px 80px rgba(0,0,0,0.12), 0 0 1px rgba(0,0,0,0.12)'
@@ -74,7 +74,7 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
     rightBorderLeft: isLight ? '1px solid rgba(0,0,0,0.07)' : `1px solid rgba(255,255,255,0.1)`,
     gridOpacity: isLight ? 0.08 : 0.04,
     gridLineColor: isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)',
-    
+
     // Close button
     closeBtnColor: isLight ? '#1C1C1E' : '#FFFFFF',
     closeBtnOpacityDefault: isLight ? 0.45 : 0.4,
@@ -84,10 +84,10 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
     // Step 1: macOS System Dialog Prompt Mockup
     step1Bg: isLight ? '#FFFFFF' : 'rgba(28, 28, 36, 0.85)',
     step1Border: isLight ? '1px solid rgba(0,0,0,0.09)' : '1px solid rgba(255, 255, 255, 0.12)',
-    step1BoxShadow: isLight 
-      ? '0 16px 36px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)' 
+    step1BoxShadow: isLight
+      ? '0 16px 36px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)'
       : '0 24px 50px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.1)',
-    step1NativelyShadow: isLight ? '0 4px 10px rgba(0,0,0,0.12)' : '0 4px 12px rgba(0,0,0,0.4)',
+    step1MeetFlooShadow: isLight ? '0 4px 10px rgba(0,0,0,0.12)' : '0 4px 12px rgba(0,0,0,0.4)',
     step1TextPrimary: isLight ? '#1C1C1E' : '#FFFFFF',
     step1TextMuted: isLight ? 'rgba(0,0,0,0.48)' : 'rgba(255,255,255,0.4)',
     step1BtnBg: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.08)',
@@ -97,16 +97,16 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
     // Step 2: macOS System Settings Toggle Mockup
     step2Bg: isLight ? '#FFFFFF' : 'rgba(36, 36, 46, 0.65)',
     step2Border: isLight ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(255, 255, 255, 0.08)',
-    step2BoxShadow: isLight 
-      ? '0 10px 24px rgba(0,0,0,0.05)' 
+    step2BoxShadow: isLight
+      ? '0 10px 24px rgba(0,0,0,0.05)'
       : '0 12px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)',
     step2IconBg: isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)',
     step2IconBorder: isLight ? '1px solid rgba(0,0,0,0.02)' : '1px solid rgba(255,255,255,0.04)',
     step2Text: isLight ? '#1C1C1E' : '#FFFFFF',
 
     // Connecting Arrow lines
-    arrowBg: isLight 
-      ? 'linear-gradient(to bottom, rgba(0,0,0,0.15), rgba(0,0,0,0.03))' 
+    arrowBg: isLight
+      ? 'linear-gradient(to bottom, rgba(0,0,0,0.15), rgba(0,0,0,0.03))'
       : 'linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0.1))',
   };
 
@@ -122,7 +122,7 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
       if (!p) return;
       setPlatform(p.platform);
       setMicStatus(p.microphone as PermStatus);
-      setScrStatus(p.screen     as PermStatus);
+      setScrStatus(p.screen as PermStatus);
     } catch {
       setMicStatus('not-determined');
       setScrStatus('not-determined');
@@ -210,8 +210,8 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
           <motion.div
             key="perm-card"
             initial={reduced ? FADE.enter : { opacity: 0, scale: 0.95, y: 16, filter: 'blur(12px)' }}
-            animate={reduced ? FADE.in : { opacity: 1, scale: 1,    y: 0,  filter: 'blur(0px)' }}
-            exit={   reduced ? FADE.exit : { opacity: 0, scale: 0.97, y: 8,  filter: 'blur(4px)' }}
+            animate={reduced ? FADE.in : { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+            exit={reduced ? FADE.exit : { opacity: 0, scale: 0.97, y: 8, filter: 'blur(4px)' }}
             transition={SPRING.gentle}
             style={{
               width: '680px', maxWidth: '92vw',
@@ -230,7 +230,7 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
                 {/* Header row */}
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <img src={nativelyIcon} alt="Natively" style={{ width: '18px', height: '18px', borderRadius: '4px', flexShrink: 0 }} />
+                    <img src={MeetFlooIcon} alt="MeetFloo" style={{ width: '18px', height: '18px', borderRadius: '4px', flexShrink: 0 }} />
                     <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: t3 }}>
                       Permissions
                     </span>
@@ -247,7 +247,7 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
                     Let's get you set up
                   </h2>
                   <p style={{ fontSize: '13px', lineHeight: 1.65, color: t3, margin: 0 }}>
-                    Natively needs a few permissions to capture meetings and transcribe speech.
+                    MeetFloo needs a few permissions to capture meetings and transcribe speech.
                   </p>
                 </motion.div>
 
@@ -306,7 +306,7 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
                   >
                     {/* Gloss Highlight (3D Jelly Clay) */}
                     <span style={{ position: 'absolute', top: '2px', left: '8px', right: '8px', height: '40%', borderRadius: '9999px', background: 'linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,255,255,0.05))', filter: 'blur(0.5px)', pointerEvents: 'none', zIndex: 1 }} />
-                    
+
                     <span style={{ position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <Settings size={14} strokeWidth={2} />
                       Open Settings
@@ -355,7 +355,7 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
 
                 {/* Guide content */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', position: 'relative', zIndex: 1, width: '100%', perspective: '1000px' }}>
-                  
+
                   <motion.div
                     style={{
                       display: 'flex',
@@ -368,7 +368,7 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
                     transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                   >
                     {/* Step 1: macOS System Dialog Prompt Mockup */}
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.15, type: 'spring', stiffness: 180, damping: 18 }}
@@ -388,30 +388,30 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
                       }}
                     >
                       <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                        {/* Natively Icon with subtle breath/float loop */}
-                        <motion.div 
+                        {/* MeetFloo Icon with subtle breath/float loop */}
+                        <motion.div
                           animate={{ y: [0, -2, 0] }}
                           transition={{ repeat: Infinity, duration: 2.8, ease: "easeInOut" }}
                           style={{ width: '32px', height: '32px', flexShrink: 0 }}
                         >
-                          <img src={nativelyIcon} alt="Natively" style={{ width: '32px', height: '32px', borderRadius: '7px', boxShadow: colors.step1NativelyShadow }} />
+                          <img src={MeetFlooIcon} alt="MeetFloo" style={{ width: '32px', height: '32px', borderRadius: '7px', boxShadow: colors.step1MeetFlooShadow }} />
                         </motion.div>
-                        
+
                         {/* Prompt Text */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                           <div style={{ fontSize: '10px', fontWeight: 600, color: colors.step1TextPrimary, lineHeight: 1.3, letterSpacing: '-0.01em' }}>
-                            "Natively" wants to record the screen.
+                            "MeetFloo" wants to record the screen.
                           </div>
                           <div style={{ fontSize: '8.5px', color: colors.step1TextMuted, lineHeight: 1.25 }}>
                             Enable access in Privacy & Security settings.
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Buttons */}
                       <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', marginTop: '4px' }}>
                         {/* Pulsing button mockup */}
-                        <motion.div 
+                        <motion.div
                           animate={{ scale: [1, 1.04, 1] }}
                           transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", repeatDelay: 0.5 }}
                           style={{ padding: '4px 8px', borderRadius: '5px', background: colors.step1BtnBg, border: colors.step1BtnBorder, fontSize: '8px', fontWeight: 600, color: colors.step1BtnText, letterSpacing: '-0.01em' }}
@@ -430,7 +430,7 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
                     </div>
 
                     {/* Step 2: macOS System Settings Toggle Mockup */}
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.25, type: 'spring', stiffness: 180, damping: 18 }}
@@ -451,20 +451,20 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
                     >
                       {/* Left app icon well */}
                       <div style={{ width: '22px', height: '22px', borderRadius: '5px', background: colors.step2IconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: colors.step2IconBorder }}>
-                        <img src={nativelyIcon} alt="Natively" style={{ width: '14px', height: '14px', borderRadius: '3px' }} />
+                        <img src={MeetFlooIcon} alt="MeetFloo" style={{ width: '14px', height: '14px', borderRadius: '3px' }} />
                       </div>
                       {/* Label */}
                       <span style={{ fontSize: '10px', fontWeight: 550, color: colors.step2Text, flex: 1, letterSpacing: '-0.01em' }}>
-                        Natively
+                        MeetFloo
                       </span>
                       {/* Active Toggle Switch with premium gradient, looping animation, and manual tap override */}
-                      <motion.div 
+                      <motion.div
                         animate={{
-                          background: mockToggleActive 
-                            ? 'linear-gradient(160deg, #34D399 0%, #10B981 100%)' 
+                          background: mockToggleActive
+                            ? 'linear-gradient(160deg, #34D399 0%, #10B981 100%)'
                             : (isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)'),
-                          boxShadow: mockToggleActive 
-                            ? '0 0 10px rgba(52,211,153,0.35), 0 2px 4px rgba(0,0,0,0.1)' 
+                          boxShadow: mockToggleActive
+                            ? '0 0 10px rgba(52,211,153,0.35), 0 2px 4px rgba(0,0,0,0.1)'
                             : '0 1px 2px rgba(0,0,0,0.05)',
                         }}
                         transition={{ duration: 0.3, ease: 'easeInOut' }}
@@ -479,10 +479,10 @@ export const PermissionsToaster: React.FC<Props> = ({ isOpen, onDismiss }) => {
                         onClick={() => setMockToggleActive(p => !p)}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <motion.div 
+                        <motion.div
                           animate={{ x: mockToggleActive ? 10 : 0 }}
                           transition={{ type: 'spring', stiffness: 450, damping: 28 }}
-                          style={{ width: '11px', height: '11px', borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} 
+                          style={{ width: '11px', height: '11px', borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }}
                         />
                       </motion.div>
                     </motion.div>
@@ -507,18 +507,18 @@ function PermItem({
   icon: Icon, label, description, status, platform, onToggle, reduced, isLight,
   relaunchHintWhenDenied,
 }: {
-  icon:        React.ElementType;
-  label:       string;
+  icon: React.ElementType;
+  label: string;
   description: string;
-  status:      PermStatus;
-  platform:    string;
-  onToggle?:   () => void;
-  reduced:     boolean;
-  isLight:     boolean;
+  status: PermStatus;
+  platform: string;
+  onToggle?: () => void;
+  reduced: boolean;
+  isLight: boolean;
   relaunchHintWhenDenied?: boolean;
 }) {
   const isGranted = status === 'granted';
-  const isDenied  = status === 'denied' || status === 'restricted';
+  const isDenied = status === 'denied' || status === 'restricted';
   const isLoading = status === 'loading' || status === 'not-determined';
   // macOS reads the Screen Recording grant at process launch: re-enabling it in
   // System Settings does NOT apply to the running app, so a previously-denied
@@ -569,9 +569,9 @@ function PermItem({
       {platform === 'darwin' && (
         <motion.div
           animate={{
-            background: isGranted 
-              ? 'rgba(52,211,153,0.85)' 
-              : isDenied 
+            background: isGranted
+              ? 'rgba(52,211,153,0.85)'
+              : isDenied
                 ? (isLight ? 'rgba(239, 68, 68, 0.2)' : 'rgba(248,113,113,0.5)')
                 : (isLight ? 'rgba(120, 120, 128, 0.16)' : 'rgba(255,255,255,0.15)'),
           }}

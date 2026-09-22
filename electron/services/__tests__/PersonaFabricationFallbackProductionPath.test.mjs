@@ -4,7 +4,7 @@
 // KnowledgeOrchestrator and drives its real processQuestion() to verify the
 // persona-fabrication fix.
 //
-// THE BUG (found on the live Natively API, gemini-3.6-flash): a confident-
+// THE BUG (found on the live MeetFloo API, gemini-3.6-flash): a confident-
 // persona candidate-directed question with NO category keyword
 // ("answer like a confident ML engineer: why should they hire me?") matches no
 // structured pack and embeds poorly, so retrieval returns ZERO nodes — a VOID.
@@ -58,7 +58,7 @@ const SYNTHETIC_RESUME = {
 
 function makeStubDb(resume) {
   return {
-    initializeSchema() {},
+    initializeSchema() { },
     getDocumentByType(type) { return type === 'resume' ? resume : null; },
     getAllNodes() { return []; },          // NO embedded nodes
     getNodeCount() { return 0; },

@@ -104,7 +104,7 @@ describe('protected invariants still hold after the tiny edits', () => {
       const m = tiny[name].match(/Sound like a real person speaking[\s\S]*?plain speech\./);
       assert.ok(m, `${name} should contain the human-voice block`);
       const block = m[0];
-      assert.doesNotMatch(block, /\bEvin\b|\bNatively\b|resume says|Two Sum|hire me because|two sum/i);
+      assert.doesNotMatch(block, /\bEvin\b|\bMeetFloo\b|resume says|Two Sum|hire me because|two sum/i);
     }
   });
 });

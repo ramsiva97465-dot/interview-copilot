@@ -4,7 +4,7 @@
 //
 // A `safeHandle('x', …)` with no matching `ipcRenderer.invoke('x')` in
 // preload.ts is dead in a shipped app. There is no generic passthrough:
-// `e2eInvoke` is the only one and it is undefined unless NATIVELY_E2E=1. Three
+// `e2eInvoke` is the only one and it is undefined unless MEETFLOO_E2E=1. Three
 // handlers were found in that state on 2026-08-29, including
 // `context-intelligence:rollout-metrics` — the sole reader of the contamination
 // rate, abort conditions and latency percentiles that recordTurnMetrics
@@ -38,7 +38,7 @@ const bridged = new Set(
   [...PRELOAD_SRC.matchAll(/ipcRenderer\.(?:invoke|send)\(\s*['"]([^'"]+)['"]/g)].map((m) => m[1]),
 );
 
-// Reachable through the NATIVELY_E2E-gated `e2eInvoke` passthrough, by design.
+// Reachable through the MEETFLOO_E2E-gated `e2eInvoke` passthrough, by design.
 const E2E_PREFIX = '__e2e__:';
 
 // Known-unbridged as of 2026-08-29. This list may SHRINK freely; growing it
@@ -52,7 +52,7 @@ const KNOWN_UNBRIDGED = new Set([
   'show-model-selector', 'hide-model-selector',
   // Window/session controls with no caller.
   'center-and-show-window', 'close-settings-window', 'reset-queues',
-  'invalidate-natively-usage-cache', 'restart-ollama',
+  'invalidate-MeetFloo-usage-cache', 'restart-ollama',
   // Exercised directly by their own suites rather than the renderer.
   'dev:thinking-budget-bench', 'skills:reap-stages',
   // Non-streaming predecessor of 'gemini-chat-stream', which is the only chat
@@ -89,8 +89,8 @@ describe('IPC bridge wiring', () => {
     const generic = [...PRELOAD_SRC.matchAll(/^\s*invoke\s*:\s*\(/gm)];
     assert.equal(generic.length, 0,
       'a generic `invoke` on the exposed API defeats the curated bridge');
-    assert.match(PRELOAD_SRC, /NATIVELY_E2E === '1'[\s\S]{0,200}e2eInvoke/,
-      'e2eInvoke must stay gated on NATIVELY_E2E');
+    assert.match(PRELOAD_SRC, /MEETFLOO_E2E === '1'[\s\S]{0,200}e2eInvoke/,
+      'e2eInvoke must stay gated on MEETFLOO_E2E');
   });
 
   test('no renderer code calls the nonexistent generic invoke', () => {

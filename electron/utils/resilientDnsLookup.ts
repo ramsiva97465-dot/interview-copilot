@@ -5,14 +5,14 @@
 // WHY (measured 2026-09-10, MacBook on an iPhone hotspot — an IPv6/NAT64
 // network whose DNS forwarder intermittently stops answering):
 //
-//   c-ares  dns.resolve4('api.natively.software')   8,009 ms
-//   system  dns.lookup  ('api.natively.software')      11 ms
+//   c-ares  dns.resolve4('api.MeetFloo.software')   8,009 ms
+//   system  dns.lookup  ('api.MeetFloo.software')      11 ms
 //
-// main.ts used to override `dns.lookup` so that api.natively.software went
+// main.ts used to override `dns.lookup` so that api.MeetFloo.software went
 // through c-ares `resolve4` FIRST (a 2026 workaround for a macOS getaddrinfo
 // ENOTFOUND on the Railway CNAME chain). c-ares queries the resolvers in
 // /etc/resolv.conf directly, with no cache and no bound; when the first of
-// them is a dead link-local hotspot address every Natively request waited
+// them is a dead link-local hotspot address every MeetFloo request waited
 // ~8 s in name resolution, blew the 4 s connect budget, was classified as a
 // provider stall, retried, hedged, regenerated — and the user read "The model
 // did not produce an answer in time" while curl reached the same host in
@@ -190,9 +190,9 @@ export function createResilientLookup(deps: ResilientLookupDeps = {}) {
 /** Install the resilient lookup as the process-wide `dns.lookup`. Idempotent. */
 export function installResilientDnsLookup(deps: ResilientLookupDeps = {}): void {
   const g = globalThis as any;
-  if (g.__nativelyResilientDnsInstalled__) return;
+  if (g.__MeetFlooResilientDnsInstalled__) return;
   const original = dns.lookup;
   const resilient = createResilientLookup({ lookup: original, ...deps });
   (dns as any).lookup = resilient.lookup;
-  g.__nativelyResilientDnsInstalled__ = true;
+  g.__MeetFlooResilientDnsInstalled__ = true;
 }

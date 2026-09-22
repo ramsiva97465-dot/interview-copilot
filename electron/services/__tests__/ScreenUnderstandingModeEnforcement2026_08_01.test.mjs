@@ -4,7 +4,7 @@
 // `screenUnderstandingMode` is written by the Privacy panel, whose copy promises
 // "Use a local vision model (Ollama) only. Cloud vision is never called." It was
 // read at ONE runtime call site — generate-what-to-say → ScreenUnderstandingService.
-// The primary Ask-AI-with-screenshot flow (NativelyInterface → gemini-chat-stream
+// The primary Ask-AI-with-screenshot flow (MeetFlooInterface → gemini-chat-stream
 // → LLMHelper.streamChat(imagePaths)), generate-code-hint and generate-brainstorm
 // all forwarded imagePaths into LLMHelper, which had no notion of the enum. So
 // the screenshot went to the cloud cascade while the UI said it never would.
@@ -44,8 +44,8 @@ const { SettingsManager } = require(dist('services/SettingsManager.js'));
 
 const IMAGE = ['/tmp/screenshot-under-test.png'];
 
-const SETTINGS_SLOT = '__nativelySettingsManagerV1__';
-const CRED_SLOT = '__nativelyCredentialsManagerV1__';
+const SETTINGS_SLOT = '__MeetFlooSettingsManagerV1__';
+const CRED_SLOT = '__MeetFlooCredentialsManagerV1__';
 let settingsBefore, credBefore;
 
 beforeEach(() => {
@@ -120,8 +120,8 @@ describe('resolveVisionPolicy', () => {
     // fail loudly, it ships the screenshot off-device under private_vision.
     // fluxion is the sharpest case: it resells the real vendors, so a reader
     // scanning for "is this remote?" sees only familiar model names.
-    for (const p of ['openai', 'gemini', 'claude', 'groq', 'natively', 'custom_provider',
-                     'litellm', 'nvidia_nim', 'openrouter', 'fluxion']) {
+    for (const p of ['openai', 'gemini', 'claude', 'groq', 'MeetFloo', 'custom_provider',
+      'litellm', 'nvidia_nim', 'openrouter', 'fluxion']) {
       assert.equal(isLocalVisionProvider(p), false, `${p} routes off-device — counting it as local would ship the screenshot`);
     }
   });

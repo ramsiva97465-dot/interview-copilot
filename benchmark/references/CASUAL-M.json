@@ -1,7 +1,7 @@
 {
   "id": "CASUAL-M",
   "category": "casual_mixed",
-  "natively_mode": "general",
+  "MeetFloo_mode": "general",
   "length_bucket": "medium",
   "speakers": [
     {
@@ -26,7 +26,7 @@
       "org": "Pellmark / Halvorsen Logistics"
     }
   ],
-  "context": "A casual video call among three old friends, Dan (the Natively user), Priya and Tom. About half the call is catch-up and banter (a TV finale, five-a-side football, Priya's new puppy, work complaints); interleaved throughout is the planning of a 3-night cabin trip for their friend Maya's 30th birthday, plus a secret surprise visit from Maya's brother.",
+  "context": "A casual video call among three old friends, Dan (the MeetFloo user), Priya and Tom. About half the call is catch-up and banter (a TV finale, five-a-side football, Priya's new puppy, work complaints); interleaved throughout is the planning of a 3-night cabin trip for their friend Maya's 30th birthday, plus a secret surprise visit from Maya's brother.",
   "facts": [
     {
       "id": "F01",

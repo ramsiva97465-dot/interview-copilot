@@ -54,8 +54,8 @@ const read = (rel) => fs.readFileSync(path.join(repoRoot, rel), 'utf8');
 // tests in gate-probe.mjs and onnxThreadConfig.test.mjs. Set the env BEFORE
 // importing the compiled providers so the gate reads the override on its
 // first call.
-process.env.NATIVELY_ONNX_MIN_FREE_GB = '0';
-process.env.NATIVELY_ONNX_MAX_CONCURRENT_SESSIONS = '99';
+process.env.MEETFLOO_ONNX_MIN_FREE_GB = '0';
+process.env.MEETFLOO_ONNX_MAX_CONCURRENT_SESSIONS = '99';
 
 // ---------------------------------------------------------------------------
 // 1 & 2. Source guards — cheap, deterministic, no build/mocking required.
@@ -229,8 +229,8 @@ describe('getBoundedOnnxSessionOptions', () => {
   const modPath = path.resolve(repoRoot, 'dist-electron/electron/utils/onnxThreadConfig.js');
 
   test('defaults to 1 intra-op + 1 inter-op thread, sequential execution mode', async () => {
-    delete process.env.NATIVELY_ONNX_INTRA_OP_THREADS;
-    delete process.env.NATIVELY_ONNX_INTER_OP_THREADS;
+    delete process.env.MEETFLOO_ONNX_INTRA_OP_THREADS;
+    delete process.env.MEETFLOO_ONNX_INTER_OP_THREADS;
     const { getBoundedOnnxSessionOptions } = await import(pathToFileURL(modPath).href);
     const opts = getBoundedOnnxSessionOptions();
     assert.equal(opts.intraOpNumThreads, 1);
@@ -238,31 +238,31 @@ describe('getBoundedOnnxSessionOptions', () => {
     assert.equal(opts.executionMode, 'sequential');
   });
 
-  test('overridable via NATIVELY_ONNX_INTRA_OP_THREADS / NATIVELY_ONNX_INTER_OP_THREADS env vars', async () => {
-    process.env.NATIVELY_ONNX_INTRA_OP_THREADS = '2';
-    process.env.NATIVELY_ONNX_INTER_OP_THREADS = '3';
+  test('overridable via MEETFLOO_ONNX_INTRA_OP_THREADS / MEETFLOO_ONNX_INTER_OP_THREADS env vars', async () => {
+    process.env.MEETFLOO_ONNX_INTRA_OP_THREADS = '2';
+    process.env.MEETFLOO_ONNX_INTER_OP_THREADS = '3';
     try {
       const { getBoundedOnnxSessionOptions } = await import(pathToFileURL(modPath).href);
       const opts = getBoundedOnnxSessionOptions();
       assert.equal(opts.intraOpNumThreads, 2);
       assert.equal(opts.interOpNumThreads, 3);
     } finally {
-      delete process.env.NATIVELY_ONNX_INTRA_OP_THREADS;
-      delete process.env.NATIVELY_ONNX_INTER_OP_THREADS;
+      delete process.env.MEETFLOO_ONNX_INTRA_OP_THREADS;
+      delete process.env.MEETFLOO_ONNX_INTER_OP_THREADS;
     }
   });
 
   test('invalid/non-positive env overrides fall back to the safe default (1)', async () => {
-    process.env.NATIVELY_ONNX_INTRA_OP_THREADS = '-5';
-    process.env.NATIVELY_ONNX_INTER_OP_THREADS = 'not-a-number';
+    process.env.MEETFLOO_ONNX_INTRA_OP_THREADS = '-5';
+    process.env.MEETFLOO_ONNX_INTER_OP_THREADS = 'not-a-number';
     try {
       const { getBoundedOnnxSessionOptions } = await import(pathToFileURL(modPath).href);
       const opts = getBoundedOnnxSessionOptions();
       assert.equal(opts.intraOpNumThreads, 1);
       assert.equal(opts.interOpNumThreads, 1);
     } finally {
-      delete process.env.NATIVELY_ONNX_INTRA_OP_THREADS;
-      delete process.env.NATIVELY_ONNX_INTER_OP_THREADS;
+      delete process.env.MEETFLOO_ONNX_INTRA_OP_THREADS;
+      delete process.env.MEETFLOO_ONNX_INTER_OP_THREADS;
     }
   });
 });

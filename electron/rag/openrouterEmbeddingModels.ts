@@ -15,7 +15,7 @@ import type { EmbeddingCatalogModel } from './embeddingCatalog';
 const LIST_TIMEOUT_MS = 10_000;
 const PROBE_TIMEOUT_MS = 20_000;
 const DEFAULT_BASE_URL = 'https://openrouter.ai/api/v1';
-const DIMENSION_PROBE_TEXT = 'natively embedding dimension probe';
+const DIMENSION_PROBE_TEXT = 'MeetFloo embedding dimension probe';
 
 export interface OpenRouterListOptions {
   baseUrl?: string;

@@ -13,9 +13,9 @@
  * declare stages in src/lib/onboarding/stageCatalog.ts.
  */
 
-const OPENS_COUNT_KEY = 'natively_app_opens_count';
-const SESSION_OPEN_TRACKED_KEY = 'natively_session_open_tracked';
-const SESSION_TOASTER_SHOWN_KEY = 'natively_session_toaster_shown';
+const OPENS_COUNT_KEY = 'MeetFloo_app_opens_count';
+const SESSION_OPEN_TRACKED_KEY = 'MeetFloo_session_open_tracked';
+const SESSION_TOASTER_SHOWN_KEY = 'MeetFloo_session_toaster_shown';
 
 /**
  * Tracks the app open event. Should be called exactly once during app initialization.
@@ -24,13 +24,13 @@ export function trackAppOpen(): number {
   try {
     const isTracked = sessionStorage.getItem(SESSION_OPEN_TRACKED_KEY) === 'true';
     let currentOpens = parseInt(localStorage.getItem(OPENS_COUNT_KEY) || '0', 10);
-    
+
     if (!isTracked) {
       currentOpens += 1;
       localStorage.setItem(OPENS_COUNT_KEY, currentOpens.toString());
       sessionStorage.setItem(SESSION_OPEN_TRACKED_KEY, 'true');
     }
-    
+
     return currentOpens;
   } catch (e) {
     console.warn('[ToasterGating] Failed to track app open:', e);
@@ -121,7 +121,7 @@ export function markToasterAsShown(toasterId: string): void {
     sessionStorage.setItem(SESSION_TOASTER_SHOWN_KEY, 'true');
     localStorage.setItem(`last_shown_time_${toasterId}`, now.toString());
     localStorage.setItem(`last_shown_opens_${toasterId}`, currentOpens.toString());
-    
+
     console.log(`[ToasterGating] Registered show for '${toasterId}' (Open #${currentOpens})`);
   } catch (e) {
     console.warn(`[ToasterGating] Error marking toaster '${toasterId}' as shown:`, e);

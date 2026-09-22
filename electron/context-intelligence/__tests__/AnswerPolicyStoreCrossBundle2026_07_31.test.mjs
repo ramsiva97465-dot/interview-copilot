@@ -24,7 +24,7 @@ const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..', '..', '..');
 const STORE_PATH = path.join(repoRoot, 'dist-electron/electron/context-intelligence/policies/answer-policy-store.js');
-const CACHE_KEY = '__nativelyAnswerPolicyStoreCacheV1__';
+const CACHE_KEY = '__MeetFlooAnswerPolicyStoreCacheV1__';
 
 let tmpDir;
 
@@ -36,14 +36,14 @@ function loadBundleCopy() {
 describe('answer-policy store — writes visible across bundle copies (2026-07-31)', () => {
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'policy-xbundle-'));
-    process.env.NATIVELY_TEST_USERDATA = tmpDir;
+    process.env.MEETFLOO_TEST_USERDATA = tmpDir;
     delete globalThis[CACHE_KEY];
   });
 
   afterEach(() => {
     delete require.cache[STORE_PATH];
     delete globalThis[CACHE_KEY];
-    delete process.env.NATIVELY_TEST_USERDATA;
+    delete process.env.MEETFLOO_TEST_USERDATA;
     try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { /* noop */ }
   });
 

@@ -142,7 +142,7 @@ export class GeminiPromptCache {
       });
       this.inflight.set(key, creation);
       // Swallow — this is fire-and-forget; the create() body logs on failure.
-      creation.catch(() => {});
+      creation.catch(() => { });
     }
     return null;
   }
@@ -193,7 +193,7 @@ export class GeminiPromptCache {
           contents: [{ role: 'user', parts: [{ text: '_' }] }],
           systemInstruction: { parts: [{ text: systemPrompt }] },
           ttl: `${CACHE_TTL_SECONDS}s`,
-          displayName: `natively-sys-${key.slice(0, 8)}`,
+          displayName: `MeetFloo-sys-${key.slice(0, 8)}`,
         },
       });
       const name: string | undefined = response?.name;

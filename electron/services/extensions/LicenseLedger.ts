@@ -6,7 +6,7 @@
  * model without a matching entry here, so an acknowledgement must come from a
  * real user action and is never inferred.
  *
- * Persisted as JSON at `~/.natively/licenses.json`. A corrupt or unreadable
+ * Persisted as JSON at `~/.MeetFloo/licenses.json`. A corrupt or unreadable
  * ledger reads as EMPTY, never as "everything acknowledged" — the failure mode
  * of a damaged file must be an extra prompt, not a silent grant.
  */

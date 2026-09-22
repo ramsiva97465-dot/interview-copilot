@@ -37,7 +37,7 @@ export function createRotatingGroqClient(usableKeys, opts = {}) {
   const scheduler = new KeyScheduler(usableKeys, { perKeyCooldownMs: opts.perKeyCooldownMs ?? 250 });
 
   // ── TPM (tokens-per-minute) pacing ──
-  // Groq scout free tier = 30000 tokens/min PER KEY. The Natively system prompt +
+  // Groq scout free tier = 30000 tokens/min PER KEY. The MeetFloo system prompt +
   // coding context is large, so an unpaced burst drains a key's token bucket and
   // Groq then SILENTLY QUEUES the stream (200, no 429) → the app's 7s first-useful
   // deadline fires → empty. We keep each key under a safe TPM ceiling by tracking a

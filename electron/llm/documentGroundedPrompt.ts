@@ -350,13 +350,13 @@ export const EVIDENCE_USE_RULE = '  <evidence_use_rule>Treat the uploaded materi
 // instrumentation surgery again.
 //
 // Convention (matches electron/intelligence/intelligenceFlags.ts): read
-// process.env.NATIVELY_* defensively (never throw), default OFF. Checked once
+// process.env.MEETFLOO_* defensively (never throw), default OFF. Checked once
 // per retrieval call (not per token/chunk) — cheap enough at that cadence.
 // PRIVACY: logs the user's raw query text when enabled — this is why it is
 // OFF by default and must never be enabled in a shipped build's default config.
 export function retrievalDiagnosticsEnabled(): boolean {
   try {
-    return process.env.NATIVELY_RETRIEVAL_DIAGNOSTICS === '1';
+    return process.env.MEETFLOO_RETRIEVAL_DIAGNOSTICS === '1';
   } catch {
     return false;
   }
@@ -512,7 +512,7 @@ export function classifyDocumentQuestionShape(question: string, priorContext?: s
   // boundary.
   const looksDefinitional = /^(define|definition of|what does .+ mean|what is (?:a|an|the)?\s*[a-z0-9][a-z0-9 -]*\??|what are (?:a|the)?\s*[a-z0-9][a-z0-9 -]*\??)$/i.test(l);
   const looksLikeList = /\b(two|three|four|five|six|seven|eight|nine|ten|\d+)\b/i.test(l)
-      || /\b(list|which|state (?:the )?rq|all the)\b/i.test(l);
+    || /\b(list|which|state (?:the )?rq|all the)\b/i.test(l);
   const looksLikeSpec = /\b(how many|what (?:gpu|batch size|learning rate|success rates?|sampling rate|rate|rates?|size|memory|vram|processor|processors?|dof|degrees of freedom|episodes?|hyperparameters?|specifications?|specs)|at what .*rate|used for (?:training|inference)|(?:training|inference) (?:hardware|setup|configuration))\b/i.test(l);
   const isMultiPart = hasMultipleSubQuestions(q);
   if (looksDefinitional && !looksLikeList && !looksLikeSpec) return 'definitional_answer';

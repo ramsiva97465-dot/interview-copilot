@@ -15,7 +15,7 @@ export const CORPUS_DIR = path.join(REPO, 'test-fixtures/modes-corpus');
 const _cache = new Map();
 
 /**
- * Read the real Gemini API key from natively-api/.env WITHOUT printing it, so the
+ * Read the real Gemini API key from MeetFloo-api/.env WITHOUT printing it, so the
  * Electron app under test uses cloud Gemini embeddings (768d) for reference files
  * — the mission's intended embedding provider — instead of the local MiniLM (384d)
  * fallback. Returns '' if not found. The value is only ever placed into the launch
@@ -26,14 +26,14 @@ export function loadGeminiKeyFromEnv() {
 }
 
 /**
- * Return ALL Gemini keys from natively-api/.env (GEMINI_API_KEY, _2.._6, then
+ * Return ALL Gemini keys from MeetFloo-api/.env (GEMINI_API_KEY, _2.._6, then
  * GOOGLE_API_KEY) in order, WITHOUT printing them. The matrix picks the first one
  * that passes a live probe so a rate-limited primary key doesn't force the app
  * onto the local fallback. Values are only placed into the launch env, never logged.
  */
 export function loadGeminiKeysFromEnv() {
   try {
-    const envPath = path.join(REPO, 'natively-api/.env');
+    const envPath = path.join(REPO, 'MeetFloo-api/.env');
     if (!fs.existsSync(envPath)) return [];
     const lines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/);
     const names = ['GEMINI_API_KEY', 'GEMINI_API_KEY_2', 'GEMINI_API_KEY_3', 'GEMINI_API_KEY_4', 'GEMINI_API_KEY_5', 'GEMINI_API_KEY_6', 'GOOGLE_API_KEY'];

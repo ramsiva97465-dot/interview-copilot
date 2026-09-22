@@ -19,7 +19,7 @@ const app = await electron.launch({
   env: {
     ...process.env,
     NODE_ENV: 'production',
-    NATIVELY_DEV_BYPASS_SCREEN_TCC: '1',
+    MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1',
   },
   timeout: 60_000,
 });
@@ -82,8 +82,8 @@ await new Promise((r) => setTimeout(r, 5_000));
 const alive = app.process().exitCode === null;
 const gpuAfter = alive
   ? await app.evaluate(({ app: eApp }) =>
-      eApp.getAppMetrics().filter((m) => m.type === 'GPU').map((m) => m.pid)
-    ).catch(() => [])
+    eApp.getAppMetrics().filter((m) => m.type === 'GPU').map((m) => m.pid)
+  ).catch(() => [])
   : [];
 const sawEvent = stdio.join('').includes('child-process-gone');
 console.log('[F-109] main alive:', alive, '| GPU pids after:', gpuAfter, '| child-process-gone observed:', sawEvent);

@@ -6,7 +6,7 @@
     "sizeOnDiskMB": 0,
     "runtime": "onnx",
     "ortBinding": "onnxruntime-node",
-    "modelId": "resources/models/natively/router-deberta-multihead",
+    "modelId": "resources/models/MeetFloo/router-deberta-multihead",
     "forwardPassesPerRow": 1,
     "loadMs": 465,
     "split": "holdout",

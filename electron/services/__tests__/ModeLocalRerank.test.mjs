@@ -38,7 +38,7 @@ async function loadRetriever() {
 function mockDeps() {
   const mockDb = {
     prepare: mock.fn(() => ({ get: mock.fn(() => null), all: mock.fn(() => []), run: mock.fn() })),
-    exec: mock.fn(() => {}),
+    exec: mock.fn(() => { }),
     transaction: mock.fn((fn) => fn),
   };
   const mockVectorStore = { searchSimilar: mock.fn(() => Promise.resolve([])), hasEmbeddings: mock.fn(() => false) };
@@ -53,8 +53,8 @@ function mockDeps() {
   return { mockDb, mockVectorStore, mockEmbeddingPipeline };
 }
 
-const GATE = 'NATIVELY_RAG_CONFIDENCE_GATE';
-const RERANK = 'NATIVELY_RAG_LOCAL_RERANK';
+const GATE = 'MEETFLOO_RAG_CONFIDENCE_GATE';
+const RERANK = 'MEETFLOO_RAG_LOCAL_RERANK';
 
 // A file whose LATER chunk is the answer-bearing one. Each chunk is built to
 // contain the query tokens weakly so the lexical score is low (→ low confidence

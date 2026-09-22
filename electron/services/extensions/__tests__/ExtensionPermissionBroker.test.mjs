@@ -25,8 +25,8 @@ const PLATFORMS = ['darwin', 'win32'];
 
 /** Model dir per platform, so containment is checked against a real-shaped path. */
 const MODEL_DIR = {
-  darwin: '/Users/someone/.natively/models/jina-reranker',
-  win32: 'C:\\Users\\someone\\.natively\\models\\jina-reranker',
+  darwin: '/Users/someone/.MeetFloo/models/jina-reranker',
+  win32: 'C:\\Users\\someone\\.MeetFloo\\models\\jina-reranker',
 };
 
 const OUTSIDE = {

@@ -29,11 +29,11 @@
 //!
 //! Swallowing is unconditional while engaged, mirroring the macOS design note:
 //! pass-through mode would just be a keylogger. The hook is therefore
-//! short-lived — engaged only while the user is actively typing into Natively.
+//! short-lived — engaged only while the user is actively typing into MeetFloo.
 //!
 //! # keyCode contract with the renderer
 //!
-//! `NativelyInterface.tsx` hardcodes macOS HID virtual keycodes (53=Esc,
+//! `MeetFlooInterface.tsx` hardcodes macOS HID virtual keycodes (53=Esc,
 //! 36=Return, 76=NumpadEnter, 51=Backspace) and expects Tab (48) + arrows
 //! (123-126) + F-keys + any system-modifier combo to be PASSED THROUGH (never
 //! delivered). We translate Windows VK codes to those mac HID codes and apply
@@ -124,7 +124,7 @@ pub struct CapturedKey {
     pub flags: u32,
     /// True for keyDown, false for keyUp. The renderer only acts on keyDown.
     pub is_key_down: bool,
-    /// True when the user has left Natively and stealth must stop: a click on
+    /// True when the user has left MeetFloo and stealth must stop: a click on
     /// another process's window (mouse hook) or a foreground switch such as
     /// Alt+Tab (WinEvent hook). StealthKeyboardManager turns this into stop().
     /// Named for the macOS field it mirrors; on Windows it covers both triggers.
@@ -437,7 +437,7 @@ unsafe fn foreground_keyboard_layout() -> HKL {
 // ─── The low-level MOUSE hook procedure ──────────────────────────────────────
 //
 // Runs alongside the keyboard hook while stealth typing is engaged. Its ONLY
-// job is to detect a click that lands OUTSIDE every Natively window and stop
+// job is to detect a click that lands OUTSIDE every MeetFloo window and stop
 // the session — the Windows equivalent of the macOS tap's isOutsideMouseDown.
 // Without it, because the keyboard hook swallows keys process-wide, a user who
 // clicks back into their meeting app could not type there until Esc / 10s idle.
@@ -447,7 +447,7 @@ unsafe fn foreground_keyboard_layout() -> HKL {
 //
 // DPI-free by design: rather than compare cursor coordinates (physical pixels)
 // against the overlay's DIP bounds, we ask which window is under the cursor and
-// whether it belongs to OUR process. Clicking any Natively window (overlay,
+// whether it belongs to OUR process. Clicking any MeetFloo window (overlay,
 // pill, toggle, settings, model selector) keeps the session; clicking any other
 // process's window — or empty desktop — stops it.
 unsafe extern "system" fn mouse_hook_proc(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
@@ -515,7 +515,7 @@ unsafe fn mouse_hook_inner(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT
 }
 
 /// True if `hwnd` (or its root top-level window) belongs to THIS process — i.e.
-/// it is one of Natively's windows.
+/// it is one of MeetFloo's windows.
 ///
 /// The GA_ROOT walk matters: WindowFromPoint can return a Chromium child HWND
 /// (Chrome_RenderWidgetHostHWND) whose owning process differs from the main
@@ -545,7 +545,7 @@ unsafe fn window_belongs_to_us(hwnd: HWND) -> bool {
 // the keyboard hook's system-modifier filter, so no click ever happens. Without
 // this, stealth would stay engaged after Alt+Tab and keep swallowing keystrokes
 // system-wide: the user would type into their newly focused app and the text
-// would silently land in Natively's chatbox instead.
+// would silently land in MeetFloo's chatbox instead.
 //
 // macOS gets this for free: when another app activates, the nonactivating panel
 // resigns key and typing goes to the new app. This WinEvent hook is the
@@ -602,8 +602,8 @@ unsafe fn foreground_event_inner(
         return;
     }
     // The overlay is WS_EX_NOACTIVATE so it never becomes foreground; any
-    // foreground change to a non-Natively window is therefore a real app switch.
-    // Still check ownership explicitly so activating a Natively window (e.g. the
+    // foreground change to a non-MeetFloo window is therefore a real app switch.
+    // Still check ownership explicitly so activating a MeetFloo window (e.g. the
     // launcher) doesn't end the session.
     if window_belongs_to_us(hwnd) {
         return;
@@ -1147,7 +1147,7 @@ impl StealthKeyboardTap {
         let (ready_tx, ready_rx) = mpsc::channel::<bool>();
         let state = self.state.clone();
         let handle = thread::Builder::new()
-            .name("natively-keyboard-hook".into())
+            .name("MeetFloo-keyboard-hook".into())
             .spawn(move || hook_worker(state, session_id, ready_tx))
             .map_err(|e| {
                 self.state.active.store(false, Ordering::Release);

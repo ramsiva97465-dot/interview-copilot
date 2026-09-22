@@ -8,7 +8,7 @@
 //
 //   1. `enable_language_identification: true` was set UNCONDITIONALLY — full
 //      multilingual auto-detect was switched ON even for a pinned session.
-//      (The natively-api relay already got this conditional right; the app's
+//      (The MeetFloo-api relay already got this conditional right; the app's
 //      direct-Soniox provider did not.)
 //
 //   2. `language_hints_strict: true` — Soniox's documented restriction flag

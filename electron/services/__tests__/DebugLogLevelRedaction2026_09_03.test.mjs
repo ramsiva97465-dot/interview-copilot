@@ -64,7 +64,7 @@ test('credential free-text patterns are scrubbed at FULL', async () => {
   const { redactForLog } = await loadRedactor();
 
   const secrets = [
-    'natively_sk_LEAK_ONE',
+    'MeetFloo_sk_LEAK_ONE',
     'sk-abcdefghijklmnopqrstuvwx',
     'gsk_ZZZZZZZZZZZZZZZZZZZZZZ',
     'AIzaAAAAAAAAAAAAAAAAAAAAAA',
@@ -182,7 +182,7 @@ test('the level binding is anchored on globalThis, not a module-local let', asyn
   const { setLogRedactionLevel } = await loadRedactor();
   setLogRedactionLevel('full');
   try {
-    assert.equal(globalThis.__nativelyLogRedactionLevelV1__?.level, 'full',
+    assert.equal(globalThis.__MeetFlooLogRedactionLevelV1__?.level, 'full',
       'level is not anchored on globalThis — per-bundle copies will diverge');
   } finally {
     setLogRedactionLevel('standard');

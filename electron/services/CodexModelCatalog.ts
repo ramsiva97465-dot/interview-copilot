@@ -31,7 +31,7 @@ export const CODEX_MODELS_CACHE_FILE = 'models_cache.json';
 
 /**
  * Models the ChatGPT Codex backend rejects for a ChatGPT account — the only
- * auth Natively has — each with the backend's own answer, "The '<id>' model is
+ * auth MeetFloo has — each with the backend's own answer, "The '<id>' model is
  * not supported when using Codex with a ChatGPT account." spark from a captured
  * CLI error (CodexCliService.test.mjs); the other three from live requests on
  * 2026-09-11 (issue #558). gpt-5.4 / gpt-5.3-codex were the shipped defaults and

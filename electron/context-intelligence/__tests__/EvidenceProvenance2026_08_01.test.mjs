@@ -74,19 +74,19 @@ describe('provenance: meeting port stamps transcript provenance', () => {
   });
 
   test('LIVE_STT by default', async () => {
-    delete process.env.NATIVELY_TEST_TRANSCRIPT_INJECTION;
+    delete process.env.MEETFLOO_TEST_TRANSCRIPT_INJECTION;
     const { evidence } = await mkPort().retrieve({ decision: meetingDecision() });
     assert.ok(evidence.length > 0, 'meeting chunk must be admitted');
     assert.equal(evidence[0].provenance, 'LIVE_STT');
   });
 
   test('TEST_TRANSCRIPT under the injection env — never LIVE_STT in a test run', async () => {
-    process.env.NATIVELY_TEST_TRANSCRIPT_INJECTION = '1';
+    process.env.MEETFLOO_TEST_TRANSCRIPT_INJECTION = '1';
     try {
       const { evidence } = await mkPort().retrieve({ decision: meetingDecision() });
       assert.equal(evidence[0]?.provenance, 'TEST_TRANSCRIPT');
     } finally {
-      delete process.env.NATIVELY_TEST_TRANSCRIPT_INJECTION;
+      delete process.env.MEETFLOO_TEST_TRANSCRIPT_INJECTION;
     }
   });
 });
@@ -166,7 +166,7 @@ describe('injection framework gates (source-pinned: ipcHandlers cannot run outsi
     const i = src.indexOf("safeHandle('debug-inject-transcript'");
     assert.ok(i !== -1, 'injection handler missing');
     const block = src.slice(i, i + 2200);
-    assert.match(block, /NATIVELY_TEST_TRANSCRIPT_INJECTION !== '1' \|\| app\.isPackaged/);
+    assert.match(block, /MEETFLOO_TEST_TRANSCRIPT_INJECTION !== '1' \|\| app\.isPackaged/);
     assert.match(block, /origin: 'test'/);
     assert.doesNotMatch(block, /origin: 'stt'/, "injected segments must never claim real STT provenance");
     assert.match(block, /segments\.length > 500/, 'batch size must be bounded');
@@ -176,19 +176,19 @@ describe('injection framework gates (source-pinned: ipcHandlers cannot run outsi
     const { isMemoryEligibleSegment } = await import(
       pathToFileURL(path.join(repoRoot, 'dist-electron/electron/intelligence/MeetingMemoryService.js')).href);
     const seg = { speaker: 'Anita', text: 'Ship Friday.', origin: 'test', confidence: 0.95 };
-    delete process.env.NATIVELY_TEST_TRANSCRIPT_INJECTION;
+    delete process.env.MEETFLOO_TEST_TRANSCRIPT_INJECTION;
     assert.equal(isMemoryEligibleSegment(seg), false, 'test origin must stay ineligible by default');
-    process.env.NATIVELY_TEST_TRANSCRIPT_INJECTION = '1';
+    process.env.MEETFLOO_TEST_TRANSCRIPT_INJECTION = '1';
     try {
       assert.equal(isMemoryEligibleSegment(seg), true, 'approved test transcripts are eligible in test runs');
       assert.equal(isMemoryEligibleSegment({ ...seg, origin: 'manual_chat' }), false,
         'the env must not widen anything except origin test');
       assert.equal(isMemoryEligibleSegment({ ...seg, origin: 'assistant' }), false);
     } finally {
-      delete process.env.NATIVELY_TEST_TRANSCRIPT_INJECTION;
+      delete process.env.MEETFLOO_TEST_TRANSCRIPT_INJECTION;
     }
     // Source-level pin of the same invariant, so a refactor can't silently
     // widen the gate.
-    assert.match(mm, /origin === 'test' && process\.env\.NATIVELY_TEST_TRANSCRIPT_INJECTION === '1'/);
+    assert.match(mm, /origin === 'test' && process\.env\.MEETFLOO_TEST_TRANSCRIPT_INJECTION === '1'/);
   });
 });

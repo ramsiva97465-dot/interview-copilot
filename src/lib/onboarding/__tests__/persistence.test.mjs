@@ -35,18 +35,18 @@ import {
 } from '../persistence.mjs';
 
 const LEGACY = {
-  permsShown:           'natively_perms_shown_v1',
-  seenModesOnboarding:  'natively_seen_modes_onboarding_v5',
-  seenProfileOnboarding:'natively_seen_profile_onboarding_v1',
-  launchCount:          'natively_launch_count_v2.7',
-  appOpensCount:        'natively_app_opens_count',
-  trialPromoTs:         'natively_trial_promo_ts',
-  adsHistory:           'natively_ads_shown_history',
+  permsShown: 'MeetFloo_perms_shown_v1',
+  seenModesOnboarding: 'MeetFloo_seen_modes_onboarding_v5',
+  seenProfileOnboarding: 'MeetFloo_seen_profile_onboarding_v1',
+  launchCount: 'MeetFloo_launch_count_v2.7',
+  appOpensCount: 'MeetFloo_app_opens_count',
+  trialPromoTs: 'MeetFloo_trial_promo_ts',
+  adsHistory: 'MeetFloo_ads_shown_history',
 };
 
 function clearAll() {
   for (const key of Object.values(LEGACY)) {
-    try { localStorage.removeItem(key); } catch {}
+    try { localStorage.removeItem(key); } catch { }
   }
   _clearAllForTests();
 }
@@ -89,7 +89,7 @@ test('saveState then loadState round-trips correctly', () => {
   assert.deepEqual(loaded.queue, ['browser_extension', 'profile_intelligence']);
 });
 
-test('hydrates completed.permissions from natively_perms_shown_v1', () => {
+test('hydrates completed.permissions from MeetFloo_perms_shown_v1', () => {
   clearAll();
   localStorage.setItem(LEGACY.permsShown, '1');
   const state = loadState();
@@ -97,21 +97,21 @@ test('hydrates completed.permissions from natively_perms_shown_v1', () => {
   assert.ok(typeof state.completed['permissions'] === 'number');
 });
 
-test('hydrates completed.modes_manager from natively_seen_modes_onboarding_v5', () => {
+test('hydrates completed.modes_manager from MeetFloo_seen_modes_onboarding_v5', () => {
   clearAll();
   localStorage.setItem(LEGACY.seenModesOnboarding, 'true');
   const state = loadState();
   assert.ok(state.completed['modes_manager'], 'expected modes_manager in completed');
 });
 
-test('hydrates completed.profile_intelligence from natively_seen_profile_onboarding_v1', () => {
+test('hydrates completed.profile_intelligence from MeetFloo_seen_profile_onboarding_v1', () => {
   clearAll();
   localStorage.setItem(LEGACY.seenProfileOnboarding, 'true');
   const state = loadState();
   assert.ok(state.completed['profile_intelligence']);
 });
 
-test('migrates dead natively_trial_promo_ts to completed.trial_promo', () => {
+test('migrates dead MeetFloo_trial_promo_ts to completed.trial_promo', () => {
   clearAll();
   const legacyTs = 1_700_000_000_000;
   localStorage.setItem(LEGACY.trialPromoTs, legacyTs.toString());

@@ -3,13 +3,13 @@
 //
 // preload exposes e2eInvoke(channel, ...args) → ipcRenderer.invoke(channel,…)
 // unconditionally. The inline comment claims it is a "no-op surface in a
-// shipped app (the handlers aren't registered)" — but NATIVELY_E2E gates only
+// shipped app (the handlers aren't registered)" — but MEETFLOO_E2E gates only
 // the __e2e__:* HANDLERS, not the channel argument: any renderer code can
 // reach all ~349 production channels ('quit-app', 'set-openai-api-key',
 // 'delete-meeting', …), defeating the curated bridge's containment.
 //
 // Two launches: WITHOUT the env, the passthrough must be absent; WITH
-// NATIVELY_E2E=1 it must remain available (the e2e probes depend on it).
+// MEETFLOO_E2E=1 it must remain available (the e2e probes depend on it).
 //
 // Expected (correct): absent without env + present with env → exit 0.
 // Bug (F-117): available without env and able to invoke a production
@@ -21,7 +21,7 @@ import { _electron as electron } from '@playwright/test';
 async function probe(envExtra) {
   const app = await electron.launch({
     args: ['dist-electron/electron/main.js'],
-    env: { ...process.env, NODE_ENV: 'production', NATIVELY_DEV_BYPASS_SCREEN_TCC: '1', ...envExtra },
+    env: { ...process.env, NODE_ENV: 'production', MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1', ...envExtra },
     timeout: 60_000,
   });
   await app.firstWindow({ timeout: 30_000 }).catch(() => null);
@@ -47,7 +47,7 @@ async function probe(envExtra) {
 }
 
 const closed = await probe({});
-console.log('[F-117] without NATIVELY_E2E:', JSON.stringify(closed));
+console.log('[F-117] without MEETFLOO_E2E:', JSON.stringify(closed));
 if (closed.type === 'no-bridge-window') {
   console.error('[F-117] Inconclusive: no bridge window.');
   process.exit(2);
@@ -58,11 +58,11 @@ if (closed.type === 'function') {
   process.exit(1);
 }
 
-const open = await probe({ NATIVELY_E2E: '1' });
-console.log('[F-117] with NATIVELY_E2E=1:', JSON.stringify(open));
+const open = await probe({ MEETFLOO_E2E: '1' });
+console.log('[F-117] with MEETFLOO_E2E=1:', JSON.stringify(open));
 if (open.type !== 'function') {
-  console.error('[F-117] FAIL: gating broke the E2E surface — probes need e2eInvoke under NATIVELY_E2E=1.');
+  console.error('[F-117] FAIL: gating broke the E2E surface — probes need e2eInvoke under MEETFLOO_E2E=1.');
   process.exit(1);
 }
-console.log('[F-117] PASS: passthrough gated to NATIVELY_E2E sessions only.');
+console.log('[F-117] PASS: passthrough gated to MEETFLOO_E2E sessions only.');
 process.exit(0);

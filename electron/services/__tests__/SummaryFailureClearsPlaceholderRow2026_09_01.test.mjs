@@ -62,7 +62,7 @@ const readRow = (db, id) =>
 describe('summary hard failure clears the placeholder row (2026-09-01)', () => {
   beforeEach(() => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'summary-failure-test-'));
-    process.env.NATIVELY_TEST_USERDATA = tmp;
+    process.env.MEETFLOO_TEST_USERDATA = tmp;
     try { delete require.cache[DB_PATH]; } catch { /* first load */ }
     DatabaseManager = require(DB_PATH).DatabaseManager;
     dbMgr = DatabaseManager.getInstance();
@@ -71,7 +71,7 @@ describe('summary hard failure clears the placeholder row (2026-09-01)', () => {
   afterEach(() => {
     try { dbMgr?.close?.(); } catch { /* already closed */ }
     try { delete require.cache[DB_PATH]; } catch { /* nothing cached */ }
-    delete process.env.NATIVELY_TEST_USERDATA;
+    delete process.env.MEETFLOO_TEST_USERDATA;
   });
 
   test('the placeholder title and blurb are replaced, and the status goes failed', () => {

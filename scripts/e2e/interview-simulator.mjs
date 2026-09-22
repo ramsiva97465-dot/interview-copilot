@@ -2,7 +2,7 @@
 //
 // Reusable REAL-BACKEND interview simulator for Profile Intelligence.
 // Boots the Electron app (frontend on, own userData dir so it never collides
-// with a running Natively instance), points it at the local natively-api
+// with a running MeetFloo instance), points it at the local MeetFloo-api
 // (MiniMax-M3 forced), ingests a profile's resume+JD (+2nd doc) through the REAL
 // ingestion path, then drives the LIVE WhatToAnswer path by injecting each
 // scenario utterance as a transcript segment and asking through __e2e__:ask.
@@ -25,7 +25,7 @@ import { scoreQuestion, aggregate } from './lib/scorer.mjs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '../..');
 const fixturesRoot = path.join(repoRoot, 'test-fixtures', 'profiles');
-const LOCAL_TOKEN = process.env.NATIVELY_E2E_LOCAL_TEST_TOKEN || 'local-test-e2e-token';
+const LOCAL_TOKEN = process.env.MEETFLOO_E2E_LOCAL_TEST_TOKEN || 'local-test-e2e-token';
 
 function arg(name, def) {
   const i = process.argv.indexOf(`--${name}`);
@@ -37,7 +37,7 @@ function arg(name, def) {
 const round = String(arg('round', '01'));
 const rephrase = Boolean(arg('rephrase', false));
 const only = String(arg('profiles', '') || '').split(',').map((s) => s.trim()).filter(Boolean);
-const PACE_MS = Number(arg('pace', process.env.NATIVELY_E2E_PACE_MS || 0)) || 0;
+const PACE_MS = Number(arg('pace', process.env.MEETFLOO_E2E_PACE_MS || 0)) || 0;
 const outRoot = path.join(repoRoot, 'debug-artifacts', 'profile-e2e', `round-${round}`);
 fs.mkdirSync(outRoot, { recursive: true });
 
@@ -104,7 +104,7 @@ async function runProfile(app, win, prof) {
   const R = makeR(win);
 
   // Clean slate + ingest.
-  await R('__e2e__:clear-profile').catch(() => {});
+  await R('__e2e__:clear-profile').catch(() => { });
   const tIngest0 = Date.now();
   const ingRes = await R('__e2e__:ingest-profile-doc', { filePath: prof.resumePath, docType: 'resume' });
   let ingJd = null;
@@ -157,7 +157,7 @@ async function runProfile(app, win, prof) {
     });
     // Inter-question pacing: keep sustained request rate under the MiniMax
     // single-key ceiling so the factual measurement isn't confounded by
-    // provider throttling. --pace <ms> or NATIVELY_E2E_PACE_MS (default 0).
+    // provider throttling. --pace <ms> or MEETFLOO_E2E_PACE_MS (default 0).
     if (PACE_MS > 0) await new Promise((r) => setTimeout(r, PACE_MS));
   }
 
@@ -166,10 +166,12 @@ async function runProfile(app, win, prof) {
   const summary = {
     id: prof.id,
     fullName: prof.meta.fullName,
-    ingest: { ms: ingestMs, resumeOk: ingRes?.success ?? false, jdOk: ingJd?.success ?? false,
+    ingest: {
+      ms: ingestMs, resumeOk: ingRes?.success ?? false, jdOk: ingJd?.success ?? false,
       hasStructuredResume: state?.hasStructuredResume, hasStructuredJD: state?.hasStructuredJD,
       nodeCount: state?.nodeCount, embeddingSpaces: state?.embeddingSpaces, aot: state?.aot, okfPack: state?.okfPack,
-      extractedName: state?.resumeName },
+      extractedName: state?.resumeName
+    },
     questions: scored,
     agg: aggregate(scored, prof.meta),
   };
@@ -187,22 +189,22 @@ async function main() {
   // per profile is the strongest possible cross-profile-bleed guard. CRITICAL: the
   // app's OWN cloud keys are blanked (empty string, so dotenv.config() can't
   // re-inject them) → ProcessingHelper builds no direct Gemini/Groq/OpenAI clients
-  // → ALL generation falls through to Natively → local natively-api → MiniMax-M3.
+  // → ALL generation falls through to MeetFloo → local MeetFloo-api → MiniMax-M3.
   function buildEnv(udd) {
     const e = { ...process.env };
     for (const k of ['GEMINI_API_KEY', 'GROQ_API_KEY', 'OPENAI_API_KEY', 'CLAUDE_API_KEY', 'DEEPSEEK_API_KEY', 'ANTHROPIC_API_KEY',
       'GEMINI_API_KEY_1', 'GEMINI_API_KEY_2', 'GEMINI_API_KEY_3', 'GEMINI_API_KEY_4', 'GEMINI_API_KEY_5', 'GEMINI_API_KEY_6',
       'GROQ_API_KEY_1', 'GROQ_API_KEY_2', 'GROQ_API_KEY_3', 'GROQ_API_KEY_4', 'GROQ_API_KEY_7', 'GROQ_API_KEY_8', 'GROQ_API_KEY_9', 'GROQ_API_KEY_10']) e[k] = '';
     return {
-      ...e, NATIVELY_E2E: '1',
-      NATIVELY_API_URL: process.env.NATIVELY_API_URL || 'http://localhost:3000',
-      NATIVELY_E2E_LOCAL_TEST_TOKEN: LOCAL_TOKEN, NATIVELY_TEST_USERDATA: udd,
-      NODE_ENV: 'test', NATIVELY_DEV_BYPASS_SCREEN_TCC: '1',
-      NATIVELY_OKF_PROFILE_PACKS: '1', NATIVELY_OKF_PROFILE_HYBRID_RETRIEVAL: '1',
+      ...e, MEETFLOO_E2E: '1',
+      MEETFLOO_API_URL: process.env.MEETFLOO_API_URL || 'http://localhost:3000',
+      MEETFLOO_E2E_LOCAL_TEST_TOKEN: LOCAL_TOKEN, MEETFLOO_TEST_USERDATA: udd,
+      NODE_ENV: 'test', MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1',
+      MEETFLOO_OKF_PROFILE_PACKS: '1', MEETFLOO_OKF_PROFILE_HYBRID_RETRIEVAL: '1',
     };
   }
   async function launchApp() {
-    const udd = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-e2e-udd-'));
+    const udd = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-e2e-udd-'));
     const app = await electron.launch({ args: ['dist-electron/electron/main.js', `--user-data-dir=${udd}`], env: buildEnv(udd), timeout: 60000 });
     const win = await app.firstWindow({ timeout: 30000 });
     // Let the renderer settle (it may navigate/reload once during boot) before
@@ -238,7 +240,7 @@ async function main() {
 
   const overall = {
     round, generatedAt: new Date().toISOString(),
-    model: 'MiniMax-M3', backend: 'local natively-api (forced primary)',
+    model: 'MiniMax-M3', backend: 'local MeetFloo-api (forced primary)',
     profiles: summaries.map((s) => ({ id: s.id, agg: s.agg, error: s.error })),
     thresholds: {
       detection: '>=0.95 on true questions', smalltalkMisfires: '0', factual: '>=0.90/profile',

@@ -99,7 +99,7 @@ describe('row validation', () => {
     //
     // The founder's hand check found the last two missing: answer_form came
     // back at 10.3% disagreement, over the brief's bar, and 35 of the 38
-    // corrections asking for `none` were needs_response=no rows. If Natively
+    // corrections asking for `none` were needs_response=no rows. If MeetFloo
     // says nothing there is no answer form and no grounding source, for the
     // same reason there is no voice and no task.
     const bad = baseRow({ labels: { ...baseRow().labels, needs_response: 'no' } });
@@ -178,32 +178,32 @@ describe('jsonl parsing', () => {
 });
 
 describe('dedupeKey', () => {
-    const row = (over = {}) => ({
-        mode: 'team-meet', input: 'hows the export coming along',
-        labels: { needs_response: 'yes', dialogue_act: 'ask', task: 'none' }, ...over,
-    });
+  const row = (over = {}) => ({
+    mode: 'team-meet', input: 'hows the export coming along',
+    labels: { needs_response: 'yes', dialogue_act: 'ask', task: 'none' }, ...over,
+  });
 
-    test('identical rows collide', () => {
-        assert.equal(dedupeKey(row()), dedupeKey(row()));
-    });
+  test('identical rows collide', () => {
+    assert.equal(dedupeKey(row()), dedupeKey(row()));
+  });
 
-    test('an adversarial pair does NOT collide', () => {
-        // Same words, different answer. This is the trap category, and a
-        // label-blind key deleted one member of every such pair.
-        const a = row();
-        const b = row({ labels: { needs_response: 'no', dialogue_act: 'statement', task: 'none' } });
-        assert.notEqual(dedupeKey(a), dedupeKey(b));
-    });
+  test('an adversarial pair does NOT collide', () => {
+    // Same words, different answer. This is the trap category, and a
+    // label-blind key deleted one member of every such pair.
+    const a = row();
+    const b = row({ labels: { needs_response: 'no', dialogue_act: 'statement', task: 'none' } });
+    assert.notEqual(dedupeKey(a), dedupeKey(b));
+  });
 
-    test('the same words in a different mode do not collide', () => {
-        assert.notEqual(dedupeKey(row()), dedupeKey(row({ mode: 'lecture' })));
-    });
+  test('the same words in a different mode do not collide', () => {
+    assert.notEqual(dedupeKey(row()), dedupeKey(row({ mode: 'lecture' })));
+  });
 
-    test('case and whitespace are normalised', () => {
-        assert.equal(dedupeKey(row()), dedupeKey(row({ input: '  Hows   THE export Coming Along ' })));
-    });
+  test('case and whitespace are normalised', () => {
+    assert.equal(dedupeKey(row()), dedupeKey(row({ input: '  Hows   THE export Coming Along ' })));
+  });
 
-    test('a missing row does not throw', () => {
-        assert.equal(typeof dedupeKey(undefined), 'string');
-    });
+  test('a missing row does not throw', () => {
+    assert.equal(typeof dedupeKey(undefined), 'string');
+  });
 });

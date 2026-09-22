@@ -249,4 +249,4 @@
  2000     10      25/25     24/25        5/5       5/5 | 24/25 1(0) | 23/25 1(0)
  2500      8      25/25     22/25        5/5       5/5 | 22/25 3(0) | 19/25 3(0)
 
-results written to /Users/evin/natively-cluely-ai-assistant/experiments/chunk-sweep/results.json
+results written to /Users/evin/MeetFloo-cluely-ai-assistant/experiments/chunk-sweep/results.json

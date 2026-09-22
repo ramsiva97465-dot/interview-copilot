@@ -20,7 +20,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 const userData =
-  process.env.NATIVELY_TEST_USERDATA || path.join(os.tmpdir(), 'natively-license-test');
+  process.env.MEETFLOO_TEST_USERDATA || path.join(os.tmpdir(), 'MeetFloo-license-test');
 
 export const app = {
   isPackaged: false,

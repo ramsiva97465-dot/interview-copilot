@@ -7,7 +7,7 @@
 // any other functionality. No redeploy needed.
 //
 // Re-enable at runtime (without changing code) by either:
-//   - env   NATIVELY_CODE_VERIFY = 'on' | 'true' | '1'   → enabled
+//   - env   MEETFLOO_CODE_VERIFY = 'on' | 'true' | '1'   → enabled
 //   - settings  codeVerificationEnabled === true         → enabled
 // Reads defensively (never throws); any uncertainty resolves to OFF, EXCEPT an
 // explicit env/settings "on" which always wins.
@@ -18,7 +18,7 @@ const envEnabled = (): boolean => {
   if (cachedEnv !== null) return cachedEnv;
   let on = false;
   try {
-    const v = (process.env.NATIVELY_CODE_VERIFY || '').trim().toLowerCase();
+    const v = (process.env.MEETFLOO_CODE_VERIFY || '').trim().toLowerCase();
     on = v === 'on' || v === 'true' || v === '1' || v === 'enabled';
   } catch { on = false; }
   cachedEnv = on;

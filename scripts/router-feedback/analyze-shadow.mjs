@@ -35,7 +35,7 @@ const MIN_CELL = Number(val('--min-cell', '5'));
 
 if (!fs.existsSync(IN)) {
   console.error(`no shadow events at ${IN}`);
-  console.error('Collect them first: run with NATIVELY_ROUTER_SHADOW=1 and export the piTelemetry ring.');
+  console.error('Collect them first: run with MEETFLOO_ROUTER_SHADOW=1 and export the piTelemetry ring.');
   process.exit(2);
 }
 

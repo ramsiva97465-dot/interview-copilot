@@ -13,10 +13,15 @@
         document.documentElement.setAttribute('data-window', w);
         document.body.style.overflow = 'hidden';
       }
-    } catch(e) {}
+    } catch (e) { }
   </script>
   <style>
-    html, body, #root { background: #000; }
+    html,
+    body,
+    #root {
+      background: #000;
+    }
+
     html[data-window="overlay"] body,
     html[data-window="overlay"] #root,
     html[data-window="cropper"] body,
@@ -31,9 +36,9 @@
   <!-- Synchronously apply cached theme before any render — prevents flash/mixed theme -->
   <script>
     try {
-      var t = localStorage.getItem('natively_resolved_theme');
+      var t = localStorage.getItem('MeetFloo_resolved_theme');
       if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
-    } catch(e) {}
+    } catch (e) { }
   </script>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>

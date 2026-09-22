@@ -1,4 +1,4 @@
-// natively-browser/src/__tests__/permissions.test.mjs
+// MeetFloo-browser/src/__tests__/permissions.test.mjs
 //
 // Tests the optional-host-permission flow: request, already-granted short
 // circuit, and the DENIED path (which must resolve gracefully, never throw, so
@@ -116,7 +116,7 @@ describe('originPatternFromUrl', () => {
 
   test('refuses non-http(s) and malformed URLs', () => {
     for (const u of ['chrome://extensions', 'file:///etc/passwd', 'about:blank',
-                     'devtools://devtools/x', 'view-source:https://a.com', 'not a url', '', null, undefined]) {
+      'devtools://devtools/x', 'view-source:https://a.com', 'not a url', '', null, undefined]) {
       assert.equal(originPatternFromUrl(u), null, `should refuse: ${String(u)}`);
     }
   });

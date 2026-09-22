@@ -1,5 +1,5 @@
 // Regression test for the "buffer overflow latch not reset on stop()" bug in
-// NativelyProSTT.
+// MeetFlooProSTT.
 //
 // Bug: `stop()` cleared `this.buffer = []` but did NOT reset
 // `bufferDroppedChunks` (counter) or `bufferOverflowReported` (one-shot flag).
@@ -12,7 +12,7 @@
 // Fix: stop() now sets both bufferDroppedChunks=0 and
 // bufferOverflowReported=false after clearing the buffer.
 //
-// Strategy: load the compiled `NativelyProSTT.js`, then for each "session"
+// Strategy: load the compiled `MeetFlooProSTT.js`, then for each "session"
 // stub `connect()` so no real WebSocket is constructed (avoids network/DNS),
 // and keep `isConnected === false` so `write()` takes the buffering branch
 // where the overflow logic lives. Push BUFFER_MAX_CHUNKS + N chunks to trip
@@ -30,10 +30,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distRoot = path.resolve(__dirname, '../../../dist-electron/electron/audio');
 
-const { NativelyProSTT } = await import(pathToFileURL(path.join(distRoot, 'NativelyProSTT.js')).href);
+const { MeetFlooProSTT } = await import(pathToFileURL(path.join(distRoot, 'MeetFlooProSTT.js')).href);
 
-test('NativelyProSTT.stop() resets buffer-overflow latch and dropped-chunk counter so the next session can re-emit buffer-overflow', () => {
-    const stt = new NativelyProSTT('fake-key', 'mic');
+test('MeetFlooProSTT.stop() resets buffer-overflow latch and dropped-chunk counter so the next session can re-emit buffer-overflow', () => {
+    const stt = new MeetFlooProSTT('fake-key', 'mic');
 
     // Stub connect() so start() never opens a real WebSocket. We want the
     // wrapper to think it's "active but not connected", which is the exact

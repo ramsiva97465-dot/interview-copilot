@@ -12,10 +12,10 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 // The Answer policy is read from the store per turn, so any test that pins a
-// policy needs an isolated userData dir. NATIVELY_TEST_USERDATA is the variable
+// policy needs an isolated userData dir. MEETFLOO_TEST_USERDATA is the variable
 // the store itself checks first, ahead of Electron's app.getPath.
 const USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'v3-bridge-'));
-process.env.NATIVELY_TEST_USERDATA = USERDATA;
+process.env.MEETFLOO_TEST_USERDATA = USERDATA;
 
 const base = path.resolve(process.cwd(), 'dist-electron/electron/context-intelligence');
 const { buildV3Prompt } = await import(pathToFileURL(path.join(base, 'orchestration/engine-bridge.js')).href);

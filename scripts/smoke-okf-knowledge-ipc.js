@@ -15,7 +15,7 @@ const { app } = require('electron');
 
 const repoRoot = path.resolve(__dirname, '..');
 const distRoot = path.join(repoRoot, 'dist-electron', 'electron');
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-okf-ipc-test-'));
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-okf-ipc-test-'));
 app.setPath('userData', tmpUserData);
 
 let pass = 0, fail = 0;
@@ -26,7 +26,7 @@ function check(label, ok, detail) {
 
 async function main() {
   await app.whenReady();
-  process.env.NATIVELY_OKF_KNOWLEDGE_PACKS = '1';
+  process.env.MEETFLOO_OKF_KNOWLEDGE_PACKS = '1';
 
   const { ModesManager } = require(path.join(distRoot, 'services/ModesManager.js'));
   const { KnowledgeManager } = require(path.join(distRoot, 'services/knowledge/KnowledgeManager.js'));
@@ -40,13 +40,13 @@ async function main() {
   // --- knowledge:list-packs (flag OFF by default — the IPC handler itself
   // checks isOkfKnowledgeUiEnabled(), which is a SEPARATE flag from
   // okfKnowledgePacks). This mirrors what the real handler does. ---
-  process.env.NATIVELY_OKF_KNOWLEDGE_UI = '0';
+  process.env.MEETFLOO_OKF_KNOWLEDGE_UI = '0';
   {
     const { isOkfKnowledgeUiEnabled } = require(path.join(distRoot, 'intelligence/intelligenceFlags.js'));
     check('okfKnowledgeUi defaults OFF', isOkfKnowledgeUiEnabled() === false);
   }
 
-  process.env.NATIVELY_OKF_KNOWLEDGE_UI = '1';
+  process.env.MEETFLOO_OKF_KNOWLEDGE_UI = '1';
   {
     const { isOkfKnowledgeUiEnabled } = require(path.join(distRoot, 'intelligence/intelligenceFlags.js'));
     check('okfKnowledgeUi flips ON via env override', isOkfKnowledgeUiEnabled() === true);

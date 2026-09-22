@@ -126,7 +126,7 @@ export function toLegacyIntent(frame: Pick<IntentFrame, 'task' | 'answer_form' |
 
     // follow_up or general. The production prior is decisive here: follow_up is
     // 0.2% of live traffic against general's 37.5%, measured over 32,919 turns
-    // in docs/natively-router-production-priors-2026-09.md. Returning follow_up
+    // in docs/MeetFloo-router-production-priors-2026-09.md. Returning follow_up
     // on a coin flip would misroute roughly one turn in three.
     return { intent: 'general', confidence: conf, ambiguous: true, via: 'default' };
 }

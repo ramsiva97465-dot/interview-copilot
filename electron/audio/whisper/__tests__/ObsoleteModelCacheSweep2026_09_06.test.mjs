@@ -16,7 +16,7 @@ const repoRoot = path.resolve(__dirname, '../../../..');
 const { purgeObsoleteModelCaches } = require(path.join(repoRoot, 'dist-electron/electron/audio/whisper/modelManager.js'));
 
 function scaffold() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-cache-sweep-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-cache-sweep-'));
   const mk = (rel) => { const p = path.join(root, ...rel.split('/')); fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, 'x'); };
   mk('Xenova/mobilebert-uncased-mnli/onnx/model_quantized.onnx');
   mk('Xenova/mobilebert-uncased-mnli/config.json');

@@ -62,7 +62,7 @@ test('failed runs are excluded from distributions', () => {
 });
 
 test('image pipeline extracts metadata and encodes supported input in memory', async () => {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'natively-vision-test-'));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'MeetFloo-vision-test-'));
   const image = path.join(dir, 'screen.png');
   await sharp({ create: { width: 1800, height: 900, channels: 3, background: '#ffffff' } }).png().toFile(image);
   const result = await core.processBenchmarkImage(image, 'high');
@@ -85,7 +85,7 @@ function baseConfig(imagePath) {
 }
 
 test('mocked stream records provider, reasoning, and TTFT only on first non-empty visible delta', async () => {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'natively-stream-test-'));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'MeetFloo-stream-test-'));
   const image = path.join(dir, 'screen.webp');
   await sharp({ create: { width: 80, height: 40, channels: 3, background: '#ffffff' } }).webp().toFile(image);
   const client = {
@@ -122,7 +122,7 @@ test('configuration validation rejects zero measured runs before provider use', 
 });
 
 test('cancellation preserves a cancelled session and prevents later runs', async () => {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'natively-cancel-test-'));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'MeetFloo-cancel-test-'));
   const image = path.join(dir, 'screen.jpg');
   await sharp({ create: { width: 20, height: 20, channels: 3, background: '#fff' } }).jpeg().toFile(image);
   const client = { models: { generateContentStream: ({ config }) => new Promise((_, reject) => config.abortSignal.addEventListener('abort', () => reject(new DOMException('Cancelled', 'AbortError')), { once: true })) } };
@@ -136,7 +136,7 @@ test('cancellation preserves a cancelled session and prevents later runs', async
 });
 
 test('timeout is classified without retrying', async () => {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'natively-timeout-test-'));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'MeetFloo-timeout-test-'));
   const image = path.join(dir, 'screen.jpg');
   await sharp({ create: { width: 20, height: 20, channels: 3, background: '#fff' } }).jpeg().toFile(image);
   let attempts = 0;
@@ -150,7 +150,7 @@ test('timeout is classified without retrying', async () => {
 });
 
 test('report generation exports expected files without binary request data', async () => {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'natively-report-test-'));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'MeetFloo-report-test-'));
   const image = path.join(dir, 'screen.png');
   await sharp({ create: { width: 10, height: 10, channels: 3, background: '#fff' } }).png().toFile(image);
   const model = { label: 'Mock', modelId: 'mock-model', enabled: true, source: 'benchmark-config' };
@@ -161,7 +161,7 @@ test('report generation exports expected files without binary request data', asy
     runs: [], statistics: [], executionOrder: [], balancedWeights: { latency: .45, quality: .45, reliability: .1 },
   };
   const output = await exportBenchmarkSession(session, path.resolve('.'));
-  for (const file of ['summary.md','summary.csv','runs.csv','results.json','config.json','environment.json']) await fs.access(path.join(output, file));
+  for (const file of ['summary.md', 'summary.csv', 'runs.csv', 'results.json', 'config.json', 'environment.json']) await fs.access(path.join(output, file));
   const results = await fs.readFile(path.join(output, 'results.json'), 'utf8');
   assert.doesNotMatch(results, /data:image|[A-Za-z0-9+/]{512}/);
   assert.doesNotMatch(results, new RegExp(dir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));

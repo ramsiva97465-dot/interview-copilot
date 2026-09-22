@@ -16,7 +16,7 @@ const WATCH = process.argv.includes('--watch');
 // private premium submodule. This opt-in mode still bundles every core Electron
 // entrypoint, but leaves private runtime imports unresolved for the packaged
 // premium build to supply. Normal development and release builds are unchanged.
-const CORE_SMOKE = process.env.NATIVELY_CORE_SMOKE === '1';
+const CORE_SMOKE = process.env.MEETFLOO_CORE_SMOKE === '1';
 const path = require('path');
 const fs = require('fs');
 
@@ -62,14 +62,14 @@ const coreSmokePremiumExternalPlugin = {
 const buildOptions = {
   entryPoints,
   bundle: true,           // resolve all static + dynamic imports so postProcessor
-                         // is inlined and the path rewrite works (vs bundle:false
-                         // which copies files as-is and leaves unresolved relative paths)
+  // is inlined and the path rewrite works (vs bundle:false
+  // which copies files as-is and leaves unresolved relative paths)
   outdir: outDir,
   outbase: rootDir,       // preserve directory structure (electron/main.ts → dist-electron/electron/main.js)
   platform: 'node',
   target: 'node20',
   format: 'cjs',          // Electron loads package.json main as CommonJS in this repo
-                          // (package.json has no "type": "module").
+  // (package.json has no "type": "module").
   external: [
     'electron',
     'better-sqlite3',
@@ -120,14 +120,14 @@ const buildOptions = {
   // BEFORE esbuild's deferred __esm module initializers — a top-level statement
   // inside main.ts gets wrapped in a lazy init that never ran at process start).
   // Under the real-UI eval's rapid app-relaunch load, macOS getaddrinfo returns
-  // spurious ENOTFOUND for api.natively.software (a Railway CNAME), failing the
+  // spurious ENOTFOUND for api.MeetFloo.software (a Railway CNAME), failing the
   // app's fetch() to /v1/pro/verify and /v1/chat and corrupting the eval — even
   // though `dig`/dns.resolve4 resolve it fine. We reroute dns.lookup for that one
   // host to dns.resolve4 (direct DNS query, no getaddrinfo cache). Gated on
-  // NATIVELY_UI_EVAL='1' and idempotent (__nativelyDnsPinned guard), so it is a
+  // MEETFLOO_UI_EVAL='1' and idempotent (__MeetFlooDnsPinned guard), so it is a
   // strict no-op in production and across the multiple bundles that carry it.
   banner: {
-    js: `try{if(process.env.NATIVELY_UI_EVAL==='1'&&!globalThis.__nativelyDnsPinned){globalThis.__nativelyDnsPinned=1;var __dns=require('dns');var __ol=__dns.lookup.bind(__dns);__dns.lookup=function(h,o,cb){if(typeof o==='function'){cb=o;o={};}if(h==='api.natively.software'){return __dns.resolve4(h,function(e,a){if(e||!a||!a.length)return __ol(h,o,cb);if(o&&o.all)return cb(null,[{address:a[0],family:4}]);return cb(null,a[0],4);});}return __ol(h,o,cb);};console.log('[eval] dns.lookup→resolve4 pinned for api.natively.software');}}catch(__e){try{console.warn('[eval] dns pin banner failed:',__e&&__e.message);}catch(_){}}`,
+    js: `try{if(process.env.MEETFLOO_UI_EVAL==='1'&&!globalThis.__MeetFlooDnsPinned){globalThis.__MeetFlooDnsPinned=1;var __dns=require('dns');var __ol=__dns.lookup.bind(__dns);__dns.lookup=function(h,o,cb){if(typeof o==='function'){cb=o;o={};}if(h==='api.MeetFloo.software'){return __dns.resolve4(h,function(e,a){if(e||!a||!a.length)return __ol(h,o,cb);if(o&&o.all)return cb(null,[{address:a[0],family:4}]);return cb(null,a[0],4);});}return __ol(h,o,cb);};console.log('[eval] dns.lookup→resolve4 pinned for api.MeetFloo.software');}}catch(__e){try{console.warn('[eval] dns pin banner failed:',__e&&__e.message);}catch(_){}}`,
   },
   logLevel: 'warning',
 };

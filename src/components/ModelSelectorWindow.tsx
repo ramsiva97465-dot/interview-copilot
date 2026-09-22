@@ -39,7 +39,7 @@ const ModelSelectorWindow = () => {
     // already-committed fix (7c4f3bd2) closed for that window.
     const [interfaceTheme, setInterfaceTheme] = useState<MeetingInterfaceTheme>(() => getMeetingInterfaceTheme());
     const [overlayOpacity, setOverlayOpacity] = useState<number>(() => {
-        const stored = localStorage.getItem('natively_overlay_opacity');
+        const stored = localStorage.getItem('MeetFloo_overlay_opacity');
         const parsed = stored ? parseFloat(stored) : NaN;
         const isUserSet = Number.isFinite(parsed) && parsed !== OVERLAY_OPACITY_DEFAULT;
         return isUserSet ? clampOverlayOpacity(parsed) : getDefaultOverlayOpacity();
@@ -118,7 +118,7 @@ const ModelSelectorWindow = () => {
 
                 // 3. Codex CLI
                 const codexCliConfig = await window.electronAPI?.getCodexCliConfig?.();
-                // Codex is only offered with a usable ChatGPT sign-in (Natively's
+                // Codex is only offered with a usable ChatGPT sign-in (MeetFloo's
                 // own or `codex login`) — the same gate Settings applies. Listing
                 // it regardless let a signed-out user pick a model that routing
                 // then silently answered from another provider (issue #558).
@@ -167,8 +167,8 @@ const ModelSelectorWindow = () => {
                 // Build the list
                 const models: ModelOption[] = [];
 
-                if (creds?.hasNativelyKey) {
-                    models.push({ id: 'natively', name: 'Natively API', type: 'cloud', provider: 'natively' });
+                if (creds?.hasMeetFlooKey) {
+                    models.push({ id: 'MeetFloo', name: 'MeetFloo API', type: 'cloud', provider: 'MeetFloo' });
                 }
 
                 // Cloud Models — standard models + unique preferred models

@@ -4,7 +4,7 @@
 // (ModesManager + KnowledgeManager OKF cards + LLMHelper.streamChat) against
 // the real thesis PDF and a real Gemini key, with okfHybridRetrieval ON.
 // Mirrors scripts/e2e-thesis-real-path.js but uses GEMINI_API_KEY directly
-// (no NATIVELY_API_KEY needed) so it can run with the keys already in .env.
+// (no MEETFLOO_API_KEY needed) so it can run with the keys already in .env.
 //
 // Run:
 //   npm run build:electron
@@ -38,7 +38,7 @@ if (GEMINI_KEYS.length === 0 && GROQ_KEYS.length === 0) {
   process.exit(0);
 }
 
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-okf-live-'));
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-okf-live-'));
 app.setPath('userData', tmpUserData);
 
 const CUSTOM_PROMPT = [
@@ -84,8 +84,8 @@ async function ingestPdfText(pdfPath) {
 
 async function main() {
   await app.whenReady();
-  process.env.NATIVELY_OKF_KNOWLEDGE_PACKS = '1';
-  process.env.NATIVELY_OKF_HYBRID_RETRIEVAL = '1';
+  process.env.MEETFLOO_OKF_KNOWLEDGE_PACKS = '1';
+  process.env.MEETFLOO_OKF_HYBRID_RETRIEVAL = '1';
 
   const pdfPath = path.join(repoRoot, 'Sample thesis for testing.pdf');
   if (!fs.existsSync(pdfPath)) {

@@ -8,7 +8,7 @@
 // Context Intelligence V3 and a second opinion on a V3-owned axis is a source
 // of disagreement rather than of information.
 //
-// THE WORKER IS NOT OPTIONAL. Natively already learned that several ONNX
+// THE WORKER IS NOT OPTIONAL. MeetFloo already learned that several ONNX
 // Runtime sessions on the Electron main thread cause fatal BFCArena::Extend
 // aborts on macOS. Every production loader here runs in its own worker behind
 // an onnxThreadConfig bound and an on-disk poison sentinel, and this one is no

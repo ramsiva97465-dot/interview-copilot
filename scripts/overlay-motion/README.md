@@ -11,7 +11,7 @@ chosen by watching the candidates play in the real overlay side by side:
 Values live in `electron/utils/overlayResizeEasing.mjs`; the height channel's
 branching lives in `src/lib/overlayHeightTween.mjs`.
 
-Because the width is a spring, it retargets in flight natively (framer carries
+Because the width is a spring, it retargets in flight MeetFloo (framer carries
 the current velocity into the new target), so the scroll scanner re-firing
 `startTransition` as code blocks cross the viewport edge needs no special case.
 A tweened width did — that hybrid existed briefly and is gone.
@@ -79,7 +79,7 @@ contrast; just don't read their "after" column as current:
 | --- | --- |
 | `overlay-auto-resize-ab-live.gif` | The real overlay window, two builds side by side, expand only. A snaps to full height; B glides. Captured with `Page.startScreencast` on the overlay target — a desktop grab cannot record a transparent always-on-top window, and the window's edges are the thing being judged. No provider answered during those captures, so the expand shown is the viewport mounting with the question bubble and the thinking dot. |
 | `overlay-auto-resize-ab-harness.gif` | The dev rig, full scenario: open → thinking → answer → code expand (width) → collapse → clear. |
-| `overlay-auto-resize-ab-retarget.gif` | The retarget stress: five expand/collapse flips at 150ms. Only meaningful for a TWEENED width, which is no longer shipped — the width is a spring and retargets natively. |
+| `overlay-auto-resize-ab-retarget.gif` | The retarget stress: five expand/collapse flips at 150ms. Only meaningful for a TWEENED width, which is no longer shipped — the width is a spring and retargets MeetFloo. |
 
 **The contract is on film only in the rig.** In the real overlay it is verified by
 measurement, not by a clip: driving `endMeeting` over CDP on a session that had a
@@ -99,7 +99,7 @@ node scripts/overlay-motion/ab-compose-grid.mjs <out.gif> <label.png> <dir>x4   
 node scripts/overlay-motion/ab-label-grid.mjs <label.png> <cellW> <cellH> <labelH>
 
 # Only relevant if a TWEENED width is ever reconsidered — the shipped width is a
-# spring, which retargets natively and needs no hybrid:
+# spring, which retargets MeetFloo and needs no hybrid:
 node scripts/overlay-motion/ab-retarget-probe.mjs             # tween + spring hybrid
 node scripts/overlay-motion/ab-retarget-probe.mjs 'retarget=tween'   # pure tween
 ```
@@ -142,7 +142,7 @@ sampled per `rAF`):
 
 A fresh transition gets the new curve; a transition retargeted in flight keeps
 the spring's velocity continuity. See `startTransition` in
-`src/components/NativelyInterface.tsx`.
+`src/components/MeetFlooInterface.tsx`.
 
 Live expand on the shipping build — "In two sentences, what is a deadlock?",
 sampled per `rAF` in the overlay renderer (`win` = `window.innerHeight`, i.e. the

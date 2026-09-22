@@ -120,7 +120,7 @@ async function main() {
   const opts = parseArgs(process.argv.slice(2));
   const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
   const version = opts.version || pkg.version;
-  const productName = pkg.build?.productName || pkg.productName || 'Natively';
+  const productName = pkg.build?.productName || pkg.productName || 'MeetFloo';
   const outDir = path.isAbsolute(opts.outDir) ? opts.outDir : path.join(repoRoot, opts.outDir);
 
   const names = macZipNames(productName, version);
@@ -128,7 +128,7 @@ async function main() {
   if (missing.length) {
     console.error(
       `[update-manifest] Missing updater ZIP(s) in ${outDir}:\n  ${missing.join('\n  ')}\n` +
-        '[update-manifest] Refusing to write a manifest that advertises artifacts you do not have.'
+      '[update-manifest] Refusing to write a manifest that advertises artifacts you do not have.'
     );
     process.exit(1);
   }
@@ -167,7 +167,7 @@ async function main() {
     if (bad) {
       console.error(
         '[update-manifest] This manifest does NOT describe these artifacts. electron-updater validates the ' +
-          'downloaded ZIP against sha512, so publishing it means every update fails AFTER a ~1 GB download.'
+        'downloaded ZIP against sha512, so publishing it means every update fails AFTER a ~1 GB download.'
       );
       process.exit(1);
     }

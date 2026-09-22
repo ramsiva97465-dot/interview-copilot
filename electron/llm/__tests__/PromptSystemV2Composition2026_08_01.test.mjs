@@ -1,6 +1,6 @@
 // electron/llm/__tests__/PromptSystemV2Composition2026_08_01.test.mjs
 //
-// Prompt System v2 — pure composer behavior (NATIVELY_V2_BEHAVIOR_TESTS.md
+// Prompt System v2 — pure composer behavior (MEETFLOO_V2_BEHAVIOR_TESTS.md
 // rows 24, 31, 32, 33, 34 plus the composition/size/caching invariants from
 // the integration spec). No providers, no Electron — dist-electron import.
 
@@ -692,11 +692,11 @@ describe('registry / descriptor round-trip (the LLMHelper compatibility hooks)',
 });
 
 describe('flag gating — default ON (promoted), env kill-switch preserves legacy byte-for-byte', () => {
-  const saved = process.env.NATIVELY_PROMPT_SYSTEM_V2;
-  beforeEach(() => { delete process.env.NATIVELY_PROMPT_SYSTEM_V2; });
+  const saved = process.env.MEETFLOO_PROMPT_SYSTEM_V2;
+  beforeEach(() => { delete process.env.MEETFLOO_PROMPT_SYSTEM_V2; });
   afterEach(() => {
-    if (saved === undefined) delete process.env.NATIVELY_PROMPT_SYSTEM_V2;
-    else process.env.NATIVELY_PROMPT_SYSTEM_V2 = saved;
+    if (saved === undefined) delete process.env.MEETFLOO_PROMPT_SYSTEM_V2;
+    else process.env.MEETFLOO_PROMPT_SYSTEM_V2 = saved;
   });
 
   test('the resolver is ON by default (promoted 2026-08-02) and composes', () => {
@@ -705,9 +705,9 @@ describe('flag gating — default ON (promoted), env kill-switch preserves legac
   });
 
   test('the env kill-switch reverts to the legacy path (resolver null)', () => {
-    process.env.NATIVELY_PROMPT_SYSTEM_V2 = '0';
+    process.env.MEETFLOO_PROMPT_SYSTEM_V2 = '0';
     assert.equal(v2.resolveV2SystemPrompt({ action: 'recap', tier: 'cloud', activeMode: null }), null);
-    delete process.env.NATIVELY_PROMPT_SYSTEM_V2;
+    delete process.env.MEETFLOO_PROMPT_SYSTEM_V2;
   });
 
   test('tier mapping: tiny → local, full/undefined → cloud', () => {

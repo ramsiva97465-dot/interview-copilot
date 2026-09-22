@@ -13,7 +13,7 @@ import type { Ctx, StageConfig, ToasterId } from './orchestrator';
 /**
  * Engagement policy for the review prompt, mirrored from the review ledger
  * (electron/services/ReviewPromptLogic.ts, and its backend twin in
- * natively-api/reviews.js). Restated here because this module is renderer-side
+ * MeetFloo-api/reviews.js). Restated here because this module is renderer-side
  * and cannot import from electron/ — the ReviewPromptLogic header already
  * documents that this trio must be kept in sync.
  *
@@ -140,11 +140,11 @@ export const STAGES: StageConfig[] = [
     },
     requiresStages: ['modes_manager'],
     skipWhen: (s) =>
-      s.hasNativelyKey ||
+      s.hasMeetFlooKey ||
       s.hasTrialToken ||
       s.isPremium,
     cooldownMs: () => 21 * 24 * 60 * 60 * 1000, // 21 days
-    reEligibility: (s) => !s.hasNativelyKey && !s.hasTrialToken && !s.isPremium,
+    reEligibility: (s) => !s.hasMeetFlooKey && !s.hasTrialToken && !s.isPremium,
   },
 
   // ──────────────────────────────────────────────────────────────

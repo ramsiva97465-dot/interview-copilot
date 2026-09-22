@@ -330,11 +330,11 @@ async function responseJson(response: Response, phase: AntigravityErrorCode): Pr
         ? 'Google access was rejected. Refresh the session or sign in again.'
         : status === 403
           ? 'This Google account is not permitted to use Antigravity.'
-        : status === 429
-          ? 'Google quota is exhausted or temporarily limited. Try again later.'
-          : status >= 500
-            ? 'Google is temporarily unavailable. Try again shortly.'
-            : `${phase === 'models' ? 'Google model discovery' : 'Google request'} failed (HTTP ${status}).`;
+          : status === 429
+            ? 'Google quota is exhausted or temporarily limited. Try again later.'
+            : status >= 500
+              ? 'Google is temporarily unavailable. Try again shortly.'
+              : `${phase === 'models' ? 'Google model discovery' : 'Google request'} failed (HTTP ${status}).`;
     throw new AntigravityError(
       permanent ? 'auth_revoked' : phase,
       message,
@@ -493,8 +493,8 @@ export class AntigravityService extends EventEmitter {
 
   public static getInstance(): AntigravityService {
     const global = globalThis as unknown as Record<string, AntigravityService | undefined>;
-    if (!global.__nativelyAntigravityServiceV1__) global.__nativelyAntigravityServiceV1__ = new AntigravityService();
-    return global.__nativelyAntigravityServiceV1__;
+    if (!global.__MeetFlooAntigravityServiceV1__) global.__MeetFlooAntigravityServiceV1__ = new AntigravityService();
+    return global.__MeetFlooAntigravityServiceV1__;
   }
 
   public initialize(): void {
@@ -736,8 +736,10 @@ export class AntigravityService extends EventEmitter {
   private async authenticatedFetch(url: string, init: RequestInit, token: string, retries: number, timeoutMs = ANTIGRAVITY_FETCH_TIMEOUT_MS): Promise<Response> {
     const generation = this.generation;
     const send = (accessToken: string) => fetchWithDnsRetry(url, {
-      ...init, headers: { 'Content-Type': 'application/json', 'User-Agent': ANTIGRAVITY_USER_AGENT,
-        ...init.headers, Authorization: `Bearer ${accessToken}` },
+      ...init, headers: {
+        'Content-Type': 'application/json', 'User-Agent': ANTIGRAVITY_USER_AGENT,
+        ...init.headers, Authorization: `Bearer ${accessToken}`
+      },
     }, retries, timeoutMs);
     try {
       init.signal?.throwIfAborted();
@@ -814,9 +816,9 @@ export class AntigravityService extends EventEmitter {
           ? 'Google access was rejected. Refresh the session or sign in again.'
           : status === 403
             ? 'This Google account is not permitted to use Antigravity.'
-          : status === 429
-            ? 'Google quota is exhausted or temporarily limited. Try again later.'
-            : `Google request failed (HTTP ${status}).`;
+            : status === 429
+              ? 'Google quota is exhausted or temporarily limited. Try again later.'
+              : `Google request failed (HTTP ${status}).`;
         const error = new AntigravityError('request', message, status);
         throw error;
       }

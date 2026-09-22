@@ -1,7 +1,7 @@
 {
   "id": "SALES-DISC-L",
   "category": "sales",
-  "natively_mode": "sales",
+  "MeetFloo_mode": "sales",
   "length_bucket": "long",
   "speakers": [
     {

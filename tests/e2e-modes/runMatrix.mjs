@@ -10,8 +10,8 @@
 //
 // Writes everything to test-results/modes-autopilot/run-N/.
 //
-// Env: NATIVELY_API_BASE (default http://localhost:3000), RUN_N (default 1),
-//      NATIVELY_E2E_LOCAL_TEST_TOKEN (default local-test), JUDGE=1 to enable
+// Env: MEETFLOO_API_BASE (default http://localhost:3000), RUN_N (default 1),
+//      MEETFLOO_E2E_LOCAL_TEST_TOKEN (default local-test), JUDGE=1 to enable
 //      the semantic LLM-judge pass.
 //
 // Usage: node tests/e2e-modes/runMatrix.mjs
@@ -30,7 +30,7 @@ const REPO = path.resolve(__dirname, '../..');
 const GEN_DIR = path.join(REPO, 'test-results/modes-autopilot/generated-modes');
 const RUN_N = process.env.RUN_N || '1';
 const OUT_DIR = path.join(REPO, `test-results/modes-autopilot/run-${RUN_N}`);
-const LOCAL_TOKEN = process.env.NATIVELY_LOCAL_TEST_TOKEN || 'local-test';
+const LOCAL_TOKEN = process.env.MEETFLOO_LOCAL_TEST_TOKEN || 'local-test';
 const ASK_TIMEOUT = Number(process.env.ASK_TIMEOUT_MS || 90000);
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -59,14 +59,14 @@ async function main() {
   const geminiKeys = loadGeminiKeysFromEnv();
   const launchEnv = {
     ...process.env,
-    NATIVELY_E2E: '1',
-    NATIVELY_API_URL: process.env.NATIVELY_API_BASE || 'http://localhost:3000',
+    MEETFLOO_E2E: '1',
+    MEETFLOO_API_URL: process.env.MEETFLOO_API_BASE || 'http://localhost:3000',
     NODE_ENV: 'development',
-    NATIVELY_DEV_BYPASS_SCREEN_TCC: '1',
-    NATIVELY_E2E_LOCAL_TEST_TOKEN: LOCAL_TOKEN,
+    MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1',
+    MEETFLOO_E2E_LOCAL_TEST_TOKEN: LOCAL_TOKEN,
     OPENAI_API_KEY: '',
     OLLAMA_URL: 'http://127.0.0.1:1',  // dead — force Gemini to win over any local Ollama
-    NATIVELY_GEMINI_EMBED_DIMS: '768',
+    MEETFLOO_GEMINI_EMBED_DIMS: '768',
   };
   // Inject the pool as GEMINI_API_KEY(_2.._N) so main.ts's pool-gatherer picks them all up.
   geminiKeys.forEach((k, i) => { launchEnv[i === 0 ? 'GEMINI_API_KEY' : `GEMINI_API_KEY_${i + 1}`] = k; });
@@ -79,7 +79,7 @@ async function main() {
     timeout: 60000,
   });
   await app.firstWindow({ timeout: 30000 });
-  await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => {});
+  await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => { });
   const w = () => app.windows()[0];
   // Resilient invoke: heavy grounded indexing can crash the Electron renderer
   // ("Target crashed"). Rather than abort the whole run, relaunch the app (the DB
@@ -106,25 +106,25 @@ async function main() {
             const fsp = await import('node:fs/promises');
             const lockDir = `${os.homedir()}/Library/Application Support/Electron`;
             await Promise.all(['SingletonLock', 'SingletonCookie', 'SingletonSocket']
-              .map((f) => fsp.unlink(`${lockDir}/${f}`).catch(() => {})));
+              .map((f) => fsp.unlink(`${lockDir}/${f}`).catch(() => { })));
           } catch { /* best-effort, non-fatal */ }
           // A crashed instance can leave orphaned Helper (network/GPU utility)
           // processes bound to this run's --user-data-dir; those alone were
           // enough to make the relaunch's fresh Electron.launch() itself fail
           // ("Process failed to launch!"), which then exhausted all 6 relaunch
-          // attempts. Kill any Electron Helper still holding a natively-e2e
+          // attempts. Kill any Electron Helper still holding a MeetFloo-e2e
           // temp profile before retrying.
           try {
             const { execSync } = await import('node:child_process');
-            execSync("pkill -9 -f 'natively-e2e-udd' 2>/dev/null || true");
+            execSync("pkill -9 -f 'MeetFloo-e2e-udd' 2>/dev/null || true");
           } catch { /* best-effort, non-fatal */ }
           await new Promise((r) => setTimeout(r, 2500));
           try {
             const { _electron: e2 } = await import('@playwright/test');
             app = await e2.launch({ args: ['dist-electron/electron/main.js'], env: launchEnv, timeout: 60000 });
             await app.firstWindow({ timeout: 30000 });
-            await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => {});
-            await app.windows()[0].evaluate(async () => (window.electronAPI || window.api).e2eInvoke('__e2e__:enable-pro')).catch(() => {});
+            await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => { });
+            await app.windows()[0].evaluate(async () => (window.electronAPI || window.api).e2eInvoke('__e2e__:enable-pro')).catch(() => { });
           } catch (relaunchErr) {
             // Relaunch itself failed — don't let it escape uncaught; fall through
             // to the retry loop (attempt+1) which will try again up to attempt===3.
@@ -215,13 +215,13 @@ async function main() {
         }
         await new Promise((r) => setTimeout(r, 2000));
       }
-      await R('__e2e__:prewarm-mode', modeId).catch(() => {});
+      await R('__e2e__:prewarm-mode', modeId).catch(() => { });
       await new Promise((r) => setTimeout(r, 1000));
       const vectorReady = allReady(statuses);
       modeRec.indexReady = vectorReady;
       modeRec.ingested = ingested;
       modeRec.indexStatuses = statuses;
-      log(`  ingested ${ingested.filter((x) => x.ok).length}/${plan.documents.length}, vectorReady=${vectorReady}, statuses=${JSON.stringify(statuses.map((s)=>s.status))}`);
+      log(`  ingested ${ingested.filter((x) => x.ok).length}/${plan.documents.length}, vectorReady=${vectorReady}, statuses=${JSON.stringify(statuses.map((s) => s.status))}`);
     }
 
     // 3. detection precision: statements must not fire, a real question must
@@ -348,7 +348,7 @@ async function main() {
     fs.writeFileSync(path.join(OUT_DIR, `mode-${plan.key}.json`), JSON.stringify(modeRec, null, 2));
   }
 
-  await app.close().catch(() => {});
+  await app.close().catch(() => { });
 
   // Judge-verdicts artifact: every semantic criterion + its verdict, for audit.
   const judgeArtifact = {

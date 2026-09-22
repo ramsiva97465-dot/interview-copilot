@@ -18,9 +18,9 @@ export interface ModelCapabilities {
 }
 
 const TIER_BUDGETS: Record<ModelTier, { max: number; system: number; output: number }> = {
-  'cloud':       { max: 128_000, system: 4000, output: 4000 },
-  'local-large': { max: 32_000,  system: 1500, output: 4000 },
-  'local-small': { max: 8_000,   system: 800,  output: 2000 },
+  'cloud': { max: 128_000, system: 4000, output: 4000 },
+  'local-large': { max: 32_000, system: 1500, output: 4000 },
+  'local-small': { max: 8_000, system: 800, output: 2000 },
 };
 
 // Native (model-card) context windows for known Ollama families.
@@ -39,7 +39,7 @@ const KNOWN_OLLAMA_NATIVE_CTX: Array<[RegExp, number]> = [
 ];
 
 /**
- * Strip Natively's own routing prefix, and then the upstream segment a gateway
+ * Strip MeetFloo's own routing prefix, and then the upstream segment a gateway
  * puts in front of the real model name.
  *
  * WHY (2026-09-03): every predicate below matches a BARE id with `startsWith`,
@@ -80,7 +80,7 @@ export function stripProviderRoutingPrefix(id: string): string {
 // Models ids we treat as cloud regardless of provider hint.
 function isCloudIdentifier(id: string): boolean {
   const s = id.toLowerCase();
-  if (s === 'natively' || s.startsWith('natively-')) return true;
+  if (s === 'MeetFloo' || s.startsWith('MeetFloo-')) return true;
   if (s.startsWith('gemini-') || s.startsWith('models/gemini')) return true;
   if (s.startsWith('gpt-') || s.startsWith('o1-') || s.startsWith('o3-') || s.startsWith('o4-') || s.startsWith('chatgpt-')) return true;
   if (s.startsWith('claude-')) return true;
@@ -197,7 +197,7 @@ export function getModelCapabilities(modelId: string, isOllama: boolean): ModelC
     const b = TIER_BUDGETS['cloud'];
     const supportsImages = lower.startsWith('gemini-') || lower.startsWith('claude-')
       || lower.startsWith('gpt-4o') || lower.startsWith('gpt-4.1') || lower.startsWith('gpt-5')
-      || lower === 'natively' || lower.startsWith('natively-')
+      || lower === 'MeetFloo' || lower.startsWith('MeetFloo-')
       || gatewayVisionHint;
     return {
       tier: 'cloud',

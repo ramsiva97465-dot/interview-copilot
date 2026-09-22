@@ -21,7 +21,7 @@
 // language_detected) immediately re-assign pendingConnectTimer AFTER
 // calling closeUpstream(), so the clear-then-reassign sequence is correct.
 //
-// Strategy: load compiled NativelyProSTT, force each timer field to a
+// Strategy: load compiled MeetFlooProSTT, force each timer field to a
 // real setTimeout handle, call closeUpstream(), and assert every field
 // is null afterward. Then drive the broader scenario: language change
 // during a reconnect window — must not produce two connect() invocations.
@@ -40,7 +40,7 @@ Module._load = function patchedLoad(request, _parent, _isMain) {
     if (request === 'electron') {
         return {
             app: {
-                getAppPath: () => '/tmp/fake-natively-app',
+                getAppPath: () => '/tmp/fake-MeetFloo-app',
                 isPackaged: false,
                 isReady: () => false,
             },
@@ -49,22 +49,22 @@ Module._load = function patchedLoad(request, _parent, _isMain) {
     return origLoad.apply(this, arguments);
 };
 
-const { NativelyProSTT } = await import(pathToFileURL(path.join(distRoot, 'NativelyProSTT.js')).href);
+const { MeetFlooProSTT } = await import(pathToFileURL(path.join(distRoot, 'MeetFlooProSTT.js')).href);
 
 test('closeUpstream() must clear reconnectTimer, stabilityTimer, and pendingConnectTimer', async () => {
-    const stt = new NativelyProSTT('close-upstream-key', 'mic');
+    const stt = new MeetFlooProSTT('close-upstream-key', 'mic');
 
     // Plant a real timer in each of the three owned fields. Use long delays
     // so they cannot fire during the test if cleanup is buggy. Each timer's
     // body records its own firing so we can assert below.
     const fired = { reconnect: false, stability: false, pending: false };
-    stt.reconnectTimer      = setTimeout(() => { fired.reconnect  = true; }, 5_000);
-    stt.stabilityTimer      = setTimeout(() => { fired.stability  = true; }, 5_000);
-    stt.pendingConnectTimer = setTimeout(() => { fired.pending    = true; }, 5_000);
+    stt.reconnectTimer = setTimeout(() => { fired.reconnect = true; }, 5_000);
+    stt.stabilityTimer = setTimeout(() => { fired.stability = true; }, 5_000);
+    stt.pendingConnectTimer = setTimeout(() => { fired.pending = true; }, 5_000);
 
     // Sanity: every field is currently a non-null Timeout reference.
-    assert.notEqual(stt.reconnectTimer,      null);
-    assert.notEqual(stt.stabilityTimer,      null);
+    assert.notEqual(stt.reconnectTimer, null);
+    assert.notEqual(stt.stabilityTimer, null);
     assert.notEqual(stt.pendingConnectTimer, null);
 
     // Act: closeUpstream() should clear all three.
@@ -92,7 +92,7 @@ test('closeUpstream() must clear reconnectTimer, stabilityTimer, and pendingConn
     await new Promise((r) => setTimeout(r, 50));
     assert.equal(fired.reconnect, false, 'reconnectTimer must not fire after closeUpstream()');
     assert.equal(fired.stability, false, 'stabilityTimer must not fire after closeUpstream()');
-    assert.equal(fired.pending,   false, 'pendingConnectTimer must not fire after closeUpstream()');
+    assert.equal(fired.pending, false, 'pendingConnectTimer must not fire after closeUpstream()');
 });
 
 test('stop() followed by an orphan timer that survived closeUpstream() must not invoke connect()', async () => {
@@ -108,7 +108,7 @@ test('stop() followed by an orphan timer that survived closeUpstream() must not 
     // the field null after stop() returns. Calling start() then waiting
     // past the original timer's fire-time should NOT call connect() from
     // the orphan.
-    const stt = new NativelyProSTT('orphan-key', 'mic');
+    const stt = new MeetFlooProSTT('orphan-key', 'mic');
 
     let connectCalls = 0;
     stt.connect = function (_skipStagger = false) { connectCalls++; };
@@ -149,7 +149,7 @@ test('language_detected reconnect after closeUpstream() clears prior timers (no 
     // pendingConnectTimer for 250 ms. After my fix, closeUpstream() should
     // also clear the leftover reconnectTimer from the prior cycle so that
     // the only timer alive is the 250 ms pendingConnectTimer.
-    const stt = new NativelyProSTT('lang-and-reconnect-key', 'mic');
+    const stt = new MeetFlooProSTT('lang-and-reconnect-key', 'mic');
 
     let connectCalls = 0;
     stt.connect = function (_skipStagger = false) {
@@ -161,7 +161,7 @@ test('language_detected reconnect after closeUpstream() clears prior timers (no 
 
     stt.isActive = true;
     stt.isConnected = true;
-    stt.ws = { close() {}, removeAllListeners() {}, readyState: 1 };
+    stt.ws = { close() { }, removeAllListeners() { }, readyState: 1 };
 
     // Plant a leftover reconnectTimer (simulating a prior 1006 cycle).
     stt.reconnectTimer = setTimeout(() => {

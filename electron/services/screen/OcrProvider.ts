@@ -2,7 +2,7 @@
 //
 // LEGACY OCR PATH — RUNTIME-DISABLED (2026-05-17)
 // =====================================================================
-// Natively now uses vision-provider screen understanding by default.
+// MeetFloo now uses vision-provider screen understanding by default.
 // This module is retained for two reasons:
 //   1. Existing tests still verify the OCR interface contract.
 //   2. A future explicit OCR-only mode could be reintroduced by toggling
@@ -12,7 +12,7 @@
 // =====================================================================
 //
 // Original purpose:
-// Unified OCR provider interface for Natively.
+// Unified OCR provider interface for MeetFloo.
 // Supports: macOS Apple Vision, Windows OCR, RapidOCR, Tesseract.js
 
 import { createRequire } from 'node:module';
@@ -121,7 +121,7 @@ async function prepareImageForOcr(imagePath: string, maxDimension = 1600): Promi
     return { path: imagePath };
   }
 
-  const tempPath = path.join(os.tmpdir(), `natively-ocr-${uuidv4()}.png`);
+  const tempPath = path.join(os.tmpdir(), `MeetFloo-ocr-${uuidv4()}.png`);
   await sharp(imagePath)
     .resize({ width: maxDimension, height: maxDimension, fit: 'inside', withoutEnlargement: true })
     .grayscale()
@@ -165,7 +165,7 @@ export class TesseractOcrAdapter implements OcrProviderAdapter {
         {
           ...assetPaths,
           logger: (m: any) => {
-            if (process.env.NATIVELY_OCR_DEBUG === '1' && m.status === 'recognizing text') {
+            if (process.env.MEETFLOO_OCR_DEBUG === '1' && m.status === 'recognizing text') {
               console.log(`[TesseractOCR] progress: ${Math.round(m.progress * 100)}%`);
             }
           },

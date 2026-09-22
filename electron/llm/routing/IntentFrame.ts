@@ -40,7 +40,7 @@ export type DialogueAct =
     | 'interruption';
 
 /**
- * Whether Natively should respond at all.
+ * Whether MeetFloo should respond at all.
  *
  * This is the axis the campaign turns on. Measured production telemetry shows
  * 6.1% of live generations end in a silence string, and 95.9% of those land on
@@ -120,7 +120,7 @@ export type Provenance = 'rules' | 'primary' | 'escalation' | 'timeout_fallback'
  * questions, which is the exact criticism the Phase 1 audit made of the system
  * it set out to replace.
  *
- * What V3 has no notion of is whether Natively should speak at all. That is
+ * What V3 has no notion of is whether MeetFloo should speak at all. That is
  * deliberate: `buildV3ForTranscriptSurface` returns null when no question
  * resolves, because "proactivity is the product feature". The turns it hands
  * back are the ambient live audio, and measured production telemetry puts 6.1%

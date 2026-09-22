@@ -94,7 +94,7 @@ test('and each of those files exists in the built output', () => {
 test('the asar rewrite is OPT-IN, not the default', () => {
   // The whole defect in one assertion: a caller that does not ask must not be
   // rewritten, or adding a resolver call silently breaks packaged builds.
-  const asarDir = '/Applications/Natively.app/Contents/Resources/app.asar/dist-electron/electron';
+  const asarDir = '/Applications/MeetFloo.app/Contents/Resources/app.asar/dist-electron/electron';
 
   const notAsked = resolveBundledScript(asarDir, ['services', 'thing.js'], { exists: () => true });
   assert.ok(notAsked.includes('app.asar/'), `default must stay inside the archive: ${notAsked}`);
@@ -108,7 +108,7 @@ test('the asar rewrite is OPT-IN, not the default', () => {
 test('the rag workers still opt in — they load a native addon', () => {
   // onnxruntime / llama.cpp cannot be dlopened from inside an archive, so these
   // two must keep the rewrite regardless of what the default becomes.
-  const asarDir = '/Applications/Natively.app/Contents/Resources/app.asar/dist-electron/electron/services/reranking';
+  const asarDir = '/Applications/MeetFloo.app/Contents/Resources/app.asar/dist-electron/electron/services/reranking';
   for (const worker of ['localRerankerWorker.js', 'ggufRerankerWorker.js']) {
     const resolved = resolveRagWorker(asarDir, worker, () => true);
     assert.ok(resolved.includes('app.asar.unpacked'), `${worker}: ${resolved}`);

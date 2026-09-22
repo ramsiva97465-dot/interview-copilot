@@ -29,7 +29,7 @@ describe('where the control applies', () => {
   });
 
   test('shown for every port whose cost is a round trip', () => {
-    for (const kind of ['natively', 'openrouter', 'jina', 'extension']) {
+    for (const kind of ['MeetFloo', 'openrouter', 'jina', 'extension']) {
       assert.equal(candidateControlApplies(kind), true, kind);
     }
   });

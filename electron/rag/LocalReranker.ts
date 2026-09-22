@@ -80,7 +80,7 @@ let startupPoisoned = false;
  * is a twelfth of the size, nine times faster, and actually improves the
  * ranking. Both are q8, so the dtype default below is unchanged.
  *
- * Override via NATIVELY_RERANKER_MODEL for experimentation.
+ * Override via MEETFLOO_RERANKER_MODEL for experimentation.
  */
 const DEFAULT_RERANKER_MODEL = 'Xenova/ms-marco-MiniLM-L-6-v2';
 
@@ -92,14 +92,14 @@ const DEFAULT_RERANKER_MODEL = 'Xenova/ms-marco-MiniLM-L-6-v2';
  * reranker missing on every packaged launch.
  */
 export function getBundledRerankerModelId(): string {
-  // Deliberately NOT honouring NATIVELY_RERANKER_MODEL. That variable selects
-  // which model to LOAD; this function answers what the INSTALLER SHIPPED, and
-  // the two are different questions. Reading the env here made the preflight
-  // look in resources/models for a model that was never bundled, fail, and show
-  // the user "Natively's packaged <override> is missing. Please reinstall
-  // Natively." — blaming the install for a deliberate override, and naming a
-  // model the installer has no reason to contain.
-  return DEFAULT_RERANKER_MODEL;
+    // Deliberately NOT honouring MEETFLOO_RERANKER_MODEL. That variable selects
+    // which model to LOAD; this function answers what the INSTALLER SHIPPED, and
+    // the two are different questions. Reading the env here made the preflight
+    // look in resources/models for a model that was never bundled, fail, and show
+    // the user "MeetFloo's packaged <override> is missing. Please reinstall
+    // MeetFloo." — blaming the install for a deliberate override, and naming a
+    // model the installer has no reason to contain.
+    return DEFAULT_RERANKER_MODEL;
 }
 
 /**
@@ -111,11 +111,11 @@ function fallbackUserDataDir(): string {
     const home = process.env.HOME || process.env.USERPROFILE || process.cwd();
     switch (process.platform) {
         case 'darwin':
-            return path.join(home, 'Library', 'Application Support', 'natively');
+            return path.join(home, 'Library', 'Application Support', 'MeetFloo');
         case 'win32':
-            return path.join(process.env.APPDATA || path.join(home, 'AppData', 'Roaming'), 'natively');
+            return path.join(process.env.APPDATA || path.join(home, 'AppData', 'Roaming'), 'MeetFloo');
         default:
-            return path.join(process.env.XDG_CONFIG_HOME || path.join(home, '.config'), 'natively');
+            return path.join(process.env.XDG_CONFIG_HOME || path.join(home, '.config'), 'MeetFloo');
     }
 }
 
@@ -154,7 +154,7 @@ class LocalRerankerImpl {
         // bge-reranker-base is q8 (onnx/model_quantized.onnx), so mixing them
         // asks for a variant the repo never shipped and latches loadFailed with
         // a message that names neither the env var nor the selection.
-        const envModel = (process.env.NATIVELY_RERANKER_MODEL || '').trim();
+        const envModel = (process.env.MEETFLOO_RERANKER_MODEL || '').trim();
         const effective = envModel ? null : selected;
         this.modelId = envModel || selected?.modelId || DEFAULT_RERANKER_MODEL;
         // Resolve the bundled model dir with the same candidate-search pattern
@@ -170,22 +170,22 @@ class LocalRerankerImpl {
         // `quantized: true` is ignored). q8 loads model_quantized.onnx
         // (~280MB) instead of the fp32 model.onnx (~1.1GB) — the bundled
         // download fetches the quantized variant, so this keeps both the
-        // installer and the loaded footprint small. NATIVELY_RERANKER_DTYPE
+        // installer and the loaded footprint small. MEETFLOO_RERANKER_DTYPE
         // overrides (e.g. 'fp32') for accuracy experiments.
         // dtype is PER MODEL, not global. bge-reranker-base ships
         // `onnx/model_quantized.onnx` (q8); the Ettin repositories ship
         // `onnx/model.onnx` (fp32) plus architecture-specific int8 exports that
         // cannot be one cross-platform choice. Applying the q8 default to an
         // Ettin model asks transformers.js for a file that is not there.
-        this.dtype = (process.env.NATIVELY_RERANKER_DTYPE || '').trim()
+        this.dtype = (process.env.MEETFLOO_RERANKER_DTYPE || '').trim()
             || effective?.dtype
             || 'q8';
     }
 
     private static resolveModelPath(modelId: string): string {
         const candidates: string[] = [];
-        if (process.env.NATIVELY_LOCAL_MODELS_PATH) {
-            candidates.push(process.env.NATIVELY_LOCAL_MODELS_PATH);
+        if (process.env.MEETFLOO_LOCAL_MODELS_PATH) {
+            candidates.push(process.env.MEETFLOO_LOCAL_MODELS_PATH);
         }
         // 2026-07-06: lazy-download user-data cache is the primary location
         // (populated by the catalogue installer when a model is downloaded).

@@ -24,7 +24,7 @@ const require = createRequire(import.meta.url);
 const root = path.resolve(__dirname, '../../..');
 
 const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cr06-'));
-process.env.NATIVELY_TEST_USERDATA = userData;
+process.env.MEETFLOO_TEST_USERDATA = userData;
 
 const electronPath = require.resolve('electron');
 require.cache[electronPath] = {
@@ -40,7 +40,7 @@ const Database = require(path.join(root, 'node_modules/better-sqlite3'));
 const sqliteVec = require(path.join(root, 'node_modules/sqlite-vec'));
 
 const MARKER = 'pending_page_count_repair';
-const dbPath = path.join(userData, 'natively.db');
+const dbPath = path.join(userData, 'MeetFloo.db');
 
 const openManager = () => { DatabaseManager.instance = undefined; return DatabaseManager.getInstance(); };
 const raw = () => {
@@ -95,7 +95,7 @@ before(() => {
   db.close();
 });
 
-after(() => { try { fs.rmSync(userData, { recursive: true, force: true }); } catch {} });
+after(() => { try { fs.rmSync(userData, { recursive: true, force: true }); } catch { } });
 
 describe('a failed DATA repair must not block the SCHEMA chain', () => {
   test('better-sqlite3 actually loaded (otherwise everything here is vacuous)', () => {

@@ -107,19 +107,23 @@ describe('TurnPlanner: availability-gated probe ordering', () => {
   });
 
   test('jd_question with profile but no JD → still routes jd_question (probe profile only)', () => {
-    const plan = planTurn({ question: 'what is the job regarding', availability: {
-      ...NO_AVAILABILITY,
-      hasProfileFacts: true,
-    } });
+    const plan = planTurn({
+      question: 'what is the job regarding', availability: {
+        ...NO_AVAILABILITY,
+        hasProfileFacts: true,
+      }
+    });
     assert.equal(plan.questionKind, 'jd_question');
     assert.deepEqual(plan.evidenceSourcesToProbe, ['profile_resume'],
       'jd_question routing is by question_kind; with no JD loaded, only profile probe is attempted');
   });
 
   test('doc_question with reference files routes to reference_files probe', () => {
-    const plan = planTurn({ question: 'summarize the deck', availability: {
-      ...NO_AVAILABILITY, hasReferenceFiles: true,
-    } });
+    const plan = planTurn({
+      question: 'summarize the deck', availability: {
+        ...NO_AVAILABILITY, hasReferenceFiles: true,
+      }
+    });
     assert.equal(plan.questionKind, 'doc_question');
     assert.deepEqual(plan.evidenceSourcesToProbe, ['reference_files']);
   });
@@ -145,8 +149,8 @@ describe('TurnPlanner: groundingProfile resolution order (iter12)', () => {
   // silently reorder them.
 
   test('tier 1 — sourceContract.groundingProfile override beats everything (even env flag)', () => {
-    const prev = process.env.NATIVELY_SEMINAR_MODE;
-    process.env.NATIVELY_SEMINAR_MODE = '1'; // also try to flip via env
+    const prev = process.env.MEETFLOO_SEMINAR_MODE;
+    process.env.MEETFLOO_SEMINAR_MODE = '1'; // also try to flip via env
     try {
       const plan = planTurn({
         question: 'any',
@@ -165,14 +169,14 @@ describe('TurnPlanner: groundingProfile resolution order (iter12)', () => {
       assert.equal(plan.groundingProfile.onNoEvidence, 'refuse',
         'tier 1: sourceContract.groundingProfile MUST win over env flag (which would have given say_not_found...)');
     } finally {
-      if (prev === undefined) delete process.env.NATIVELY_SEMINAR_MODE;
-      else process.env.NATIVELY_SEMINAR_MODE = prev;
+      if (prev === undefined) delete process.env.MEETFLOO_SEMINAR_MODE;
+      else process.env.MEETFLOO_SEMINAR_MODE = prev;
     }
   });
 
   test('tier 2 — sourceContract.templateType === "seminar" emits strict profile without env flag', () => {
-    const prev = process.env.NATIVELY_SEMINAR_MODE;
-    delete process.env.NATIVELY_SEMINAR_MODE; // ensure env is OFF
+    const prev = process.env.MEETFLOO_SEMINAR_MODE;
+    delete process.env.MEETFLOO_SEMINAR_MODE; // ensure env is OFF
     try {
       const plan = planTurn({
         question: 'any',
@@ -187,14 +191,14 @@ describe('TurnPlanner: groundingProfile resolution order (iter12)', () => {
       assert.equal(plan.groundingProfile.onNoEvidence, 'say_not_found_then_answer_general',
         'tier 2: per-mode templateType seminar must emit strict profile even without env flag');
     } finally {
-      if (prev === undefined) delete process.env.NATIVELY_SEMINAR_MODE;
-      else process.env.NATIVELY_SEMINAR_MODE = prev;
+      if (prev === undefined) delete process.env.MEETFLOO_SEMINAR_MODE;
+      else process.env.MEETFLOO_SEMINAR_MODE = prev;
     }
   });
 
   test('tier 3 — env flag fires only when tiers 1+2 are absent', () => {
-    const prev = process.env.NATIVELY_SEMINAR_MODE;
-    process.env.NATIVELY_SEMINAR_MODE = '1';
+    const prev = process.env.MEETFLOO_SEMINAR_MODE;
+    process.env.MEETFLOO_SEMINAR_MODE = '1';
     try {
       // sourceContract absent — both tiers 1+2 fall through.
       const plan = planTurn({
@@ -205,14 +209,14 @@ describe('TurnPlanner: groundingProfile resolution order (iter12)', () => {
       assert.equal(plan.groundingProfile.evidencePreference, 'required',
         'tier 3: env flag (legacy migration window) still works');
     } finally {
-      if (prev === undefined) delete process.env.NATIVELY_SEMINAR_MODE;
-      else process.env.NATIVELY_SEMINAR_MODE = prev;
+      if (prev === undefined) delete process.env.MEETFLOO_SEMINAR_MODE;
+      else process.env.MEETFLOO_SEMINAR_MODE = prev;
     }
   });
 
   test('tier 4 — DEFAULT when nothing is set (the 7 built-in modes case)', () => {
-    const prev = process.env.NATIVELY_SEMINAR_MODE;
-    delete process.env.NATIVELY_SEMINAR_MODE;
+    const prev = process.env.MEETFLOO_SEMINAR_MODE;
+    delete process.env.MEETFLOO_SEMINAR_MODE;
     try {
       const plan = planTurn({
         question: 'any',
@@ -223,8 +227,8 @@ describe('TurnPlanner: groundingProfile resolution order (iter12)', () => {
       assert.equal(plan.groundingProfile.evidencePreference, 'preferred');
       assert.equal(plan.groundingProfile.onNoEvidence, 'answer_general_labeled');
     } finally {
-      if (prev === undefined) delete process.env.NATIVELY_SEMINAR_MODE;
-      else process.env.NATIVELY_SEMINAR_MODE = prev;
+      if (prev === undefined) delete process.env.MEETFLOO_SEMINAR_MODE;
+      else process.env.MEETFLOO_SEMINAR_MODE = prev;
     }
   });
 });

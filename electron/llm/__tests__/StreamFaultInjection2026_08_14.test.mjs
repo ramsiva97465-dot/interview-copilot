@@ -44,7 +44,7 @@ async function withEnv(vars, fn) {
 describe('the switches are OFF unless explicitly requested', () => {
   test('no env vars -> both disabled', async () => {
     await withEnv(
-      { NATIVELY_TEST_FAIL_STREAM_AFTER_CHARS: undefined, NATIVELY_TEST_STREAM_OUTPUT_CHARS: undefined },
+      { MEETFLOO_TEST_FAIL_STREAM_AFTER_CHARS: undefined, MEETFLOO_TEST_STREAM_OUTPUT_CHARS: undefined },
       (m) => {
         assert.equal(m.failStreamAfterChars(), null);
         assert.equal(m.testOutputCharCeiling(), null);
@@ -59,7 +59,7 @@ describe('the switches are OFF unless explicitly requested', () => {
     // answer to nothing.
     for (const bad of ['0', '-5', 'lots', '', 'NaN']) {
       await withEnv(
-        { NATIVELY_TEST_FAIL_STREAM_AFTER_CHARS: bad, NATIVELY_TEST_STREAM_OUTPUT_CHARS: bad },
+        { MEETFLOO_TEST_FAIL_STREAM_AFTER_CHARS: bad, MEETFLOO_TEST_STREAM_OUTPUT_CHARS: bad },
         (m) => {
           assert.equal(m.failStreamAfterChars(), null, `fail-after accepted ${JSON.stringify(bad)}`);
           assert.equal(m.testOutputCharCeiling(), null, `ceiling accepted ${JSON.stringify(bad)}`);
@@ -69,10 +69,10 @@ describe('the switches are OFF unless explicitly requested', () => {
   });
 
   test('valid values are honoured', async () => {
-    await withEnv({ NATIVELY_TEST_FAIL_STREAM_AFTER_CHARS: '40' }, (m) => {
+    await withEnv({ MEETFLOO_TEST_FAIL_STREAM_AFTER_CHARS: '40' }, (m) => {
       assert.equal(m.failStreamAfterChars(), 40);
     });
-    await withEnv({ NATIVELY_TEST_STREAM_OUTPUT_CHARS: '250' }, (m) => {
+    await withEnv({ MEETFLOO_TEST_STREAM_OUTPUT_CHARS: '250' }, (m) => {
       assert.equal(m.testOutputCharCeiling(), 250);
     });
   });

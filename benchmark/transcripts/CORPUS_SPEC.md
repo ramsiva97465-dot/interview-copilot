@@ -1,13 +1,13 @@
 # Synthetic corpus authoring spec (summary-model benchmark, 2026-09-17)
 
 You are authoring ONE long, realistic conversation transcript plus its gold reference fact sheet.
-The transcript will be fed to Natively's real post-meeting summary pipeline, and model summaries
+The transcript will be fed to MeetFloo's real post-meeting summary pipeline, and model summaries
 will be scored against your fact sheet. Precision of the fact sheet matters as much as realism.
 
-## What Natively transcripts look like
+## What MeetFloo transcripts look like
 
-Natively captures two audio channels during a call:
-- the **microphone** = the Natively user ("Me"), label `S0`
+MeetFloo captures two audio channels during a call:
+- the **microphone** = the MeetFloo user ("Me"), label `S0`
 - the **system audio** = everyone else on the call. Speech diarization splits it into
   `S1`, `S2`, `S3`, ... (stable per person).
 
@@ -34,7 +34,7 @@ Write `benchmark/transcripts/src/<ID>.txt`:
 ```
 # id: <ID>
 # title: <short internal title, NOT shown to models>
-# S0: Me — <name>, <role>, <org>   (the Natively user, on mic)
+# S0: Me — <name>, <role>, <org>   (the MeetFloo user, on mic)
 # S1: <name>, <role>, <org>
 # S2: ...
 S1: Hey, can you hear me okay?
@@ -82,7 +82,7 @@ Write `benchmark/references/<ID>.json`, valid JSON, this schema:
 {
   "id": "<ID>",
   "category": "<category>",
-  "natively_mode": "<mode templateType>",
+  "MeetFloo_mode": "<mode templateType>",
   "length_bucket": "short|medium|long|very_long",
   "speakers": [{"label": "S0", "shown_to_model_as": "Me", "name": "...", "role": "...", "org": "..."}],
   "context": "2-3 sentence neutral description of what this conversation is",

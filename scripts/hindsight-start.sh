@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start the Hindsight embedded dev server WITH Natively's LLM provider chain + fallback.
+# Start the Hindsight embedded dev server WITH MeetFloo's LLM provider chain + fallback.
 #
 # 1. Loads GEMINI_API_KEY (+ any other provider keys) from .env.
 # 2. Generates the litellm.Router config (Gemini→OpenAI→Claude→DeepSeek→Groq→Ollama,

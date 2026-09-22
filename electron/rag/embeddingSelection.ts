@@ -62,7 +62,7 @@ export function validateEmbeddingSelection(
     return {
       ok: false,
       error: 'unknown_provider',
-      message: `"${chosen}" is not an embedding provider Natively knows about.`,
+      message: `"${chosen}" is not an embedding provider MeetFloo knows about.`,
     };
   }
   if (!provider.available) {

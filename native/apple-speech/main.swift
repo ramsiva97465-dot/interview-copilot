@@ -26,7 +26,7 @@ struct BridgeError: LocalizedError {
 /// exit path, not about a failure seen in the wild.)
 ///
 /// The main loop reads audio lines continuously, so it observes a failure
-/// within one chunk (~100ms at the sizes Natively sends) and throws it from
+/// within one chunk (~100ms at the sizes MeetFloo sends) and throws it from
 /// the one place that already knows how to report and exit.
 final class FailureBox: @unchecked Sendable {
     private let lock = NSLock()

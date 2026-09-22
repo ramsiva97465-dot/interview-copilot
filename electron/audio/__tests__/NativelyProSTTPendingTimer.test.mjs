@@ -1,5 +1,5 @@
 // Regression test for the "orphan inline reconnect timer double-connect" bug
-// in NativelyProSTT.setSampleRate / setRecognitionLanguage / language_detected.
+// in MeetFlooProSTT.setSampleRate / setRecognitionLanguage / language_detected.
 //
 // Symptom: setSampleRate (also setRecognitionLanguage and the language_detected
 // handler) scheduled an inline `setTimeout(() => { if (this.isActive)
@@ -12,7 +12,7 @@
 // transcripts. The fix introduces a `pendingConnectTimer` field that is
 // reassigned on every inline setTimeout and cleared in `start()` and `stop()`.
 //
-// Strategy: load the COMPILED NativelyProSTT with `Module._load` patched so
+// Strategy: load the COMPILED MeetFlooProSTT with `Module._load` patched so
 // `require('electron')` is harmless, then spy on the instance's `connect`
 // method (renamed via the wrapper's mangled-but-public-via-cast field on the
 // JS side — esbuild preserves class method names) and assert the call count
@@ -33,7 +33,7 @@ Module._load = function patchedLoad(request, parent, isMain) {
     if (request === 'electron') {
         return {
             app: {
-                getAppPath: () => '/tmp/fake-natively-app',
+                getAppPath: () => '/tmp/fake-MeetFloo-app',
                 isPackaged: false,
                 isReady: () => false,
             },
@@ -42,10 +42,10 @@ Module._load = function patchedLoad(request, parent, isMain) {
     return origLoad.apply(this, arguments);
 };
 
-const { NativelyProSTT } = await import(pathToFileURL(path.join(distRoot, 'NativelyProSTT.js')).href);
+const { MeetFlooProSTT } = await import(pathToFileURL(path.join(distRoot, 'MeetFlooProSTT.js')).href);
 
 test('setSampleRate inline 250ms reconnect timer must not fire after stop()/start() (no double-connect)', async () => {
-    const stt = new NativelyProSTT('fake-api-key', 'mic');
+    const stt = new MeetFlooProSTT('fake-api-key', 'mic');
 
     // Spy: replace `connect` with a counter that records calls and does
     // nothing else (no real WebSocket attempt). We replace the prototype
@@ -74,10 +74,10 @@ test('setSampleRate inline 250ms reconnect timer must not fire after stop()/star
     // clears isConnected before nulling ws.
     stt.ws = {
         readyState: 1, // WebSocket.OPEN
-        removeAllListeners() {},
-        on() {},
-        send() {},
-        close() {},
+        removeAllListeners() { },
+        on() { },
+        send() { },
+        close() { },
     };
 
     // 3) Trigger the inline 250ms setTimeout. closeUpstream() runs synchronously

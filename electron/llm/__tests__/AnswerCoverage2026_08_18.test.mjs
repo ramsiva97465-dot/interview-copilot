@@ -77,7 +77,7 @@ describe('live wiring (source pins)', () => {
   const flagsSrc = readFileSync(path.resolve(__dirname, '../../intelligence/intelligenceFlags.ts'), 'utf8');
 
   test('wtaClauseCoverageRepair flag exists and defaults OFF', () => {
-    assert.match(flagsSrc, /wtaClauseCoverageRepair: \{ env: 'NATIVELY_WTA_CLAUSE_COVERAGE_REPAIR', setting: 'wtaClauseCoverageRepairEnabled', default: false \}/);
+    assert.match(flagsSrc, /wtaClauseCoverageRepair: \{ env: 'MEETFLOO_WTA_CLAUSE_COVERAGE_REPAIR', setting: 'wtaClauseCoverageRepairEnabled', default: false \}/);
   });
 
   test('assessment is observed on the live path with the standard skip gates', () => {

@@ -6,7 +6,7 @@
     "sizeOnDiskMB": 0,
     "runtime": "onnx",
     "ortBinding": "onnxruntime-node",
-    "modelId": "resources/models/natively/router-minilm-multihead",
+    "modelId": "resources/models/MeetFloo/router-minilm-multihead",
     "forwardPassesPerRow": 1,
     "dataset": "v3.jsonl",
     "datasetRows": 7214,

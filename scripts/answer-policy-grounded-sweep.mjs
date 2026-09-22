@@ -23,7 +23,7 @@
 //      A prompt-level assertion cannot tell you the model obeys it.
 //
 // Route: direct to the vendor (--provider deepseek|minimax), never through
-// natively-api/server.js — that path authenticates against the PRODUCTION
+// MeetFloo-api/server.js — that path authenticates against the PRODUCTION
 // Supabase and writes a usage row per call.
 //
 // Usage:
@@ -58,10 +58,14 @@ const CONCURRENCY = Number(flag('concurrency', 8));
 const PROVIDER = flag('provider', 'deepseek');
 
 const PROVIDERS = {
-  deepseek: { url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-v4-flash',
-    keys: () => [process.env.DEEPSEEK_API_KEY, ...Array.from({ length: 10 }, (_, i) => process.env[`DEEPSEEK_API_KEY_${i + 1}`])] },
-  minimax: { url: 'https://api.minimax.io/v1/chat/completions', model: 'MiniMax-M3',
-    keys: () => [process.env.MINIMAX_API_KEY, ...Array.from({ length: 10 }, (_, i) => process.env[`MINIMAX_API_KEY_${i + 1}`])] },
+  deepseek: {
+    url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-v4-flash',
+    keys: () => [process.env.DEEPSEEK_API_KEY, ...Array.from({ length: 10 }, (_, i) => process.env[`DEEPSEEK_API_KEY_${i + 1}`])]
+  },
+  minimax: {
+    url: 'https://api.minimax.io/v1/chat/completions', model: 'MiniMax-M3',
+    keys: () => [process.env.MINIMAX_API_KEY, ...Array.from({ length: 10 }, (_, i) => process.env[`MINIMAX_API_KEY_${i + 1}`])]
+  },
 };
 const P = PROVIDERS[PROVIDER];
 if (!P) { console.error(`[grounded] unknown --provider ${PROVIDER}`); process.exit(2); }
@@ -157,8 +161,10 @@ async function call(system, user, attempt = 0) {
     res = await fetch(P.url, {
       method: 'POST',
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: P.model, messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
-        thinking: { type: 'disabled' }, stream: false, max_tokens: 1200, temperature: 0.2 }),
+      body: JSON.stringify({
+        model: P.model, messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+        thinking: { type: 'disabled' }, stream: false, max_tokens: 1200, temperature: 0.2
+      }),
       signal: AbortSignal.timeout(120000),
     });
   } catch (e) {
@@ -184,7 +190,7 @@ async function call(system, user, attempt = 0) {
 
 // ── V3 path ─────────────────────────────────────────────────────────────────
 const USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'grounded-'));
-process.env.NATIVELY_TEST_USERDATA = USERDATA;
+process.env.MEETFLOO_TEST_USERDATA = USERDATA;
 const ciBase = path.join(repoRoot, 'dist-electron/electron/context-intelligence');
 const { buildV3Prompt } = await import(pathToFileURL(path.join(ciBase, 'orchestration/engine-bridge.js')).href);
 const { CONTEXT_INTELLIGENCE_V3_ENV_KEY } = await import(pathToFileURL(path.join(ciBase, 'contracts/flag.js')).href);
@@ -315,7 +321,7 @@ let done = 0;
 const t0 = Date.now();
 
 async function worker(queue) {
-  for (;;) {
+  for (; ;) {
     const t = queue.shift();
     if (!t) return;
     let rec;
@@ -335,8 +341,10 @@ async function worker(queue) {
         const a = await call(p.system, p.user);
         const g = grade(t, a);
         bump(t.kind, g.verdict);
-        rec = { ...t, must: String(t.must ?? ''), topic: String(t.topic ?? ''),
-          fallbackUsed: p.fallbackUsed, evidenceCount: p.evidenceCount, ...g, answer: a };
+        rec = {
+          ...t, must: String(t.must ?? ''), topic: String(t.topic ?? ''),
+          fallbackUsed: p.fallbackUsed, evidenceCount: p.evidenceCount, ...g, answer: a
+        };
       }
     } catch (e) {
       bump(t.kind, 'ERROR');
@@ -357,8 +365,10 @@ jsonl.end();
 process.stdout.write('\n');
 
 fs.writeFileSync(path.join(outDir, 'summary.json'),
-  `${JSON.stringify({ stamp, provider: PROVIDER, model: P.model, repeats: REPEATS, tasks: tasks.length,
-    elapsedSec: Math.round((Date.now() - t0) / 1000), stats }, null, 2)}\n`);
+  `${JSON.stringify({
+    stamp, provider: PROVIDER, model: P.model, repeats: REPEATS, tasks: tasks.length,
+    elapsedSec: Math.round((Date.now() - t0) / 1000), stats
+  }, null, 2)}\n`);
 
 console.log('\n=== GROUNDED / OPEN-MODE / STRICT SWEEP ===');
 console.log(`provider=${PROVIDER} model=${P.model} tasks=${tasks.length} elapsed=${Math.round((Date.now() - t0) / 1000)}s\n`);

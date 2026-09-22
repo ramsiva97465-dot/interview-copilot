@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { AccordionSection } from '../ui/AccordionSection';
 
-// Extracted from NativelyApiSettings so PlansSettings can order this AFTER the
+// Extracted from MeetFlooApiSettings so PlansSettings can order this AFTER the
 // app-only-license section. It used to be the last thing inside the API
 // component, which forced it to render above the Pro section (a sibling one
 // level up) with no way to reorder the two.
@@ -10,11 +10,11 @@ import { AccordionSection } from '../ui/AccordionSection';
 // No boxed icon left of the title: the accordion header is already a bordered
 // rectangle, so a second one inside it was redundant. Title + chevron is enough.
 export const HowItWorksRefund: React.FC = () => {
-    const openExternal = (url: string) => {
-        (window.electronAPI as any)?.openExternal?.(url);
-    };
+  const openExternal = (url: string) => {
+    (window.electronAPI as any)?.openExternal?.(url);
+  };
 
-    return (
+  return (
     <AccordionSection
       title="How it works & refund policy"
       className="bg-bg-item-surface rounded-2xl border-border-subtle !mb-0"
@@ -29,7 +29,7 @@ export const HowItWorksRefund: React.FC = () => {
             How it works
           </p>
           <button
-            onClick={() => openExternal('https://natively.software/pro')}
+            onClick={() => openExternal('https://MeetFloo.software/pro')}
             className="flex items-center gap-1 text-[11px] text-text-secondary hover:text-text-primary transition-colors duration-150 cursor-pointer motion-reduce:transition-none"
           >
             Watch demo <ArrowUpRight size={11} strokeWidth={2} />
@@ -172,5 +172,5 @@ export const HowItWorksRefund: React.FC = () => {
         </div>
       </div>
     </AccordionSection>
-    );
+  );
 };

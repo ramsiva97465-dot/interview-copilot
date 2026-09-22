@@ -132,7 +132,7 @@ test('an unfindable worker still returns a coherent path, not undefined', () => 
 });
 
 test('the asar rewrite survives, because a native addon cannot load from an archive', () => {
-  const asar = '/Applications/Natively.app/Contents/Resources/app.asar/dist-electron/electron/services/reranking';
+  const asar = '/Applications/MeetFloo.app/Contents/Resources/app.asar/dist-electron/electron/services/reranking';
   const resolved = resolveRagWorker(asar, 'ggufRerankerWorker.js', () => true);
   assert.ok(resolved.includes('app.asar.unpacked'), resolved);
   assert.ok(!/app\.asar(?!\.unpacked)/.test(resolved), `still points inside the archive: ${resolved}`);
@@ -154,7 +154,7 @@ test('every bundle that inlines ExtensionHost can find the host bootstrap', () =
   //
   //   Error [ERR_MODULE_NOT_FOUND]: Cannot find module
   //   '.../dist-electron/electron/host/bootstrap.js'
-  //   imported from /Users/…/.natively/extensions/jina-reranker-v35/
+  //   imported from /Users/…/.MeetFloo/extensions/jina-reranker-v35/
   //
   // `bootstrapPath()` was `path.join(__dirname, 'host', 'bootstrap.js')`, which
   // is only correct executing from `electron/services/extensions/`. esbuild

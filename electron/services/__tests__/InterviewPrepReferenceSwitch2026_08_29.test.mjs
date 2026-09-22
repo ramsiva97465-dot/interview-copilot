@@ -39,7 +39,7 @@ const cjsRequire = createRequire(import.meta.url);
 const { ModesManager } = cjsRequire(path.resolve(repoRoot, 'dist-electron/electron/services/ModesManager.js'));
 const msc = cjsRequire(path.resolve(repoRoot, 'dist-electron/electron/services/modeSourceContract.js'));
 
-const ENV = 'NATIVELY_RETRIEVAL_INTERVIEW_PREP_HONORS_REFERENCE_SWITCH';
+const ENV = 'MEETFLOO_RETRIEVAL_INTERVIEW_PREP_HONORS_REFERENCE_SWITCH';
 const withFlag = (value, fn) => {
   const original = process.env[ENV];
   process.env[ENV] = value;

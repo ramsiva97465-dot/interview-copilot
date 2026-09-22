@@ -25,7 +25,7 @@
 // classifyIntentWithContext, detectCategoryHints) from the compiled premium
 // submodule output against the exact 6 questions that shared
 // contractHash:"715f1efe2666e8f6" in the Phase 0 benchmark corpus
-// (NATIVELY_CONTEXT_SYSTEM_SIMPLIFICATION_PROMPT.md lines 1256-1802 for the
+// (MEETFLOO_CONTEXT_SYSTEM_SIMPLIFICATION_PROMPT.md lines 1256-1802 for the
 // [SOURCE-ARBITER]/[CONTEXT-OS] trace lines; lines 2511-2603 for the
 // full/untruncated question text used here).
 //
@@ -78,7 +78,7 @@ function isCandidateDirected(question, intent) {
 // The exact 6 questions sharing contractHash:"715f1efe2666e8f6" in the
 // captured benchmark (full, untruncated text; SOURCE-ARBITER's
 // `questionSnippet` truncates at 80 chars, so these are read from Appendix
-// B's visible transcript — NATIVELY_CONTEXT_SYSTEM_SIMPLIFICATION_PROMPT.md
+// B's visible transcript — MEETFLOO_CONTEXT_SYSTEM_SIMPLIFICATION_PROMPT.md
 // lines 2511, 2516, 2521 [de-duplicated — see item 4 of this phase's report
 // for the doubled-text artifact itself], 2526, 2531, 2603).
 const QUESTIONS = {

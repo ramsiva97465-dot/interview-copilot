@@ -16,7 +16,7 @@
 // import despite the note above about esbuild inlining a second copy of each.
 import { TRIAL_SENTINEL_KEY } from '../../config/constants';
 
-export type RerankerProvider = 'local' | 'natively' | 'openrouter' | 'jina';
+export type RerankerProvider = 'local' | 'MeetFloo' | 'openrouter' | 'jina';
 
 export interface RerankerSettings {
   /**
@@ -27,12 +27,12 @@ export interface RerankerSettings {
   /** OpenRouter model id. No default is hard-coded — see defaultRerankModel(). */
   openrouterModel?: string;
   /**
-   * Managed Natively rerank model. Absent means the one model the API serves —
+   * Managed MeetFloo rerank model. Absent means the one model the API serves —
    * unlike the BYOK providers there is nothing for the user to choose, so this
    * exists only so a future second managed model does not need a settings
    * migration.
    */
-  nativelyModel?: string;
+  MeetFlooModel?: string;
   /** Jina AI model id, e.g. jina-reranker-v3.5. */
   jinaModel?: string;
   /**
@@ -105,7 +105,7 @@ export interface EligibilityInputs {
  * than being invited to fix a key that would still not be used.
  */
 export function evaluateHostedEligibility(input: EligibilityInputs): HostedEligibility {
-  if (input.provider !== 'natively' && input.provider !== 'openrouter' && input.provider !== 'jina') {
+  if (input.provider !== 'MeetFloo' && input.provider !== 'openrouter' && input.provider !== 'jina') {
     return { eligible: false, reason: 'provider-not-selected' };
   }
   if (input.localOnly) return { eligible: false, reason: 'local-only-mode' };
@@ -125,7 +125,7 @@ export function describeIneligibility(reason: HostedIneligibility): string {
       return 'Reference-file content is not allowed to leave this machine '
         + '(Settings > Privacy). Hosted reranking would send retrieved document text, '
         + 'so it is unavailable.';
-    // Provider-neutral: these are reached for Natively and Jina too, and naming
+    // Provider-neutral: these are reached for MeetFloo and Jina too, and naming
     // OpenRouter to a user who picked one of the others sends them to fix a
     // credential they never configured.
     case 'no-api-key':
@@ -157,11 +157,11 @@ export function readRerankerSettings(): RerankerSettings {
 
 /** The key for a hosted provider. One credential per provider, shared app-wide. */
 export function readHostedApiKey(provider: RerankerProvider): string | undefined {
-  if (provider === 'natively') {
+  if (provider === 'MeetFloo') {
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { CredentialsManager } = require('../CredentialsManager');
-      const stored = CredentialsManager.getInstance().getNativelyApiKey?.();
+      const stored = CredentialsManager.getInstance().getMeetFlooApiKey?.();
       const key = (stored || '').trim();
       // The trial sentinel is NOT a credential. A trial authenticates with a
       // paired x-trial-token header, and the shared hosted client sends only
@@ -170,7 +170,7 @@ export function readHostedApiKey(provider: RerankerProvider): string | undefined
       // the real situation and costs no network call.
       if (key && key !== TRIAL_SENTINEL_KEY) return key;
     } catch { /* fall through to env */ }
-    const env = (process.env.NATIVELY_API_KEY || '').trim();
+    const env = (process.env.MEETFLOO_API_KEY || '').trim();
     return env && env !== TRIAL_SENTINEL_KEY ? env : undefined;
   }
   if (provider === 'jina') {
@@ -188,16 +188,16 @@ export function readHostedApiKey(provider: RerankerProvider): string | undefined
 
 /** The model id for whichever hosted provider is selected. */
 export function readHostedModel(settings: RerankerSettings): string | undefined {
-  if (settings.provider === 'natively') {
+  if (settings.provider === 'MeetFloo') {
     // Falls back to the managed model rather than to undefined: with one model
     // served and nothing to pick, an unset setting must mean "the managed one",
     // not 'no-model' ineligibility on a provider the user just selected.
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { defaultHostedModel } = require('../../rag/hostedRerankProviders') as typeof import('../../rag/hostedRerankProviders');
-    return settings.nativelyModel || defaultHostedModel('natively') || undefined;
+    return settings.MeetFlooModel || defaultHostedModel('MeetFloo') || undefined;
   }
   if (settings.provider === 'jina') {
-    // Same reasoning as the natively branch: Jina's catalogue is curated and
+    // Same reasoning as the MeetFloo branch: Jina's catalogue is curated and
     // static, so an unset model means "the recommended one", not 'no-model'
     // ineligibility on a provider whose key the user just pasted. Without this
     // a Jina key activated nothing and silently fell back to the local
@@ -414,7 +414,7 @@ async function rerankInSafeBatches(
  * the retrieval one stayed resident for the life of the process with nothing
  * able to reach it.
  */
-const GGUF_PORT_KEY = 'natively.reranker.ggufPort';
+const GGUF_PORT_KEY = 'MeetFloo.reranker.ggufPort';
 
 type GgufPortEntry = { id: string; port: RerankSeamPort } | null;
 

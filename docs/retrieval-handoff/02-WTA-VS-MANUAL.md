@@ -160,7 +160,7 @@ The reviewer also cleared two candidates: the `profileSourceCount` manual-vs-eng
 
 ## Divergence in the OTHER direction (manual is the degraded side)
 
-- **Renderer chat history is dropped on manual chat.** `NativelyInterface.tsx:6349` builds `conversationContextForSubmit` (`:6370`) and passes it as `context`, but the V3 short-circuit consumes only `message` — so it falls back to `conversation-state-store` (populated at `ipcHandlers.ts:1591`). WTA *does* thread a live window (`conversationSummary: _ctx.conversationWindow(90)`).
+- **Renderer chat history is dropped on manual chat.** `MeetFlooInterface.tsx:6349` builds `conversationContextForSubmit` (`:6370`) and passes it as `context`, but the V3 short-circuit consumes only `message` — so it falls back to `conversation-state-store` (populated at `ipcHandlers.ts:1591`). WTA *does* thread a live window (`conversationSummary: _ctx.conversationWindow(90)`).
 - **No validators on manual's V3 branch** (§3c) means an unvalidated answer can ship there.
 - **`personaBase`:** manual resolves `action: 'answer'` **with `chatSurface: true`**; WTA resolves it without. Neither ships `what_to_say` on the default path, so the spoken-words contract is absent from the live overlay while manual at least gets its chat layout.
 

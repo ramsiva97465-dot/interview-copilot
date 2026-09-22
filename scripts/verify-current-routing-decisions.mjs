@@ -23,7 +23,7 @@ const OUT = path.join(REPO, 'test-results', 'mixed-7000-audit');
 const DIST = path.join(REPO, 'dist-electron');
 
 // load current built modules
-function tryReq(...names) { for (const n of names) { try { return require(path.join(DIST, n)); } catch {} } return {}; }
+function tryReq(...names) { for (const n of names) { try { return require(path.join(DIST, n)); } catch { } } return {}; }
 const planner = tryReq('llm/AnswerPlanner.js', 'AnswerPlanner.js');
 const liveMoment = tryReq('intelligence/LiveMomentRouter.js');
 const speak = tryReq('llm/speakability.js');
@@ -45,16 +45,16 @@ function plan(q, surface) {
 function speakTarget(answerType, q) {
   // LiveMomentRouter.targetForAnswerType / speakabilityForAnswerType / classify
   for (const fn of ['speakabilityTargetForAnswerType', 'targetForAnswerType', 'classifySpeakability', 'speakabilityFor']) {
-    if (typeof speak[fn] === 'function') { try { return speak[fn](answerType, q); } catch {} }
-    if (typeof liveMoment[fn] === 'function') { try { return liveMoment[fn](answerType, q); } catch {} }
+    if (typeof speak[fn] === 'function') { try { return speak[fn](answerType, q); } catch { } }
+    if (typeof liveMoment[fn] === 'function') { try { return liveMoment[fn](answerType, q); } catch { } }
   }
-  if (typeof liveMoment.routeLiveMoment === 'function') { try { const d = liveMoment.routeLiveMoment({ answerType, question: q }); return d?.target || d?.speakabilityTarget || JSON.stringify(d); } catch {} }
+  if (typeof liveMoment.routeLiveMoment === 'function') { try { const d = liveMoment.routeLiveMoment({ answerType, question: q }); return d?.target || d?.speakabilityTarget || JSON.stringify(d); } catch { } }
   return '(no speakability API found)';
 }
 
 const SETS = {
   H1_H2_tech: { surface: 'manual', qs: ['What is Redis?', 'What is JWT?', 'What is CORS?', 'Explain REST API in simple terms.', 'Explain database indexing.', 'Explain caching strategies.', 'Explain the JavaScript event loop.', 'Explain rate limiting.', 'What is CAP theorem?', 'What is Kafka?'] },
-  H3_sales: { surface: 'manual', qs: ['What is Natively?', 'What does your product do?', 'Who is this for?', 'What problem do you solve?', 'Give me the elevator pitch.', 'What is Natively built with?', 'What platforms does it support?', 'Why should I pay when ChatGPT exists?', 'How is Natively different from Cluely?', 'Your product is expensive.'] },
+  H3_sales: { surface: 'manual', qs: ['What is MeetFloo?', 'What does your product do?', 'Who is this for?', 'What problem do you solve?', 'Give me the elevator pitch.', 'What is MeetFloo built with?', 'What platforms does it support?', 'Why should I pay when ChatGPT exists?', 'How is MeetFloo different from Cluely?', 'Your product is expensive.'] },
   H4_teammeet: { surface: 'wta', qs: ['What are the action items?', 'What was decided?', 'Who is the owner?', 'What is the deadline?', 'Summarize the meeting.', 'What are the next steps?', 'Recap this meeting.'] },
   H5_lecture: { surface: 'wta', qs: ['Summarize this lecture.', 'What are the key concepts?', 'Explain this slide.', 'What is the main idea?', 'Define the key terms.', 'What should I remember from this?'] },
   H6_profile: { surface: 'manual', qs: ['Introduce yourself.', 'Tell me about yourself.', 'What is your current role?', 'How many years of experience do you have?', 'What companies have you worked at?', 'What is your strongest match for this role?', 'What gap do I have?', 'Why should we hire you?'] },

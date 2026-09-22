@@ -100,7 +100,7 @@ describe('mode retrieval port', () => {
 const { sourceTypeForFile, classifyDocShape } = await import(
   pathToFileURL(path.join(base, 'retrieval/mode-retrieval-port.js')).href);
 
-const RESUME_TEXT = `# Evin John\n## Summary\nEngineer...\n## Experience\n### Intern\n## Projects\n### Natively\n## Education\n**CGPA:** 7.5/10\n`;
+const RESUME_TEXT = `# Evin John\n## Summary\nEngineer...\n## Experience\n### Intern\n## Projects\n### MeetFloo\n## Education\n**CGPA:** 7.5/10\n`;
 const JD_TEXT = `# Software Engineer II — Google\n## Minimum Qualifications\n- 2+ years of professional experience\n## Preferred Qualifications\n## Responsibilities\n# About the Role\n## Compensation\n`;
 
 describe('document typing', () => {
@@ -133,9 +133,13 @@ describe('document typing', () => {
       scope: { userId: 'u1' }, sessionId: 's', manualQuestion: 'What is my CGPA?',
     });
     const p = createModeRetrievalPort({
-      modesManager: { retrieveHybridRaw: async () => ({ chunks: [
-        { sourceId: 'f1', fileName: 'resume.md', text: 'Education CUSAT CGPA: 7.5/10', chunkIndex: 0, score: 0.8 },
-      ] }) },
+      modesManager: {
+        retrieveHybridRaw: async () => ({
+          chunks: [
+            { sourceId: 'f1', fileName: 'resume.md', text: 'Education CUSAT CGPA: 7.5/10', chunkIndex: 0, score: 0.8 },
+          ]
+        })
+      },
       modeInfo: { id: 'm1' },
       files: [{ id: 'f1', fileName: 'resume.md', content: RESUME_TEXT }],
       allowedSourceTypes: ['RESUME', 'JOB_DESCRIPTION', 'PROFILE_FACT', 'REFERENCE_FILE'],
@@ -149,9 +153,13 @@ describe('document typing', () => {
   test('and a JD still cannot answer a user-skill claim', async () => {
     const { orchestrate } = await import(pathToFileURL(path.join(base, 'orchestration/orchestrator.js')).href);
     const p = createModeRetrievalPort({
-      modesManager: { retrieveHybridRaw: async () => ({ chunks: [
-        { sourceId: 'jd', fileName: 'jd.md', text: 'Kubernetes and Docker required.', chunkIndex: 0, score: 0.99 },
-      ] }) },
+      modesManager: {
+        retrieveHybridRaw: async () => ({
+          chunks: [
+            { sourceId: 'jd', fileName: 'jd.md', text: 'Kubernetes and Docker required.', chunkIndex: 0, score: 0.99 },
+          ]
+        })
+      },
       modeInfo: { id: 'm1' },
       files: [{ id: 'jd', fileName: 'jd.md', content: JD_TEXT }],
       allowedSourceTypes: ['RESUME', 'JOB_DESCRIPTION', 'PROFILE_FACT'],

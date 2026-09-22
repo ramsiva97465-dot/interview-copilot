@@ -24,11 +24,11 @@ Module._load = function patched(request, _p, _m) {
   return origLoad.apply(this, arguments);
 };
 
-const { NativelyProSTT } = await import(pathToFileURL(path.join(distRoot, 'NativelyProSTT.js')).href);
+const { MeetFlooProSTT } = await import(pathToFileURL(path.join(distRoot, 'MeetFlooProSTT.js')).href);
 
-const RELAY_URL = 'wss://us-relay.natively.software/ws';
-const ALT_URL = 'wss://asia-relay.natively.software/ws';
-const RAILWAY_URL = 'wss://api.natively.software/v1/transcribe';
+const RELAY_URL = 'wss://us-relay.MeetFloo.software/ws';
+const ALT_URL = 'wss://asia-relay.MeetFloo.software/ws';
+const RAILWAY_URL = 'wss://api.MeetFloo.software/v1/transcribe';
 
 function makeConfig() {
   return {
@@ -58,7 +58,7 @@ function flagsOn(overrides = {}) {
 }
 
 function relayInstance(flags = flagsOn()) {
-  const stt = new NativelyProSTT('natively_sk_paid', 'system', { appVersion: '2.7.0', platform: 'mac', flags });
+  const stt = new MeetFlooProSTT('MeetFloo_sk_paid', 'system', { appVersion: '2.7.0', platform: 'mac', flags });
   stt.installTarget(makeConfig());
   return stt;
 }
@@ -122,7 +122,7 @@ test('token-fatal advance does not run when already on railway (lets normal fata
   const stt = relayInstance();
   // Walk to railway first.
   stt.maybeAdvanceTarget(RELAY_URL, 1006); stt.maybeAdvanceTarget(RELAY_URL, 1006);
-  stt.maybeAdvanceTarget(ALT_URL, 1006);   stt.maybeAdvanceTarget(ALT_URL, 1006);
+  stt.maybeAdvanceTarget(ALT_URL, 1006); stt.maybeAdvanceTarget(ALT_URL, 1006);
   assert.equal(stt.connectUrl(), RAILWAY_URL);
   // A forceAdvance on railway is a no-op (railway uses legacy auth; invalid_key_format there is genuinely fatal).
   stt.forceAdvanceTarget(RAILWAY_URL, 'token_fatal');
@@ -140,7 +140,7 @@ test('sttRailwayFallbackEnabled=false strips the railway url from the chain', ()
 
 test('flag OFF: resolver never called, connect() dials BACKEND_URL, legacy frame', async () => {
   let resolverCalls = 0;
-  const stt = new NativelyProSTT('natively_sk_paid', 'system', {
+  const stt = new MeetFlooProSTT('MeetFloo_sk_paid', 'system', {
     appVersion: '2.7.0',
     platform: 'mac',
     flags: flagsOn({ isRelayEnabled: () => false }),  // master OFF
@@ -154,18 +154,18 @@ test('flag OFF: resolver never called, connect() dials BACKEND_URL, legacy frame
   assert.equal(startedResolve, false, 'flag OFF → maybeResolveRelayTarget returns false synchronously (no async resolve)');
   assert.equal(resolverCalls, 0, 'BUG: resolver must NEVER be called when the flag is off');
   assert.equal(stt.target, null, 'flag OFF → no relay target installed');
-  assert.equal(stt.connectUrl(), 'wss://api.natively.software/v1/transcribe', 'flag OFF → connect() dials the hardcoded BACKEND_URL');
+  assert.equal(stt.connectUrl(), 'wss://api.MeetFloo.software/v1/transcribe', 'flag OFF → connect() dials the hardcoded BACKEND_URL');
 
   // And the auth frame must be the legacy shape for that url.
   const frame = stt.buildAuthFrame(stt.connectUrl());
-  assert.equal(frame.key, 'natively_sk_paid');
+  assert.equal(frame.key, 'MeetFloo_sk_paid');
   assert.equal(frame.session_token, undefined);
   stt.removeAllListeners();
 });
 
 test('flag ON with no cache: maybeResolveRelayTarget starts an async resolve (returns true)', async () => {
   let resolverCalls = 0;
-  const stt = new NativelyProSTT('natively_sk_paid', 'system', {
+  const stt = new MeetFlooProSTT('MeetFloo_sk_paid', 'system', {
     appVersion: '2.7.0',
     platform: 'mac',
     flags: flagsOn(),

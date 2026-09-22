@@ -23,7 +23,7 @@ const normalizeBlock = ipc.slice(normalizeStart, normalizeEnd);
 
 test('Direct Assist persisted setting defaults off and the operator kill switch is authoritative', () => {
   assert.match(settings, /directAssistEnabled\?: boolean/);
-  assert.match(settings, /NATIVELY_DIRECT_ASSIST_KILL_SWITCH/);
+  assert.match(settings, /MEETFLOO_DIRECT_ASSIST_KILL_SWITCH/);
   assert.match(settings, /isDirectAssistKilledByOperator\(\): boolean/);
   assert.match(
     settings,
@@ -48,7 +48,7 @@ test('preload and renderer declarations expose one correlated Direct Assist brid
     assert.match(source, /type: 'error'[\s\S]{0,140}partial: boolean/);
     // The 'start' event's trimmedFields field has drifted before (fixed
     // 2026-09-01): electron/direct-assist/types.ts, src/types/electron.d.ts
-    // and NativelyInterface.tsx's local DirectAssistRendererEvent were kept
+    // and MeetFlooInterface.tsx's local DirectAssistRendererEvent were kept
     // in sync while preload.ts's own local duplicate was missed — no compile
     // error, since onDirectAssistEvent forwards the raw IPC object untouched.
     assert.match(source, /type: 'start'[\s\S]{0,140}trimmedFields: string\[\]/);
@@ -385,7 +385,7 @@ test('listDirectAssistRungs builds the ladder with no preference gate in front o
 
 // No test pins copy about the fallback onto this card. The switch is announced
 // where it actually happens — the answer card's fallbackNotice
-// (NativelyInterface.tsx) — so Settings does not have to describe it, and the
+// (MeetFlooInterface.tsx) — so Settings does not have to describe it, and the
 // Direct Assist card keeps the one-line description it shipped with.
 
 test('a transcribed history turn does not consume the image-validation budget', () => {

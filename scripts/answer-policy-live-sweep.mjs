@@ -10,10 +10,10 @@
 //
 // ROUTE — direct to the provider API (--provider deepseek|minimax) with the key
 // from .env. It
-// deliberately does NOT go through natively-api/server.js: that path runs
+// deliberately does NOT go through MeetFloo-api/server.js: that path runs
 // authenticate() → validateKey() against the PRODUCTION Supabase in .env and
 // writes a usage row per call, so a 6000-call sweep would mutate live billing
-// state. Nothing here touches Natively infrastructure.
+// state. Nothing here touches MeetFloo infrastructure.
 //
 // Usage:
 //   node scripts/answer-policy-live-sweep.mjs --per-mode 10          # pilot
@@ -61,7 +61,7 @@ const DRY_RUN = has('dry-run');
 // per-provider differences are the URL, the model id and the key pool.
 //
 // deepseek (default) — deepseek-v4-flash. Measured 2026-08-07: ~1.6s per call
-// and no leading reasoning block. Config mirrors natively-api's
+// and no leading reasoning block. Config mirrors MeetFloo-api's
 // buildDeepSeekBody (thinking disabled).
 // minimax — MiniMax-M3. Kept because it is production's primary generator, but
 // on this account it sustains only ~4.8K tokens/min: a 6000-call sweep took
@@ -73,13 +73,13 @@ const PROVIDERS = {
     url: process.env.E2E_DEEPSEEK_BASE_URL || 'https://api.deepseek.com/chat/completions',
     model: process.env.E2E_DEEPSEEK_MODEL || 'deepseek-v4-flash',
     keys: () => [process.env.E2E_DEEPSEEK_API_KEY, process.env.DEEPSEEK_API_KEY,
-      ...Array.from({ length: 10 }, (_, i) => process.env[`DEEPSEEK_API_KEY_${i + 1}`])],
+    ...Array.from({ length: 10 }, (_, i) => process.env[`DEEPSEEK_API_KEY_${i + 1}`])],
   },
   minimax: {
     url: `${(process.env.E2E_MINIMAX_BASE_URL || 'https://api.minimax.io/v1').replace(/\/+$/, '')}/chat/completions`,
     model: process.env.E2E_MINIMAX_MODEL || 'MiniMax-M3',
     keys: () => [process.env.E2E_MINIMAX_API_KEY, process.env.MINIMAX_API_KEY,
-      ...Array.from({ length: 10 }, (_, i) => process.env[`MINIMAX_API_KEY_${i + 1}`])],
+    ...Array.from({ length: 10 }, (_, i) => process.env[`MINIMAX_API_KEY_${i + 1}`])],
   },
 };
 if (!PROVIDERS[PROVIDER]) {
@@ -367,7 +367,7 @@ function grade(row, answer) {
 
 // ── MiniMax ─────────────────────────────────────────────────────────────────
 // M2.7/M3 emit a LEADING reasoning block even with thinking:{type:'disabled'}
-// (server-side note in natively-api/lib/minimaxProvider.js). The CLOSE tag is
+// (server-side note in MeetFloo-api/lib/minimaxProvider.js). The CLOSE tag is
 // what proves it was reasoning — the open tag is sometimes namespaced or
 // missing entirely — so strip everything up to the first think-shaped close.
 function stripThink(s) {
@@ -425,7 +425,7 @@ async function callModel(system, user, attempt = 0) {
 
 // ── the real prompt path ────────────────────────────────────────────────────
 const USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'ap-sweep-'));
-process.env.NATIVELY_TEST_USERDATA = USERDATA;
+process.env.MEETFLOO_TEST_USERDATA = USERDATA;
 
 const ciBase = path.join(repoRoot, 'dist-electron/electron/context-intelligence');
 const { buildV3Prompt } = await import(pathToFileURL(path.join(ciBase, 'orchestration/engine-bridge.js')).href);
@@ -494,15 +494,17 @@ console.log(`[sweep] out=${outDir}`);
 
 const stats = {};
 for (const m of MODES) {
-  stats[m] = { asked: 0, pass: 0, fail: 0, review: 0, error: 0, nullPrompt: 0,
+  stats[m] = {
+    asked: 0, pass: 0, fail: 0, review: 0, error: 0, nullPrompt: 0,
     mustAnswer: 0, mustAnswerFail: 0, sourceOk: 0, sourceReview: 0, latencyMs: 0,
-    promptTokens: 0, completionTokens: 0 };
+    promptTokens: 0, completionTokens: 0
+  };
 }
 let done = 0;
 const t0 = Date.now();
 
 async function worker(queue) {
-  for (;;) {
+  for (; ;) {
     const item = queue.shift();
     if (!item) return;
     const { modeId, row } = item;
@@ -515,8 +517,10 @@ async function worker(queue) {
         s.nullPrompt += 1; s.error += 1;
         rec = { modeId, ...row, attached, error: 'buildV3Prompt returned null' };
       } else if (DRY_RUN) {
-        rec = { modeId, ...row, attached, fallbackUsed: prompt.fallbackUsed,
-          unsupportedInMode: prompt.unsupportedInMode, dryRun: true };
+        rec = {
+          modeId, ...row, attached, fallbackUsed: prompt.fallbackUsed,
+          unsupportedInMode: prompt.unsupportedInMode, dryRun: true
+        };
         s.pass += 1;
       } else {
         const c0 = Date.now();
@@ -531,8 +535,10 @@ async function worker(queue) {
         if (g.verdict === 'PASS') s.pass += 1;
         else if (g.verdict === 'FAIL') s.fail += 1;
         else s.review += 1;
-        rec = { modeId, ...row, attached, fallbackUsed: prompt.fallbackUsed,
-          unsupportedInMode: prompt.unsupportedInMode, ms, finish, ...g, answer: text };
+        rec = {
+          modeId, ...row, attached, fallbackUsed: prompt.fallbackUsed,
+          unsupportedInMode: prompt.unsupportedInMode, ms, finish, ...g, answer: text
+        };
       }
     } catch (e) {
       s.error += 1;
@@ -555,8 +561,10 @@ jsonl.end();
 process.stdout.write('\n');
 
 // ── summary ─────────────────────────────────────────────────────────────────
-const totals = { asked: 0, pass: 0, fail: 0, review: 0, error: 0, mustAnswer: 0, mustAnswerFail: 0,
-  sourceOk: 0, sourceReview: 0, promptTokens: 0, completionTokens: 0, latencyMs: 0 };
+const totals = {
+  asked: 0, pass: 0, fail: 0, review: 0, error: 0, mustAnswer: 0, mustAnswerFail: 0,
+  sourceOk: 0, sourceReview: 0, promptTokens: 0, completionTokens: 0, latencyMs: 0
+};
 for (const m of MODES) for (const k of Object.keys(totals)) totals[k] += stats[m][k] ?? 0;
 
 const summary = {

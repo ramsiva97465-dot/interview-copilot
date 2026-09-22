@@ -46,7 +46,7 @@ const parentPort = (process as unknown as { parentPort?: ParentPort }).parentPor
 
 if (!parentPort) {
   // Running outside a utilityProcess. Fail loudly rather than sitting idle.
-  throw new Error('[natively] extension bootstrap requires an Electron utilityProcess');
+  throw new Error('[MeetFloo] extension bootstrap requires an Electron utilityProcess');
 }
 
 const port = parentPort;
@@ -153,7 +153,7 @@ function assertReranker(value: unknown): asserts value is Reranker {
   const r = value as Partial<Reranker> | null;
   if (!r || typeof r.init !== 'function' || typeof r.rerank !== 'function' || typeof r.dispose !== 'function') {
     throw new Error(
-      '[natively] the extension entrypoint must export a Reranker with init(), rerank() and dispose()',
+      '[MeetFloo] the extension entrypoint must export a Reranker with init(), rerank() and dispose()',
     );
   }
 }
@@ -167,7 +167,7 @@ async function handleRerank(
   candidates: RerankCandidate[],
   topK: number,
 ): Promise<RankedCandidate[]> {
-  if (!reranker) throw new Error('[natively] rerank() called before init()');
+  if (!reranker) throw new Error('[MeetFloo] rerank() called before init()');
   // The host owns the real deadline and fails the call regardless; this signal
   // is what lets a cooperative extension stop early. It used to be a controller
   // nothing ever aborted, so every extension's `opts.signal.aborted` check was
@@ -239,7 +239,7 @@ async function handleMessage(message: HostToExtensionMessage): Promise<void> {
         return;
 
       default:
-        throw new Error(`[natively] unknown request kind ${JSON.stringify(request.body)}`);
+        throw new Error(`[MeetFloo] unknown request kind ${JSON.stringify(request.body)}`);
     }
   } catch (error) {
     send({

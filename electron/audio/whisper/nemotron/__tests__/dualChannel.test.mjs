@@ -94,7 +94,7 @@ const localWhisperSttPresent = fs.existsSync(localWhisperSttJsPath);
 
 // ── MODEL_DIR resolution — same convention as integration.test.mjs ────────
 function defaultAppUserDataDir() {
-  const appName = 'natively';
+  const appName = 'MeetFloo';
   if (process.platform === 'darwin') {
     return path.join(os.homedir(), 'Library', 'Application Support', appName);
   }
@@ -217,7 +217,7 @@ function readOnnxSemaphore() {
   // onnxConfigJsPath copy read/write the SAME globalThis key, so this is a
   // real, direct, non-mocked view of the actual semaphore state.
   const g = globalThis;
-  return g.__nativelyOnnxSemaphoreV1__ || { inFlightNormal: 0, inFlightHigh: 0 };
+  return g.__MeetFlooOnnxSemaphoreV1__ || { inFlightNormal: 0, inFlightHigh: 0 };
 }
 
 /**

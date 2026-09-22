@@ -14,7 +14,7 @@
  * version bump that moves them would leave every other test green. Run this
  * after any node-llama-cpp upgrade:
  *
- *   NATIVELY_TEST_JINA_V35=1 node --test electron/rag/__tests__/JinaListwiseAgainstGguf2026_09_03.test.mjs
+ *   MEETFLOO_TEST_JINA_V35=1 node --test electron/rag/__tests__/JinaListwiseAgainstGguf2026_09_03.test.mjs
  *
  * Install the model first through Settings > Reranker, or:
  *   node -e "require('./dist-electron/electron/services/reranking/localModelInstaller.js')
@@ -47,7 +47,7 @@ const REF = JSON.parse(fs.readFileSync(
   path.join(__dirname, 'fixtures/jina-reranker-v3.5-reference.json'), 'utf8'));
 
 const MODEL_DIR = path.join(
-  os.homedir(), 'Library/Application Support/natively/local-models/jinaai/jina-reranker-v3.5-GGUF');
+  os.homedir(), 'Library/Application Support/MeetFloo/local-models/jinaai/jina-reranker-v3.5-GGUF');
 const WEIGHTS = path.join(MODEL_DIR, 'jina-reranker-v3.5-Q4_K_M.gguf');
 const PROJECTOR = path.join(MODEL_DIR, 'projector.safetensors');
 
@@ -58,8 +58,8 @@ const PROJECTOR = path.join(MODEL_DIR, 'projector.safetensors');
 // identical everywhere and makes this the deliberate post-upgrade check its
 // header describes.
 const installed = process.platform === 'darwin' && fs.existsSync(WEIGHTS) && fs.existsSync(PROJECTOR);
-const skip = !process.env.NATIVELY_TEST_JINA_V35
-  ? 'set NATIVELY_TEST_JINA_V35=1 to run this (loads a 378MB model); see this file\'s header'
+const skip = !process.env.MEETFLOO_TEST_JINA_V35
+  ? 'set MEETFLOO_TEST_JINA_V35=1 to run this (loads a 378MB model); see this file\'s header'
   : installed ? false : 'jina-reranker-v3.5 is not installed (410MB); see this file\'s header';
 
 test('the GGUF ranks the way the published fp32 model ranks', { skip }, async () => {
@@ -115,8 +115,10 @@ test('the private node-llama-cpp shape this depends on still exists', { skip }, 
     const marks = [1, Math.floor(tokens.length / 2), tokens.length - 1];
     const seen = new Map();
     await context._decodeTokens(
-      { sequenceId: sequence._sequenceId, firstTokenSequenceIndex: 0, tokens,
-        logits: tokens.map((_, i) => marks.includes(i)), tokenMeter: sequence.tokenMeter },
+      {
+        sequenceId: sequence._sequenceId, firstTokenSequenceIndex: 0, tokens,
+        logits: tokens.map((_, i) => marks.includes(i)), tokenMeter: sequence.tokenMeter
+      },
       (batchIndex, tokenIndex) => { seen.set(tokenIndex, batchIndex); return null; },
     );
     const vectors = marks.map(i => Array.from(context._ctx.getEmbedding(seen.get(i) + 1, 8)).join(','));

@@ -99,7 +99,7 @@ const dbAvailable = (() => {
 describe('seeding survives a partial failure', { skip: dbAvailable ? false : 'needs the Electron runner (better-sqlite3 ABI)' }, () => {
   const freshManager = async () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'resil-'));
-    process.env.NATIVELY_TEST_USERDATA = dir;
+    process.env.MEETFLOO_TEST_USERDATA = dir;
     // Fresh module registry so the singleton + latch are per-test.
     const mod = await import(`${pathToFileURL(path.join(base, 'services/ModesManager.js')).href}?t=${Date.now()}${Math.random()}`);
     return { ModesManager: mod.ModesManager, dir };

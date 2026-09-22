@@ -18,8 +18,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '../../..');
 const cjsRequire = createRequire(import.meta.url);
 
-process.env.NATIVELY_CONTEXT_OS = '1';
-process.env.NATIVELY_CONTEXT_OS_WTA = '1';
+process.env.MEETFLOO_CONTEXT_OS = '1';
+process.env.MEETFLOO_CONTEXT_OS_WTA = '1';
 
 const co = cjsRequire(path.resolve(repoRoot, 'dist-electron/electron/intelligence/context-os/index.js'));
 
@@ -76,11 +76,11 @@ test('WTA prior assistant facts are denied for EVERY authority', () => {
 });
 
 test('WTA surface flag off → null (legacy WTA untouched)', () => {
-  process.env.NATIVELY_CONTEXT_OS_WTA = '0';
+  process.env.MEETFLOO_CONTEXT_OS_WTA = '0';
   try {
     assert.equal(wtaContract(), null);
   } finally {
-    process.env.NATIVELY_CONTEXT_OS_WTA = '1';
+    process.env.MEETFLOO_CONTEXT_OS_WTA = '1';
   }
 });
 

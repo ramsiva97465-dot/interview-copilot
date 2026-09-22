@@ -42,12 +42,12 @@ function gate(enabled, percent, apiKey) {
 }
 
 test('fnv1aBucket is deterministic per key', () => {
-  assert.equal(fnv1aBucket('natively_sk_alpha'), fnv1aBucket('natively_sk_alpha'));
+  assert.equal(fnv1aBucket('MeetFloo_sk_alpha'), fnv1aBucket('MeetFloo_sk_alpha'));
   assert.equal(fnv1aBucket(''), fnv1aBucket(''));
 });
 
 test('fnv1aBucket returns an integer in [0, 99]', () => {
-  for (const k of ['', 'a', 'natively_sk_xyz', 'a'.repeat(64), '🔑', 'trial']) {
+  for (const k of ['', 'a', 'MeetFloo_sk_xyz', 'a'.repeat(64), '🔑', 'trial']) {
     const b = fnv1aBucket(k);
     assert.ok(Number.isInteger(b), `bucket for "${k}" must be an integer`);
     assert.ok(b >= 0 && b <= 99, `bucket for "${k}" must be in [0,99], got ${b}`);
@@ -72,14 +72,14 @@ test('precedence: master ON + percent 0 → true (Enabled-as-override = 100%)', 
 });
 
 test('precedence: master ON + percent 100 → true for every key', () => {
-  for (const k of ['a', 'b', 'natively_sk_z', '']) {
+  for (const k of ['a', 'b', 'MeetFloo_sk_z', '']) {
     assert.equal(gate(true, 100, k), true);
   }
 });
 
 test('precedence: master ON + mid percent is deterministic per key', () => {
   // A key whose bucket < 50 is in at 50%; the SAME key always gets the SAME answer.
-  const key = 'natively_sk_determinism';
+  const key = 'MeetFloo_sk_determinism';
   const bucket = fnv1aBucket(key);
   const first = gate(true, 50, key);
   const second = gate(true, 50, key);

@@ -15,7 +15,7 @@ const { app } = require('electron');
 
 const repoRoot = path.resolve(__dirname, '..');
 const distRoot = path.join(repoRoot, 'dist-electron', 'electron');
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-okf-db-test-'));
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-okf-db-test-'));
 app.setPath('userData', tmpUserData);
 
 let pass = 0, fail = 0;
@@ -26,7 +26,7 @@ function check(label, ok, detail) {
 
 async function main() {
   await app.whenReady();
-  process.env.NATIVELY_OKF_KNOWLEDGE_PACKS = '1';
+  process.env.MEETFLOO_OKF_KNOWLEDGE_PACKS = '1';
 
   const { ModesManager } = require(path.join(distRoot, 'services/ModesManager.js'));
   const { KnowledgeManager } = require(path.join(distRoot, 'services/knowledge/KnowledgeManager.js'));
@@ -68,4 +68,4 @@ OpenVLA-OFT is an improved version of OpenVLA. It uses parallel decoding and ach
   process.exit(fail === 0 ? 0 : 1);
 }
 
-main().catch((e) => { console.error('[smoke-okf-db] FATAL', e); try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch {} process.exit(2); });
+main().catch((e) => { console.error('[smoke-okf-db] FATAL', e); try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch { } process.exit(2); });

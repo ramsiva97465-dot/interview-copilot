@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react" // forcing refresh
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ToastProvider, ToastViewport } from "./components/ui/toast"
-import NativelyInterface from "./components/NativelyInterface"
+import MeetFlooInterface from "./components/NativelyInterface"
 import HindsightStatusBanner from "./components/HindsightStatusBanner"
 import SettingsPopup from "./components/SettingsPopup" // Keeping for legacy/specific window support if needed
 import Launcher from "./components/Launcher"
@@ -11,13 +11,14 @@ import SettingsOverlay from "./components/SettingsOverlay"
 import StartupSequence from "./components/StartupSequence"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import UpdateBanner from "./components/UpdateBanner"
-import { NativelyQuotaBanner } from "./components/NativelyQuotaBanner"
-import { FreeTrialBanner }      from "./components/trial/FreeTrialBanner"
+import { MeetFlooQuotaBanner } from "./components/NativelyQuotaBanner"
+import { FreeTrialBanner } from "./components/trial/FreeTrialBanner"
 import type { TrialUsage, TrialLimits } from './types/nativelyUsage';
-import { FreeTrialModal }       from "./components/trial/FreeTrialModal"
+import { FreeTrialModal } from "./components/trial/FreeTrialModal"
 import { OrchestratorProvider, OrchestratedToasterHost, setUserState as setOrchestratorUserState, emitOrchestratorEvent } from "./components/onboarding/OrchestratedToasterHost"
 import ReviewPromptHost from "./components/ReviewPromptHost"
 import { AdminDashboard } from "./components/admin/AdminDashboard"
+import { GoogleAuthModal } from "./components/auth/GoogleAuthModal"
 // NOTE: explicit `.ts` extension is load-bearing. Vite's default resolver
 // tries `.mjs` before `.ts` (see DEFAULT_EXTENSIONS in vite/dist/node/constants.js),
 // and this directory also has an `orchestrator.mjs` companion (kept for
@@ -43,7 +44,7 @@ import {
   PremiumPromoToaster,
   RemoteCampaignToaster,
   PremiumUpgradeModal,
-  NativelyApiPromoToaster,
+  MeetFlooApiPromoToaster,
   MaxUltraUpgradeToaster,
   useAdCampaigns
 } from './premium'
@@ -187,6 +188,11 @@ const App: React.FC = () => {
 
   // State
   const [showStartup, setShowStartup] = useState(true);
+  const [showGoogleAuthOnStartup, setShowGoogleAuthOnStartup] = useState(() => {
+    // Show Google Auth immediately on boot if the user has no email registered yet.
+    return !localStorage.getItem('meetfloo_user_email');
+  });
+
   // Stable identity: StartupSequence arms its dismissal timers in a
   // useEffect(deps:[onComplete]). An inline closure would be a new identity on
   // every App re-render — and the boot path re-renders many times (7-10 async
@@ -331,7 +337,7 @@ const App: React.FC = () => {
   // Overlay opacity — only meaningful when isOverlayWindow, but stored centrally
   // so it can be initialized once from localStorage and updated via IPC.
   const [overlayOpacity, setOverlayOpacity] = useState<number>(() => {
-    const stored = localStorage.getItem('natively_overlay_opacity');
+    const stored = localStorage.getItem('MeetFloo_overlay_opacity');
     const parsed = stored ? parseFloat(stored) : NaN;
     // Treat missing value or the old default (0.65) as "not user-set"
     const isUserSet = Number.isFinite(parsed) && parsed !== OVERLAY_OPACITY_DEFAULT;
@@ -348,19 +354,19 @@ const App: React.FC = () => {
   const [appStartTime] = useState<number>(Date.now());
   const [lastMeetingEndTime, setLastMeetingEndTime] = useState<number | null>(null);
   const [isProcessingMeeting, setIsProcessingMeeting] = useState<boolean>(false);
-  
+
   // Ollama Auto-Pull State
   const [ollamaPullStatus, setOllamaPullStatus] = useState<'idle' | 'downloading' | 'complete' | 'failed'>('idle');
   const [ollamaPullPercent, setOllamaPullPercent] = useState<number>(0);
   const [ollamaPullMessage, setOllamaPullMessage] = useState<string>('');
 
   // Re-index State
-  const [incompatibleWarning, setIncompatibleWarning] = useState<{count: number; oldProvider: string; newProvider: string} | null>(null);
+  const [incompatibleWarning, setIncompatibleWarning] = useState<{ count: number; oldProvider: string; newProvider: string } | null>(null);
   // Automatic background re-index progress (fired after an embedding-model upgrade).
-  const [reindexProgress, setReindexProgress] = useState<{done: number; total: number} | null>(null);
-  
+  const [reindexProgress, setReindexProgress] = useState<{ done: number; total: number } | null>(null);
+
   // API check
-  const [hasNativelyApi, setHasNativelyApi] = useState<boolean>(false);
+  const [hasMeetFlooApi, setHasMeetFlooApi] = useState<boolean>(false);
 
   // ── Onboarding toasters now handled by OnboardingOrchestrator ──
   // (No local state for permissions / trial promo toasters.)
@@ -419,7 +425,7 @@ const App: React.FC = () => {
   // .bind() creates a new function on every render, causing the store to
   // tear down and re-subscribe unnecessarily.
   const orchSubscribe = React.useCallback(
-    (cb: () => void) => orch ? orch.subscribe(cb) : () => {},
+    (cb: () => void) => orch ? orch.subscribe(cb) : () => { },
     [orch],
   );
   const orchSnapshot = React.useCallback(
@@ -438,7 +444,7 @@ const App: React.FC = () => {
     appStartTime,
     lastMeetingEndTime,
     isProcessingMeeting,
-    hasNativelyApi,
+    hasMeetFlooApi,
     orchestratorAllowsAds
   );
 
@@ -449,7 +455,7 @@ const App: React.FC = () => {
     if (!isLauncherWindow && !isDefault) return;
     if (!isElectron) return; // Do not run onboarding orchestrator on web landing page
     // A/B KILL-SWITCH (2026-07-10): ?noorch=1 (set by WindowHelper when
-    // NATIVELY_DISABLE_ONBOARDING_ORCH=1) skips the onboarding orchestrator
+    // MEETFLOO_DISABLE_ONBOARDING_ORCH=1) skips the onboarding orchestrator
     // entirely — no drain loop, no toasters. Lets the same build A/B the
     // orchestrator ON vs OFF to confirm/deny the 2026-07-04 native-leak
     // regression in the field. Remove once the leak fix is field-verified.
@@ -495,10 +501,10 @@ const App: React.FC = () => {
     setOrchestratorUserState({
       isPremium: isPremiumActive,
       hasProfile,
-      hasNativelyKey: hasNativelyApi,
+      hasMeetFlooKey: hasMeetFlooApi,
       hasTrialToken: !!activeTrial,
     });
-  }, [isPremiumActive, hasProfile, hasNativelyApi, activeTrial]);
+  }, [isPremiumActive, hasProfile, hasMeetFlooApi, activeTrial]);
 
   // Pause the orchestrator while a foreground settings surface is open so
   // toasters never appear over the user's settings interaction.
@@ -548,38 +554,38 @@ const App: React.FC = () => {
 
             // 2. seenModesOnboarding
             if (flags.seenModesOnboarding) {
-              try { localStorage.setItem('natively_seen_modes_onboarding_v5', 'true'); } catch {}
+              try { localStorage.setItem('MeetFloo_seen_modes_onboarding_v5', 'true'); } catch { }
             } else {
               try {
-                const localSeen = localStorage.getItem('natively_seen_modes_onboarding_v5') === 'true';
+                const localSeen = localStorage.getItem('MeetFloo_seen_modes_onboarding_v5') === 'true';
                 if (localSeen) {
-                  window.electronAPI?.onboardingSetFlag?.('seenModesOnboarding', true).catch(() => {});
+                  window.electronAPI?.onboardingSetFlag?.('seenModesOnboarding', true).catch(() => { });
                 }
-              } catch {}
+              } catch { }
             }
 
             // 3. seenProfileOnboarding
             if (flags.seenProfileOnboarding) {
-              try { localStorage.setItem('natively_seen_profile_onboarding_v1', 'true'); } catch {}
+              try { localStorage.setItem('MeetFloo_seen_profile_onboarding_v1', 'true'); } catch { }
             } else {
               try {
-                const localSeen = localStorage.getItem('natively_seen_profile_onboarding_v1') === 'true';
+                const localSeen = localStorage.getItem('MeetFloo_seen_profile_onboarding_v1') === 'true';
                 if (localSeen) {
-                  window.electronAPI?.onboardingSetFlag?.('seenProfileOnboarding', true).catch(() => {});
+                  window.electronAPI?.onboardingSetFlag?.('seenProfileOnboarding', true).catch(() => { });
                 }
-              } catch {}
+              } catch { }
             }
 
             // 4. permsShown
             if (flags.permsShown) {
-              try { localStorage.setItem('natively_perms_shown_v1', '1'); } catch {}
+              try { localStorage.setItem('MeetFloo_perms_shown_v1', '1'); } catch { }
             } else {
               try {
-                const localSeen = localStorage.getItem('natively_perms_shown_v1') === '1';
+                const localSeen = localStorage.getItem('MeetFloo_perms_shown_v1') === '1';
                 if (localSeen) {
-                  window.electronAPI?.onboardingSetFlag?.('permsShown', true).catch(() => {});
+                  window.electronAPI?.onboardingSetFlag?.('permsShown', true).catch(() => { });
                 }
-              } catch {}
+              } catch { }
             }
           } else {
             fallbackLocal();
@@ -593,7 +599,7 @@ const App: React.FC = () => {
     }
 
     // Basic status check for campaign targeting
-    window.electronAPI?.profileGetStatus?.().then(s => setHasProfile(s?.hasProfile || false)).catch(() => {});
+    window.electronAPI?.profileGetStatus?.().then(s => setHasProfile(s?.hasProfile || false)).catch(() => { });
     // Load full plan details for targeted ad delivery (plan tier + provider).
     window.electronAPI?.licenseGetDetails?.()
       .then(details => {
@@ -615,10 +621,10 @@ const App: React.FC = () => {
         }
       });
 
-    // Also check for Natively API key
+    // Also check for MeetFloo API key
     window.electronAPI?.getStoredCredentials?.()
-      .then((creds) => setHasNativelyApi(!!creds?.hasNativelyKey))
-      .catch(() => {});
+      .then((creds) => setHasMeetFlooApi(!!creds?.hasMeetFlooKey))
+      .catch(() => { });
 
     // ── Trial: check stored token and start polling if active ──
     let trialPollId: ReturnType<typeof setInterval> | null = null;
@@ -633,15 +639,15 @@ const App: React.FC = () => {
           // resume/JD data doesn't linger in SQLite beyond the trial window.
           if (!profileWiped) {
             profileWiped = true;
-            window.electronAPI?.wipeTrialProfileData?.().catch(() => {});
+            window.electronAPI?.wipeTrialProfileData?.().catch(() => { });
           }
           setShowTrialExpiredModal(true);
           if (trialPollId) { clearInterval(trialPollId); trialPollId = null; }
         } else {
           setActiveTrial({
             expiresAt: res.expires_at ?? '',
-            usage:     res.usage     ?? { ai: 0, ai_tokens: 0, stt_seconds: 0, search: 0 },
-            limits:    (res as { limits?: TrialLimits }).limits,
+            usage: res.usage ?? { ai: 0, ai_tokens: 0, stt_seconds: 0, search: 0 },
+            limits: (res as { limits?: TrialLimits }).limits,
           });
         }
       } catch { /* ignore — non-critical */ }
@@ -653,7 +659,7 @@ const App: React.FC = () => {
         // Already expired at launch — wipe immediately then show modal after a brief delay
         if (!profileWiped) {
           profileWiped = true;
-          window.electronAPI?.wipeTrialProfileData?.().catch(() => {});
+          window.electronAPI?.wipeTrialProfileData?.().catch(() => { });
         }
         setTimeout(() => setShowTrialExpiredModal(true), 10_000);
         return;
@@ -676,7 +682,7 @@ const App: React.FC = () => {
       });
       checkTrial();
       trialPollId = setInterval(checkTrial, 30_000);
-    }).catch(() => {});
+    }).catch(() => { });
 
     // Listen for trial-ended event (emitted by trial:end-byok IPC)
     const removeTrialListener = window.electronAPI?.onTrialEnded?.(() => {
@@ -688,9 +694,9 @@ const App: React.FC = () => {
     // The orchestrator owns scheduling; we just feed it the latest user state.
     if (isLauncherWindow || isDefault) {
       // Permissions state — first launch vs returning mac with revoked TCC.
-      const permsShown = localStorage.getItem('natively_perms_shown_v1') === '1';
-      const seenModes = localStorage.getItem('natively_seen_modes_onboarding_v5') === 'true';
-      const seenProfile = localStorage.getItem('natively_seen_profile_onboarding_v1') === 'true';
+      const permsShown = localStorage.getItem('MeetFloo_perms_shown_v1') === '1';
+      const seenModes = localStorage.getItem('MeetFloo_seen_modes_onboarding_v5') === 'true';
+      const seenProfile = localStorage.getItem('MeetFloo_seen_profile_onboarding_v1') === 'true';
 
       const maybeCheck = window.electronAPI?.checkPermissions;
       if (maybeCheck) {
@@ -716,7 +722,7 @@ const App: React.FC = () => {
       // Donation status (support toaster gate)
       window.electronAPI?.getDonationStatus?.()
         .then(s => setOrchestratorUserState({ donationShouldShow: s?.shouldShow ?? false }))
-        .catch(() => {});
+        .catch(() => { });
 
       // Extension connection state
       window.electronAPI?.phoneMirrorGetInfo?.()
@@ -725,7 +731,7 @@ const App: React.FC = () => {
           extensionSupported: true,
           isV2_8_OrNewer: true, // min version handled inside the stage skipWhen
         }))
-        .catch(() => {});
+        .catch(() => { });
     }
 
     // Listen for open-settings-tab events from other windows (e.g. overlay Modes button)
@@ -866,7 +872,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!isOverlayWindow || !window.electronAPI?.onThemeChanged) return;
     return window.electronAPI.onThemeChanged(() => {
-      const stored = localStorage.getItem('natively_overlay_opacity');
+      const stored = localStorage.getItem('MeetFloo_overlay_opacity');
       if (!stored) {
         setOverlayOpacity(getDefaultOverlayOpacity());
       }
@@ -912,18 +918,18 @@ const App: React.FC = () => {
     userName?: string;
   }) => {
     try {
-      localStorage.setItem('natively_last_meeting_start', Date.now().toString());
+      localStorage.setItem('MeetFloo_last_meeting_start', Date.now().toString());
       // Self-heal a poisoned preference. Until the picker started filtering
-      // them, Natively's own system-audio tap aggregate could be enumerated as
+      // them, MeetFloo's own system-audio tap aggregate could be enumerated as
       // an input device (private CoreAudio aggregates are hidden from other
       // processes, not from ours) and saved here. It is not a microphone and
       // never exists at mic-start time, so every meeting failed with
-      // "Input device 'NativelySystemAudioTap' not found". Main falls back to
+      // "Input device 'MeetFlooSystemAudioTap' not found". Main falls back to
       // the default either way; dropping the key stops the stale value from
       // being shown as the user's choice in Settings forever.
       let inputDeviceId = localStorage.getItem('preferredInputDeviceId');
       if (isInternalCaptureDevice(inputDeviceId)) {
-        console.warn(`[App] Discarding saved input device "${inputDeviceId}" — it is one of Natively's own capture devices, not a microphone.`);
+        console.warn(`[App] Discarding saved input device "${inputDeviceId}" — it is one of MeetFloo's own capture devices, not a microphone.`);
         localStorage.removeItem('preferredInputDeviceId');
         inputDeviceId = null;
       }
@@ -967,7 +973,7 @@ const App: React.FC = () => {
         // left on the launcher with nothing actionable. Re-open the permissions
         // card, which checks live mic/screen status, re-requests the mic, and
         // deep-links to System Settings. This is the recoverable surface for
-        // the "I press Start Natively and nothing happens" report.
+        // the "I press Start MeetFloo and nothing happens" report.
         if (result.code === 'mic-permission-denied') {
           // Route through the orchestrator: mark mac TCC as blocked so the
           // permissions stage becomes re-eligible.
@@ -993,14 +999,14 @@ const App: React.FC = () => {
     setIsProcessingMeeting(true);
 
     // Local bookkeeping that does not depend on the main process.
-    const startStr = localStorage.getItem('natively_last_meeting_start');
+    const startStr = localStorage.getItem('MeetFloo_last_meeting_start');
     if (startStr) {
       const duration = Date.now() - parseInt(startStr, 10);
       const threshold = import.meta.env.DEV ? 10000 : 180000;
       if (duration >= threshold) {
-        localStorage.setItem('natively_show_profile_toaster', 'true');
+        localStorage.setItem('MeetFloo_show_profile_toaster', 'true');
       }
-      localStorage.removeItem('natively_last_meeting_start');
+      localStorage.removeItem('MeetFloo_last_meeting_start');
     }
 
     // Fire-and-forget: main's endMeeting() handler now performs the
@@ -1120,7 +1126,7 @@ const App: React.FC = () => {
                 } as React.CSSProperties}
               >
                 <HindsightStatusBanner />
-                <NativelyInterface
+                <MeetFlooInterface
                   onEndMeeting={handleEndMeeting}
                   overlayOpacity={overlayOpacity}
                   interfaceTheme={meetingInterfaceTheme}
@@ -1138,228 +1144,232 @@ const App: React.FC = () => {
   // Renders if window=launcher OR no param
   return (
     <ErrorBoundary context="Launcher">
-    <div className="h-full min-h-0 w-full relative bg-transparent">
-      {/* data-opacity-preview-surface: queried (via querySelectorAll, not by
+      <div className="h-full min-h-0 w-full relative bg-transparent">
+        {/* data-opacity-preview-surface: queried (via querySelectorAll, not by
           id — there are two separate blocks below) by SettingsOverlay's
           startPreviewingOpacity/stopPreviewingOpacity so the Interface
           Opacity live-preview hides every global banner/toast/modal along
           with #launcher-container, instead of leaving whichever one happens
           to be visible (update/quota/trial banners, onboarding toasts, ad
           promos) painted opaque on top of the "transparent" preview. */}
-      {!isolateGlobalSurfaces && showHindsightBanner && (
-        <div data-opacity-preview-surface="">
-          <HindsightStatusBanner variant="floating-card" />
-        </div>
-      )}
-      <AnimatePresence>
-        {showStartup ? (
-          <motion.div
-            key="startup"
-            className="h-full w-full"
-            initial={{ opacity: 0, scale: 1.01 }}
-            animate={{ opacity: 1, scale: 1, transition: { duration: 0.5, ease: [0.23, 1, 0.32, 1] } }}
-            exit={{ opacity: 0, scale: 1.04, pointerEvents: "none", transition: { duration: 0.55, ease: [0.4, 0, 0.2, 1] } }}
-          >
-            <StartupSequence onComplete={dismissStartup} />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="main"
-            className="h-full w-full"
-            initial={{ opacity: 0, scale: 0.99, y: 8 }} // "Linear" style entry: slightly down and scaled down
-            animate={{ opacity: 1, scale: 1, y: 0 }}    // Slide up and snap to place
-            transition={{
-              duration: 0.6,
-              ease: [0.19, 1, 0.22, 1], // Expo-out: snappy start, smooth landing
-            }}
-            onAnimationComplete={reportRevealComplete}
-          >
-            <QueryClientProvider client={queryClient}>
-              <ToastProvider>
-                <WebDownloadBanner />
-                <div id="launcher-container" className="h-full w-full relative">
-                  <Launcher
-                    onStartMeeting={handleStartMeeting}
-                    onOpenSettings={(tab = 'general') => openSettingsExclusive(tab)}
-                    onOpenProfile={() => openProfileExclusive()}
-                    onOpenModes={() => openModesExclusive()}
-                    onPageChange={setIsLauncherMainView}
-                    ollamaPullStatus={ollamaPullStatus}
-                    ollamaPullPercent={ollamaPullPercent}
-                    ollamaPullMessage={ollamaPullMessage}
+        {!isolateGlobalSurfaces && showHindsightBanner && (
+          <div data-opacity-preview-surface="">
+            <HindsightStatusBanner variant="floating-card" />
+          </div>
+        )}
+        <AnimatePresence>
+          {showStartup ? (
+            <motion.div
+              key="startup"
+              className="h-full w-full"
+              initial={{ opacity: 0, scale: 1.01 }}
+              animate={{ opacity: 1, scale: 1, transition: { duration: 0.5, ease: [0.23, 1, 0.32, 1] } }}
+              exit={{ opacity: 0, scale: 1.04, pointerEvents: "none", transition: { duration: 0.55, ease: [0.4, 0, 0.2, 1] } }}
+            >
+              <StartupSequence onComplete={dismissStartup} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="main"
+              className="h-full w-full"
+              initial={{ opacity: 0, scale: 0.99, y: 8 }} // "Linear" style entry: slightly down and scaled down
+              animate={{ opacity: 1, scale: 1, y: 0 }}    // Slide up and snap to place
+              transition={{
+                duration: 0.6,
+                ease: [0.19, 1, 0.22, 1], // Expo-out: snappy start, smooth landing
+              }}
+              onAnimationComplete={reportRevealComplete}
+            >
+              <QueryClientProvider client={queryClient}>
+                <ToastProvider>
+                  <WebDownloadBanner />
+                  <div id="launcher-container" className="h-full w-full relative">
+                    <Launcher
+                      onStartMeeting={handleStartMeeting}
+                      onOpenSettings={(tab = 'general') => openSettingsExclusive(tab)}
+                      onOpenProfile={() => openProfileExclusive()}
+                      onOpenModes={() => openModesExclusive()}
+                      onPageChange={setIsLauncherMainView}
+                      ollamaPullStatus={ollamaPullStatus}
+                      ollamaPullPercent={ollamaPullPercent}
+                      ollamaPullMessage={ollamaPullMessage}
+                    />
+                  </div>
+                  <SettingsOverlay
+                    isOpen={isSettingsOpen}
+                    onClose={() => {
+                      setIsSettingsOpen(false);
+                    }}
+                    initialTab={settingsNav.tab}
+                    initialTabSeq={settingsNav.seq}
+                    initialIsPremium={hasLoadedLicense ? isPremiumActive : null}
+                    initialHasMeetFlooKey={hasMeetFlooApi}
                   />
-                </div>
-                <SettingsOverlay
-                  isOpen={isSettingsOpen}
-                  onClose={() => {
-                    setIsSettingsOpen(false);
-                  }}
-                  initialTab={settingsNav.tab}
-                  initialTabSeq={settingsNav.seq}
-                  initialIsPremium={hasLoadedLicense ? isPremiumActive : null}
-                  initialHasNativelyKey={hasNativelyApi}
-                />
-                <AnimatePresence>
-                  {activeManagerPanel && (
-                    <motion.div
-                      key="manager-panel"
-                      variants={managerBackdropVariants}
-                      initial="initial"
-                      animate="animate"
-                      exit="exit"
-                      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-                      onClick={(event) => {
-                        if (event.target !== event.currentTarget) return;
-                        closeManagerPanel();
-                      }}
-                    >
+                  <GoogleAuthModal
+                    isOpen={showGoogleAuthOnStartup}
+                    onClose={() => setShowGoogleAuthOnStartup(false)}
+                  />
+                  <AnimatePresence>
+                    {activeManagerPanel && (
                       <motion.div
-                        ref={managerDialogRef}
-                        data-testid="manager-panel-host"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label={activeManagerPanel === 'modes' ? 'Modes Manager' : 'Profile Intelligence'}
-                        tabIndex={-1}
-                        variants={managerCardVariants}
-                        onClick={(event) => event.stopPropagation()}
-                        style={{
-                          willChange: 'transform, opacity',
-                          transformOrigin: 'center',
+                        key="manager-panel"
+                        variants={managerBackdropVariants}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+                        onClick={(event) => {
+                          if (event.target !== event.currentTarget) return;
+                          closeManagerPanel();
                         }}
-                        className="manager-panel-shell w-[820px] h-[600px] max-w-[95vw] max-h-[90vh] rounded-2xl overflow-hidden border border-border-muted bg-bg-elevated"
                       >
-                        <AnimatePresence mode="wait" initial={false}>
                         <motion.div
-                          key={activeManagerPanel}
-                          data-testid={`manager-panel-${activeManagerPanel}`}
-                          variants={managerContentVariants}
-                          initial="initial"
-                          animate="animate"
-                          exit="exit"
-                          className="h-full w-full"
+                          ref={managerDialogRef}
+                          data-testid="manager-panel-host"
+                          role="dialog"
+                          aria-modal="true"
+                          aria-label={activeManagerPanel === 'modes' ? 'Modes Manager' : 'Profile Intelligence'}
+                          tabIndex={-1}
+                          variants={managerCardVariants}
+                          onClick={(event) => event.stopPropagation()}
+                          style={{
+                            willChange: 'transform, opacity',
+                            transformOrigin: 'center',
+                          }}
+                          className="manager-panel-shell w-[820px] h-[600px] max-w-[95vw] max-h-[90vh] rounded-2xl overflow-hidden border border-border-muted bg-bg-elevated"
                         >
-                          {activeManagerPanel === 'modes' ? (
-                            <ModesSettings
-                              onClose={closeManagerPanel}
-                              isPremium={isPremiumActive}
-                              isLoaded={hasLoadedLicense}
-                              isTrialActive={!!activeTrial}
-                              onOpenNativelyAPI={() => openSettingsExclusive('plans')}
-                            />
-                          ) : (
-                            <ProfileIntelligenceSettings
-                              onClose={closeManagerPanel}
-                              onOpenNativelyAPI={() => openSettingsExclusive('plans')}
-                            />
-                          )}
+                          <AnimatePresence mode="wait" initial={false}>
+                            <motion.div
+                              key={activeManagerPanel}
+                              data-testid={`manager-panel-${activeManagerPanel}`}
+                              variants={managerContentVariants}
+                              initial="initial"
+                              animate="animate"
+                              exit="exit"
+                              className="h-full w-full"
+                            >
+                              {activeManagerPanel === 'modes' ? (
+                                <ModesSettings
+                                  onClose={closeManagerPanel}
+                                  isPremium={isPremiumActive}
+                                  isLoaded={hasLoadedLicense}
+                                  isTrialActive={!!activeTrial}
+                                  onOpenMeetFlooAPI={() => openSettingsExclusive('plans')}
+                                />
+                              ) : (
+                                <ProfileIntelligenceSettings
+                                  onClose={closeManagerPanel}
+                                  onOpenMeetFlooAPI={() => openSettingsExclusive('plans')}
+                                />
+                              )}
+                            </motion.div>
+                          </AnimatePresence>
                         </motion.div>
-                        </AnimatePresence>
                       </motion.div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                <ToastViewport />
-              </ToastProvider>
-            </QueryClientProvider>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                    )}
+                  </AnimatePresence>
+                  <ToastViewport />
+                </ToastProvider>
+              </QueryClientProvider>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
 
-      <AnimatePresence>
-        {incompatibleWarning && isDefault && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed bottom-6 right-6 z-50 pointer-events-auto"
-          >
-            <div className="bg-[#1A1A1A] border border-[#ff3333]/30 shadow-2xl rounded-2xl p-5 max-w-[340px] flex flex-col gap-3">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-[#ff3333] shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="text-[#E0E0E0] font-medium text-sm">Provider Changed</h3>
-                  <p className="text-[#A0A0A0] text-xs mt-1 leading-relaxed">
-                    ⚠ {incompatibleWarning.count} meetings used your previous AI provider ({incompatibleWarning.oldProvider}) and won't appear in search results under {incompatibleWarning.newProvider}.
-                  </p>
+        <AnimatePresence>
+          {incompatibleWarning && isDefault && (
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed bottom-6 right-6 z-50 pointer-events-auto"
+            >
+              <div className="bg-[#1A1A1A] border border-[#ff3333]/30 shadow-2xl rounded-2xl p-5 max-w-[340px] flex flex-col gap-3">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-[#ff3333] shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="text-[#E0E0E0] font-medium text-sm">Provider Changed</h3>
+                    <p className="text-[#A0A0A0] text-xs mt-1 leading-relaxed">
+                      ⚠ {incompatibleWarning.count} meetings used your previous AI provider ({incompatibleWarning.oldProvider}) and won't appear in search results under {incompatibleWarning.newProvider}.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-1 justify-end">
+                  <button
+                    onClick={() => setIncompatibleWarning(null)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-[#A0A0A0] hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                  <button
+                    onClick={handleReindex}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#ff3333]/10 text-[#ff3333] hover:bg-[#ff3333]/20 transition-colors"
+                  >
+                    Re-index automatically
+                  </button>
                 </div>
               </div>
-              <div className="flex gap-2 mt-1 justify-end">
-                <button 
-                  onClick={() => setIncompatibleWarning(null)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-[#A0A0A0] hover:text-white hover:bg-white/5 transition-colors"
-                >
-                  Dismiss
-                </button>
-                <button 
-                  onClick={handleReindex}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#ff3333]/10 text-[#ff3333] hover:bg-[#ff3333]/20 transition-colors"
-                >
-                  Re-index automatically
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      <AnimatePresence>
-        {reindexProgress && isDefault && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed bottom-6 right-6 z-50 pointer-events-auto"
-          >
-            <div className="bg-[#1A1A1A] border border-white/10 shadow-2xl rounded-2xl p-5 max-w-[340px] flex flex-col gap-3">
-              <div className="flex items-start gap-3">
-                <RefreshCw className={`w-5 h-5 text-[#A0A0A0] shrink-0 mt-0.5 ${reindexProgress.done < reindexProgress.total ? 'animate-spin' : ''}`} />
-                <div className="flex-1">
-                  <h3 className="text-[#E0E0E0] font-medium text-sm">
-                    {reindexProgress.done >= reindexProgress.total && reindexProgress.total > 0
-                      ? 'Search index updated'
-                      : 'Updating search index'}
-                  </h3>
-                  <p className="text-[#A0A0A0] text-xs mt-1 leading-relaxed">
-                    {reindexProgress.done >= reindexProgress.total && reindexProgress.total > 0
-                      ? 'Your past conversations are searchable again.'
-                      : `Re-indexing your past conversations for the upgraded AI model… ${reindexProgress.done}/${reindexProgress.total}`}
-                  </p>
-                  {reindexProgress.total > 0 && (
-                    <div className="mt-2 h-1 w-full rounded-full bg-white/10 overflow-hidden">
-                      <div
-                        className="h-full bg-[#E0E0E0] transition-all duration-500"
-                        style={{ width: `${Math.min(100, Math.round((reindexProgress.done / reindexProgress.total) * 100))}%` }}
-                      />
-                    </div>
-                  )}
+        <AnimatePresence>
+          {reindexProgress && isDefault && (
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed bottom-6 right-6 z-50 pointer-events-auto"
+            >
+              <div className="bg-[#1A1A1A] border border-white/10 shadow-2xl rounded-2xl p-5 max-w-[340px] flex flex-col gap-3">
+                <div className="flex items-start gap-3">
+                  <RefreshCw className={`w-5 h-5 text-[#A0A0A0] shrink-0 mt-0.5 ${reindexProgress.done < reindexProgress.total ? 'animate-spin' : ''}`} />
+                  <div className="flex-1">
+                    <h3 className="text-[#E0E0E0] font-medium text-sm">
+                      {reindexProgress.done >= reindexProgress.total && reindexProgress.total > 0
+                        ? 'Search index updated'
+                        : 'Updating search index'}
+                    </h3>
+                    <p className="text-[#A0A0A0] text-xs mt-1 leading-relaxed">
+                      {reindexProgress.done >= reindexProgress.total && reindexProgress.total > 0
+                        ? 'Your past conversations are searchable again.'
+                        : `Re-indexing your past conversations for the upgraded AI model… ${reindexProgress.done}/${reindexProgress.total}`}
+                    </p>
+                    {reindexProgress.total > 0 && (
+                      <div className="mt-2 h-1 w-full rounded-full bg-white/10 overflow-hidden">
+                        <div
+                          className="h-full bg-[#E0E0E0] transition-all duration-500"
+                          style={{ width: `${Math.min(100, Math.round((reindexProgress.done / reindexProgress.total) * 100))}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      <div data-opacity-preview-surface="">
-        {!isolateGlobalSurfaces && <UpdateBanner />}
-        {!isolateGlobalSurfaces && <NativelyQuotaBanner />}
+        <div data-opacity-preview-surface="">
+          {!isolateGlobalSurfaces && <UpdateBanner />}
+          {!isolateGlobalSurfaces && <MeetFlooQuotaBanner />}
 
-        {/* Orchestrated onboarding toasters (single-slot, controlled by OnboardingOrchestrator) */}
-        {!isolateOnboarding && isElectron && (
-          <OrchestratorProvider>
-            <OrchestratedToasterHost />
-          </OrchestratorProvider>
-        )}
+          {/* Orchestrated onboarding toasters (single-slot, controlled by OnboardingOrchestrator) */}
+          {!isolateOnboarding && isElectron && (
+            <OrchestratorProvider>
+              <OrchestratedToasterHost />
+            </OrchestratorProvider>
+          )}
 
-        {/* DEV-ONLY: direct ReviewPromptHost mount for iterating on the modal UX.
+          {/* DEV-ONLY: direct ReviewPromptHost mount for iterating on the modal UX.
             Gated on import.meta.env.DEV plus the same opt-in flags the host
             already respects (?review=force, window.__reviewForceShow). When
             active, this bypasses the orchestrator entirely so the persisted
             onboarding ledger is not modified. */}
-        {!isolateGlobalSurfaces && shouldMountDevReviewHost() && <ReviewPromptHost />}
+          {!isolateGlobalSurfaces && shouldMountDevReviewHost() && <ReviewPromptHost />}
 
-        {/* Trial Banners and Post-Trial Upgrade Modals Hidden */}
-        {/*
+          {/* Trial Banners and Post-Trial Upgrade Modals Hidden */}
+          {/*
         {!isolateGlobalSurfaces && (isLauncherWindow || isDefault) && activeTrial && (
           <FreeTrialBanner
             expiresAt={activeTrial.expiresAt}
@@ -1387,74 +1397,74 @@ const App: React.FC = () => {
         )}
         */}
 
-        {/* Ad toasters */}
-        {!isolateModals && isLauncherMainView && !isSettingsOpen && (
-          <NativelyApiPromoToaster
-            isOpen={activeAd === 'natively_api'}
-            onDismiss={() => dismissAd('natively_api')}
-            onOpenSettings={(tab: string) => openSettingsExclusive(tab)}
-          />
-        )}
-        {!isolateModals && isLauncherMainView && (
-          <>
-            <ProfileFeatureToaster
-              isOpen={activeAd === 'profile'}
-              onDismiss={dismissAd}
-              onSetupProfile={() => openProfileExclusive()}
+          {/* Ad toasters */}
+          {!isolateModals && isLauncherMainView && !isSettingsOpen && (
+            <MeetFlooApiPromoToaster
+              isOpen={activeAd === 'MeetFloo_api'}
+              onDismiss={() => dismissAd('MeetFloo_api')}
+              onOpenSettings={(tab: string) => openSettingsExclusive(tab)}
             />
-            <JDAwarenessToaster
-              isOpen={activeAd === 'jd'}
-              onDismiss={dismissAd}
-              onSetupJD={() => openProfileExclusive()}
-            />
-            <PremiumPromoToaster
-              isOpen={activeAd === 'promo'}
-              onDismiss={dismissAd}
-              onUpgrade={() => {
-                setShowPremiumModal(true);
-              }}
-            />
-            <MaxUltraUpgradeToaster
-              isOpen={activeAd === 'max_ultra_upgrade'}
-              onDismiss={dismissAd}
-              onUpgrade={() => {
-                setShowPremiumModal(true);
-              }}
-            />
+          )}
+          {!isolateModals && isLauncherMainView && (
+            <>
+              <ProfileFeatureToaster
+                isOpen={activeAd === 'profile'}
+                onDismiss={dismissAd}
+                onSetupProfile={() => openProfileExclusive()}
+              />
+              <JDAwarenessToaster
+                isOpen={activeAd === 'jd'}
+                onDismiss={dismissAd}
+                onSetupJD={() => openProfileExclusive()}
+              />
+              <PremiumPromoToaster
+                isOpen={activeAd === 'promo'}
+                onDismiss={dismissAd}
+                onUpgrade={() => {
+                  setShowPremiumModal(true);
+                }}
+              />
+              <MaxUltraUpgradeToaster
+                isOpen={activeAd === 'max_ultra_upgrade'}
+                onDismiss={dismissAd}
+                onUpgrade={() => {
+                  setShowPremiumModal(true);
+                }}
+              />
 
-            {/* Remote Campaigns Render Logic (Commented out)
+              {/* Remote Campaigns Render Logic (Commented out)
             <RemoteCampaignToaster
               isOpen={typeof activeAd === 'object' && activeAd !== null}
               campaign={typeof activeAd === 'object' && activeAd !== null ? activeAd : undefined as any}
               onDismiss={dismissAd}
             />
             */}
-          </>
-        )}
+            </>
+          )}
 
-        {!isolateModals && <PremiumUpgradeModal
-          isOpen={showPremiumModal}
-          onClose={() => setShowPremiumModal(false)}
-          isPremium={isPremiumActive}
-          onActivated={() => {
-            setIsPremiumActive(true);
-            // Refresh full plan details after activation so ad targeting reflects the new plan
-            window.electronAPI?.licenseGetDetails?.()
-              .then(d => setPlanDetails(d ?? { isPremium: true }))
-              .catch(() => setPlanDetails({ isPremium: true }));
-            setShowPremiumModal(false);
-            // If user activated during post-trial modal, close it — they have a plan now
-            setShowTrialExpiredModal(false);
-            setActiveTrial(null);
-            // After activation, open settings to Profile Intelligence
-            setTimeout(() => {
-              openProfileExclusive();
-            }, 300);
-          }}
-          onDeactivated={() => { setIsPremiumActive(false); setPlanDetails({ isPremium: false }); }}
-        />}
+          {!isolateModals && <PremiumUpgradeModal
+            isOpen={showPremiumModal}
+            onClose={() => setShowPremiumModal(false)}
+            isPremium={isPremiumActive}
+            onActivated={() => {
+              setIsPremiumActive(true);
+              // Refresh full plan details after activation so ad targeting reflects the new plan
+              window.electronAPI?.licenseGetDetails?.()
+                .then(d => setPlanDetails(d ?? { isPremium: true }))
+                .catch(() => setPlanDetails({ isPremium: true }));
+              setShowPremiumModal(false);
+              // If user activated during post-trial modal, close it — they have a plan now
+              setShowTrialExpiredModal(false);
+              setActiveTrial(null);
+              // After activation, open settings to Profile Intelligence
+              setTimeout(() => {
+                openProfileExclusive();
+              }, 300);
+            }}
+            onDeactivated={() => { setIsPremiumActive(false); setPlanDetails({ isPremium: false }); }}
+          />}
+        </div>
       </div>
-    </div>
     </ErrorBoundary>
   )
 }

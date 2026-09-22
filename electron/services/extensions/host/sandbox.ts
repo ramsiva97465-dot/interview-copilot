@@ -89,7 +89,7 @@ function normalizeModuleId(request: string): string {
 }
 
 /** Synthetic module URL the ESM hook maps `child_process` onto. */
-const SHIMMED_CHILD_PROCESS_URL = 'natively-sandbox:child_process';
+const SHIMMED_CHILD_PROCESS_URL = 'MeetFloo-sandbox:child_process';
 
 export function installSandbox(options: SandboxOptions): SandboxReport {
   const target = options.target ?? (globalThis as unknown as Record<string, unknown>);
@@ -110,11 +110,11 @@ export function installSandbox(options: SandboxOptions): SandboxReport {
     }
   }
 
-    // ── Modules ────────────────────────────────────────────────────────────
+  // ── Modules ────────────────────────────────────────────────────────────
   const childProcessShim = createChildProcessShim(granted, options.preauthorizedBinaries);
   // The ESM hook can only return a URL, so the shim is reachable by the tiny
   // module that hook synthesises. Same object as the require() path returns.
-  (globalThis as Record<string, unknown>).__nativelyChildProcessShim = childProcessShim;
+  (globalThis as Record<string, unknown>).__MeetFlooChildProcessShim = childProcessShim;
 
   const handler = (request: string): { handled: true; value: unknown } | { handled: false } => {
     const id = normalizeModuleId(request);
@@ -124,7 +124,7 @@ export function installSandbox(options: SandboxOptions): SandboxReport {
     }
     if (BLOCKED_MODULES.includes(id)) {
       throw new Error(
-        `[natively] "${request}" is not available to extensions. ` +
+        `[MeetFloo] "${request}" is not available to extensions. ` +
         'Use the global fetch(), which is mediated by the permission broker.',
       );
     }
@@ -209,7 +209,7 @@ function patchEsmLoader(
           format: 'module',
           shortCircuit: true,
           source:
-            'const s = globalThis.__nativelyChildProcessShim;\n'
+            'const s = globalThis.__MeetFlooChildProcessShim;\n'
             + 'export const spawn = s.spawn;\n'
             + 'export const exec = s.exec;\n'
             + 'export const execSync = s.execSync;\n'
@@ -251,14 +251,14 @@ export function createBrokeredFetch(callBroker: BrokerCall) {
       : (input as { url?: string })?.url;
 
     if (typeof url !== 'string' || !url) {
-      throw new TypeError('[natively] fetch() requires a URL string');
+      throw new TypeError('[MeetFloo] fetch() requires a URL string');
     }
 
     let parsed: URL;
     try {
       parsed = new URL(url);
     } catch {
-      throw new TypeError(`[natively] fetch() could not parse the URL ${JSON.stringify(url)}`);
+      throw new TypeError(`[MeetFloo] fetch() could not parse the URL ${JSON.stringify(url)}`);
     }
 
     const port = parsed.port
@@ -386,7 +386,7 @@ export function createChildProcessShim(
 
   const refuse = (name: string) => () => {
     throw new Error(
-      `[natively] child_process.${name} is not available to extensions. ` +
+      `[MeetFloo] child_process.${name} is not available to extensions. ` +
       'Use spawn() with a binary declared in "allowedBinaries".',
     );
   };
@@ -394,11 +394,11 @@ export function createChildProcessShim(
   return {
     spawn(command: string, args?: readonly string[], options?: unknown): unknown {
       if (!granted.has('process.spawn')) {
-        throw new Error('[natively] spawning a process requires the "process.spawn" permission');
+        throw new Error('[MeetFloo] spawning a process requires the "process.spawn" permission');
       }
       if (!allowed.has(normalizeBinary(command))) {
         throw new Error(
-          `[natively] binary ${JSON.stringify(command)} is not in this extension's "allowedBinaries"`,
+          `[MeetFloo] binary ${JSON.stringify(command)} is not in this extension's "allowedBinaries"`,
         );
       }
       // Authorised: perform the real spawn here in the child, so stdio streams

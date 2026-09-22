@@ -20,7 +20,7 @@
 // multi-cluster labels but is swayed by a single odd neighbour in a sparse
 // region, which this corpus has plenty of.
 //
-// Prototypes live in a JSON cache rather than natively.db via sqlite-vec. For
+// Prototypes live in a JSON cache rather than MeetFloo.db via sqlite-vec. For
 // PRODUCTION the brief specifies sqlite-vec and that is right; for measurement
 // the storage layer changes nothing and a DB dependency would add setup that
 // the benchmark does not need. The vectors and the arithmetic are identical.

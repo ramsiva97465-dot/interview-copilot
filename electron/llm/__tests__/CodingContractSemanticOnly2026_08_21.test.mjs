@@ -22,7 +22,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-process.env.NATIVELY_PROMPT_SYSTEM_V2 = '1';
+process.env.MEETFLOO_PROMPT_SYSTEM_V2 = '1';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dist = (p) => pathToFileURL(path.resolve(__dirname, '../../../dist-electron/electron/llm/', p)).href;

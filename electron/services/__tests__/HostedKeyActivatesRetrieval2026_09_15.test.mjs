@@ -1,7 +1,7 @@
 // Pasting a hosted key must actually turn that provider on (2026-09-15).
 //
-// Natively was the only key that self-activated: setNativelyApiKey promotes the
-// reranker to 'natively' and readHostedModel falls back to the managed model.
+// MeetFloo was the only key that self-activated: setMeetFlooApiKey promotes the
+// reranker to 'MeetFloo' and readHostedModel falls back to the managed model.
 // Every other key was stored and then did nothing —
 //
 //   • setOpenrouterApiKey / setJinaApiKey (CredentialsManager.ts:1033, :1044)
@@ -43,7 +43,7 @@ const require = createRequire(import.meta.url);
 const repoRoot = path.resolve(process.cwd());
 const A = require(path.join(repoRoot, 'dist-electron/electron/services/hostedKeyActivation.js'));
 const { decideRerankerActivation, decideEmbeddingActivation, rerankModelForActivation,
-        defaultEmbeddingSelection, decideRevert, applyHostedKeyActivation } = A;
+  defaultEmbeddingSelection, decideRevert, applyHostedKeyActivation } = A;
 
 /** A settings store + catalogue stub, so the applier is tested without a
  *  SettingsManager singleton and without a network. */
@@ -229,8 +229,10 @@ describe('applying the decision', () => {
   });
 
   test('clearing the key reverts the reranker but LEAVES the embedding model', async () => {
-    const io = fakeIo({ reranker: { provider: 'jina', jinaModel: 'jina-reranker-v3.5' },
-                        voyageEmbeddingModel: 'voyage-4' });
+    const io = fakeIo({
+      reranker: { provider: 'jina', jinaModel: 'jina-reranker-v3.5' },
+      voyageEmbeddingModel: 'voyage-4'
+    });
     const out = await applyHostedKeyActivation('jina', { keyPresent: false, io });
     assert.equal(out.reranker, 'revert');
     assert.equal(io.store.reranker.provider, 'local');

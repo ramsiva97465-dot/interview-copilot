@@ -49,14 +49,14 @@ const { LLMHelper } = require(dist('LLMHelper.js'));
 const { SettingsManager } = require(dist('services/SettingsManager.js'));
 const { PRIVATE_VISION_NO_LOCAL_MESSAGE } = require(dist('llm/visionPolicy.js'));
 
-const SETTINGS_SLOT = '__nativelySettingsManagerV1__';
-const CRED_SLOT = '__nativelyCredentialsManagerV1__';
+const SETTINGS_SLOT = '__MeetFlooSettingsManagerV1__';
+const CRED_SLOT = '__MeetFlooCredentialsManagerV1__';
 let settingsBefore, credBefore;
 
 // A REAL file on disk: processImage / fs.existsSync are not stubbed, so the
 // base64 that reaches each stub is produced by the shipped encoding path. A
 // fake path would make "payload carries pixels" unfalsifiable.
-const IMG = path.join(os.tmpdir(), 'natively-boundary-probe.png');
+const IMG = path.join(os.tmpdir(), 'MeetFloo-boundary-probe.png');
 // 1x1 PNG.
 const PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
@@ -113,9 +113,9 @@ function helper() {
   h.checkOllamaAvailable = async () => false;
   h.ensureOllamaModelSelected = async () => false;
   h.rateLimiters = {
-    gemini: { acquire: async () => {} }, groq: { acquire: async () => {} },
-    openai: { acquire: async () => {} }, claude: { acquire: async () => {} },
-    deepseek: { acquire: async () => {} },
+    gemini: { acquire: async () => { } }, groq: { acquire: async () => { } },
+    openai: { acquire: async () => { } }, claude: { acquire: async () => { } },
+    deepseek: { acquire: async () => { } },
   };
   h.withRetry = (fn) => fn();
   h.withTimeout = (p) => p;
@@ -124,7 +124,7 @@ function helper() {
   h.isClaudeModel = () => true;
   h.modelVersionManager = {
     getAllVisionTiers: () => [{ family: 'gemini_flash', tier1: 'g1', tier2: 'g2', tier3: 'g3' }],
-    onModelError: async () => {},
+    onModelError: async () => { },
   };
   h.isCodexAvailable = () => false;
   h.codexCliConfig = { path: '/nonexistent/codex', model: 'm', fastModel: 'fm', timeoutMs: 1000 };
@@ -458,7 +458,7 @@ describe('DEFECT 3 — the `custom` family toggle reaches the boundary', () => {
     setCreds({ disabled: ['custom'] });
     const { h } = helper();
     h.customProvider = { id: 'cp1', name: 'OpenRouter', curlCommand: 'curl https://openrouter.ai/api' };
-    h.nativelyKey = null;
+    h.MeetFlooKey = null;
     h._openaiClient = null;
     h._claudeClient = null;
     h._client = null;
@@ -484,10 +484,10 @@ describe('DEFECT 3 — the `custom` family toggle reaches the boundary', () => {
     h.customProvider = { id: 'cp1', name: 'OpenRouter', curlCommand: 'curl https://openrouter.ai/api' };
     h._client = null; h._groqClient = null; h._openaiClient = null;
     h._claudeClient = null; h._deepseekClient = null;
-    h.nativelyKey = null;
+    h.MeetFlooKey = null;
     let used = false;
     h.executeCustomProvider = async () => { used = true; return 'custom-ok'; };
-    await LLMHelper.prototype.chatWithGemini.call(h, 'a question').catch(() => {});
+    await LLMHelper.prototype.chatWithGemini.call(h, 'a question').catch(() => { });
     return used;
   };
 
@@ -557,7 +557,7 @@ describe('DEFECT 3 — the `custom` family toggle reaches the boundary', () => {
     setCreds({ disabled: [] });
     const { h } = helper();
     h.customProvider = { id: 'cp1', name: 'OpenRouter', curlCommand: 'curl https://openrouter.ai/api' };
-    h.nativelyKey = null;
+    h.MeetFlooKey = null;
     h._openaiClient = null;
     h._claudeClient = null;
     h._client = null; // no Gemini either, so custom is the only rung left

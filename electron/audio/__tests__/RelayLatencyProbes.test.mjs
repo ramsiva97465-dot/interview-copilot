@@ -23,7 +23,7 @@ const {
 } = rs;
 
 test('deriveHealthUrl: wss→https /healthz, ws→http, junk→null', () => {
-  assert.equal(deriveHealthUrl('wss://us-relay.natively.software/v1/transcribe'), 'https://us-relay.natively.software/healthz');
+  assert.equal(deriveHealthUrl('wss://us-relay.MeetFloo.software/v1/transcribe'), 'https://us-relay.MeetFloo.software/healthz');
   assert.equal(deriveHealthUrl('ws://localhost:8080/v1/transcribe'), 'http://localhost:8080/healthz');
   assert.equal(deriveHealthUrl('not a url'), null);
 });

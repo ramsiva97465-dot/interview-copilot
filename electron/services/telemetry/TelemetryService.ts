@@ -158,7 +158,7 @@ const SENSITIVE_KEY_RE = /(api[_-]?key|authorization|bearer|token|secret|passwor
 const REMOVE_VALUE_KEY_RE = /(raw[_-]?(transcript|prompt|reference|content|query|resume|jd|persona|negotiation)|transcript(text)?|prompt|reference(content)?|evidence(text)?|screenshot(path)?|image(path)?|error(body|response)?|responsebody|body|query(text|string)?|user(input|message)|chunk(text|content)?|snippet(text)?|resume(text)?|persona(text)?|negotiation(text|script|context)?|jd(text|content)?|customcontext|customnotes|notes|note|answer(text)?|question(text)?|latestquestion|content|text)$/i;
 const API_KEY_VALUE_PATTERNS = [
   /Bearer\s+[A-Za-z0-9._~+\/=:-]{12,}/gi,
-  /natively_sk_[A-Za-z0-9._-]+/gi,
+  /MeetFloo_sk_[A-Za-z0-9._-]+/gi,
   /sk-[A-Za-z0-9]{20,}/gi,
   /gsk_[A-Za-z0-9]{20,}/gi,
   /dg_[A-Za-z0-9]{20,}/gi,
@@ -356,7 +356,7 @@ export class TelemetryService {
           const controller = new AbortController();
           const timer = setTimeout(() => controller.abort(), 3000);
           f(url, { ...opts, signal: controller.signal })
-            .catch(() => {})
+            .catch(() => { })
             .finally(() => clearTimeout(timer));
         } catch {
           // never throw
@@ -373,7 +373,7 @@ export class TelemetryService {
           body: JSON.stringify({
             api_key: apiKey,
             event: record.name,
-            distinct_id: sink.distinctId || 'natively-desktop',
+            distinct_id: sink.distinctId || 'MeetFloo-desktop',
             properties: {
               ...record.properties,
               ...(record.sessionId ? { session_id: record.sessionId } : {}),
@@ -381,7 +381,7 @@ export class TelemetryService {
               ...(record.provider ? { provider: record.provider } : {}),
               ...(typeof record.durationMs === 'number' ? { duration_ms: record.durationMs } : {}),
               ...(record.status ? { status: record.status } : {}),
-              $lib: 'natively-desktop',
+              $lib: 'MeetFloo-desktop',
             },
             timestamp: record.timestamp,
           }),
@@ -396,11 +396,13 @@ export class TelemetryService {
         post(`https://api.axiom.co/v1/datasets/${encodeURIComponent(dataset)}/ingest`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify([{ _time: record.timestamp, kind: record.name, source: 'desktop', ...record.properties,
+          body: JSON.stringify([{
+            _time: record.timestamp, kind: record.name, source: 'desktop', ...record.properties,
             ...(record.sessionId ? { session_id: record.sessionId } : {}),
             ...(record.provider ? { provider: record.provider } : {}),
             ...(typeof record.durationMs === 'number' ? { duration_ms: record.durationMs } : {}),
-            ...(record.status ? { status: record.status } : {}) }]),
+            ...(record.status ? { status: record.status } : {})
+          }]),
         });
         return;
       }
@@ -421,10 +423,10 @@ export class TelemetryService {
           timestamp: record.timestamp,
           platform: 'node',
           level: 'error',
-          logger: 'natively-desktop',
+          logger: 'MeetFloo-desktop',
           release: sink.release || 'unknown',
           environment: sink.environment || 'production',
-          tags: { service: 'natively-desktop', event: record.name, ...(record.provider ? { provider: record.provider } : {}) },
+          tags: { service: 'MeetFloo-desktop', event: record.name, ...(record.provider ? { provider: record.provider } : {}) },
           extra: { ...record.properties, ...(record.status ? { status: record.status } : {}) },
           message: { formatted: `desktop:${record.name}${record.status ? ` (${record.status})` : ''}` },
         };
@@ -514,7 +516,7 @@ export function parseClientSentryDsn(dsn: string | undefined): ParsedSentryDsn |
     return {
       dsn,
       envelopeUrl: `${u.protocol}//${u.host}/api/${projectId}/envelope/`,
-      authHeader: `Sentry sentry_version=7, sentry_client=natively-desktop/1.0, sentry_key=${publicKey}`,
+      authHeader: `Sentry sentry_version=7, sentry_client=MeetFloo-desktop/1.0, sentry_key=${publicKey}`,
     };
   } catch {
     return null;

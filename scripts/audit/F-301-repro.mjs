@@ -1,8 +1,8 @@
-// F-301 repro: the manual-chat first-useful deadline sat BELOW natively-api's
+// F-301 repro: the manual-chat first-useful deadline sat BELOW MeetFloo-api's
 // provider-rotation budget, so the client tore down the HTTP request 3s before
 // the server could rescue the turn.
 //
-// natively-api runs a SEQUENTIAL cascade and cuts over to the next provider at
+// MeetFloo-api runs a SEQUENTIAL cascade and cuts over to the next provider at
 // AI_TTFT_BUDGET_MS (10s, server.js). The client aborted at the 7s provider cap
 // (firstUsefulDeadlineMs), killing the socket at t=7s — so at t=10s there was
 // nothing left to rescue and the user saw "The model did not produce an answer
@@ -10,7 +10,7 @@
 // invariant, but had only ever been applied to the WTA path — never to manual
 // chat, which is the path its own rationale describes.
 //
-// Reads AI_TTFT_BUDGET_MS out of natively-api/server.js so the two cannot drift.
+// Reads AI_TTFT_BUDGET_MS out of MeetFloo-api/server.js so the two cannot drift.
 //
 // Expected (correct): manual-chat deadline on the server route > server budget.
 // Bug (F-301): 7000 < 10000 → exit 1.
@@ -22,7 +22,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '../..');
 const { firstUsefulDeadlineMs } = await import(pathToFileURL(path.join(root, 'dist-electron/electron/llm/liveDeadlines.js')).href);
 
-const server = fs.readFileSync(path.join(root, 'natively-api/server.js'), 'utf8');
+const server = fs.readFileSync(path.join(root, 'MeetFloo-api/server.js'), 'utf8');
 const m = server.match(/AI_TTFT_BUDGET_MS\s*=\s*Number\(process\.env\.AI_TTFT_BUDGET_MS\)\s*\|\|\s*([0-9_]+)/);
 if (!m) { console.error('[F-301] Inconclusive: could not read AI_TTFT_BUDGET_MS from server.js'); process.exit(2); }
 const serverBudget = Number(m[1].replace(/_/g, ''));

@@ -3,7 +3,7 @@ import { OpenAIEmbeddingProvider } from './providers/OpenAIEmbeddingProvider';
 import { GeminiEmbeddingProvider } from './providers/GeminiEmbeddingProvider';
 import { OllamaEmbeddingProvider } from './providers/OllamaEmbeddingProvider';
 import { LocalEmbeddingProvider } from './providers/LocalEmbeddingProvider';
-import { NativelyEmbeddingProvider } from './providers/NativelyEmbeddingProvider';
+import { MeetFlooEmbeddingProvider } from './providers/NativelyEmbeddingProvider';
 import { TRIAL_SENTINEL_KEY } from '../config/constants';
 import { probeOllamaEmbeddingDimensions } from './ollamaEmbeddingModels';
 import { probeCustomEmbeddingDimensions } from './customEmbeddingModels';
@@ -77,15 +77,15 @@ export interface AppAPIConfig {
   voyageEmbeddingModel?: string;
   voyageEmbeddingDims?: number;
   /**
-   * Natively API key. Routed FIRST when present: this is the managed embedding
-   * tier, and until it was wired up a Natively customer silently fell through to
+   * MeetFloo API key. Routed FIRST when present: this is the managed embedding
+   * tier, and until it was wired up a MeetFloo customer silently fell through to
    * Ollama or the bundled MiniLM model.
    */
-  nativelyApiKey?: string;
-  /** Required when nativelyApiKey is the trial sentinel — trials auth by token. */
-  nativelyTrialToken?: string;
-  /** Override for the Natively API base (tests, staging). */
-  nativelyApiUrl?: string;
+  MeetFlooApiKey?: string;
+  /** Required when MeetFlooApiKey is the trial sentinel — trials auth by token. */
+  MeetFlooTrialToken?: string;
+  /** Override for the MeetFloo API base (tests, staging). */
+  MeetFlooApiUrl?: string;
   providerDataScopes?: ProviderDataScopePolicy;
   // Optional overrides for the Gemini embedding model/dims (internal escape hatch
   // for a future bump). Default to gemini-embedding-2 @ 768d when omitted.
@@ -132,7 +132,7 @@ export class EmbeddingProviderResolver {
   /** Cloud providers get a bounded probe-retry before we demote (hysteresis). */
   private static readonly CLOUD_PROBE_ATTEMPTS = 3;
   private static readonly CLOUD_PROBE_BACKOFF_MS = 400;
-  // 'natively' added 2026-08-30. It is a billed network round-trip like the
+  // 'MeetFloo' added 2026-08-30. It is a billed network round-trip like the
   // other two, so a single 429 or blip must not demote it — demotion changes the
   // active embedding SPACE and strands every persisted vector, which is the
   // thrash this hysteresis exists to prevent. Omitting it gave the managed tier
@@ -142,7 +142,7 @@ export class EmbeddingProviderResolver {
   // changes the active embedding SPACE and strands every persisted vector —
   // exactly the thrash this hysteresis exists to prevent.
   private static readonly CLOUD_PROVIDER_NAMES = new Set([
-    'openai', 'gemini', 'natively', 'voyage', 'openrouter', 'custom',
+    'openai', 'gemini', 'MeetFloo', 'voyage', 'openrouter', 'custom',
   ]);
 
   /**
@@ -216,22 +216,22 @@ export class EmbeddingProviderResolver {
       }
     };
 
-    // ── Natively first ────────────────────────────────────────────────────────
-    // "If a Natively API key exists, route through it first; if it fails, follow
+    // ── MeetFloo first ────────────────────────────────────────────────────────
+    // "If a MeetFloo API key exists, route through it first; if it fails, follow
     // the chain." A managed key is an explicit choice of the managed tier, so it
     // outranks a BYO key for embeddings.
     //
-    // Still scope-gated: Natively is a CLOUD provider, so a privacy policy that
+    // Still scope-gated: MeetFloo is a CLOUD provider, so a privacy policy that
     // forbids sending content off-device must exclude it exactly as it excludes
     // OpenAI and Gemini. "Managed" is not an exemption from the user's policy.
-    const nativelyKey = (config.nativelyApiKey || '').trim();
+    const MeetFlooKey = (config.MeetFlooApiKey || '').trim();
     // The trial sentinel is not a credential — without the paired trial token the
     // provider cannot authenticate, so offering it just burns a probe per index.
-    const trialUsable = nativelyKey !== TRIAL_SENTINEL_KEY || !!config.nativelyTrialToken;
-    if (nativelyKey && trialUsable) {
-      pushScoped('natively_embeddings', () => new NativelyEmbeddingProvider(nativelyKey, {
-        baseUrl: config.nativelyApiUrl,
-        trialToken: config.nativelyTrialToken,
+    const trialUsable = MeetFlooKey !== TRIAL_SENTINEL_KEY || !!config.MeetFlooTrialToken;
+    if (MeetFlooKey && trialUsable) {
+      pushScoped('MeetFloo_embeddings', () => new MeetFlooEmbeddingProvider(MeetFlooKey, {
+        baseUrl: config.MeetFlooApiUrl,
+        trialToken: config.MeetFlooTrialToken,
       }));
     }
 
@@ -329,11 +329,11 @@ export class EmbeddingProviderResolver {
     const geminiPool = EmbeddingProviderResolver.buildGeminiKeyPool(config);
     if (geminiPool.length > 0) {
       pushScoped('gemini_embeddings', () => {
-        // Rollback lever: NATIVELY_GEMINI_EMBED_MODEL / _DIMS env vars pin the model
+        // Rollback lever: MEETFLOO_GEMINI_EMBED_MODEL / _DIMS env vars pin the model
         // without a rebuild (e.g. back to 'gemini-embedding-001' @ 768 in an incident).
         // Explicit config overrides take precedence over env, which overrides the v2 default.
-        const envModel = process.env.NATIVELY_GEMINI_EMBED_MODEL;
-        const envDims = process.env.NATIVELY_GEMINI_EMBED_DIMS ? Number(process.env.NATIVELY_GEMINI_EMBED_DIMS) : undefined;
+        const envModel = process.env.MEETFLOO_GEMINI_EMBED_MODEL;
+        const envDims = process.env.MEETFLOO_GEMINI_EMBED_DIMS ? Number(process.env.MEETFLOO_GEMINI_EMBED_DIMS) : undefined;
         return new GeminiEmbeddingProvider(
           geminiPool,
           config.geminiEmbeddingModel ?? envModel,
@@ -365,8 +365,8 @@ export class EmbeddingProviderResolver {
     }
     // ── An explicit choice outranks the chain ────────────────────────────────
     // Without this the ordered list above decided everything and the user's pick
-    // was ignored: choosing Gemini while a Natively key existed simply kept
-    // Natively, because natively sorts first and was available.
+    // was ignored: choosing Gemini while a MeetFloo key existed simply kept
+    // MeetFloo, because MeetFloo sorts first and was available.
     //
     // Narrowed to a SINGLE candidate rather than merely reordered. Falling
     // through to another provider when the chosen one is unavailable would
@@ -496,7 +496,7 @@ export class EmbeddingProviderResolver {
   /**
    * resolve(), plus WHICH pinned provider was demoted and why it still matters.
    *
-   * Measured 2026-09-11 on a phone-hotspot network: the natively probe failed
+   * Measured 2026-09-11 on a phone-hotspot network: the MeetFloo probe failed
    * 2/3 at launch, the resolver fell through to the bundled model, and the
    * whole session ran 384-d MiniLM — every persisted voyage-4 vector stranded,
    * every reference-file query answered lexically, "the meeting notes weren't
@@ -544,7 +544,7 @@ export class EmbeddingProviderResolver {
         return { provider, demotedPinned: null };
       }
       if (outcome === 'transient' && chosenProvider && provider.name === chosenProvider
-          && EmbeddingProviderResolver.CLOUD_PROVIDER_NAMES.has(provider.name)) {
+        && EmbeddingProviderResolver.CLOUD_PROVIDER_NAMES.has(provider.name)) {
         demotedPinned = provider;
       }
       // Say which it actually is. Printed unconditionally, "trying next" read as
@@ -555,7 +555,7 @@ export class EmbeddingProviderResolver {
       console.log(more
         ? `[EmbeddingProviderResolver] Provider ${provider.name} unavailable, trying next...`
         : `[EmbeddingProviderResolver] Provider ${provider.name} unavailable and it was the last candidate`
-          + `${chosenProvider ? ` (you selected ${chosenProvider}) — falling back to the bundled model` : ''}.`);
+        + `${chosenProvider ? ` (you selected ${chosenProvider}) — falling back to the bundled model` : ''}.`);
     }
 
     // Local is the terminal fallback. Do NOT probe isAvailable() here: that loads
@@ -570,7 +570,7 @@ export class EmbeddingProviderResolver {
       // because its credential (or measured width) is missing. The generic
       // "no provider available" line below reads as an auto-mode fallthrough
       // and says nothing about the user's choice, which is exactly how a
-      // Natively pin with a cleared key looked like the app deciding on its own
+      // MeetFloo pin with a cleared key looked like the app deciding on its own
       // to run MiniLM.
       console.warn(
         `[EmbeddingProviderResolver] You selected '${chosenProvider}' for embeddings, but it is not configured `

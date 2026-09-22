@@ -1,12 +1,12 @@
 // electron/llm/__tests__/DeadlineBudgetOrdering2026_08_10.test.mjs
 //
-// The Electron client and natively-api each enforce their own first-token
+// The Electron client and MeetFloo-api each enforce their own first-token
 // deadline, and they were INVERTED:
 //
 //   client  LIVE_TOTAL_HARD_TIMEOUT_MS   8_000ms
-//   server  AI_TTFT_BUDGET_MS           10_000ms   (natively-api/server.js)
+//   server  AI_TTFT_BUDGET_MS           10_000ms   (MeetFloo-api/server.js)
 //
-// A Natively-key user's chat goes to `${NATIVELY_API_URL}/v1/chat`
+// A MeetFloo-key user's chat goes to `${MEETFLOO_API_URL}/v1/chat`
 // (LLMHelper.ts:3462), where the server runs a sequential provider cascade —
 // Gemini Flash -> MiniMax-M3 -> Gemini Pro — cutting over at AI_TTFT_BUDGET_MS
 // when a provider is slow to first token. That cutover is the mechanism that is
@@ -35,9 +35,9 @@ import {
 } from '../../../dist-electron/electron/llm/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SERVER = path.resolve(__dirname, '../../../natively-api/server.js');
+const SERVER = path.resolve(__dirname, '../../../MeetFloo-api/server.js');
 
-// `natively-api` is a gitlink with NO .gitmodules entry, so CI never checks it
+// `MeetFloo-api` is a gitlink with NO .gitmodules entry, so CI never checks it
 // out and this file is absent there (code review 2026-08-12 — previously this
 // suite would have ENOENT'd on every CI run). The cross-repo assertions are
 // skipped when it is missing rather than failing: they are a local/dev guard
@@ -46,13 +46,13 @@ const SERVER = path.resolve(__dirname, '../../../natively-api/server.js');
 const SERVER_AVAILABLE = fs.existsSync(SERVER);
 const SKIP_NO_SERVER = SERVER_AVAILABLE
   ? false
-  : 'skip: natively-api/server.js not checked out (gitlink absent — expected in CI)';
+  : 'skip: MeetFloo-api/server.js not checked out (gitlink absent — expected in CI)';
 
 /** Read the server's default TTFT budget straight from its source. */
 function serverTtftBudgetMs() {
   const src = fs.readFileSync(SERVER, 'utf8');
   const m = /const AI_TTFT_BUDGET_MS = Number\(process\.env\.AI_TTFT_BUDGET_MS\) \|\| ([0-9_]+)/.exec(src);
-  assert.ok(m, 'could not read AI_TTFT_BUDGET_MS from natively-api/server.js');
+  assert.ok(m, 'could not read AI_TTFT_BUDGET_MS from MeetFloo-api/server.js');
   return Number(m[1].replace(/_/g, ''));
 }
 

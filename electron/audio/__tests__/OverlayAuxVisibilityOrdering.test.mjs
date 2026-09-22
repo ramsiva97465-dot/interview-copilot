@@ -69,8 +69,8 @@ test('applyOverlayAuxVisibility exists and takes the wanted state explicitly', (
     source,
     /private applyOverlayAuxVisibility\(want: boolean\): void \{/,
     'the explicit aux-visibility primitive must survive — call sites mid-swap ' +
-      'cannot derive visibility from the overlay (it is still visible while ' +
-      'being hidden)',
+    'cannot derive visibility from the overlay (it is still visible while ' +
+    'being hidden)',
   );
   // The derived form must be a thin wrapper over it, not a second implementation.
   const sync = extractMethodBody('syncOverlayAuxVisibility');
@@ -78,7 +78,7 @@ test('applyOverlayAuxVisibility exists and takes the wanted state explicitly', (
     sync,
     /this\.applyOverlayAuxVisibility\(/,
     'syncOverlayAuxVisibility must delegate to applyOverlayAuxVisibility so the ' +
-      'two paths cannot drift',
+    'two paths cannot drift',
   );
 });
 
@@ -96,14 +96,14 @@ test('switchToLauncher hides the aux chrome BEFORE showing the launcher', () => 
   assert.ok(
     hideAux < launcherShow,
     'the pill/toggle hide must precede the launcher show — the pill is ' +
-      'alwaysOnTop and the launcher is not, so any frame with both up paints ' +
-      'the pill over the launcher (the reported Stop-meeting bug)',
+    'alwaysOnTop and the launcher is not, so any frame with both up paints ' +
+    'the pill over the launcher (the reported Stop-meeting bug)',
   );
 });
 
 test('switchToLauncher still hides the overlay body AFTER showing the launcher', () => {
   // The aux fix must not have inverted the show-before-hide invariant that
-  // keeps at least one Natively window on screen through the swap.
+  // keeps at least one MeetFloo window on screen through the swap.
   const launcherShow = Math.min(
     ...['this.launcherWindow.show()', 'this.launcherWindow.showInactive()']
       .map((s) => switchToLauncher.indexOf(s))
@@ -123,7 +123,7 @@ test('switchToOverlay shows the aux chrome in the same block as the body, on bot
     shows.length,
     2,
     'both the win32 opacity-shield branch and the macOS/default branch must ' +
-      'show the aux chrome explicitly — one per branch',
+    'show the aux chrome explicitly — one per branch',
   );
 });
 
@@ -138,7 +138,7 @@ test('the win32 aux show lands while the opacity shield is still down', () => {
   assert.ok(
     shieldDown < auxShow && auxShow < unshield,
     'the win32 aux show must sit between the opacity shield going down and ' +
-      'coming back up',
+    'coming back up',
   );
 });
 
@@ -149,14 +149,14 @@ test('switchToOverlay pre-applies expanded:true to the aux state before the body
   assert.ok(
     ensure < preApply,
     'pre-apply must accompany ensure-expanded — the pill otherwise learns the ' +
-      'expansion a renderer→main→pill round trip later and fades in 0.22s ' +
-      'behind the body (OverlayAuxWindows opacity gate)',
+    'expansion a renderer→main→pill round trip later and fades in 0.22s ' +
+    'behind the body (OverlayAuxWindows opacity gate)',
   );
   const setState = switchToOverlay.indexOf('this.setOverlayUiState(');
   assert.ok(
     setState !== -1 && setState < switchToOverlay.indexOf('this.applyOverlayAuxVisibility(true)'),
     'the pre-applied state must be pushed BEFORE the pill window is shown, so ' +
-      'the pill paints expanded on its first frame',
+    'the pill paints expanded on its first frame',
   );
 });
 
@@ -170,7 +170,7 @@ test('every direct overlay hide/show path drives the aux chrome explicitly', () 
     hideMainWindow,
     /this\.applyOverlayAuxVisibility\(false\)/,
     'hideMainWindow feeds screenshot capture (fixed 80ms compositor flush) — ' +
-      'an event-hop pill hide can leak the pill into the captured frame',
+    'an event-hop pill hide can leak the pill into the captured frame',
   );
   assert.match(
     showOverlay,
@@ -208,15 +208,15 @@ test('drag management is enabled on BOTH platforms, welding on macOS only', () =
   // which starves the follower window, so managing the drag still wins.
   assert.match(
     source,
-    /this\.overlayGroupDragManaged =\s*\n?\s*this\.overlayGroupWelded \|\|\s*\n?\s*\(process\.platform === 'win32' && process\.env\.NATIVELY_OVERLAY_GROUP_DRAG !== '0'\)/,
+    /this\.overlayGroupDragManaged =\s*\n?\s*this\.overlayGroupWelded \|\|\s*\n?\s*\(process\.platform === 'win32' && process\.env\.MEETFLOO_OVERLAY_GROUP_DRAG !== '0'\)/,
     'Windows must opt into managed drag independently of welding',
   );
   assert.match(
     source,
     /this\.overlayGroupDragManaged =\s*\n?\s*this\.overlayGroupWelded \|\|/,
-    'a welded pill MUST be drag-managed — a welded child dragged natively ' +
-      'moves alone and tears the group apart, so macOS cannot disable it ' +
-      'independently',
+    'a welded pill MUST be drag-managed — a welded child dragged MeetFloo ' +
+    'moves alone and tears the group apart, so macOS cannot disable it ' +
+    'independently',
   );
   // The drag entry points gate on dragManaged, not welded, or Windows no-ops.
   assert.match(extractMethodBody('moveOverlayGroupTo'), /if \(!this\.overlayGroupDragManaged\) return;/);
@@ -231,7 +231,7 @@ test('the non-welded (Windows) drag path carries the pill, the welded one does n
     move,
     /if \(!this\.overlayGroupWelded\) this\.positionOverlayAuxWindows\(\)/,
     'the pill must be re-derived from the shell when NOT welded, and left ' +
-      'alone when welded (AppKit already moved it — touching it doubles the move)',
+    'alone when welded (AppKit already moved it — touching it doubles the move)',
   );
 });
 
@@ -277,10 +277,10 @@ test('a move arriving without a start still anchors safely', () => {
 test('welding is macOS-only and has a kill switch', () => {
   assert.match(
     source,
-    /this\.overlayGroupWelded\s*=\s*isMac && process\.env\.NATIVELY_OVERLAY_WINDOW_GROUP !== '0'/,
+    /this\.overlayGroupWelded\s*=\s*isMac && process\.env\.MEETFLOO_OVERLAY_WINDOW_GROUP !== '0'/,
     'welding must be gated on darwin (win32 setParentWindow is OWNER semantics ' +
-      '— owned windows do not move with the owner, so Windows must keep the ' +
-      'event-mirroring path) and must stay disableable at runtime',
+    '— owned windows do not move with the owner, so Windows must keep the ' +
+    'event-mirroring path) and must stay disableable at runtime',
   );
   assert.match(
     source,
@@ -311,7 +311,7 @@ test('welded mode stands down the manual move mirroring in BOTH directions', () 
   assert.ok(
     guard < mirror,
     'the welded guard must precede the reverse mirroring, or a child move ' +
-      'double-moves the pill',
+    'double-moves the pill',
   );
 });
 
@@ -330,8 +330,8 @@ test('welded mode does not clamp the pill independently of the shell', () => {
     body,
     /const rigidToShell = this\.overlayGroupWelded \|\| this\.overlayGroupDragging;/,
     'the pill must be rigid to the shell both while welded AND during any ' +
-      'managed drag — clamping it on its own displaces it relative to the ' +
-      'shell, reintroducing "the group came apart" by another route',
+    'managed drag — clamping it on its own displaces it relative to the ' +
+    'shell, reintroducing "the group came apart" by another route',
   );
   assert.match(body, /const px = rigidToShell\s*\n?\s*\?\s*idealX/);
   assert.match(body, /const py = rigidToShell \? idealY :/);
@@ -383,7 +383,7 @@ test('welded geometry is re-asserted at settle points, not only before a show', 
     placements.length,
     2,
     'children must be placed BEFORE the show (so their first painted frame is ' +
-      'right) and AGAIN after it (so a constrained parent frame self-corrects)',
+    'right) and AGAIN after it (so a constrained parent frame self-corrects)',
   );
   const showCall = apply.indexOf('apply(this.pillWindow, want)');
   assert.ok(
@@ -394,7 +394,7 @@ test('welded geometry is re-asserted at settle points, not only before a show', 
     extractMethodBody('endOverlayGroupDrag'),
     /this\.positionOverlayAuxWindows\(\)/,
     'drag release is a settle point too — cheap insurance (0.22ms, and child ' +
-      'moves provably do not feed back) against any drift the live drag left',
+    'moves provably do not feed back) against any drift the live drag left',
   );
 });
 
@@ -410,7 +410,7 @@ test('the group-drag IPC is restricted to the pill window', () => {
     body,
     /pillWin\.webContents\.id === event\.sender\.id/,
     'the drag channel must be sender-id validated like every other overlay ' +
-      'channel — it moves a window, so any renderer could otherwise drive it',
+    'channel — it moves a window, so any renderer could otherwise drive it',
   );
   assert.ok(
     !body.includes('getToggleWindow'),
@@ -431,8 +431,8 @@ test('the pill window turns OFF its OS drag region when welded', () => {
     css,
     /\[data-overlay-group-drag-managed='true'\][\s\S]{0,140}?-webkit-app-region: no-drag/,
     'the OS drag region must be disabled in the pill window on BOTH platforms ' +
-      '— on macOS a natively-dragged child moves alone, on Windows it enters ' +
-      'the modal move loop',
+    '— on macOS a MeetFloo-dragged child moves alone, on Windows it enters ' +
+    'the modal move loop',
   );
   const aux = readFileSync(
     path.resolve(__dirname, '../../../src/components/OverlayAuxWindows.tsx'),
@@ -447,7 +447,7 @@ test('the pill window turns OFF its OS drag region when welded', () => {
     aux,
     /setPointerCapture/,
     'the manual drag needs pointer capture, or it dies when the cursor leaves ' +
-      'the ~200px pill window mid-drag',
+    'the ~200px pill window mid-drag',
   );
   assert.match(
     aux,

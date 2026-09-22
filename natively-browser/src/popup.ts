@@ -43,13 +43,13 @@ function hostOf(origin: string): string {
 function describe(outcome: DomPostOutcome): { text: string; kind: 'ok' | 'err' | 'warn' } {
   switch (outcome.kind) {
     case 'success':
-      return { text: 'Sent to Natively.', kind: 'ok' };
+      return { text: 'Sent to MeetFloo.', kind: 'ok' };
     case 'unauthorized':
       return { text: 'Pairing expired (token rotated). Re-pair below.', kind: 'warn' };
     case 'no-session':
-      return { text: 'Start a Natively session, then capture again.', kind: 'warn' };
+      return { text: 'Start a MeetFloo session, then capture again.', kind: 'warn' };
     case 'refused':
-      return { text: 'Open Natively and enable Phone Mirror.', kind: 'err' };
+      return { text: 'Open MeetFloo and enable Phone Mirror.', kind: 'err' };
     case 'rate-limited':
       return { text: 'Too many requests — wait a moment and retry.', kind: 'warn' };
     case 'too-large':
@@ -82,7 +82,7 @@ async function refreshStatus(): Promise<void> {
   }
   if (outcome.kind === 'success') {
     showPaired(true);
-    // Distinguish "capture-ready" (the push WebSocket is live, so the Natively
+    // Distinguish "capture-ready" (the push WebSocket is live, so the MeetFloo
     // hotkey can trigger capture) from merely "paired" (HTTP reachable, but the
     // service worker's WS isn't open yet — capture would fall back to screenshot).
     let wsOpen = false;
@@ -106,11 +106,11 @@ function describePair(outcome: PairFetchOutcome): { text: string; kind: 'ok' | '
     case 'paired':
       return { text: 'Connected.', kind: 'ok' };
     case 'not-armed':
-      return { text: 'Click "Connect browser extension" in Natively settings first.', kind: 'warn' };
+      return { text: 'Click "Connect browser extension" in MeetFloo settings first.', kind: 'warn' };
     case 'forbidden':
       return { text: 'Pairing refused by desktop.', kind: 'err' };
     case 'refused':
-      return { text: 'Open Natively and enable Phone Mirror.', kind: 'err' };
+      return { text: 'Open MeetFloo and enable Phone Mirror.', kind: 'err' };
     case 'error':
       return { text: outcome.message, kind: 'err' };
   }

@@ -20,7 +20,7 @@ const app = await electron.launch({
   env: {
     ...process.env,
     NODE_ENV: 'production', // isDev=false → file:// renderer, no dev server needed
-    NATIVELY_DEV_BYPASS_SCREEN_TCC: '1',
+    MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1',
   },
   timeout: 60_000,
 });

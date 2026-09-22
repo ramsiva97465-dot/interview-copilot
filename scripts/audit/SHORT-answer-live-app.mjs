@@ -14,15 +14,15 @@ import { _electron as electron } from '@playwright/test';
 import fs from 'node:fs';
 
 const dotenv = Object.fromEntries(
-  fs.readFileSync('/tmp/natively-land-wt/.env', 'utf8').split('\n')
+  fs.readFileSync('/tmp/MeetFloo-land-wt/.env', 'utf8').split('\n')
     .filter((l) => /^[A-Z0-9_]+=/.test(l))
     .map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1).trim().replace(/^["']|["']$/g, '')]),
 );
 
 const env = {
   ...process.env, ...dotenv,
-  NATIVELY_E2E: '1', NODE_ENV: 'development',
-  NATIVELY_DEV_BYPASS_SCREEN_TCC: '1', NATIVELY_E2E_LOCAL_TEST_TOKEN: 'local-test',
+  MEETFLOO_E2E: '1', NODE_ENV: 'development',
+  MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1', MEETFLOO_E2E_LOCAL_TEST_TOKEN: 'local-test',
   OLLAMA_URL: 'http://127.0.0.1:1',           // force the cloud/gateway route
 };
 
@@ -49,20 +49,20 @@ const QS = [
 
 const app = await electron.launch({ args: ['dist-electron/electron/main.js'], env, timeout: 90000 });
 await app.firstWindow({ timeout: 45000 });
-await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => {});
+await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => { });
 
 const RAW = async (fn, arg) => {
   for (let a = 0; a < 5; a++) {
     try {
       const w = app.windows()[0] || await app.firstWindow();
-      await w.waitForLoadState('domcontentloaded').catch(() => {});
+      await w.waitForLoadState('domcontentloaded').catch(() => { });
       return await w.evaluate(fn, arg);
     } catch (e) { if (a === 4) throw e; await new Promise((r) => setTimeout(r, 1800)); }
   }
 };
 const R = (ch, ...a) => RAW(async ({ ch, a }) => (window.electronAPI || window.api).e2eInvoke(ch, ...a), { ch, a });
 
-await R('__e2e__:enable-pro').catch(() => {});
+await R('__e2e__:enable-pro').catch(() => { });
 // Mode setup is best-effort: the WTA path runs under whatever mode is active,
 // and a probe that dies here would tell us nothing about the gate.
 const modeInfo = await RAW(async () => {
@@ -83,16 +83,16 @@ for (const q of QS) {
   const t0 = Date.now();
   let res;
   try { res = await R('__e2e__:ask', { question: q, timeoutMs: 60000, priorTurns: MEETING }); }
-  catch (e) { console.log(`${q.slice(0,35).padEnd(35)} | ERROR ${String(e.message).slice(0,50)}`); continue; }
+  catch (e) { console.log(`${q.slice(0, 35).padEnd(35)} | ERROR ${String(e.message).slice(0, 50)}`); continue; }
   const ms = Date.now() - t0;
   const ans = (res?.answer || '').trim();
   const streamed = (res?.streamedTokens || '').trim();
-  if (!res?.success) { console.log(`${q.slice(0,35).padEnd(35)} | ${String(ms).padEnd(5)} | (no answer: timedOut=${res?.timedOut})`); continue; }
+  if (!res?.success) { console.log(`${q.slice(0, 35).padEnd(35)} | ${String(ms).padEnd(5)} | (no answer: timedOut=${res?.timedOut})`); continue; }
   n++;
   const isCanned = CANNED.some((c) => ans.includes(c));
   if (isCanned) canned++;
   if (!isCanned && ans.length < GATE) shortOk++;
-  console.log(`${q.slice(0,35).padEnd(35)} | ${String(ms).padEnd(5)} | ${String(ans.length).padEnd(12)} | ${String(streamed.length > 0).padEnd(9)} | ${String(isCanned).padEnd(7)} | ${ans.slice(0,44)}${ans.length>44?'…':''}`);
+  console.log(`${q.slice(0, 35).padEnd(35)} | ${String(ms).padEnd(5)} | ${String(ans.length).padEnd(12)} | ${String(streamed.length > 0).padEnd(9)} | ${String(isCanned).padEnd(7)} | ${ans.slice(0, 44)}${ans.length > 44 ? '…' : ''}`);
 }
 console.log(`\n  answered: ${n}/${QS.length} | SHORT answers delivered intact: ${shortOk} | replaced by a canned line: ${canned}`);
 await app.close();

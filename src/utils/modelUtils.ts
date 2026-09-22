@@ -146,7 +146,7 @@ export const STANDARD_CLOUD_MODELS: Record<string, {
 };
 
 // The id stays 'codex-cli' (persisted in settings and routing), but the provider
-// is not a CLI: Natively calls the ChatGPT Codex backend with its own ChatGPT
+// is not a CLI: MeetFloo calls the ChatGPT Codex backend with its own ChatGPT
 // sign-in and never runs the `codex` binary (issue #558).
 export const CODEX_CLI_MODEL = {
     id: 'codex-cli',
@@ -156,7 +156,7 @@ export const CODEX_CLI_MODEL = {
 
 /**
  * Built-in Codex models, used when the user has no Codex CLI catalogue to read
- * (see codexModelOptions) — which is most users, since Natively does not need
+ * (see codexModelOptions) — which is most users, since MeetFloo does not need
  * the CLI. Also the name source for surfaces that only have a selector id
  * (getCodexCliModelDisplayName).
  *
@@ -245,7 +245,7 @@ export const isModelAllowed = (provider: string, modelId: string, allowList: str
  * The display label for a LiteLLM-proxied model.
  *
  * TWO prefixes stack on these ids, and neither is identity:
- *   1. `litellm/` — Natively's own routing prefix. providerFamily() and
+ *   1. `litellm/` — MeetFloo's own routing prefix. providerFamily() and
  *      modelAvailable() (ipcHandlers.ts) key off it, so it can never be
  *      dropped from the ID; it just has no business being on screen.
  *   2. `<upstream>/` — the PROXY's own model id. Most LiteLLM configs name

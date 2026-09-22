@@ -1,8 +1,8 @@
-// Issue #558 — a successful `codex login` counted for nothing: Natively only
+// Issue #558 — a successful `codex login` counted for nothing: MeetFloo only
 // accepted its own ChatGPT sign-in. The Codex CLI's session in
-// `$CODEX_HOME/auth.json` is now used READ-ONLY when Natively is not signed in
+// `$CODEX_HOME/auth.json` is now used READ-ONLY when MeetFloo is not signed in
 // itself. Never refreshed: ChatGPT OAuth rotates the refresh token, so a
-// Natively refresh would sign the CLI out.
+// MeetFloo refresh would sign the CLI out.
 //
 // Tokens here are synthetic JWTs. Every OS-facing input (env, home dir, path
 // flavour, file reads, clock) is injected, so the macOS and Windows branches
@@ -23,7 +23,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '../../..');
 
 // Hermetic: never read the developer's real `codex login`.
-process.env.CODEX_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-codex-home-'));
+process.env.CODEX_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-codex-home-'));
 
 const dist = (p) => pathToFileURL(path.join(root, 'dist-electron/electron/services', p)).href;
 const { parseCodexAuthJson, readCodexCliAuth, resetCodexCliAuthCache, CODEX_CLI_TOKEN_SKEW_MS } = await import(dist('CodexCliAuth.js'));
@@ -61,7 +61,7 @@ describe('parseCodexAuthJson', () => {
     assert.equal(parseCodexAuthJson(authJson({ accountId: '' }), NOW).accountId, 'acct-from-claim');
   });
 
-  test('an expired token is "expired", not usable — Natively never refreshes it', () => {
+  test('an expired token is "expired", not usable — MeetFloo never refreshes it', () => {
     const s = parseCodexAuthJson(authJson({ exp: NOW - 18 * 86400e3 }), NOW);
     assert.equal(s.status, 'expired');
     assert.equal(s.email, 'ana@example.com', 'email still shown so the UI can say whose login expired');
@@ -149,7 +149,7 @@ describe('readCodexCliAuth', () => {
 });
 
 describe('getCodexAuthStatus (what routing and the renderer see)', () => {
-  // Tests run signed out of Natively's own ChatGPT sign-in.
+  // Tests run signed out of MeetFloo's own ChatGPT sign-in.
   CodexOAuthService.getInstance().__resetForTest?.();
   CodexOAuthService.getInstance().signOut();
   const cli = (state) => () => state;
@@ -167,7 +167,7 @@ describe('getCodexAuthStatus (what routing and the renderer see)', () => {
     assert.equal(codexSignedOutMessage(s), CODEX_CLI_LOGIN_EXPIRED_MESSAGE);
   });
 
-  test('no CLI login and no Natively sign-in → the general sign-in message, naming both routes', () => {
+  test('no CLI login and no MeetFloo sign-in → the general sign-in message, naming both routes', () => {
     for (const status of ['missing', 'api-key', 'invalid']) {
       const s = getCodexAuthStatus(cli({ status }));
       assert.equal(s.signedIn, false, status);
@@ -236,7 +236,7 @@ describe('a 401 on the CLI session', () => {
 describe('wiring guards', () => {
   const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
 
-  test('the CLI session is never refreshed or written by Natively', () => {
+  test('the CLI session is never refreshed or written by MeetFloo', () => {
     const src = read('electron/services/CodexCliAuth.ts');
     assert.doesNotMatch(src, /writeFile|refresh_token['"]?\s*[:=]|oauth\/token/);
     const svc = read('electron/services/CodexCliService.ts');

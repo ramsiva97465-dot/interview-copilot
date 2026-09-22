@@ -4,7 +4,7 @@
 // makes it rebuild and re-notarize a finished DMG, ~25 minutes for nothing, which is
 // exactly what the guard exists to prevent.
 //
-// Observed 2026-08-27 on Natively-2.8.8-arm64.dmg, seconds after this same hook had
+// Observed 2026-08-27 on MeetFloo-2.8.8-arm64.dmg, seconds after this same hook had
 // stapled AND validated it; Gatekeeper confirmed the ticket offline
 // ("accepted / source=Notarized Developer ID") while stapler was still failing.
 
@@ -37,7 +37,7 @@ test('other network shapes are inconclusive too', () => {
 test('a genuinely unstapled file is NOT excused as a network problem', () => {
   // This must stay negative, or the guard would skip notarizing a DMG that needs it.
   assert.equal(
-    isInconclusiveStaplerFailure('Natively-2.8.8.dmg does not have a ticket stapled to it.'),
+    isInconclusiveStaplerFailure('MeetFloo-2.8.8.dmg does not have a ticket stapled to it.'),
     false
   );
 });

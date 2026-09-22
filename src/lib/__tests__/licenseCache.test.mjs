@@ -12,7 +12,7 @@
 import { test, describe, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 
-const KEY = 'natively_license_snapshot_v1';
+const KEY = 'MeetFloo_license_snapshot_v1';
 let store = {};
 
 // Minimal localStorage stand-in. Node has no DOM; the module only ever calls
@@ -37,12 +37,12 @@ describe('licenseCache — survives restart', () => {
 
     test('a snapshot written in one session is present in the next', async () => {
         const first = await restart();
-        first.setLicenseSnapshot({ isPremium: true, provider: 'natively_api' });
+        first.setLicenseSnapshot({ isPremium: true, provider: 'MeetFloo_api' });
 
         // THE REGRESSION: with a module-level-only cache this came back null,
         // so the first paint after launch guessed wrong and then corrected.
         const second = await restart();
-        assert.deepEqual(second.getLicenseSnapshot(), { isPremium: true, provider: 'natively_api' });
+        assert.deepEqual(second.getLicenseSnapshot(), { isPremium: true, provider: 'MeetFloo_api' });
     });
 
     test('clearing removes it for future sessions too', async () => {
@@ -75,7 +75,7 @@ describe('licenseCache — survives restart', () => {
 
     test('a non-string provider is dropped, not carried through', async () => {
         // provider must be `string | undefined`; anything else would reach the
-        // `=== 'natively_api'` comparison that decides whether to hide the
+        // `=== 'MeetFloo_api'` comparison that decides whether to hide the
         // app-only-licence section.
         store[KEY] = JSON.stringify({ isPremium: true, provider: 42 });
         const { getLicenseSnapshot } = await restart();
@@ -83,13 +83,13 @@ describe('licenseCache — survives restart', () => {
     });
 
     test('unknown provider means standalone, never bundled', async () => {
-        // The safety property: NativelyProSettings hides its Deactivate button
-        // only for provider === 'natively_api'. An unknown provider must fall
+        // The safety property: MeetFlooProSettings hides its Deactivate button
+        // only for provider === 'MeetFloo_api'. An unknown provider must fall
         // through to the standalone branch, so it must not be guessable as
-        // 'natively_api' from a partial record.
+        // 'MeetFloo_api' from a partial record.
         store[KEY] = JSON.stringify({ isPremium: true });
         const { getLicenseSnapshot } = await restart();
-        assert.notEqual(getLicenseSnapshot().provider, 'natively_api');
+        assert.notEqual(getLicenseSnapshot().provider, 'MeetFloo_api');
     });
 
     test('storage failure degrades to in-memory instead of throwing', async () => {

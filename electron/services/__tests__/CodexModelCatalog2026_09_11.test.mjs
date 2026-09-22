@@ -3,8 +3,8 @@
 // sign-in, the backend rejected three of the four presets and both defaults:
 // "The '<id>' model is not supported when using Codex with a ChatGPT account." The picker now reads the installation's own
 // catalogue — `$CODEX_HOME/models_cache.json`, which the CLI refreshes from the
-// same backend Natively calls — and falls back to the built-in presets only
-// when no catalogue exists (most users never install the CLI: Natively signs in
+// same backend MeetFloo calls — and falls back to the built-in presets only
+// when no catalogue exists (most users never install the CLI: MeetFloo signs in
 // to ChatGPT itself).
 //
 // Every OS-facing input (env, home dir, path flavour, file reader) is injected,

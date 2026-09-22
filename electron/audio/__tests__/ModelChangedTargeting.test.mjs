@@ -36,7 +36,7 @@ test('AppState sends model-changed only to current model listeners', () => {
   const helperBody = extractMethod(mainSource, /public\s+sendModelChanged\s*\([^)]*\)[^{]*\{/, 'sendModelChanged');
 
   assert.ok(/new\s+Set\s*<\s*number\s*>\s*\(/.test(helperBody), 'BUG: sendModelChanged must dedupe target windows.');
-  assert.ok(/getOverlayWindow\s*\(\s*\)/.test(helperBody), 'BUG: sendModelChanged must target the overlay, where NativelyInterface listens.');
+  assert.ok(/getOverlayWindow\s*\(\s*\)/.test(helperBody), 'BUG: sendModelChanged must target the overlay, where MeetFlooInterface listens.');
   assert.ok(/modelSelectorWindowHelper\.getWindow\s*\(\s*\)/.test(helperBody), 'BUG: sendModelChanged must target the model selector window.');
   assert.ok(/sendToWindow\s*\(\s*win\s*,\s*['"]model-changed['"]\s*,\s*modelId\s*\)/.test(helperBody), 'BUG: sendModelChanged must use safe window sends.');
   assert.ok(!/BrowserWindow\.getAllWindows\s*\(\s*\)/.test(helperBody), 'BUG: sendModelChanged must not broadcast to every BrowserWindow.');
@@ -47,7 +47,7 @@ test('model-changed call sites use the targeted helper', () => {
   assert.ok(/this\.sendModelChanged\s*\(\s*defaultModel\s*\)/.test(meetingStopRegion), 'BUG: meeting-stop default model revert must use targeted model-changed dispatch.');
   assert.ok(!/BrowserWindow\.getAllWindows\s*\(\s*\)[\s\S]*model-changed/.test(meetingStopRegion), 'BUG: meeting-stop model-changed must not broadcast to every BrowserWindow.');
 
-  for (const needle of ['set-natively-api-key', "safeHandle('set-model'", "safeHandle('set-default-model'"]) {
+  for (const needle of ['set-MeetFloo-api-key', "safeHandle('set-model'", "safeHandle('set-default-model'"]) {
     const region = extractRegion(ipcSource, needle, 2_000);
     assert.ok(/appState\.sendModelChanged\s*\(/.test(region), `BUG: ${needle} must use targeted model-changed dispatch.`);
     assert.ok(!/BrowserWindow\.getAllWindows\s*\(\s*\)[\s\S]*model-changed/.test(region), `BUG: ${needle} must not broadcast model-changed to every BrowserWindow.`);

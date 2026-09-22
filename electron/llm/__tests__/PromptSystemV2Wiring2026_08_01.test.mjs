@@ -229,9 +229,9 @@ describe('universal coding contract — every surface resolves its signals throu
 });
 
 describe('flag + meeting surfaces', () => {
-  test('promptSystemV2 flag is registered with env NATIVELY_PROMPT_SYSTEM_V2, default TRUE (promoted 2026-08-02)', () => {
-    assert.match(flagsSrc, /promptSystemV2: \{ env: 'NATIVELY_PROMPT_SYSTEM_V2', setting: 'promptSystemV2Enabled', default: true \}/);
-    assert.ok(flagsSrc.includes('NATIVELY_PROMPT_SYSTEM_V2=0'), 'kill-switch note missing from the promotion comment');
+  test('promptSystemV2 flag is registered with env MEETFLOO_PROMPT_SYSTEM_V2, default TRUE (promoted 2026-08-02)', () => {
+    assert.match(flagsSrc, /promptSystemV2: \{ env: 'MEETFLOO_PROMPT_SYSTEM_V2', setting: 'promptSystemV2Enabled', default: true \}/);
+    assert.ok(flagsSrc.includes('MEETFLOO_PROMPT_SYSTEM_V2=0'), 'kill-switch note missing from the promotion comment');
   });
 
   test('meeting title generation consults the v2 title action; summary JSON keeps its schema prompt', () => {

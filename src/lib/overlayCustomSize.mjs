@@ -114,8 +114,8 @@ export const OVERLAY_MAX_WINDOW_HEIGHT = 2560;
  */
 export const OVERLAY_WORK_AREA_BUDGET = 0.9;
 
-export const CUSTOM_WIDTH_STORAGE_KEY = 'natively_custom_overlay_width';
-export const CUSTOM_HEIGHT_STORAGE_KEY = 'natively_custom_overlay_height';
+export const CUSTOM_WIDTH_STORAGE_KEY = 'MeetFloo_custom_overlay_width';
+export const CUSTOM_HEIGHT_STORAGE_KEY = 'MeetFloo_custom_overlay_height';
 
 /** Clamp n into [lo, hi]. */
 export function clamp(n, lo, hi) {

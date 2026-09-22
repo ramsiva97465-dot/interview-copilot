@@ -91,43 +91,43 @@ const DEFAULT_ON_KEYS = new Set([
 const expectedDefault = (key) => DEFAULT_ON_KEYS.has(key) ? true : false;
 
 const FLAG_ENV = {
-  profileTreeV2: 'NATIVELY_PROFILE_TREE_V2',
-  contextRouterV2: 'NATIVELY_CONTEXT_ROUTER_V2',
-  liveTranscriptBrain: 'NATIVELY_LIVE_TRANSCRIPT_BRAIN',
-  promptAssemblerV2: 'NATIVELY_PROMPT_ASSEMBLER_V2',
-  answerDiversityGuard: 'NATIVELY_ANSWER_DIVERSITY_GUARD',
-  meetingMemoryV2: 'NATIVELY_MEETING_MEMORY_V2',
-  globalSearchV2: 'NATIVELY_GLOBAL_SEARCH_V2',
-  inMeetingSearchV2: 'NATIVELY_IN_MEETING_SEARCH_V2',
-  lectureIntelligenceV2: 'NATIVELY_LECTURE_INTELLIGENCE_V2',
-  diagramIntelligence: 'NATIVELY_DIAGRAM_INTELLIGENCE',
-  hindsightMemory: 'NATIVELY_HINDSIGHT_MEMORY',
-  hindsightLiveRecall: 'NATIVELY_HINDSIGHT_LIVE_RECALL',
-  hindsightPostMeetingRetain: 'NATIVELY_HINDSIGHT_POST_MEETING_RETAIN',
-  trace: 'NATIVELY_INTELLIGENCE_TRACE',
-  durableMemoryWindow: 'NATIVELY_DURABLE_MEMORY_WINDOW',
-  contextOsEnabled: 'NATIVELY_CONTEXT_OS',
-  contextOsManualChatEnabled: 'NATIVELY_CONTEXT_OS_MANUAL_CHAT',
-  contextOsWtaEnabled: 'NATIVELY_CONTEXT_OS_WTA',
-  contextOsRecapFollowupEnabled: 'NATIVELY_CONTEXT_OS_RECAP_FOLLOWUP',
-  contextOsEvidencePackEnabled: 'NATIVELY_CONTEXT_OS_EVIDENCE_PACK',
-  contextOsMemorySafetyEnabled: 'NATIVELY_CONTEXT_OS_MEMORY_SAFETY',
+  profileTreeV2: 'MEETFLOO_PROFILE_TREE_V2',
+  contextRouterV2: 'MEETFLOO_CONTEXT_ROUTER_V2',
+  liveTranscriptBrain: 'MEETFLOO_LIVE_TRANSCRIPT_BRAIN',
+  promptAssemblerV2: 'MEETFLOO_PROMPT_ASSEMBLER_V2',
+  answerDiversityGuard: 'MEETFLOO_ANSWER_DIVERSITY_GUARD',
+  meetingMemoryV2: 'MEETFLOO_MEETING_MEMORY_V2',
+  globalSearchV2: 'MEETFLOO_GLOBAL_SEARCH_V2',
+  inMeetingSearchV2: 'MEETFLOO_IN_MEETING_SEARCH_V2',
+  lectureIntelligenceV2: 'MEETFLOO_LECTURE_INTELLIGENCE_V2',
+  diagramIntelligence: 'MEETFLOO_DIAGRAM_INTELLIGENCE',
+  hindsightMemory: 'MEETFLOO_HINDSIGHT_MEMORY',
+  hindsightLiveRecall: 'MEETFLOO_HINDSIGHT_LIVE_RECALL',
+  hindsightPostMeetingRetain: 'MEETFLOO_HINDSIGHT_POST_MEETING_RETAIN',
+  trace: 'MEETFLOO_INTELLIGENCE_TRACE',
+  durableMemoryWindow: 'MEETFLOO_DURABLE_MEMORY_WINDOW',
+  contextOsEnabled: 'MEETFLOO_CONTEXT_OS',
+  contextOsManualChatEnabled: 'MEETFLOO_CONTEXT_OS_MANUAL_CHAT',
+  contextOsWtaEnabled: 'MEETFLOO_CONTEXT_OS_WTA',
+  contextOsRecapFollowupEnabled: 'MEETFLOO_CONTEXT_OS_RECAP_FOLLOWUP',
+  contextOsEvidencePackEnabled: 'MEETFLOO_CONTEXT_OS_EVIDENCE_PACK',
+  contextOsMemorySafetyEnabled: 'MEETFLOO_CONTEXT_OS_MEMORY_SAFETY',
 };
 
 const EXTRA_FLAG_ENV = [
-  'NATIVELY_MEETING_SUMMARY_V3',
-  'NATIVELY_MEETING_MODE_AUTODETECT',
-  'NATIVELY_FOLLOWUP_DRAFT_V2',
-  'NATIVELY_SPEAKER_LABELS_V1',
-  'NATIVELY_MEETING_SUMMARY_LLM_POLISH',
-  'NATIVELY_SPEAKER_DIARIZATION_V1',
-  'NATIVELY_RAG_CONFIDENCE_GATE', 'NATIVELY_RAG_LOCAL_RERANK', 'NATIVELY_RAG_RRF_FUSION', 'NATIVELY_RAG_SPECULATIVE_RERANK',
-  'NATIVELY_OKF_KNOWLEDGE_PACKS', 'NATIVELY_OKF_MARKDOWN_EXPORT', 'NATIVELY_OKF_HYBRID_RETRIEVAL',
-  'NATIVELY_OKF_GRAPH_EXPANSION', 'NATIVELY_OKF_KNOWLEDGE_UI', 'NATIVELY_OKF_USER_EDITABLE_CARDS',
-  'NATIVELY_OKF_PROFILE_PACKS', 'NATIVELY_OKF_PROFILE_HYBRID_RETRIEVAL', 'NATIVELY_OKF_PROFILE_MARKDOWN_EXPORT',
-  'NATIVELY_OKF_PROFILE_GRAPH_EXPANSION', 'NATIVELY_OKF_PROFILE_KNOWLEDGE_UI',
-  'NATIVELY_DOC_GROUNDED_STRICT_ISOLATION', 'NATIVELY_DOC_GROUNDED_FALSE_REFUSAL_REPAIR',
-  'NATIVELY_JIT_FINAL_ANSWER_ENFORCED',
+  'MEETFLOO_MEETING_SUMMARY_V3',
+  'MEETFLOO_MEETING_MODE_AUTODETECT',
+  'MEETFLOO_FOLLOWUP_DRAFT_V2',
+  'MEETFLOO_SPEAKER_LABELS_V1',
+  'MEETFLOO_MEETING_SUMMARY_LLM_POLISH',
+  'MEETFLOO_SPEAKER_DIARIZATION_V1',
+  'MEETFLOO_RAG_CONFIDENCE_GATE', 'MEETFLOO_RAG_LOCAL_RERANK', 'MEETFLOO_RAG_RRF_FUSION', 'MEETFLOO_RAG_SPECULATIVE_RERANK',
+  'MEETFLOO_OKF_KNOWLEDGE_PACKS', 'MEETFLOO_OKF_MARKDOWN_EXPORT', 'MEETFLOO_OKF_HYBRID_RETRIEVAL',
+  'MEETFLOO_OKF_GRAPH_EXPANSION', 'MEETFLOO_OKF_KNOWLEDGE_UI', 'MEETFLOO_OKF_USER_EDITABLE_CARDS',
+  'MEETFLOO_OKF_PROFILE_PACKS', 'MEETFLOO_OKF_PROFILE_HYBRID_RETRIEVAL', 'MEETFLOO_OKF_PROFILE_MARKDOWN_EXPORT',
+  'MEETFLOO_OKF_PROFILE_GRAPH_EXPANSION', 'MEETFLOO_OKF_PROFILE_KNOWLEDGE_UI',
+  'MEETFLOO_DOC_GROUNDED_STRICT_ISOLATION', 'MEETFLOO_DOC_GROUNDED_FALSE_REFUSAL_REPAIR',
+  'MEETFLOO_JIT_FINAL_ANSWER_ENFORCED',
 ];
 
 function clearAll() {
@@ -175,7 +175,7 @@ describe('Rollout — enabled mode (per-flag, independent)', () => {
   });
 
   test('the production-default Context OS core has an explicit per-surface kill switch', () => {
-    process.env.NATIVELY_CONTEXT_OS_MANUAL_CHAT = 'off';
+    process.env.MEETFLOO_CONTEXT_OS_MANUAL_CHAT = 'off';
     __resetIntelligenceFlagsCache();
     assert.equal(isIntelligenceFlagEnabled('contextOsEnabled'), true, 'umbrella default remains on');
     assert.equal(isIntelligenceFlagEnabled('contextOsManualChatEnabled'), false, 'manual surface is disabled');
@@ -184,8 +184,8 @@ describe('Rollout — enabled mode (per-flag, independent)', () => {
 
   test('the recommended rollout order is all independently gated (no hard coupling)', () => {
     // Enable the first few in the spec's recommended order; later ones stay off.
-    process.env.NATIVELY_INTELLIGENCE_TRACE = 'on';
-    process.env.NATIVELY_PROFILE_TREE_V2 = 'on';
+    process.env.MEETFLOO_INTELLIGENCE_TRACE = 'on';
+    process.env.MEETFLOO_PROFILE_TREE_V2 = 'on';
     __resetIntelligenceFlagsCache();
     assert.equal(isIntelligenceFlagEnabled('trace'), true);
     assert.equal(isIntelligenceFlagEnabled('profileTreeV2'), true);
@@ -198,7 +198,7 @@ describe('Rollout — instant rollback', () => {
   afterEach(clearAll);
 
   test('an explicit OFF overrides everything (instant kill)', () => {
-    process.env.NATIVELY_DIAGRAM_INTELLIGENCE = 'off';
+    process.env.MEETFLOO_DIAGRAM_INTELLIGENCE = 'off';
     __resetIntelligenceFlagsCache();
     assert.equal(isIntelligenceFlagEnabled('diagramIntelligence'), false);
   });

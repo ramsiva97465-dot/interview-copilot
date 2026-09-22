@@ -11,8 +11,8 @@ All paths are relative to the repo root.
 | Full pipeline outputs (summary object, per-call timings, compressed raw model output, events) | `benchmark/outputs/<config>/<conversation>/run<N>.json` |
 | Judge evaluations | `benchmark/evaluations/<config>/<conversation>/run<N>.json` |
 | Provider wire logs (params, usage, model, latency; no text, no keys, no reasoning) | `benchmark/raw/wire/<config>.jsonl` |
-| natively-api server logs | `benchmark/raw/server-logs/<config>.log` |
-| Transcripts (authored/caption source + Natively segments) | `benchmark/transcripts/src/*.txt`, `benchmark/transcripts/*.segments.json` |
+| MeetFloo-api server logs | `benchmark/raw/server-logs/<config>.log` |
+| Transcripts (authored/caption source + MeetFloo segments) | `benchmark/transcripts/src/*.txt`, `benchmark/transcripts/*.segments.json` |
 | Gold fact sheets | `benchmark/references/*.json` |
 | Corpus manifest / config / pricing | `benchmark/manifest.json`, `benchmark/config.json` |
 | Harness (shim, worker, orchestrator, judge, analysis, report) | `benchmark/harness/` |

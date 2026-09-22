@@ -99,7 +99,7 @@ export interface CapturedKey {
   /** True for keyDown, false for keyUp. The renderer only acts on keyDown. */
   isKeyDown: boolean
   /**
-   * True when the user has left Natively and stealth must stop: a click on
+   * True when the user has left MeetFloo and stealth must stop: a click on
    * another process's window (mouse hook) or a foreground switch such as
    * Alt+Tab (WinEvent hook). StealthKeyboardManager turns this into stop().
    * Named for the macOS field it mirrors; on Windows it covers both triggers.

@@ -31,7 +31,7 @@ const {
 // The build that died on 2026-08-26: the upload was reset at part 148 of the
 // 1.01 GB arm64 DMG. Note there is NO `status:` line anywhere — Apple never
 // reached a verdict, which is exactly what makes a retry safe.
-const ABORTED_UPLOAD = `Conducting pre-submission checks for Natively-2.8.7-arm64.dmg and initiating connection to the Apple notary service...
+const ABORTED_UPLOAD = `Conducting pre-submission checks for MeetFloo-2.8.7-arm64.dmg and initiating connection to the Apple notary service...
 Submission ID received
   id: 1fc52d33-8223-4f10-bd9b-d3e57041caeb
 Error: abortedUpload(resumeRequest: SotoS3.S3.ResumeMultipartUploadRequest(uploadRequest: SotoS3.S3.CreateMultipartUploadRequest(acl: nil, bucket: "notary-submissions-prod"), uploadId: "C1Yu5crB", completedParts: [SotoS3.S3.CompletedPart(eTag: Optional("\\"066a630c8ba415b79c2ab440aeaa0d94\\""), partNumber: Optional(148))]), error: The operation couldn't be completed. (Network.NWError error 54 - Connection reset by peer))`;
@@ -58,7 +58,7 @@ Error: HTTP status code: 401. Unable to authenticate with the App Store Connect 
 
 test('redactNotaryArgs hides the value after every credential flag', () => {
   const args = [
-    'notarytool', 'submit', '/release/Natively.dmg',
+    'notarytool', 'submit', '/release/MeetFloo.dmg',
     '--apple-id', 'evin@example.com',
     '--password', 'abcd-efgh-ijkl-mnop',
     '--team-id', 'BJM29W3UQ6',
@@ -68,7 +68,7 @@ test('redactNotaryArgs hides the value after every credential flag', () => {
   assert.ok(!safe.includes('abcd-efgh-ijkl-mnop'), 'app-specific password leaked');
   assert.ok(!safe.includes('evin@example.com'), 'apple id leaked');
   assert.ok(!safe.includes('BJM29W3UQ6'), 'team id leaked');
-  assert.ok(safe.includes('/release/Natively.dmg'), 'the target path must stay readable');
+  assert.ok(safe.includes('/release/MeetFloo.dmg'), 'the target path must stay readable');
   assert.equal(safe.match(/<redacted>/g).length, 3);
 });
 
@@ -77,7 +77,7 @@ test('redactNotaryArgs covers the api-key and keychain strategies too', () => {
     '--key', '/Users/evin/Downloads/AuthKey.p8',
     '--key-id', 'T9GPZ92M7K',
     '--issuer', '11111111-2222-3333-4444-555555555555',
-    '--keychain-profile', 'natively-notary',
+    '--keychain-profile', 'MeetFloo-notary',
   ]).join(' ');
   assert.equal(safe, '--key <redacted> --key-id <redacted> --issuer <redacted> --keychain-profile <redacted>');
 });
@@ -223,7 +223,7 @@ function fakeRunner(results, probeResults = {}) {
   return { run, calls, submits };
 }
 
-const silent = { warn() {}, log() {}, error() {} };
+const silent = { warn() { }, log() { }, error() { } };
 
 test('a dropped upload retries and succeeds on the next attempt', async () => {
   const { run, submits } = fakeRunner([
@@ -232,8 +232,8 @@ test('a dropped upload retries and succeeds on the next attempt', async () => {
   ]);
   const slept = [];
   const res = await notarytoolSubmitWithRetry({
-    target: '/release/Natively-2.8.7-arm64.dmg',
-    credArgs: ['--keychain-profile', 'natively-notary'],
+    target: '/release/MeetFloo-2.8.7-arm64.dmg',
+    credArgs: ['--keychain-profile', 'MeetFloo-notary'],
     run,
     sleep: async (ms) => slept.push(ms),
     log: silent,
@@ -250,17 +250,17 @@ test('the retry re-submits the SAME file — it never rebuilds the DMG', async (
     { code: 0, signal: null, output: '' },
   ]);
   await notarytoolSubmitWithRetry({
-    target: '/release/Natively-2.8.7-arm64.dmg',
-    credArgs: ['--keychain-profile', 'natively-notary'],
+    target: '/release/MeetFloo-2.8.7-arm64.dmg',
+    credArgs: ['--keychain-profile', 'MeetFloo-notary'],
     run,
-    sleep: async () => {},
+    sleep: async () => { },
     log: silent,
   });
   for (const call of submits) {
     assert.equal(call.cmd, 'xcrun');
     assert.deepEqual(call.args, [
-      'notarytool', 'submit', '/release/Natively-2.8.7-arm64.dmg',
-      '--keychain-profile', 'natively-notary', '--wait',
+      'notarytool', 'submit', '/release/MeetFloo-2.8.7-arm64.dmg',
+      '--keychain-profile', 'MeetFloo-notary', '--wait',
     ]);
   }
 });
@@ -270,7 +270,7 @@ test('an Invalid verdict fails on the FIRST attempt — no re-upload, no sleep',
   const slept = [];
   await assert.rejects(
     () => notarytoolSubmitWithRetry({
-      target: '/release/Natively.dmg', run, sleep: async (ms) => slept.push(ms), log: silent,
+      target: '/release/MeetFloo.dmg', run, sleep: async (ms) => slept.push(ms), log: silent,
     }),
     /verdict:Invalid/
   );
@@ -281,7 +281,7 @@ test('an Invalid verdict fails on the FIRST attempt — no re-upload, no sleep',
 test('the failure message reports attempts ACTUALLY made, not the cap', async () => {
   const { run } = fakeRunner([{ code: 64, signal: null, output: MISSING_FILE }]);
   const err = await notarytoolSubmitWithRetry({
-    target: '/release/Natively.dmg', maxAttempts: 3, run, sleep: async () => {}, log: silent,
+    target: '/release/MeetFloo.dmg', maxAttempts: 3, run, sleep: async () => { }, log: silent,
   }).then(() => null, (e) => e);
   assert.match(err.message, /after 1 attempt\b/);
 });
@@ -291,7 +291,7 @@ test('a persistent network failure gives up after maxAttempts with backoff', asy
   const slept = [];
   await assert.rejects(
     () => notarytoolSubmitWithRetry({
-      target: '/release/Natively.dmg',
+      target: '/release/MeetFloo.dmg',
       maxAttempts: 3,
       baseDelayMs: 30_000,
       run,
@@ -307,11 +307,11 @@ test('a persistent network failure gives up after maxAttempts with backoff', asy
 test('the thrown error never contains a credential value', async () => {
   const { run } = fakeRunner([{ code: 1, signal: null, output: ABORTED_UPLOAD }]);
   const err = await notarytoolSubmitWithRetry({
-    target: '/release/Natively.dmg',
+    target: '/release/MeetFloo.dmg',
     credArgs: ['--apple-id', 'evin@example.com', '--password', 'abcd-efgh-ijkl-mnop'],
     maxAttempts: 1,
     run,
-    sleep: async () => {},
+    sleep: async () => { },
     log: silent,
   }).then(() => null, (e) => e);
 
@@ -319,7 +319,7 @@ test('the thrown error never contains a credential value', async () => {
   assert.ok(!err.message.includes('abcd-efgh-ijkl-mnop'), 'password leaked into the build log');
   assert.ok(!err.message.includes('evin@example.com'), 'apple id leaked into the build log');
   assert.match(err.message, /<redacted>/);
-  assert.match(err.message, /Natively\.dmg/);
+  assert.match(err.message, /MeetFloo\.dmg/);
 });
 
 test('the retry warning never contains a credential value', async () => {
@@ -329,11 +329,11 @@ test('the retry warning never contains a credential value', async () => {
   ]);
   const warnings = [];
   await notarytoolSubmitWithRetry({
-    target: '/release/Natively.dmg',
+    target: '/release/MeetFloo.dmg',
     credArgs: ['--password', 'abcd-efgh-ijkl-mnop'],
     run,
-    sleep: async () => {},
-    log: { warn: (m) => warnings.push(m), log() {}, error() {} },
+    sleep: async () => { },
+    log: { warn: (m) => warnings.push(m), log() { }, error() { } },
   });
   assert.equal(warnings.length, 1);
   assert.ok(!warnings[0].includes('abcd-efgh-ijkl-mnop'));
@@ -343,7 +343,7 @@ test('a bounded error message survives the enormous abortedUpload dump', async (
   const huge = `${ABORTED_UPLOAD}${'x'.repeat(50_000)}`;
   const { run } = fakeRunner([{ code: 1, signal: null, output: huge }]);
   const err = await notarytoolSubmitWithRetry({
-    target: '/release/Natively.dmg', maxAttempts: 1, run, sleep: async () => {}, log: silent,
+    target: '/release/MeetFloo.dmg', maxAttempts: 1, run, sleep: async () => { }, log: silent,
   }).then(() => null, (e) => e);
   assert.ok(err.message.length < 1500, `error message not bounded: ${err.message.length} chars`);
 });
@@ -363,7 +363,7 @@ test('a target is required', async () => {
 
 test('extractSubmissionIds pulls the ids notarytool printed, oldest first', () => {
   const out = 'Submission ID received\n  id: 11111111-2222-3333-4444-555555555555\n' +
-              'Submission ID received\n  id: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+    'Submission ID received\n  id: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
   assert.deepEqual(extractSubmissionIds(out), [
     '11111111-2222-3333-4444-555555555555',
     'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
@@ -384,7 +384,7 @@ test('an already-Accepted submission short-circuits the re-upload entirely', asy
     { info: { code: 0, output: '  status: Accepted' } }
   );
   const res = await notarytoolSubmitWithRetry({
-    target: '/release/Natively.dmg', run, sleep: async () => {}, log: silent,
+    target: '/release/MeetFloo.dmg', run, sleep: async () => { }, log: silent,
   });
   assert.equal(res.code, 0);
   assert.equal(res.recoveredSubmissionId, '1fc52d33-8223-4f10-bd9b-d3e57041caeb');
@@ -403,7 +403,7 @@ test('"In Progress" is NOT treated as recoverable — it carries no information'
     { info: { code: 0, output: '  status: In Progress' } }
   );
   const res = await notarytoolSubmitWithRetry({
-    target: '/release/Natively.dmg', run, sleep: async () => {}, log: silent,
+    target: '/release/MeetFloo.dmg', run, sleep: async () => { }, log: silent,
   });
   assert.equal(res.code, 0);
   assert.equal(submits.length, 2, 'must re-submit rather than wait');
@@ -450,7 +450,7 @@ test('a submission Apple already REJECTED stops immediately — no further uploa
   );
   await assert.rejects(
     () => notarytoolSubmitWithRetry({
-      target: '/release/Natively.dmg', maxAttempts: 3, run, sleep: async () => {}, log: silent,
+      target: '/release/MeetFloo.dmg', maxAttempts: 3, run, sleep: async () => { }, log: silent,
     }),
     /verdict:Invalid/
   );
@@ -465,7 +465,7 @@ test('when the id is unknown to Apple, the normal re-upload still happens', asyn
     { info: { code: 1, output: 'Error: submission does not exist' } }
   );
   const res = await notarytoolSubmitWithRetry({
-    target: '/release/Natively.dmg', run, sleep: async () => {}, log: silent,
+    target: '/release/MeetFloo.dmg', run, sleep: async () => { }, log: silent,
   });
   assert.equal(res.code, 0);
   assert.equal(submits.length, 2, 'falls back to a real re-submit');

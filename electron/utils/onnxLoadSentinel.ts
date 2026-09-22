@@ -13,7 +13,7 @@
 // host process BEFORE the JS `worker.on('error'|'exit')` listeners fire — so
 // the in-memory `nonRecoverableLoadError` / `loadFailed` latches never
 // persist across restarts. The original bug: a user-selected Whisper model
-// that natively aborted at load kill the app on every launch because the
+// that MeetFloo aborted at load kill the app on every launch because the
 // catalog-id gate was passed and the recent-failure cooldown hadn't been
 // written yet.
 //
@@ -43,7 +43,7 @@
 // failure, or JSON corruption returns `null` (= "no poison"), so the load
 // proceeds normally. This module is a SAFETY net — its absence MUST NOT
 // turn a working load into a crash. An env flag
-// (NATIVELY_ONNX_SENTINEL_DISABLED=1) short-circuits all writes to a no-op
+// (MEETFLOO_ONNX_SENTINEL_DISABLED=1) short-circuits all writes to a no-op
 // for emergency rollback.
 
 import fs from 'fs';
@@ -67,9 +67,9 @@ export interface OnnxLoadSentinel {
 
 /** Whether the sentinel machinery is active. Honored by every primitive so an
  *  operator can disable the disk layer via env without a redeploy. Default
- *  ON; set NATIVELY_ONNX_SENTINEL_DISABLED=1 in production to opt out. */
+ *  ON; set MEETFLOO_ONNX_SENTINEL_DISABLED=1 in production to opt out. */
 function sentinelEnabled(): boolean {
-    return process.env.NATIVELY_ONNX_SENTINEL_DISABLED !== '1';
+    return process.env.MEETFLOO_ONNX_SENTINEL_DISABLED !== '1';
 }
 
 function sentinelPath(family: OnnxFamily): string {

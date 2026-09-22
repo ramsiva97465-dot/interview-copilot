@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const sourcePath = path.resolve(__dirname, '../NativelyProSTT.ts');
+const sourcePath = path.resolve(__dirname, '../MeetFlooProSTT.ts');
 const source = readFileSync(sourcePath, 'utf8');
 
 function sourceWindow(startMarker, endMarker) {

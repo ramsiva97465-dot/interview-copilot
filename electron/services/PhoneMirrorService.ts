@@ -122,11 +122,11 @@ const WAIT_FOR_EXTENSION_MS = 1_200;
 //   - the unpacked dev build (deterministic from the manifest `key` → this ID),
 //   - an optional override for contributors loading a differently-keyed build.
 // A web page cannot forge a chrome-extension:// origin, and a different extension
-// won't match any of these exact IDs. See natively-browser/README.md + CONTRACT.md.
+// won't match any of these exact IDs. See MeetFloo-browser/README.md + CONTRACT.md.
 const STORE_EXTENSION_ID = 'lmhgnkbjnelmciecjkleaomjpejcgaln'; // Chrome Web Store
 const DEV_EXTENSION_ID = 'macjecgdfliikhplbbdbpljomcigjnjg'; // unpacked (manifest key)
 const PINNED_EXTENSION_IDS = new Set(
-  [STORE_EXTENSION_ID, DEV_EXTENSION_ID, process.env.NATIVELY_DOM_EXTENSION_ID].filter(
+  [STORE_EXTENSION_ID, DEV_EXTENSION_ID, process.env.MEETFLOO_DOM_EXTENSION_ID].filter(
     (id): id is string => !!id,
   ),
 );
@@ -206,7 +206,7 @@ export class PhoneMirrorService {
   // the hotkey press is used instead of falling back to a screenshot.
   private extWaiters = new Set<() => void>();
   // Resolver for the window that should receive captured DOM (the overlay that
-  // mounts NativelyInterface). When it yields no live window, /dom returns 409.
+  // mounts MeetFlooInterface). When it yields no live window, /dom returns 409.
   private overlayResolver: (() => BrowserWindow | null) | null = null;
   // Smart Browser Context v2 — injected AI metadata classifier (opt-in). When set,
   // the /classify endpoint routes sanitized page metadata through it (which uses
@@ -483,7 +483,7 @@ export class PhoneMirrorService {
 
   /**
    * Set the resolver for the window that should receive captured DOM. This is
-   * the overlay window that mounts NativelyInterface — captured page content is
+   * the overlay window that mounts MeetFlooInterface — captured page content is
    * only meaningful when an active session/overlay exists. When the resolver
    * returns no live window, /dom answers 409 no_active_session.
    */
@@ -708,7 +708,7 @@ export class PhoneMirrorService {
 
   /**
    * The live window that should receive captured DOM. Prefers the configured
-   * overlay resolver (the window mounting NativelyInterface); falls back to any
+   * overlay resolver (the window mounting MeetFlooInterface); falls back to any
    * live BrowserWindow only if no resolver is set (keeps standalone use working).
    * Returns null when no live window exists → /dom answers 409.
    */
@@ -813,13 +813,13 @@ export class PhoneMirrorService {
           this.pendingTabs.delete(msg.reqId);
           const tabs = Array.isArray(msg.tabs)
             ? (msg.tabs as unknown[])
-                .map((t) => t as Record<string, unknown>)
-                .filter((t) => typeof t.id === 'number')
-                .map((t) => ({
-                  id: t.id as number,
-                  title: typeof t.title === 'string' ? t.title : '',
-                  url: typeof t.url === 'string' ? t.url : '',
-                }))
+              .map((t) => t as Record<string, unknown>)
+              .filter((t) => typeof t.id === 'number')
+              .map((t) => ({
+                id: t.id as number,
+                title: typeof t.title === 'string' ? t.title : '',
+                url: typeof t.url === 'string' ? t.url : '',
+              }))
             : [];
           pending.resolve(tabs);
         }
@@ -1109,9 +1109,9 @@ export class PhoneMirrorService {
             }
 
             const cappedDom = parsed.dom.substring(0, DOM_CONTEXT_MAX_CHARS);
-            // Deliver to the overlay window (the one that mounts NativelyInterface).
+            // Deliver to the overlay window (the one that mounts MeetFlooInterface).
             // No live overlay → no active session to receive context → 409, so the
-            // extension can tell the user to start a Natively session first.
+            // extension can tell the user to start a MeetFloo session first.
             const targetWin = this.resolveDomTargetWindow();
             if (!targetWin) {
               res.writeHead(409, jsonHeaders);
@@ -1130,7 +1130,7 @@ export class PhoneMirrorService {
             res.end(JSON.stringify({ success: true }));
             return;
           }
-        } catch (_) {}
+        } catch (_) { }
         const headers: Record<string, string> = { 'Content-Type': 'text/plain' };
         if (allowedOrigin) headers['Access-Control-Allow-Origin'] = allowedOrigin;
         res.writeHead(400, headers);
@@ -1381,13 +1381,13 @@ export class PhoneMirrorService {
       if (!alive) {
         try {
           ws.terminate();
-        } catch (_) {}
+        } catch (_) { }
         return;
       }
       alive = false;
       try {
         ws.ping();
-      } catch (_) {}
+      } catch (_) { }
     }, 15_000);
 
     ws.on('close', () => {
@@ -1501,7 +1501,7 @@ export class PhoneMirrorService {
     for (const c of this.wss.clients) {
       try {
         c.close(code, reason);
-      } catch (_) {}
+      } catch (_) { }
     }
   }
 
@@ -1614,7 +1614,7 @@ export function pickTargetExtensionIndex(
 
 /**
  * Pure decision for whether PhoneMirror should auto-start on boot, given the
- * `NATIVELY_DISABLE_PHONE_MIRROR` kill switch (env.disablePhoneMirror) and the
+ * `MEETFLOO_DISABLE_PHONE_MIRROR` kill switch (env.disablePhoneMirror) and the
  * persisted `phoneMirrorEnabled` setting. Extracted from main.ts's boot
  * sequence so the decision itself — not just its source text — is testable.
  */

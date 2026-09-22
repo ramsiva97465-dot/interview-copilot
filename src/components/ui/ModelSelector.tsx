@@ -54,8 +54,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ currentModel, onSe
                 const creds = await window.electronAPI?.getStoredCredentials?.();
                 const cModels: { id: string; name: string; desc: string; provider: string }[] = [];
 
-                if (creds?.hasNativelyKey) {
-                    cModels.push({ id: 'natively', name: 'MeetFloo API', desc: t('Managed AI • Fast execution'), provider: 'natively' });
+                if (creds?.hasMeetFlooKey) {
+                    cModels.push({ id: 'MeetFloo', name: 'MeetFloo API', desc: t('Managed AI • Fast execution'), provider: 'MeetFloo' });
                 }
                 for (const [prov, cfg] of Object.entries(STANDARD_CLOUD_MODELS)) {
                     if (!cfg.hasKeyCheck(creds)) continue;

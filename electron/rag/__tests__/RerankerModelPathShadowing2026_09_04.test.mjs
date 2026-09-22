@@ -63,7 +63,7 @@ function fixture(roots) {
 function resolveFrom(dir) {
   const script = `
     const { getLocalReranker } = require(${JSON.stringify(
-      path.join(repoRoot, 'dist-electron/electron/rag/LocalReranker.js'))});
+    path.join(repoRoot, 'dist-electron/electron/rag/LocalReranker.js'))});
     process.stdout.write(String(getLocalReranker().modelPath));
   `;
   // HOME is redirected as well as cwd. resolveModelPath also consults
@@ -78,12 +78,12 @@ function resolveFrom(dir) {
   return execFileSync(process.execPath, ['-e', script], {
     cwd: dir,
     encoding: 'utf8',
-    // A stray NATIVELY_* override on the developer's shell would decide the
+    // A stray MEETFLOO_* override on the developer's shell would decide the
     // answer instead of the code under test.
     env: {
       ...process.env,
-      NATIVELY_LOCAL_MODELS_PATH: '',
-      NATIVELY_RERANKER_MODEL: '',
+      MEETFLOO_LOCAL_MODELS_PATH: '',
+      MEETFLOO_RERANKER_MODEL: '',
       HOME: emptyHome,            // POSIX
       USERPROFILE: emptyHome,     // Windows
     },

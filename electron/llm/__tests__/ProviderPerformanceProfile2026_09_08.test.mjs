@@ -1,6 +1,6 @@
 // electron/llm/__tests__/ProviderPerformanceProfile2026_09_08.test.mjs
 //
-// The Provider Performance Profile — the evidence layer behind Natively's
+// The Provider Performance Profile — the evidence layer behind MeetFloo's
 // adaptive deadlines.
 //
 // WHAT THESE TESTS ARE ACTUALLY DEFENDING. This area has a documented history of
@@ -15,7 +15,7 @@
 // store observes every route, but only the routes the shipped route table marks
 // adaptive may have their deadline moved. A test that let evidence move
 // `server_cascade` would be re-arming F-301 (the client abandoning a turn 2s
-// before natively-api rotates providers), so that separation is pinned here.
+// before MeetFloo-api rotates providers), so that separation is pinned here.
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
@@ -297,7 +297,7 @@ describe('adaptive TTFT — recording is not adapting', () => {
   });
 
   test('the server cascade is IMMOVABLE — this is the F-301 invariant', () => {
-    // 13000 is "natively-api's 10s provider cutover + 3s". Narrowing it puts the
+    // 13000 is "MeetFloo-api's 10s provider cutover + 3s". Narrowing it puts the
     // client back to abandoning turns before the server can rotate. Evidence has
     // nothing to correct on a number derived from a mechanism we can read.
     const d = adaptiveTtftCeilingMs(
@@ -771,8 +771,8 @@ describe('user-facing grading and diagnostics', () => {
     // remember: PerformanceTurnRecord has no field that could hold a prompt, a
     // transcript line, a filename or an image.
     const { performanceHooks, __setProviderPerformanceStore, __setRuntimeSignals, RuntimeSignals } = M;
-    const prev = process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE;
-    process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = '1';
+    const prev = process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE;
+    process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = '1';
     const s = store();
     __setProviderPerformanceStore(s);
     __setRuntimeSignals(new RuntimeSignals({ readNetwork: () => ({ id: 'n', interfaceClass: 'wifi', offline: false }) }));
@@ -788,7 +788,7 @@ describe('user-facing grading and diagnostics', () => {
     });
     __setProviderPerformanceStore(null);
     __setRuntimeSignals(null);
-    if (prev === undefined) delete process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE; else process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = prev;
+    if (prev === undefined) delete process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE; else process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = prev;
 
     assert.equal(records.length, 1);
     const serialized = JSON.stringify(records[0]);
@@ -853,22 +853,22 @@ describe('the flags are the rollback story, so the OFF path is pinned too', () =
     }
     __setProviderPerformanceStore(s);
     __setRuntimeSignals(new RuntimeSignals({ readNetwork: () => ({ id: 'testnet', interfaceClass: 'wifi', offline: false }) }));
-    const prevProfile = process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE;
-    const prevIdle = process.env.NATIVELY_ADAPTIVE_STREAM_IDLE;
-    const prevTtft = process.env.NATIVELY_ADAPTIVE_TTFT;
+    const prevProfile = process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE;
+    const prevIdle = process.env.MEETFLOO_ADAPTIVE_STREAM_IDLE;
+    const prevTtft = process.env.MEETFLOO_ADAPTIVE_TTFT;
     try { return fn(s); } finally {
       __setProviderPerformanceStore(null);
       __setRuntimeSignals(null);
-      if (prevProfile === undefined) delete process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE; else process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = prevProfile;
-      if (prevIdle === undefined) delete process.env.NATIVELY_ADAPTIVE_STREAM_IDLE; else process.env.NATIVELY_ADAPTIVE_STREAM_IDLE = prevIdle;
-      if (prevTtft === undefined) delete process.env.NATIVELY_ADAPTIVE_TTFT; else process.env.NATIVELY_ADAPTIVE_TTFT = prevTtft;
+      if (prevProfile === undefined) delete process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE; else process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = prevProfile;
+      if (prevIdle === undefined) delete process.env.MEETFLOO_ADAPTIVE_STREAM_IDLE; else process.env.MEETFLOO_ADAPTIVE_STREAM_IDLE = prevIdle;
+      if (prevTtft === undefined) delete process.env.MEETFLOO_ADAPTIVE_TTFT; else process.env.MEETFLOO_ADAPTIVE_TTFT = prevTtft;
     }
   }
 
   test('adaptiveStreamIdle OFF returns the shipped constant despite strong evidence', () => {
     withStrongEvidence(() => {
-      process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = '1';
-      process.env.NATIVELY_ADAPTIVE_STREAM_IDLE = '0';
+      process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = '1';
+      process.env.MEETFLOO_ADAPTIVE_STREAM_IDLE = '0';
       const hooks = performanceHooks({ llmHelper: helper, hasImages: false, inputTokens: 2000 });
       assert.equal(hooks.interTokenStallMs, LIVE_INTER_TOKEN_STALL_MS);
       // The DECISION is still computed, so diagnostics can show what it would
@@ -880,8 +880,8 @@ describe('the flags are the rollback story, so the OFF path is pinned too', () =
 
   test('adaptiveStreamIdle ON acts on the same evidence', () => {
     withStrongEvidence(() => {
-      process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = '1';
-      process.env.NATIVELY_ADAPTIVE_STREAM_IDLE = '1';
+      process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = '1';
+      process.env.MEETFLOO_ADAPTIVE_STREAM_IDLE = '1';
       const hooks = performanceHooks({ llmHelper: helper, hasImages: false, inputTokens: 2000 });
       assert.ok(hooks.interTokenStallMs < LIVE_INTER_TOKEN_STALL_MS);
       assert.ok(hooks.interTokenStallMs >= STREAM_IDLE_MIN_MS);
@@ -890,8 +890,8 @@ describe('the flags are the rollback story, so the OFF path is pinned too', () =
 
   test('the master flag OFF disables recording as well as acting', () => {
     withStrongEvidence(() => {
-      process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = '0';
-      process.env.NATIVELY_ADAPTIVE_STREAM_IDLE = '1';
+      process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = '0';
+      process.env.MEETFLOO_ADAPTIVE_STREAM_IDLE = '1';
       const hooks = performanceHooks({ llmHelper: helper, hasImages: false, inputTokens: 2000 });
       assert.equal(hooks.interTokenStallMs, LIVE_INTER_TOKEN_STALL_MS);
       assert.equal(hooks.observe, undefined, 'no observer at all when the profile is off');
@@ -900,8 +900,8 @@ describe('the flags are the rollback story, so the OFF path is pinned too', () =
 
   test('adaptiveTtft OFF is the identity function on the shipped value', () => {
     withStrongEvidence(() => {
-      process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = '1';
-      process.env.NATIVELY_ADAPTIVE_TTFT = '0';
+      process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = '1';
+      process.env.MEETFLOO_ADAPTIVE_TTFT = '0';
       assert.equal(applyAdaptiveTtft(15_000, { llmHelper: helper, hasImages: false, inputTokens: 2000 }), 15_000);
     });
   });
@@ -909,15 +909,15 @@ describe('the flags are the rollback story, so the OFF path is pinned too', () =
   test('a missing or broken llmHelper never changes a deadline', () => {
     // Fail-open: every path in the wiring returns the shipped value rather than
     // throwing on the answer path.
-    process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = '1';
-    process.env.NATIVELY_ADAPTIVE_STREAM_IDLE = '1';
+    process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = '1';
+    process.env.MEETFLOO_ADAPTIVE_STREAM_IDLE = '1';
     for (const bad of [null, undefined, {}, { performanceIdentity: () => { throw new Error('boom'); } }]) {
       const hooks = performanceHooks({ llmHelper: bad, hasImages: false, inputTokens: 100 });
       assert.equal(hooks.interTokenStallMs, LIVE_INTER_TOKEN_STALL_MS);
       assert.equal(applyAdaptiveTtft(15_000, { llmHelper: bad, hasImages: false, inputTokens: 100 }), 15_000);
     }
-    delete process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE;
-    delete process.env.NATIVELY_ADAPTIVE_STREAM_IDLE;
+    delete process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE;
+    delete process.env.MEETFLOO_ADAPTIVE_STREAM_IDLE;
   });
 });
 
@@ -978,8 +978,10 @@ describe('going live: what the default-ON flags must never do', () => {
       ttftMs: 500, totalMs: 2000, interChunkGapsMs: gaps, chunkCount: gaps.length + 1,
       reason: 'done', firstUsefulBudgetMs: 8000, interTokenStallMs: 8000, speculative: false,
     });
-    const ident = { providerId: 'p', modelId: 'm', route: 'default_provider', inputTokens: 100,
-      outputTokens: 10, hasImages: false, startedAt: 0, coldStart: false, userCancelled: false };
+    const ident = {
+      providerId: 'p', modelId: 'm', route: 'default_provider', inputTokens: 100,
+      outputTokens: 10, hasImages: false, startedAt: 0, coldStart: false, userCancelled: false
+    };
     const sig = { contaminatedSince: () => null };
 
     recordStreamObservation(obs([10, 20]), ident, { store: s, signals: sig, networkProfileId: 'n' });
@@ -1015,11 +1017,15 @@ describe('going live: what the default-ON flags must never do', () => {
     // The store must hold the CLASS and nothing of the error.
     const s = store();
     recordStreamObservation(
-      { ttftMs: null, totalMs: 900, interChunkGapsMs: [], chunkCount: 0, reason: 'error',
+      {
+        ttftMs: null, totalMs: 900, interChunkGapsMs: [], chunkCount: 0, reason: 'error',
         error: Object.assign(new Error('SECRET-PROMPT-TEXT leaked here'), { status: 429 }),
-        firstUsefulBudgetMs: 8000, interTokenStallMs: 8000, speculative: false },
-      { providerId: 'p', modelId: 'm', route: 'default_provider', inputTokens: 100, outputTokens: 0,
-        hasImages: false, startedAt: 0, coldStart: false, userCancelled: false },
+        firstUsefulBudgetMs: 8000, interTokenStallMs: 8000, speculative: false
+      },
+      {
+        providerId: 'p', modelId: 'm', route: 'default_provider', inputTokens: 100, outputTokens: 0,
+        hasImages: false, startedAt: 0, coldStart: false, userCancelled: false
+      },
       { store: s, signals: { contaminatedSince: () => null }, networkProfileId: 'n' },
     );
     const p = s.getExact('p', 'm', 'n');
@@ -1048,14 +1054,18 @@ describe('going live: what the default-ON flags must never do', () => {
     __resetSecondaryStreamTallies();
     const s = store();
     __setProviderPerformanceStore(s);
-    const prev = process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE;
-    process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = '1';
+    const prev = process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE;
+    process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = '1';
     const observe = secondaryStreamObserver('repair');
-    observe({ ttftMs: 300, totalMs: 900, interChunkGapsMs: [10, 10, 10], chunkCount: 4,
-      reason: 'done', firstUsefulBudgetMs: 7000, interTokenStallMs: 8000, speculative: false });
-    observe({ ttftMs: null, totalMs: 7000, interChunkGapsMs: [], chunkCount: 0,
-      reason: 'first_useful_timeout', firstUsefulBudgetMs: 7000, interTokenStallMs: 8000, speculative: false });
-    if (prev === undefined) delete process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE; else process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = prev;
+    observe({
+      ttftMs: 300, totalMs: 900, interChunkGapsMs: [10, 10, 10], chunkCount: 4,
+      reason: 'done', firstUsefulBudgetMs: 7000, interTokenStallMs: 8000, speculative: false
+    });
+    observe({
+      ttftMs: null, totalMs: 7000, interChunkGapsMs: [], chunkCount: 0,
+      reason: 'first_useful_timeout', firstUsefulBudgetMs: 7000, interTokenStallMs: 8000, speculative: false
+    });
+    if (prev === undefined) delete process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE; else process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = prev;
     __setProviderPerformanceStore(null);
 
     const tally = secondaryStreamTallies().find((t) => t.kind === 'repair');
@@ -1084,8 +1094,8 @@ describe('going live: what the default-ON flags must never do', () => {
 
   test('capability facts are seeded into the profile by the live hook', () => {
     const { performanceHooks, __setRuntimeSignals, RuntimeSignals } = M;
-    const prev = process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE;
-    process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = '1';
+    const prev = process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE;
+    process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = '1';
     const s = store();
     __setProviderPerformanceStore(s);
     __setRuntimeSignals(new RuntimeSignals({ readNetwork: () => ({ id: 'n', interfaceClass: 'wifi', offline: false }) }));
@@ -1098,7 +1108,7 @@ describe('going live: what the default-ON flags must never do', () => {
     assert.ok(p.capability.contextWindowTokens > 0);
     __setProviderPerformanceStore(null);
     __setRuntimeSignals(null);
-    if (prev === undefined) delete process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE; else process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = prev;
+    if (prev === undefined) delete process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE; else process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = prev;
   });
 
   test('an over-limit request is a capability finding; poor big requests are a reliability one', () => {
@@ -1334,29 +1344,31 @@ describe('the image-compression responder (Phase 18)', () => {
   const { imageProfileForTurn, __setProviderPerformanceStore, __setRuntimeSignals, RuntimeSignals } = M;
 
   function withSlowVisionProvider(fn) {
-    const prev = process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE;
-    const prevImg = process.env.NATIVELY_ADAPTIVE_IMAGE_QUALITY;
-    process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = '1';
+    const prev = process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE;
+    const prevImg = process.env.MEETFLOO_ADAPTIVE_IMAGE_QUALITY;
+    process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = '1';
     // This responder has its OWN flag, default OFF — it is the only adaptive
     // consumer that visibly degrades output rather than being bounded so that
     // ON is safer or equal, so it has to be asked for.
-    process.env.NATIVELY_ADAPTIVE_IMAGE_QUALITY = '1';
+    process.env.MEETFLOO_ADAPTIVE_IMAGE_QUALITY = '1';
     const s = store();
     // A vision provider measured at 9s TTFT and 8 tokens/sec: a 400-token
     // answer needs ~50s more, far past any interactive budget.
     for (let i = 0; i < 3; i++) {
-      s.record(sample({ providerId: 'custom', modelId: 'gw/m', networkProfileId: 'n',
-        route: 'vision', workload: 'vision', ttftMs: 9_000, generationRateTps: 8 }));
+      s.record(sample({
+        providerId: 'custom', modelId: 'gw/m', networkProfileId: 'n',
+        route: 'vision', workload: 'vision', ttftMs: 9_000, generationRateTps: 8
+      }));
     }
     __setProviderPerformanceStore(s);
     __setRuntimeSignals(new RuntimeSignals({ readNetwork: () => ({ id: 'n', interfaceClass: 'wifi', offline: false }) }));
     try { return fn(); } finally {
       __setProviderPerformanceStore(null);
       __setRuntimeSignals(null);
-      if (prev === undefined) delete process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE;
-      else process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = prev;
-      if (prevImg === undefined) delete process.env.NATIVELY_ADAPTIVE_IMAGE_QUALITY;
-      else process.env.NATIVELY_ADAPTIVE_IMAGE_QUALITY = prevImg;
+      if (prev === undefined) delete process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE;
+      else process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = prev;
+      if (prevImg === undefined) delete process.env.MEETFLOO_ADAPTIVE_IMAGE_QUALITY;
+      else process.env.MEETFLOO_ADAPTIVE_IMAGE_QUALITY = prevImg;
     }
   }
 
@@ -1364,21 +1376,23 @@ describe('the image-compression responder (Phase 18)', () => {
 
   test('with its flag OFF (the default) nothing is ever downgraded', () => {
     // The kill switch a user seeing blurrier screenshots needs.
-    const prev = process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE;
-    process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = '1';
-    delete process.env.NATIVELY_ADAPTIVE_IMAGE_QUALITY;
+    const prev = process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE;
+    process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = '1';
+    delete process.env.MEETFLOO_ADAPTIVE_IMAGE_QUALITY;
     const s = store();
     for (let i = 0; i < 3; i++) {
-      s.record(sample({ providerId: 'custom', modelId: 'gw/m', networkProfileId: 'n',
-        route: 'vision', workload: 'vision', ttftMs: 9_000, generationRateTps: 8 }));
+      s.record(sample({
+        providerId: 'custom', modelId: 'gw/m', networkProfileId: 'n',
+        route: 'vision', workload: 'vision', ttftMs: 9_000, generationRateTps: 8
+      }));
     }
     __setProviderPerformanceStore(s);
     __setRuntimeSignals(new RuntimeSignals({ readNetwork: () => ({ id: 'n', interfaceClass: 'wifi', offline: false }) }));
     assert.equal(imageProfileForTurn('balanced', { llmHelper: helper, inputTokens: 2000 }), 'balanced');
     __setProviderPerformanceStore(null);
     __setRuntimeSignals(null);
-    if (prev === undefined) delete process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE;
-    else process.env.NATIVELY_PROVIDER_PERFORMANCE_PROFILE = prev;
+    if (prev === undefined) delete process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE;
+    else process.env.MEETFLOO_PROVIDER_PERFORMANCE_PROFILE = prev;
   });
 
   test('a slow vision provider downgrades balanced → fast', () => {
@@ -1423,8 +1437,10 @@ describe('routing readiness (Phase 19) — the profile can answer, without being
         s.record(sample({ providerId, modelId: 'm', networkProfileId: 'n', workload, ttftMs }));
       }
       for (let i = 0; i < bad; i++) {
-        s.record(sample({ providerId, modelId: 'm', networkProfileId: 'n', workload,
-          sampleClass: 'timeout', ttftMs: null, totalMs: null, maxGapMs: null, p50GapMs: null }));
+        s.record(sample({
+          providerId, modelId: 'm', networkProfileId: 'n', workload,
+          sampleClass: 'timeout', ttftMs: null, totalMs: null, maxGapMs: null, p50GapMs: null
+        }));
       }
     };
     put('A', 'small', 400, 20, 0);      // excellent small
@@ -1460,8 +1476,10 @@ describe('routing readiness (Phase 19) — the profile can answer, without being
   test('reliability outranks latency — a fast, flaky provider does not lead', () => {
     const s = store();
     for (let i = 0; i < 20; i++) s.record(sample({ providerId: 'flaky', modelId: 'm', networkProfileId: 'n', ttftMs: 300 }));
-    for (let i = 0; i < 20; i++) s.record(sample({ providerId: 'flaky', modelId: 'm', networkProfileId: 'n',
-      sampleClass: 'server_error', ttftMs: null, totalMs: null, maxGapMs: null, p50GapMs: null }));
+    for (let i = 0; i < 20; i++) s.record(sample({
+      providerId: 'flaky', modelId: 'm', networkProfileId: 'n',
+      sampleClass: 'server_error', ttftMs: null, totalMs: null, maxGapMs: null, p50GapMs: null
+    }));
     for (let i = 0; i < 20; i++) s.record(sample({ providerId: 'steady', modelId: 'm', networkProfileId: 'n', ttftMs: 1_500 }));
     const ranked = rankProvidersFor(s.all(), 'small');
     assert.equal(ranked[0].providerId, 'steady',
@@ -1473,8 +1491,10 @@ describe('routing readiness (Phase 19) — the profile can answer, without being
     // caller choosing a fallback order needs to see the difference.
     const s = store();
     for (let i = 0; i < 5; i++) s.record(sample({ providerId: 'known', modelId: 'm', networkProfileId: 'n', ttftMs: 800 }));
-    s.setCapabilities('unknown', 'm', 'n', { streaming: true, vision: 'unknown', tools: 'unknown',
-      structuredOutput: 'unknown', contextWindowTokens: 0, source: 'unknown' });
+    s.setCapabilities('unknown', 'm', 'n', {
+      streaming: true, vision: 'unknown', tools: 'unknown',
+      structuredOutput: 'unknown', contextWindowTokens: 0, source: 'unknown'
+    });
     const ranked = rankProvidersFor(s.all(), 'small');
     assert.equal(ranked.length, 2, 'the unmeasured provider is still listed');
     assert.equal(ranked[0].providerId, 'known');
@@ -1595,7 +1615,7 @@ describe('retry counting (Phase 6 / 27)', () => {
     reason: 'done', firstUsefulBudgetMs: 8000, interTokenStallMs: 8000, speculative: false, ...over,
   });
   const ident = (over = {}) => ({
-    providerId: 'natively', modelId: 'natively', route: 'server_cascade', inputTokens: 2000,
+    providerId: 'MeetFloo', modelId: 'MeetFloo', route: 'server_cascade', inputTokens: 2000,
     outputTokens: 0, hasImages: false, startedAt: 0, coldStart: false, userCancelled: false, ...over,
   });
   const sig = { contaminatedSince: () => null };
@@ -1603,27 +1623,27 @@ describe('retry counting (Phase 6 / 27)', () => {
   test('a banked transport retry lands on the next sample for that identity', () => {
     __resetTransportRetries();
     const s = store();
-    noteTransportRetry('natively', 'natively');
-    noteTransportRetry('natively', 'natively');
+    noteTransportRetry('MeetFloo', 'MeetFloo');
+    noteTransportRetry('MeetFloo', 'MeetFloo');
     const written = recordStreamObservation(obs(), ident(), { store: s, signals: sig, networkProfileId: 'n' });
     assert.equal(written.retryCount, 2);
-    assert.equal(s.getExact('natively', 'natively', 'n').workloads.small.reliability.retries, 2);
+    assert.equal(s.getExact('MeetFloo', 'MeetFloo', 'n').workloads.small.reliability.retries, 2);
   });
 
   test('retries are DRAINED, so one retry is never counted twice', () => {
     __resetTransportRetries();
     const s = store();
-    noteTransportRetry('natively', 'natively');
+    noteTransportRetry('MeetFloo', 'MeetFloo');
     recordStreamObservation(obs(), ident(), { store: s, signals: sig, networkProfileId: 'n' });
     const second = recordStreamObservation(obs(), ident(), { store: s, signals: sig, networkProfileId: 'n' });
     assert.equal(second.retryCount, 0, 'the bank is emptied by the first sample');
-    assert.equal(s.getExact('natively', 'natively', 'n').workloads.small.reliability.retries, 1);
+    assert.equal(s.getExact('MeetFloo', 'MeetFloo', 'n').workloads.small.reliability.retries, 1);
   });
 
   test('a retry on ONE identity does not leak onto another', () => {
     __resetTransportRetries();
     const s = store();
-    noteTransportRetry('natively', 'natively');
+    noteTransportRetry('MeetFloo', 'MeetFloo');
     const other = recordStreamObservation(obs(), ident({ providerId: 'gemini', modelId: 'gemini-3.7-flash' }),
       { store: s, signals: sig, networkProfileId: 'n' });
     assert.equal(other.retryCount, 0);
@@ -1636,10 +1656,10 @@ describe('retry counting (Phase 6 / 27)', () => {
     // would hide precisely that.
     __resetTransportRetries();
     const s = store();
-    noteTransportRetry('natively', 'natively');
-    noteTransportRetry('natively', 'natively');
+    noteTransportRetry('MeetFloo', 'MeetFloo');
+    noteTransportRetry('MeetFloo', 'MeetFloo');
     recordStreamObservation(obs({ reason: 'done' }), ident(), { store: s, signals: sig, networkProfileId: 'n' });
-    const r = s.getExact('natively', 'natively', 'n').workloads.small.reliability;
+    const r = s.getExact('MeetFloo', 'MeetFloo', 'n').workloads.small.reliability;
     assert.equal(r.ok, 1, 'the turn succeeded');
     assert.equal(r.retries, 2, 'and it took three attempts to do so');
   });
@@ -1649,7 +1669,7 @@ describe('retry counting (Phase 6 / 27)', () => {
     // inheriting whatever the shared bank happens to hold.
     __resetTransportRetries();
     const s = store();
-    noteTransportRetry('natively', 'natively');
+    noteTransportRetry('MeetFloo', 'MeetFloo');
     const w = recordStreamObservation(obs(), ident({ retryCount: 0 }), { store: s, signals: sig, networkProfileId: 'n' });
     assert.equal(w.retryCount, 0);
     __resetTransportRetries();
@@ -1658,9 +1678,9 @@ describe('retry counting (Phase 6 / 27)', () => {
   test('a user cancellation banks nothing against the provider', () => {
     __resetTransportRetries();
     const s = store();
-    noteTransportRetry('natively', 'natively');
+    noteTransportRetry('MeetFloo', 'MeetFloo');
     recordStreamObservation(obs({ reason: 'aborted' }), ident(), { store: s, signals: sig, networkProfileId: 'n' });
-    assert.equal(s.getExact('natively', 'natively', 'n').workloads.small.reliability.retries, 0,
+    assert.equal(s.getExact('MeetFloo', 'MeetFloo', 'n').workloads.small.reliability.retries, 0,
       'a turn the user stopped is not the provider working hard');
     __resetTransportRetries();
   });

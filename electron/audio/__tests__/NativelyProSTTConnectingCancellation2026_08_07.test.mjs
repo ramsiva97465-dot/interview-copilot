@@ -2,7 +2,7 @@
 // connecting" crash.
 //
 // Symptom: a user stops a meeting a second or two after starting it, while
-// both the mic and system Natively Pro STT sockets are still in CONNECTING.
+// both the mic and system MeetFloo Pro STT sockets are still in CONNECTING.
 // stop() -> closeUpstream() used to call removeAllListeners() and THEN
 // close(). With ws@8, close() on a CONNECTING socket routes through
 // abortHandshake(), which does:
@@ -32,7 +32,7 @@
 //
 // Strategy: no fakes. A real TCP server accepts the connection but never
 // completes the WebSocket upgrade, so the sockets genuinely sit in CONNECTING.
-// Real ws, real compiled NativelyProSTT, real stop().
+// Real ws, real compiled MeetFlooProSTT, real stop().
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -49,7 +49,7 @@ Module._load = function patchedLoad(request) {
     if (request === 'electron') {
         return {
             app: {
-                getAppPath: () => '/tmp/fake-natively-app',
+                getAppPath: () => '/tmp/fake-MeetFloo-app',
                 isPackaged: false,
                 isReady: () => false,
             },
@@ -58,7 +58,7 @@ Module._load = function patchedLoad(request) {
     return origLoad.apply(this, arguments);
 };
 
-const { NativelyProSTT } = await import(pathToFileURL(path.join(distRoot, 'NativelyProSTT.js')).href);
+const { MeetFlooProSTT } = await import(pathToFileURL(path.join(distRoot, 'MeetFlooProSTT.js')).href);
 
 /** A TCP server that accepts but never upgrades — clients stay in CONNECTING. */
 async function stalledServer() {
@@ -85,11 +85,11 @@ async function stalledServer() {
  * tests) connectUrl() returns it verbatim.
  *
  * This keeps the test hermetic. It must never open a socket to
- * api.natively.software: that would make the suite network-dependent and point
+ * api.MeetFloo.software: that would make the suite network-dependent and point
  * dozens of cancelled handshakes per run at production.
  */
 function makeStt(url, channel) {
-    const stt = new NativelyProSTT('cancellation-key', channel);
+    const stt = new MeetFlooProSTT('cancellation-key', channel);
     stt.BACKEND_URL = url;
     return stt;
 }
@@ -119,7 +119,7 @@ test('HERMETICITY GUARD: the socket dials the local server, never production', a
     // start() nulls this.target, so pinning `target` before start() is silently
     // discarded and connect() falls back to BACKEND_URL. If this test ever
     // regresses to that shape it would quietly point every cancelled handshake
-    // below at wss://api.natively.software. Pin it down explicitly.
+    // below at wss://api.MeetFloo.software. Pin it down explicitly.
     const server = await stalledServer();
     const stt = makeStt(server.url, 'mic');
 
@@ -135,9 +135,9 @@ test('HERMETICITY GUARD: the socket dials the local server, never production', a
         dialed.startsWith('ws://127.0.0.1:'),
         `the test must dial the local stalled server, got ${dialed}. ` +
         'A non-local URL means the seam broke and this suite is now hitting the ' +
-        'real Natively STT endpoint over the network.'
+        'real MeetFloo STT endpoint over the network.'
     );
-    assert.ok(!dialed.includes('natively.software'), 'must never reach production');
+    assert.ok(!dialed.includes('MeetFloo.software'), 'must never reach production');
 });
 
 test('stopping mic + system STT mid-handshake must not escape as an uncaughtException', async () => {
@@ -167,7 +167,7 @@ test('stopping mic + system STT mid-handshake must not escape as an uncaughtExce
     assert.deepEqual(
         uncaught.map(e => e.message),
         [],
-        'Cancelling a CONNECTING Natively Pro STT socket must not raise a process-level ' +
+        'Cancelling a CONNECTING MeetFloo Pro STT socket must not raise a process-level ' +
         'uncaughtException. ws@8 always emits the abortHandshake error one tick after ' +
         'close(); closeUpstream() must keep an error listener attached across that tick.'
     );

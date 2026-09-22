@@ -28,20 +28,20 @@ const { shouldUseHybridRetrieval, runHybridModeRetrieval, hybridRetrievalBudgetM
     __dirname, '../../../dist-electron/electron/llm/modeHybridEligibility.js',
   )).href);
 
-afterEach(() => { delete process.env.NATIVELY_RAG_LOCAL_RERANK; });
+afterEach(() => { delete process.env.MEETFLOO_RAG_LOCAL_RERANK; });
 
 // ── 1. Eligibility ──────────────────────────────────────────────────────────
 
 test('doc-grounded is ALWAYS eligible, regardless of the rerank flag', () => {
-  process.env.NATIVELY_RAG_LOCAL_RERANK = 'off';
+  process.env.MEETFLOO_RAG_LOCAL_RERANK = 'off';
   assert.equal(shouldUseHybridRetrieval({ forceDocumentGrounding: true }), true);
 });
 
 test('non-doc-grounded follows the ragLocalRerank flag (the streamChat semantics, now canonical)', () => {
-  process.env.NATIVELY_RAG_LOCAL_RERANK = 'off';
+  process.env.MEETFLOO_RAG_LOCAL_RERANK = 'off';
   assert.equal(shouldUseHybridRetrieval({ forceDocumentGrounding: false }), false,
     'prod posture: flag off + non-doc → lexical');
-  process.env.NATIVELY_RAG_LOCAL_RERANK = 'on';
+  process.env.MEETFLOO_RAG_LOCAL_RERANK = 'on';
   assert.equal(shouldUseHybridRetrieval({ forceDocumentGrounding: false }), true,
     'dev/test posture: flag on → hybrid even without doc grounding');
 });

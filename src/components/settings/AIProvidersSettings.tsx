@@ -85,7 +85,7 @@ import { LiquidGlassBadge } from '../../ui-components/LiquidGlassBadge';
    stays on the compositor, which matters because this renderer also hosts the
    always-on-top overlay and a 3s Ollama poll. framer-motion is already loaded in
    this renderer by the sibling settings panels (Plans, Intelligence, Help, Pro,
-   Natively API), so the exception adds no bundle cost that was not already
+   MeetFloo API), so the exception adds no bundle cost that was not already
    being paid.
    ═══════════════════════════════════════════════════════════════════════════ */
 /* Exported so other panels can adopt this design language. Every token below is
@@ -1173,17 +1173,17 @@ export const AipSwitch: React.FC<AipSwitchProps> = ({
  * and a missed one was invisible.
  */
 export const CLOUD_PROVIDERS = [
-    { id: 'sarvam'   as const, name: 'Sarvam AI', placeholder: 'sk_s0xb...', url: 'https://dashboard.sarvam.ai/' },
-    { id: 'gemini'   as const, name: 'Gemini',   placeholder: 'AIzaSy...',  url: 'https://aistudio.google.com/app/apikey' },
+    { id: 'sarvam' as const, name: 'Sarvam AI', placeholder: 'sk_s0xb...', url: 'https://dashboard.sarvam.ai/' },
+    { id: 'gemini' as const, name: 'Gemini', placeholder: 'AIzaSy...', url: 'https://aistudio.google.com/app/apikey' },
     // Also a gateway, but NOT opt-in: 36 models, and its catalogue endpoint is
     // scoped to the key's group. The one provider here with a second required
     // setting — see the protocol selector passed as `extraControls` below.
     { id: 'fluxion' as const, name: 'Fluxion AI', placeholder: 'sk-...', url: 'https://fluxionai.world' },
-    { id: 'groq'     as const, name: 'Groq',     placeholder: 'gsk_...',    url: 'https://console.groq.com/keys' },
-    { id: 'openai'   as const, name: 'OpenAI',   placeholder: 'sk-...',     url: 'https://platform.openai.com/api-keys' },
-    { id: 'claude'   as const, name: 'Claude',   placeholder: 'sk-ant-...', url: 'https://console.anthropic.com/settings/keys' },
+    { id: 'groq' as const, name: 'Groq', placeholder: 'gsk_...', url: 'https://console.groq.com/keys' },
+    { id: 'openai' as const, name: 'OpenAI', placeholder: 'sk-...', url: 'https://platform.openai.com/api-keys' },
+    { id: 'claude' as const, name: 'Claude', placeholder: 'sk-ant-...', url: 'https://console.anthropic.com/settings/keys' },
     // Text-only; intentionally NOT part of the screenshot/vision fallback chain.
-    { id: 'deepseek' as const, name: 'DeepSeek', placeholder: 'sk-...',     url: 'https://platform.deepseek.com/api_keys' },
+    { id: 'deepseek' as const, name: 'DeepSeek', placeholder: 'sk-...', url: 'https://platform.deepseek.com/api_keys' },
     { id: 'nvidia_nim' as const, name: 'Nvidia Nim', placeholder: 'nvapi-...', url: 'https://build.nvidia.com' },
     // A gateway, not a vendor: its model list is opt-in (isOptInModelProvider),
     // and ONE key here also backs OpenRouter embeddings and reranking.
@@ -1262,11 +1262,11 @@ export const AipProviderMark: React.FC<AipProviderMarkProps> = ({ provider, name
                     20 leaves 3px of breathing room per side.
 
                     `.brand-mark-raster` (index.css) flattens a white-on-transparent
-                    mark to black in the light theme. Natively's own icon is drawn
+                    mark to black in the light theme. MeetFloo's own icon is drawn
                     for the dark theme, so without it the tile reads as empty. It is
                     opt-in (WHITE_ON_TRANSPARENT_MARKS) because on a full-colour
                     mark that filter paints every pixel black. This renderer is
-                    shared: the natively mark reaches it from Retrieval's
+                    shared: the MeetFloo mark reaches it from Retrieval's
                     Embeddings/Reranker rows, not from any row in this panel. */}
                 <img src={imageSrc} alt="" width={20} height={20}
                     className={`object-contain ${WHITE_ON_TRANSPARENT_MARKS.has(key) ? 'brand-mark-raster' : ''}`} />
@@ -1413,9 +1413,9 @@ export const AipModelList: React.FC<AipModelListProps> = ({
                 requestAnimationFrame(() => summaryRef.current?.focus());
                 return;
             case 'ArrowDown': e.preventDefault(); moveTo(activeIndex + 1); return;
-            case 'ArrowUp':   e.preventDefault(); moveTo(activeIndex - 1); return;
-            case 'Home':      e.preventDefault(); moveTo(0); return;
-            case 'End':       e.preventDefault(); moveTo(visible.length - 1); return;
+            case 'ArrowUp': e.preventDefault(); moveTo(activeIndex - 1); return;
+            case 'Home': e.preventDefault(); moveTo(0); return;
+            case 'End': e.preventDefault(); moveTo(visible.length - 1); return;
         }
     };
 
@@ -1456,7 +1456,7 @@ export const AipModelList: React.FC<AipModelListProps> = ({
                         {enabled.length === 0
                             ? (optIn ? `${t('None selected')} · ${models.length}` : `${t('All')} ${models.length}`)
                             : `${enabledCount} / ${models.length}`}
-                      </span>}
+                    </span>}
                 <ChevronDown size={13} strokeWidth={1.75} className="aip-select-chevron" aria-hidden="true" />
             </button>
 
@@ -1467,28 +1467,28 @@ export const AipModelList: React.FC<AipModelListProps> = ({
                 <div>
                     <div id={panelId} role="group" aria-label={t('Models shown in the picker')} className="pt-2" onKeyDown={onListKeyDown}>
                         <div className="flex items-center gap-2 mb-2">
-                        {showFilterBar && (
-                            <>
-                                <input
-                                    type="search"
-                                    value={query}
-                                    onChange={e => setQuery(e.target.value)}
-                                    onKeyDown={e => { if (e.key === 'ArrowDown') { e.preventDefault(); moveTo(0); } }}
-                                    placeholder={t('Filter models…')}
-                                    className="aip-input flex-1"
-                                    data-mono="true"
-                                />
-                                {/* Reset means "back to no filter" = ALL, which is incoherent
+                            {showFilterBar && (
+                                <>
+                                    <input
+                                        type="search"
+                                        value={query}
+                                        onChange={e => setQuery(e.target.value)}
+                                        onKeyDown={e => { if (e.key === 'ArrowDown') { e.preventDefault(); moveTo(0); } }}
+                                        placeholder={t('Filter models…')}
+                                        className="aip-input flex-1"
+                                        data-mono="true"
+                                    />
+                                    {/* Reset means "back to no filter" = ALL, which is incoherent
                                     for an opt-in provider — there Clear above is the real
                                     control and this would just be a second, wrong-labelled one. */}
-                                {!optIn && enabled.length > 0 && (
-                                    <button type="button" onClick={onReset} className="aip-btn aip-btn-sm shrink-0" title={t('Show all models again')}>
-                                        {t('Reset')}
-                                    </button>
-                                )}
-                            </>
-                        )}
-                        {/* Deliberately OUTSIDE {showFilterBar}: that gate only opens above
+                                    {!optIn && enabled.length > 0 && (
+                                        <button type="button" onClick={onReset} className="aip-btn aip-btn-sm shrink-0" title={t('Show all models again')}>
+                                            {t('Reset')}
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                            {/* Deliberately OUTSIDE {showFilterBar}: that gate only opens above
                             12 models, and bulk selection is not a big-catalogue luxury. On an
                             OPT-IN list nothing is ticked until you tick it, so with a 4-model
                             proxy these were the only controls that mattered and they were the
@@ -1499,52 +1499,52 @@ export const AipModelList: React.FC<AipModelListProps> = ({
                             would be a 300-model foot-gun sitting right next to it. With no
                             filter typed, `visible` is every model the provider reports, so
                             Deselect all can always reach every selection. */}
-                        {onBulkToggle && visible.length > 0 && (
-                            <>
-                                <button
-                                    type="button"
-                                    onClick={() => onBulkToggle(visible.map(m => m.id), true)}
-                                    className="aip-btn aip-btn-sm shrink-0"
-                                    title={query.trim()
-                                        ? t('Select the models currently listed')
-                                        : t('Select every model')}
-                                >
-                                    {t('Select all')}
-                                </button>
-                                {/* "Deselect all", not "Clear": users reach for the symmetric
+                            {onBulkToggle && visible.length > 0 && (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={() => onBulkToggle(visible.map(m => m.id), true)}
+                                        className="aip-btn aip-btn-sm shrink-0"
+                                        title={query.trim()
+                                            ? t('Select the models currently listed')
+                                            : t('Select every model')}
+                                    >
+                                        {t('Select all')}
+                                    </button>
+                                    {/* "Deselect all", not "Clear": users reach for the symmetric
                                     wording, and an asymmetric pair reads as two unrelated
                                     actions. Both labels over-claim identically while a filter
                                     is active, which the tooltips resolve. */}
-                                {enabledCount > 0 && (
-                                    <button
-                                        type="button"
-                                        onClick={() => onBulkToggle(visible.map(m => m.id), false)}
-                                        className="aip-btn aip-btn-sm shrink-0"
-                                        title={query.trim()
-                                            ? t('Deselect the models currently listed')
-                                            : t('Deselect every model')}
-                                    >
-                                        {t('Deselect all')}
-                                    </button>
-                                )}
-                            </>
-                        )}
-                        {onRefresh && (
-                            <button
-                                type="button"
-                                onClick={onRefresh}
-                                disabled={refreshing}
-                                className={`aip-btn aip-btn-sm shrink-0 ${showFilterBar || (onBulkToggle && visible.length > 0) ? '' : 'ml-auto'}`}
-                                title={t('Re-read the model list from this provider')}
-                            >
-                                <RefreshCw size={11} strokeWidth={1.75} className={refreshing ? 'aip-spinner' : ''} />
-                                {/* "Fetch all models" offers to go and get the REST of the
+                                    {enabledCount > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => onBulkToggle(visible.map(m => m.id), false)}
+                                            className="aip-btn aip-btn-sm shrink-0"
+                                            title={query.trim()
+                                                ? t('Deselect the models currently listed')
+                                                : t('Deselect every model')}
+                                        >
+                                            {t('Deselect all')}
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                            {onRefresh && (
+                                <button
+                                    type="button"
+                                    onClick={onRefresh}
+                                    disabled={refreshing}
+                                    className={`aip-btn aip-btn-sm shrink-0 ${showFilterBar || (onBulkToggle && visible.length > 0) ? '' : 'ml-auto'}`}
+                                    title={t('Re-read the model list from this provider')}
+                                >
+                                    <RefreshCw size={11} strokeWidth={1.75} className={refreshing ? 'aip-spinner' : ''} />
+                                    {/* "Fetch all models" offers to go and get the REST of the
                                     catalogue — right for the preset-shipping cards, wrong for
                                     one whose catalogue already arrived whole. Same signal
                                     catalogIsComplete uses to silence the built-in note. */}
-                                {refreshing ? t('Fetching...') : (showFilterBar || catalogIsComplete) ? t('Refresh') : t('Fetch all models')}
-                            </button>
-                        )}
+                                    {refreshing ? t('Fetching...') : (showFilterBar || catalogIsComplete) ? t('Refresh') : t('Fetch all models')}
+                                </button>
+                            )}
                         </div>
 
                         <div ref={listRef} className="aip-well aip-scroll-y custom-scrollbar aip-models-well">
@@ -1785,11 +1785,11 @@ type PendingConfirm =
 // ProviderDataScope in electron/llm/ProviderRouter.ts — that union is what the
 // main-process guard asserts against.
 const SCOPE_ROWS = [
-    { key: 'transcript' as const,        labelKey: 'Transcripts',         Icon: MessageSquare },
-    { key: 'screenshots' as const,       labelKey: 'Screenshots',         Icon: Image },
-    { key: 'reference_files' as const,   labelKey: 'Reference files',     Icon: FileText },
-    { key: 'profile_history' as const,   labelKey: 'Profile history',     Icon: User },
-    { key: 'embeddings' as const,        labelKey: 'Cloud embeddings',    Icon: Boxes },
+    { key: 'transcript' as const, labelKey: 'Transcripts', Icon: MessageSquare },
+    { key: 'screenshots' as const, labelKey: 'Screenshots', Icon: Image },
+    { key: 'reference_files' as const, labelKey: 'Reference files', Icon: FileText },
+    { key: 'profile_history' as const, labelKey: 'Profile history', Icon: User },
+    { key: 'embeddings' as const, labelKey: 'Cloud embeddings', Icon: Boxes },
     { key: 'post_call_summary' as const, labelKey: 'Post-call summaries', Icon: ClipboardList },
 ];
 
@@ -1819,20 +1819,20 @@ const CODEX_MODEL_REASONING_EFFORTS = ['none', 'low', 'medium', 'high', 'xhigh']
 // CLI binary rejects with a 400).
 const CODEX_MODEL_REASONING_SETS: ReadonlyArray<readonly [string, readonly string[]]> = [
     ['gpt-5-2025-08-07', ['low', 'medium', 'high']],
-    ['gpt-5-mini',       ['low', 'medium', 'high']],
-    ['gpt-5-nano',       ['low', 'medium', 'high']],
-    ['gpt-5',            ['low', 'medium', 'high']],
-    ['gpt-5.1',          ['none', 'low', 'medium', 'high']],
-    ['gpt-5.2',          ['none', 'low', 'medium', 'high', 'xhigh']],
-    ['gpt-5.4',          ['none', 'low', 'medium', 'high', 'xhigh']],
-    ['gpt-5.5',          ['none', 'low', 'medium', 'high', 'xhigh']],
-    ['gpt-5.5-codex',    ['low', 'medium', 'high', 'xhigh']],
-    ['gpt-5.4-codex',    ['low', 'medium', 'high', 'xhigh']],
+    ['gpt-5-mini', ['low', 'medium', 'high']],
+    ['gpt-5-nano', ['low', 'medium', 'high']],
+    ['gpt-5', ['low', 'medium', 'high']],
+    ['gpt-5.1', ['none', 'low', 'medium', 'high']],
+    ['gpt-5.2', ['none', 'low', 'medium', 'high', 'xhigh']],
+    ['gpt-5.4', ['none', 'low', 'medium', 'high', 'xhigh']],
+    ['gpt-5.5', ['none', 'low', 'medium', 'high', 'xhigh']],
+    ['gpt-5.5-codex', ['low', 'medium', 'high', 'xhigh']],
+    ['gpt-5.4-codex', ['low', 'medium', 'high', 'xhigh']],
     ['gpt-5.3-codex-spark', ['low', 'medium', 'high']],
-    ['gpt-5.3-codex',    ['low', 'medium', 'high']],
-    ['gpt-5.2-codex',    ['low', 'medium', 'high', 'xhigh']],
-    ['gpt-5.1-codex',    ['low', 'medium', 'high']],
-    ['gpt-5-codex',      ['low', 'medium', 'high']],
+    ['gpt-5.3-codex', ['low', 'medium', 'high']],
+    ['gpt-5.2-codex', ['low', 'medium', 'high', 'xhigh']],
+    ['gpt-5.1-codex', ['low', 'medium', 'high']],
+    ['gpt-5-codex', ['low', 'medium', 'high']],
 ];
 
 function getValidCodexReasoningEfforts(modelId: string): readonly string[] {
@@ -1965,17 +1965,17 @@ const CodexCliModelField: React.FC<{
 }> = ({ label, value, options, fromCodexCli, onSelect }) => {
     const t = useT();
     return (
-    <label className="space-y-1 block min-w-0">
-        <span className="aip-label">{label}</span>
-        <ModelSelect
-            value={value}
-            options={value && !options.some(option => option.id === value)
-                ? [{ id: value, name: fromCodexCli ? `${prettifyModelId(value)} (${t('not in your Codex CLI list')})` : prettifyModelId(value) }, ...options]
-                : options}
-            onChange={onSelect}
-            placeholder={t("Select a model")}
-        />
-    </label>
+        <label className="space-y-1 block min-w-0">
+            <span className="aip-label">{label}</span>
+            <ModelSelect
+                value={value}
+                options={value && !options.some(option => option.id === value)
+                    ? [{ id: value, name: fromCodexCli ? `${prettifyModelId(value)} (${t('not in your Codex CLI list')})` : prettifyModelId(value) }, ...options]
+                    : options}
+                onChange={onSelect}
+                placeholder={t("Select a model")}
+            />
+        </label>
     );
 };
 
@@ -2114,7 +2114,7 @@ export const AmbiguousCredentialStoresCard = AmbiguousStoresCard;
  *
  * The failure this prevents is silent and easy to misattribute — an excellent
  * generation model still produces a poor answer when the wrong context was
- * retrieved, and the user blames the model or Natively. Non-blocking by design,
+ * retrieved, and the user blames the model or MeetFloo. Non-blocking by design,
  * and "Continue" is permanent: an unstoppable warning becomes something to click
  * past.
  *
@@ -2199,58 +2199,58 @@ const LightweightEmbeddingNotice: React.FC<{ onOpenEmbeddings?: () => void }> = 
             data-leaving={leaving ? 'true' : 'false'}
             style={{ marginTop: 0 }}
         >
-          {/* Bare grid item: anything with padding or a border here floors the
+            {/* Bare grid item: anything with padding or a border here floors the
               collapse at that box's own height. */}
-          <div>
-            <div className="pt-5">
-            {/* No entrance animation of its own. This wrapper is a direct child
+            <div>
+                <div className="pt-5">
+                    {/* No entrance animation of its own. This wrapper is a direct child
                 of `[data-settings-stagger]`, so `settings-stagger-in` (220ms,
                 the same ease-out) already plays when the card is inserted —
                 which is the moment that matters here, since the card mounts a
                 beat after the panel does, on an IPC round-trip. Adding
                 `.aip-panel-fade` underneath would be two entrances for one
                 arrival. */}
-            <div className="aip-card p-5 space-y-3">
-                {/* Provider-card anatomy, verbatim: 26px tile, 13px title, one
+                    <div className="aip-card p-5 space-y-3">
+                        {/* Provider-card anatomy, verbatim: 26px tile, 13px title, one
                     status badge, 11px description hanging off the tile gutter.
                     That shape is what makes a card in this panel look like it
                     belongs to this panel. `.aip-tile--mark` is the NEUTRAL tile
                     (button fill, hairline border, currentColor glyph) rather
                     than the brand-tinted monogram — there is no brand here. */}
-                <div className="flex items-start gap-3">
-                    <span className="aip-tile aip-tile--mark" aria-hidden="true">
-                        <Boxes size={16} strokeWidth={1.75} />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <p className="aip-card-title">{t('Retrieval still uses a lightweight model')}</p>
-                            {/* One status primitive, as everywhere else here. */}
-                            <AipBadge tone="warn" label={t('Embeddings')} />
-                        </div>
-                        {/* Two plain sentences: the stake first, then the fix.
+                        <div className="flex items-start gap-3">
+                            <span className="aip-tile aip-tile--mark" aria-hidden="true">
+                                <Boxes size={16} strokeWidth={1.75} />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <p className="aip-card-title">{t('Retrieval still uses a lightweight model')}</p>
+                                    {/* One status primitive, as everywhere else here. */}
+                                    <AipBadge tone="warn" label={t('Embeddings')} />
+                                </div>
+                                {/* Two plain sentences: the stake first, then the fix.
                             No em-dash aside — a parenthetical inside an 11px
                             line is a speed bump, and it was carrying the part
                             the reader most needs.
-                            It also no longer sells the Natively key. Embeddings
+                            It also no longer sells the MeetFloo key. Embeddings
                             run on any provider in the catalogue (OpenAI, Gemini,
                             Voyage, OpenRouter, Ollama, a custom endpoint), so
                             naming one of them here was both a plug and wrong. */}
-                        <p className="aip-meta mt-1">
-                            {state.cloudAllowed
-                                ? t('Every answer is built on what retrieval finds. A stronger embedding model finds your code and documents more accurately, locally or through any provider you have set up.')
-                                : t('Every answer is built on what retrieval finds. A stronger local embedding model finds your code and documents more accurately.')}
-                        </p>
-                    </div>
-                </div>
-                {/* The model as a well, not as prose. It is the evidence behind
+                                <p className="aip-meta mt-1">
+                                    {state.cloudAllowed
+                                        ? t('Every answer is built on what retrieval finds. A stronger embedding model finds your code and documents more accurately, locally or through any provider you have set up.')
+                                        : t('Every answer is built on what retrieval finds. A stronger local embedding model finds your code and documents more accurately.')}
+                                </p>
+                            </div>
+                        </div>
+                        {/* The model as a well, not as prose. It is the evidence behind
                     the word "lightweight", so it gets the panel's recessed
                     surface and its real numbers — 384 dimensions is what makes
                     the claim checkable instead of an assertion. */}
-                <div className="aip-well px-3 py-2 flex items-center justify-between gap-3">
-                    <span className="aip-mono truncate">{state.model || 'MiniLM'}</span>
-                    {detail && <span className="aip-count shrink-0">{detail}</span>}
-                </div>
-                {/* The Antigravity/Codex action bar, verbatim: `flex-1` +
+                        <div className="aip-well px-3 py-2 flex items-center justify-between gap-3">
+                            <span className="aip-mono truncate">{state.model || 'MiniLM'}</span>
+                            {detail && <span className="aip-count shrink-0">{detail}</span>}
+                        </div>
+                        {/* The Antigravity/Codex action bar, verbatim: `flex-1` +
                     data-size="row" on the action, `shrink-0` + the same row
                     height beside it. Two auto-width pills left-aligned under a
                     576px card left half the row empty and read as leftovers;
@@ -2263,35 +2263,35 @@ const LightweightEmbeddingNotice: React.FC<{ onOpenEmbeddings?: () => void }> = 
                     no fill, and this dismissal is permanent, so an escape hatch
                     that reads as a caption is an unstoppable warning from the
                     other side. Width and order carry the hierarchy. */}
-                <div className="aip-provider-row">
-                    <button
-                        type="button"
-                        className="aip-btn flex-1"
-                        data-size="row"
-                        onClick={() => onOpenEmbeddings?.()}
-                    >
-                        {t('Choose an embedding model')}
-                    </button>
-                    <button
-                        type="button"
-                        className="aip-btn shrink-0"
-                        data-size="row"
-                        onClick={dismiss}
-                    >
-                        {t('Keep MiniLM')}
-                    </button>
+                        <div className="aip-provider-row">
+                            <button
+                                type="button"
+                                className="aip-btn flex-1"
+                                data-size="row"
+                                onClick={() => onOpenEmbeddings?.()}
+                            >
+                                {t('Choose an embedding model')}
+                            </button>
+                            <button
+                                type="button"
+                                className="aip-btn shrink-0"
+                                data-size="row"
+                                onClick={dismiss}
+                            >
+                                {t('Keep MiniLM')}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            </div>
-          </div>
         </div>
     );
 };
 
-// Unified Codex sign-in: Natively's own (source 'natively') or the Codex CLI's
+// Unified Codex sign-in: MeetFloo's own (source 'MeetFloo') or the Codex CLI's
 // `codex login`, used read-only (source 'codex-cli'). `cliLogin` is the CLI
 // session's state either way, for the expired-login hint.
-type CodexSignInStatus = { signedIn: boolean; source?: 'natively' | 'codex-cli' | null; cliLogin?: string; email?: string; expiresAt?: number };
+type CodexSignInStatus = { signedIn: boolean; source?: 'MeetFloo' | 'codex-cli' | null; cliLogin?: string; email?: string; expiresAt?: number };
 
 const readCodexSignInStatus = async (): Promise<CodexSignInStatus | null> => {
     const status = await window.electronAPI?.codexLoginStatus?.().catch(() => null);
@@ -2553,7 +2553,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
     const [directAssistError, setDirectAssistError] = useState('');
     const [fastResponseMode, setFastResponseMode] = useState(false);
     const [credentialsLoaded, setCredentialsLoaded] = useState(false);
-    const canUseFastMode = !!(hasStoredKey.groq || hasStoredKey.natively || (codexCliConfig.enabled && codexOauthStatus.signedIn));
+    const canUseFastMode = !!(hasStoredKey.groq || hasStoredKey.MeetFloo || (codexCliConfig.enabled && codexOauthStatus.signedIn));
 
     // --- Dynamic Model Discovery ---
     const [preferredModels, setPreferredModels] = useState<Record<string, string>>({});
@@ -2682,7 +2682,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                         openrouter: (creds as any).hasOpenrouterKey || false,
                         fluxion: (creds as any).hasFluxionKey || false,
                         litellm: creds.hasLitellmBaseURL || false,
-                        natively: creds.hasNativelyKey || false
+                        MeetFloo: creds.hasMeetFlooKey || false
                     });
                     setActiveSttProvider((creds as any).sttProvider || 'none');
                     // Prefill stored LiteLLM config so re-saving doesn't silently reset it.
@@ -2723,7 +2723,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                     setCloudEnabledModelsState(creds.cloudEnabledModels || {});
                     window.electronAPI?.getCloudFetchedModels?.()
                         .then((res: { models?: Record<string, AipModelEntry[]> }) => { if (res?.models) setCloudFetchedModels(res.models); })
-                        .catch(() => {});
+                        .catch(() => { });
                     setPreferredModels(pm);
 
                     // Is retrieval actually running on OpenRouter right now? Only
@@ -2748,8 +2748,8 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                 if (signIn) {
                     setCodexOauthStatus(signIn);
                     // A `codex login` session makes Codex usable with no sign-in
-                    // step in Natively, so nothing else would flip `enabled` on
-                    // (Natively's own sign-in does it in onCodexLoginComplete).
+                    // step in MeetFloo, so nothing else would flip `enabled` on
+                    // (MeetFloo's own sign-in does it in onCodexLoginComplete).
                     // The provider switch on the card stays the user's off switch.
                     if (signIn.source === 'codex-cli' && cliConfig && !cliConfig.enabled) {
                         const result = await window.electronAPI?.setCodexCliConfig?.({ ...cliConfig, enabled: true });
@@ -2798,7 +2798,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
             // @ts-ignore
             unsubs.push(window.electronAPI.onGroqFastTextChanged((enabled: boolean) => {
                 setFastResponseMode(enabled);
-                localStorage.setItem('natively_groq_fast_text', String(enabled));
+                localStorage.setItem('MeetFloo_groq_fast_text', String(enabled));
             }));
         }
         if (window.electronAPI?.onDirectAssistEnabledChanged) {
@@ -2878,8 +2878,8 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
     const buildAvailableModelOptions = (): { id: string; name: string }[] => {
         const opts: { id: string; name: string }[] = [];
 
-        if (hasStoredKey.natively && isProviderEnabled('natively')) {
-            opts.push({ id: 'natively', name: 'MeetFloo API' });
+        if (hasStoredKey.MeetFloo && isProviderEnabled('MeetFloo')) {
+            opts.push({ id: 'MeetFloo', name: 'MeetFloo API' });
         }
 
         for (const [prov, cfg] of Object.entries(STANDARD_CLOUD_MODELS)) {
@@ -3220,14 +3220,14 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
         }
     };
 
-    // Effect to enforce fast mode disabled if neither Groq key nor Natively API is configured.
+    // Effect to enforce fast mode disabled if neither Groq key nor MeetFloo API is configured.
     // Guard with credentialsLoaded so this never fires during the initial async load phase
     // (when hasStoredKey is still empty and canUseFastMode is incorrectly false).
     useEffect(() => {
         if (!credentialsLoaded) return;
         if (!canUseFastMode && fastResponseMode) {
             setFastResponseMode(false);
-            localStorage.setItem('natively_groq_fast_text', 'false');
+            localStorage.setItem('MeetFloo_groq_fast_text', 'false');
             // @ts-ignore
             window.electronAPI?.setGroqFastTextMode(false);
         }
@@ -3256,7 +3256,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
             if (api?.onCodexLoginComplete) {
                 unsubs.push(api.onCodexLoginComplete((info: any) => {
                     setCodexOauthInProgress(false);
-                    setCodexOauthStatus(prev => ({ ...prev, signedIn: true, source: 'natively', email: info?.email || prev.email }));
+                    setCodexOauthStatus(prev => ({ ...prev, signedIn: true, source: 'MeetFloo', email: info?.email || prev.email }));
                     setCodexAuthStatus('success');
                     setCodexAuthMessage(`${t('Signed in to ChatGPT')}${info?.email ? ` ${t('as')} ${info.email}` : ''}.`);
                     // Auto-enable codex now that we're signed in.
@@ -3280,7 +3280,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                     setCodexAuthStatus('idle');
                     setCodexAuthMessage(t('Signed out of ChatGPT.'));
                     // A valid `codex login` session keeps Codex usable after
-                    // signing out of Natively's own — re-read so the card says so
+                    // signing out of MeetFloo's own — re-read so the card says so
                     // instead of showing a sign-out that did not take effect.
                     readCodexSignInStatus().then(status => { if (status) setCodexOauthStatus(status); });
                 }));
@@ -3343,7 +3343,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
             // This called `window.electronAPI?.invoke?.('ensure-ollama-running')`
             // behind a @ts-ignore, and this preload exposes NO generic `invoke`
             // (the only passthrough, e2eInvoke, is undefined unless
-            // NATIVELY_E2E=1). So the optional call short-circuited, `result`
+            // MEETFLOO_E2E=1). So the optional call short-circuited, `result`
             // was always undefined, and the branch below reported 'not-found'
             // WITHOUT EVER TRYING TO START THE DAEMON. The @ts-ignore is what
             // let it typecheck.
@@ -3400,7 +3400,7 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                 setOllamaStatus('detected');
             } else {
                 // An empty list is NOT proof the daemon is missing. This handler
-                // answers with generation-capable models, and Natively itself
+                // answers with generation-capable models, and MeetFloo itself
                 // pulls nomic-embed-text for retrieval — so a perfectly healthy
                 // Ollama holding only that embedder lands here. Reporting "Not
                 // found" would offer Auto-Fix, whose force-restart path can
@@ -3951,80 +3951,80 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
             <LightweightEmbeddingNotice onOpenEmbeddings={onNavigate ? () => onNavigate('embedding') : undefined} />
 
             <div className="aip-card p-5 flex items-center justify-between gap-4">
-                    <div className="min-w-0">
-                        <label className="block text-xs font-medium uppercase tracking-wide mb-0 aip-hero">{t('Active Model')}</label>
-                        <p className="text-[10px] aip-muted mt-0.5">{t('Applies to new chats instantly.')}</p>
-                    </div>
-                    <ModelSelect
-                        value={defaultModel}
-                        options={buildAvailableModelOptions()}
-                        onChange={async (val) => {
-                            setDefaultModel(val);
-                            try {
-                                const res = await window.electronAPI?.setDefaultModel(val);
-                                if (res?.adjusted && res.effectiveModel) {
-                                    setDefaultModel(res.effectiveModel);
-                                }
-                            } catch (e) {
-                                console.error(e);
-                            }
-                        }}
-                    />
+                <div className="min-w-0">
+                    <label className="block text-xs font-medium uppercase tracking-wide mb-0 aip-hero">{t('Active Model')}</label>
+                    <p className="text-[10px] aip-muted mt-0.5">{t('Applies to new chats instantly.')}</p>
                 </div>
+                <ModelSelect
+                    value={defaultModel}
+                    options={buildAvailableModelOptions()}
+                    onChange={async (val) => {
+                        setDefaultModel(val);
+                        try {
+                            const res = await window.electronAPI?.setDefaultModel(val);
+                            if (res?.adjusted && res.effectiveModel) {
+                                setDefaultModel(res.effectiveModel);
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }}
+                />
+            </div>
 
             <div className="aip-card p-5 flex items-center justify-between gap-4">
-                    <div className="min-w-0">
-                        <label className="block text-xs font-medium uppercase tracking-wide mb-0 aip-hero">{t('AI Response Language')}</label>
-                        <p className="text-[10px] aip-muted mt-0.5">
-                            {aiResponseLanguage === 'auto'
-                                ? t('Mirrors user\'s language automatically')
-                                : t('Language for AI suggestions and notes')
-                            }
-                        </p>
-                    </div>
-                    <div className="relative" ref={aiLangDropdownRef}>
-                        <button
-                            onClick={onToggleAiLangDropdown}
-                            aria-expanded={isAiLangDropdownOpen}
-                            className="aip-btn min-w-[110px] justify-between"
+                <div className="min-w-0">
+                    <label className="block text-xs font-medium uppercase tracking-wide mb-0 aip-hero">{t('AI Response Language')}</label>
+                    <p className="text-[10px] aip-muted mt-0.5">
+                        {aiResponseLanguage === 'auto'
+                            ? t('Mirrors user\'s language automatically')
+                            : t('Language for AI suggestions and notes')
+                        }
+                    </p>
+                </div>
+                <div className="relative" ref={aiLangDropdownRef}>
+                    <button
+                        onClick={onToggleAiLangDropdown}
+                        aria-expanded={isAiLangDropdownOpen}
+                        className="aip-btn min-w-[110px] justify-between"
+                    >
+                        <span className="capitalize text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-1">
+                            {aiResponseLanguage === 'auto' ? t('Auto') : aiResponseLanguage}
+                        </span>
+                        <ChevronDown size={12} strokeWidth={1.75} className={`shrink-0 transition-transform ${isAiLangDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isAiLangDropdownOpen && (
+                        <div
+                            role="listbox"
+                            aria-label={t('AI Response Language')}
+                            className="aip-float aip-scroll-y aip-panel-fade absolute right-0 top-full mt-1 min-w-full w-max z-20 p-1 select-none max-h-60 custom-scrollbar"
                         >
-                            <span className="capitalize text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-1">
-                                {aiResponseLanguage === 'auto' ? t('Auto') : aiResponseLanguage}
-                            </span>
-                            <ChevronDown size={12} strokeWidth={1.75} className={`shrink-0 transition-transform ${isAiLangDropdownOpen ? 'rotate-180' : ''}`} />
-                        </button>
-
-                        {isAiLangDropdownOpen && (
-                            <div
-                                role="listbox"
-                                aria-label={t('AI Response Language')}
-                                className="aip-float aip-scroll-y aip-panel-fade absolute right-0 top-full mt-1 min-w-full w-max z-20 p-1 select-none max-h-60 custom-scrollbar"
-                            >
-                                {availableAiLanguages.map((option) => (
-                                    <button
-                                        key={option.code}
-                                        onClick={() => onSelectAiLanguage(option.code)}
-                                        className={`aip-select-option ${aiResponseLanguage === option.code ? 'aip-text' : ''}`}
-                                        aria-selected={aiResponseLanguage === option.code}
-                                        role="option"
-                                    >
-                                        {option.code === 'auto' ? (
-                                            <span className="font-medium">{t('Auto')}</span>
-                                        ) : (
-                                            <span className="font-medium">{option.label}</span>
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                            {availableAiLanguages.map((option) => (
+                                <button
+                                    key={option.code}
+                                    onClick={() => onSelectAiLanguage(option.code)}
+                                    className={`aip-select-option ${aiResponseLanguage === option.code ? 'aip-text' : ''}`}
+                                    aria-selected={aiResponseLanguage === option.code}
+                                    role="option"
+                                >
+                                    {option.code === 'auto' ? (
+                                        <span className="font-medium">{t('Auto')}</span>
+                                    ) : (
+                                        <span className="font-medium">{option.label}</span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
+            </div>
 
             <div className="aip-card p-5 flex items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                            <label className="block text-xs font-medium uppercase tracking-wide mb-0 aip-hero">{t('Direct Assist')}</label>
-                            {/* The Liquid Glass material rather than .aip-badge:
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                        <label className="block text-xs font-medium uppercase tracking-wide mb-0 aip-hero">{t('Direct Assist')}</label>
+                        {/* The Liquid Glass material rather than .aip-badge:
                                 a tag qualifies the title beside it, and this one
                                 carries no status, so it also drops the status dot
                                 that primitive leads with.
@@ -4038,83 +4038,83 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                                 deliberate choice for this variant, and it is one
                                 here too. A navy label on the same fill reaches
                                 5.31:1 if that ever needs to change. */}
-                            <LiquidGlassBadge variant="sky">{t('Beta')}</LiquidGlassBadge>
-                        </div>
-                        <p className="text-[10px] aip-muted mt-0.5">
-                            {t('Sends your typed, spoken, screenshot, and page input straight to the model, unprocessed.')}
-                        </p>
-                        {directAssistError && (
-                            <p className="text-[10px] aip-danger-fg mt-1" role="alert">{directAssistError}</p>
-                        )}
+                        <LiquidGlassBadge variant="sky">{t('Beta')}</LiquidGlassBadge>
                     </div>
-                    <AipSwitch
-                        checked={directAssistEnabled}
-                        disabled={directAssistBusy}
-                        label={t('Direct Assist')}
-                        onChange={async () => {
-                            if (directAssistBusy) return;
-                            const previous = directAssistEnabled;
-                            const next = !previous;
-                            setDirectAssistBusy(true);
-                            setDirectAssistError('');
-                            setDirectAssistEnabled(next);
-                            try {
-                                const result = await window.electronAPI?.setDirectAssistEnabled?.(next);
-                                if (!result?.success) {
-                                    setDirectAssistEnabled(previous);
-                                    setDirectAssistError(result?.error || t('Could not update Direct Assist.'));
-                                }
-                            } catch (error) {
-                                setDirectAssistEnabled(previous);
-                                setDirectAssistError(
-                                    error instanceof Error ? error.message : t('Could not update Direct Assist.'),
-                                );
-                            } finally {
-                                setDirectAssistBusy(false);
-                            }
-                        }}
-                    />
+                    <p className="text-[10px] aip-muted mt-0.5">
+                        {t('Sends your typed, spoken, screenshot, and page input straight to the model, unprocessed.')}
+                    </p>
+                    {directAssistError && (
+                        <p className="text-[10px] aip-danger-fg mt-1" role="alert">{directAssistError}</p>
+                    )}
                 </div>
+                <AipSwitch
+                    checked={directAssistEnabled}
+                    disabled={directAssistBusy}
+                    label={t('Direct Assist')}
+                    onChange={async () => {
+                        if (directAssistBusy) return;
+                        const previous = directAssistEnabled;
+                        const next = !previous;
+                        setDirectAssistBusy(true);
+                        setDirectAssistError('');
+                        setDirectAssistEnabled(next);
+                        try {
+                            const result = await window.electronAPI?.setDirectAssistEnabled?.(next);
+                            if (!result?.success) {
+                                setDirectAssistEnabled(previous);
+                                setDirectAssistError(result?.error || t('Could not update Direct Assist.'));
+                            }
+                        } catch (error) {
+                            setDirectAssistEnabled(previous);
+                            setDirectAssistError(
+                                error instanceof Error ? error.message : t('Could not update Direct Assist.'),
+                            );
+                        } finally {
+                            setDirectAssistBusy(false);
+                        }
+                    }}
+                />
+            </div>
 
-<div
-                    className={`aip-card p-5 flex items-center justify-between gap-4 ${!canUseFastMode ? 'opacity-50 grayscale' : ''}`}
-                    title={!canUseFastMode ? t("Requires Groq, MeetFloo API, or Codex CLI to be configured") : ""}
-                >
-                    <div className="flex-1 min-w-0">
-                        {/* No "Needs Groq" badge. It named ONE of the three
-                            providers that satisfy canUseFastMode (Groq, Natively
+            <div
+                className={`aip-card p-5 flex items-center justify-between gap-4 ${!canUseFastMode ? 'opacity-50 grayscale' : ''}`}
+                title={!canUseFastMode ? t("Requires Groq, MeetFloo API, or Codex CLI to be configured") : ""}
+            >
+                <div className="flex-1 min-w-0">
+                    {/* No "Needs Groq" badge. It named ONE of the three
+                            providers that satisfy canUseFastMode (Groq, MeetFloo
                             API, Codex CLI), so it read as a hard Groq dependency
                             that does not exist — and the line below already
                             states the real requirement in full, as does the
                             card's title. A badge carries only what no other
                             control already says. */}
-                        <label className="block text-xs font-medium uppercase tracking-wide mb-0 aip-hero">{t('Fast Response Mode')}</label>
-                        <p className="text-[10px] aip-muted mt-0.5">{t('Uses the fastest available provider instead of your selected model.')}</p>
-                        {!canUseFastMode && (
-                            <p className="text-xs aip-warn-fg mt-0.5 font-medium">{t('Requires Groq, MeetFloo API, or Codex CLI to be configured.')}</p>
-                        )}
-                    </div>
-                    {/* aria-disabled, not disabled: the onClick guard below is the
+                    <label className="block text-xs font-medium uppercase tracking-wide mb-0 aip-hero">{t('Fast Response Mode')}</label>
+                    <p className="text-[10px] aip-muted mt-0.5">{t('Uses the fastest available provider instead of your selected model.')}</p>
+                    {!canUseFastMode && (
+                        <p className="text-xs aip-warn-fg mt-0.5 font-medium">{t('Requires Groq, MeetFloo API, or Codex CLI to be configured.')}</p>
+                    )}
+                </div>
+                {/* aria-disabled, not disabled: the onClick guard below is the
                         only thing that explains WHY the toggle is unavailable, and
                         Stage 3 owns replacing that alert() with an inline hint.
                         Hard-disabling here would make it unreachable dead code. */}
-                    <AipSwitch
-                        checked={fastResponseMode}
-                        disabled={!canUseFastMode}
-                        label={t('Fast Response Mode')}
-                        onChange={async () => {
-                            if (!canUseFastMode) {
-                                alert(t("Please configure Groq, MeetFloo API, or Codex CLI first to enable Fast Response Mode."));
-                                return;
-                            }
-                            const newState = !fastResponseMode;
-                            setFastResponseMode(newState);
-                            localStorage.setItem('natively_groq_fast_text', String(newState));
-                            // @ts-ignore
-                            await window.electronAPI?.setGroqFastTextMode(newState);
-                        }}
-                    />
-                </div>
+                <AipSwitch
+                    checked={fastResponseMode}
+                    disabled={!canUseFastMode}
+                    label={t('Fast Response Mode')}
+                    onChange={async () => {
+                        if (!canUseFastMode) {
+                            alert(t("Please configure Groq, MeetFloo API, or Codex CLI first to enable Fast Response Mode."));
+                            return;
+                        }
+                        const newState = !fastResponseMode;
+                        setFastResponseMode(newState);
+                        localStorage.setItem('MeetFloo_groq_fast_text', String(newState));
+                        // @ts-ignore
+                        await window.electronAPI?.setGroqFastTextMode(newState);
+                    }}
+                />
+            </div>
 
             {/* Provider groups. Splits the sections below into three views instead
                 of one long scroll. Each tab now carries id + aria-controls, each
@@ -4200,86 +4200,86 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                 at its own fixed child position, so switching tabs already forces
                 an unmount + mount and re-runs .aip-panel-fade — no `key` needed. */}
             {activeTab === 'cloud' && (
-            <div
-                id={tabPanelId('cloud')}
-                role="tabpanel"
-                aria-labelledby={tabButtonId('cloud')}
-                tabIndex={0}
-                className="space-y-5 aip-panel-fade"
-                data-stagger-skip
-            >
-            {/* Cloud Providers */}
-            <div className="space-y-5">
-                <div>
-                    <h3 className="text-sm font-bold aip-hero mb-1">{t('Cloud Providers')}</h3>
-                    <p className="text-xs aip-muted mb-2">{t('Add API keys to unlock cloud AI models.')}</p>
-                </div>
-
-                <div className="aip-cq space-y-4">
-
-                    {CLOUD_PROVIDERS.map(({ id, name, placeholder, url }) => {
-                        const [keyValue, setKeyValue] = keyFields[id];
-                        return (
-                            <ProviderCard
-                                key={id}
-                                providerId={id}
-                                providerName={name}
-                                keyPlaceholder={placeholder}
-                                keyUrl={url}
-                                apiKey={keyValue}
-                                onKeyChange={setKeyValue}
-                                hasStoredKey={!!hasStoredKey[id]}
-                                preferredModel={preferredModels[id]}
-                                isDisabled={disabledProviders.includes(id)}
-                                onToggleDisabled={(enabled) => handleToggleProvider(id, enabled)}
-                                selectableModels={effectiveModels(id)}
-                                enabledModels={cloudEnabledModels[id]}
-                                onToggleModel={(modelId) => handleToggleModel(id, modelId)}
-                                onResetModels={() => handleResetModels(id)}
-                                onSetDefaultModel={(modelId) => handleSetDefaultModel(id, modelId)}
-                                hasCatalog={(cloudFetchedModels[id]?.length ?? 0) > 0}
-                                modelSaveError={!!modelSaveError[id]}
-                                onSaveKey={async () => { await handleSaveKey(id, keyValue, setKeyValue); }}
-                                onRemoveKey={() => handleRemoveKey(id, setKeyValue)}
-                                onTestConnection={() => handleTestConnection(id, keyValue)}
-                                testStatus={testStatus[id] || 'idle'}
-                                testError={testError[id]}
-                                keyWriteError={keyWriteError[id]}
-                                savingStatus={!!savingStatus[id]}
-                                savedStatus={!!savedStatus[id]}
-                                onPreferredModelChange={(model) => setPreferredModels(prev => ({ ...prev, [id]: model }))}
-                                extraControls={id !== 'fluxion' || !hasStoredKey.fluxion ? undefined : (
-                                    /* One muted line, not a label + two buttons + a hint.
-                                       The protocol is DETECTED from the key's group on save
-                                       (see detectFluxionProtocol), so there is nothing here
-                                       for the user to decide — this only reports what was
-                                       found, the way a resolved value should. */
-                                    <div className="aip-provider-row">
-                                        <span className="text-[11px] aip-muted">
-                                            {t('API format')}: {fluxionProtocol === 'anthropic' ? t('Anthropic') : t('OpenAI')}
-                                            {' · '}
-                                            {t('detected from your key')}
-                                        </span>
-                                    </div>
-                                )}
-                            />
-                        );
-                    })}
-
-                </div>
-            </div>
-
-            {/* Google Antigravity */}
-            <div className="aip-card p-5 space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                    <div className="flex gap-3">
-                        <AipProviderMark provider="antigravity" name="Google Antigravity" className="mt-0.5" />
+                <div
+                    id={tabPanelId('cloud')}
+                    role="tabpanel"
+                    aria-labelledby={tabButtonId('cloud')}
+                    tabIndex={0}
+                    className="space-y-5 aip-panel-fade"
+                    data-stagger-skip
+                >
+                    {/* Cloud Providers */}
+                    <div className="space-y-5">
                         <div>
-                            <h3 className="text-sm font-bold aip-hero mb-1">Google Antigravity</h3>
-                            <p className="text-xs aip-muted">{t('Sign in with Google to use your Antigravity models.')}</p>
+                            <h3 className="text-sm font-bold aip-hero mb-1">{t('Cloud Providers')}</h3>
+                            <p className="text-xs aip-muted mb-2">{t('Add API keys to unlock cloud AI models.')}</p>
+                        </div>
+
+                        <div className="aip-cq space-y-4">
+
+                            {CLOUD_PROVIDERS.map(({ id, name, placeholder, url }) => {
+                                const [keyValue, setKeyValue] = keyFields[id];
+                                return (
+                                    <ProviderCard
+                                        key={id}
+                                        providerId={id}
+                                        providerName={name}
+                                        keyPlaceholder={placeholder}
+                                        keyUrl={url}
+                                        apiKey={keyValue}
+                                        onKeyChange={setKeyValue}
+                                        hasStoredKey={!!hasStoredKey[id]}
+                                        preferredModel={preferredModels[id]}
+                                        isDisabled={disabledProviders.includes(id)}
+                                        onToggleDisabled={(enabled) => handleToggleProvider(id, enabled)}
+                                        selectableModels={effectiveModels(id)}
+                                        enabledModels={cloudEnabledModels[id]}
+                                        onToggleModel={(modelId) => handleToggleModel(id, modelId)}
+                                        onResetModels={() => handleResetModels(id)}
+                                        onSetDefaultModel={(modelId) => handleSetDefaultModel(id, modelId)}
+                                        hasCatalog={(cloudFetchedModels[id]?.length ?? 0) > 0}
+                                        modelSaveError={!!modelSaveError[id]}
+                                        onSaveKey={async () => { await handleSaveKey(id, keyValue, setKeyValue); }}
+                                        onRemoveKey={() => handleRemoveKey(id, setKeyValue)}
+                                        onTestConnection={() => handleTestConnection(id, keyValue)}
+                                        testStatus={testStatus[id] || 'idle'}
+                                        testError={testError[id]}
+                                        keyWriteError={keyWriteError[id]}
+                                        savingStatus={!!savingStatus[id]}
+                                        savedStatus={!!savedStatus[id]}
+                                        onPreferredModelChange={(model) => setPreferredModels(prev => ({ ...prev, [id]: model }))}
+                                        extraControls={id !== 'fluxion' || !hasStoredKey.fluxion ? undefined : (
+                                            /* One muted line, not a label + two buttons + a hint.
+                                               The protocol is DETECTED from the key's group on save
+                                               (see detectFluxionProtocol), so there is nothing here
+                                               for the user to decide — this only reports what was
+                                               found, the way a resolved value should. */
+                                            <div className="aip-provider-row">
+                                                <span className="text-[11px] aip-muted">
+                                                    {t('API format')}: {fluxionProtocol === 'anthropic' ? t('Anthropic') : t('OpenAI')}
+                                                    {' · '}
+                                                    {t('detected from your key')}
+                                                </span>
+                                            </div>
+                                        )}
+                                    />
+                                );
+                            })}
+
                         </div>
                     </div>
-                    {/* Same switch every other provider header carries (Codex above,
+
+                    {/* Google Antigravity */}
+                    <div className="aip-card p-5 space-y-4">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="flex gap-3">
+                                <AipProviderMark provider="antigravity" name="Google Antigravity" className="mt-0.5" />
+                                <div>
+                                    <h3 className="text-sm font-bold aip-hero mb-1">Google Antigravity</h3>
+                                    <p className="text-xs aip-muted">{t('Sign in with Google to use your Antigravity models.')}</p>
+                                </div>
+                            </div>
+                            {/* Same switch every other provider header carries (Codex above,
                         ProviderCard's key-backed providers below) — not an
                         Enable/Disable button, which read as a different kind of
                         control for the same state. Shown unconditionally, like
@@ -4287,14 +4287,14 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                         because there is nothing to hide before a key exists, but
                         this provider's models are gated by sign-in, not a key, and
                         the disabled flag is independently meaningful. */}
-                    <AipSwitch
-                        checked={!disabledProviders.includes('antigravity')}
-                        onChange={() => handleToggleProvider('antigravity', disabledProviders.includes('antigravity'))}
-                        label={`${disabledProviders.includes('antigravity') ? t('Enable') : t('Disable')} Google Antigravity`}
-                        title={disabledProviders.includes('antigravity') ? t('Enable provider') : t('Disable provider')}
-                    />
-                </div>
-                {/* No "Not connected" line: the sign-in bar directly below already
+                            <AipSwitch
+                                checked={!disabledProviders.includes('antigravity')}
+                                onChange={() => handleToggleProvider('antigravity', disabledProviders.includes('antigravity'))}
+                                label={`${disabledProviders.includes('antigravity') ? t('Enable') : t('Disable')} Google Antigravity`}
+                                title={disabledProviders.includes('antigravity') ? t('Enable provider') : t('Disable provider')}
+                            />
+                        </div>
+                        {/* No "Not connected" line: the sign-in bar directly below already
                     says the account is not connected, so the label was a second
                     copy of the same fact taking a row.
                     The live region stays MOUNTED and is hidden instead of being
@@ -4302,12 +4302,12 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                     with its first message is not reliably announced, and Tailwind's
                     space-y uses `:not([hidden]) ~ :not([hidden])`, so a hidden node
                     drops out of the spacing chain and leaves no gap. */}
-                <p className="text-xs aip-muted" role="status" hidden={!antigravityStatus.inProgress && !antigravityStatus.signedIn}>
-                    {antigravityStatus.inProgress ? t('Waiting for Google sign-in…')
-                        : antigravityStatus.signedIn ? t('Antigravity connected') : ''}
-                    {antigravityStatus.signedIn && antigravityStatus.expiresAt && ` · ${t('Refreshes automatically before')} ${new Date(antigravityStatus.expiresAt).toLocaleTimeString()}`}
-                </p>
-                {/* Primary action takes Codex's full-width row SHAPE (aip-btn
+                        <p className="text-xs aip-muted" role="status" hidden={!antigravityStatus.inProgress && !antigravityStatus.signedIn}>
+                            {antigravityStatus.inProgress ? t('Waiting for Google sign-in…')
+                                : antigravityStatus.signedIn ? t('Antigravity connected') : ''}
+                            {antigravityStatus.signedIn && antigravityStatus.expiresAt && ` · ${t('Refreshes automatically before')} ${new Date(antigravityStatus.expiresAt).toLocaleTimeString()}`}
+                        </p>
+                        {/* Primary action takes Codex's full-width row SHAPE (aip-btn
                     flex-1, data-size="row") but NOT its data-variant="accent":
                     the accent tint is periwinkle in this panel's token scope, and
                     the card keeps the neutral button colour it already had.
@@ -4315,42 +4315,42 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                     than replacing it — Antigravity can abort a pending browser
                     round-trip and Codex cannot, and that capability should not
                     cost the shared shape. */}
-                {/* `.aip-provider-row`, the same class Groq / NVIDIA NIM / every
+                        {/* `.aip-provider-row`, the same class Groq / NVIDIA NIM / every
                     ProviderCard action row uses — not an ad-hoc `flex flex-wrap gap-2`,
                     which was 8px in both axes where that class is 12px column / 8px row.
                     Reusing it keeps the two card families spaced identically instead of
                     close enough to look like a mistake. */}
-                <div className="aip-provider-row">
-                    {antigravityStatus.inProgress ? (
-                        <>
-                            <button type="button" className="aip-btn flex-1" data-size="row" disabled>
-                                <Loader2 size={13} strokeWidth={1.75} className="aip-spinner" /> {t('Waiting for browser…')}
-                            </button>
-                            <button
-                                type="button"
-                                className="aip-btn shrink-0"
-                                data-size="row"
-                                data-variant="ghost"
-                                onClick={() => window.electronAPI.antigravityCancelLogin().catch(() => setAntigravityError(t('Could not cancel sign-in. Try again.')))}
-                            >{t('Cancel')}</button>
-                        </>
-                    ) : !antigravityStatus.signedIn ? (
-                        <button
-                            type="button"
-                            className="aip-btn flex-1"
-                            data-size="row"
-                            disabled={antigravityBusy}
-                            onClick={() => void runAntigravityAction('login')}
-                        >
-                            <ExternalLink size={13} strokeWidth={1.75} /> {t('Sign in with Google')}
-                        </button>
-                    ) : (<>
-                        {/* "Reload models" is gone from this row: AipModelList owns
+                        <div className="aip-provider-row">
+                            {antigravityStatus.inProgress ? (
+                                <>
+                                    <button type="button" className="aip-btn flex-1" data-size="row" disabled>
+                                        <Loader2 size={13} strokeWidth={1.75} className="aip-spinner" /> {t('Waiting for browser…')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="aip-btn shrink-0"
+                                        data-size="row"
+                                        data-variant="ghost"
+                                        onClick={() => window.electronAPI.antigravityCancelLogin().catch(() => setAntigravityError(t('Could not cancel sign-in. Try again.')))}
+                                    >{t('Cancel')}</button>
+                                </>
+                            ) : !antigravityStatus.signedIn ? (
+                                <button
+                                    type="button"
+                                    className="aip-btn flex-1"
+                                    data-size="row"
+                                    disabled={antigravityBusy}
+                                    onClick={() => void runAntigravityAction('login')}
+                                >
+                                    <ExternalLink size={13} strokeWidth={1.75} /> {t('Sign in with Google')}
+                                </button>
+                            ) : (<>
+                                {/* "Reload models" is gone from this row: AipModelList owns
                            discovery, exactly as ProviderCard's comment says for the cloud
                            cards. Two controls for one action is what that note warns about. */}
-                        <button type="button" className="aip-btn" onClick={() => void runAntigravityAction('logout')}>{t('Disconnect')}</button>
+                                <button type="button" className="aip-btn" onClick={() => void runAntigravityAction('logout')}>{t('Disconnect')}</button>
 
-                        {/* Beside Disconnect, not under it — the same row placement Groq,
+                                {/* Beside Disconnect, not under it — the same row placement Groq,
                             NVIDIA NIM and every other ProviderCard uses.
 
                             It MUST be a direct child of this wrapping flex row: AipModelList
@@ -4366,39 +4366,39 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                             id would tick a row that never matches at read time. Antigravity
                             is not an opt-in provider (isOptInModelProvider is litellm-only),
                             so an empty allow-list still means ALL models. */}
-                        {antigravityModels.length > 0 && !disabledProviders.includes('antigravity') && (
-                            <AipModelList
-                                models={antigravityModels.map(({ id, label }) => ({ id: `antigravity:${id}`, label }))}
-                                enabled={cloudEnabledModels['antigravity'] || []}
-                                onToggle={(modelId) => handleToggleModel('antigravity', modelId)}
-                                onReset={() => handleResetModels('antigravity')}
-                                defaultId={defaultModel.startsWith('antigravity:') ? defaultModel : undefined}
-                                onSetDefault={(modelId) => void handleSetAntigravityDefault(modelId)}
-                                error={modelSaveError['antigravity'] ? 'save-failed' : null}
-                                refreshing={antigravityBusy}
-                                onRefresh={() => void runAntigravityAction('models')}
-                                catalogIsComplete
-                            />
-                        )}
-                    </>)}
-                </div>
-                {/* The empty catalogue keeps its own Reload control. Discovery moved
+                                {antigravityModels.length > 0 && !disabledProviders.includes('antigravity') && (
+                                    <AipModelList
+                                        models={antigravityModels.map(({ id, label }) => ({ id: `antigravity:${id}`, label }))}
+                                        enabled={cloudEnabledModels['antigravity'] || []}
+                                        onToggle={(modelId) => handleToggleModel('antigravity', modelId)}
+                                        onReset={() => handleResetModels('antigravity')}
+                                        defaultId={defaultModel.startsWith('antigravity:') ? defaultModel : undefined}
+                                        onSetDefault={(modelId) => void handleSetAntigravityDefault(modelId)}
+                                        error={modelSaveError['antigravity'] ? 'save-failed' : null}
+                                        refreshing={antigravityBusy}
+                                        onRefresh={() => void runAntigravityAction('models')}
+                                        catalogIsComplete
+                                    />
+                                )}
+                            </>)}
+                        </div>
+                        {/* The empty catalogue keeps its own Reload control. Discovery moved
                     into AipModelList, which is gated on `antigravityModels.length > 0`
                     — so in exactly the state that needs a retry there was none, and
                     signing out and back in was the only way to re-run it. */}
-                {antigravityStatus.signedIn && antigravityModels.length === 0 && (
-                    <div className="space-y-1">
-                        <p className="text-xs aip-muted">{t('No Antigravity models currently have quota.')}</p>
-                        <button type="button" className="aip-btn" data-size="sm" disabled={antigravityBusy} onClick={() => void runAntigravityAction('models')}>
-                            <RefreshCw size={12} strokeWidth={1.75} className={antigravityBusy ? 'aip-spinner' : undefined} />
-                            {antigravityBusy ? t('Reloading…') : t('Reload models')}
-                        </button>
+                        {antigravityStatus.signedIn && antigravityModels.length === 0 && (
+                            <div className="space-y-1">
+                                <p className="text-xs aip-muted">{t('No Antigravity models currently have quota.')}</p>
+                                <button type="button" className="aip-btn" data-size="sm" disabled={antigravityBusy} onClick={() => void runAntigravityAction('models')}>
+                                    <RefreshCw size={12} strokeWidth={1.75} className={antigravityBusy ? 'aip-spinner' : undefined} />
+                                    {antigravityBusy ? t('Reloading…') : t('Reload models')}
+                                </button>
+                            </div>
+                        )}
+                        {antigravityError && <p className="text-xs aip-warn-fg" role="alert">{antigravityError}</p>}
                     </div>
-                )}
-                {antigravityError && <p className="text-xs aip-warn-fg" role="alert">{antigravityError}</p>}
-            </div>
 
-            {/* Codex — ChatGPT subscription proxy.
+                    {/* Codex — ChatGPT subscription proxy.
 
                 Same card shape as Google Antigravity above: ONE aip-card that owns
                 its provider header (mark + title + description + switch), then a
@@ -4410,322 +4410,322 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                 The account email moves from a dedicated `aip-well` into the status
                 line, which is where Antigravity puts the same fact; the well was the
                 third element competing to say "you are signed in". */}
-            <div className="aip-card p-5 space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                    <div className="flex gap-3 min-w-0">
-                        <AipProviderMark provider="codex" name="OpenAI Codex" className="mt-0.5" />
-                        <div className="min-w-0">
-                            <h3 className="text-sm font-bold aip-hero mb-1">OpenAI Codex</h3>
-                            <p className="text-xs aip-muted">{t('Use your ChatGPT Plus/Pro subscription as an AI provider.')}</p>
+                    <div className="aip-card p-5 space-y-4">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="flex gap-3 min-w-0">
+                                <AipProviderMark provider="codex" name="OpenAI Codex" className="mt-0.5" />
+                                <div className="min-w-0">
+                                    <h3 className="text-sm font-bold aip-hero mb-1">OpenAI Codex</h3>
+                                    <p className="text-xs aip-muted">{t('Use your ChatGPT Plus/Pro subscription as an AI provider.')}</p>
+                                </div>
+                            </div>
+                            <AipSwitch
+                                checked={!disabledProviders.includes('codex-cli')}
+                                onChange={() => handleToggleProvider('codex-cli', disabledProviders.includes('codex-cli'))}
+                                label={`${disabledProviders.includes('codex-cli') ? t('Enable') : t('Disable')} OpenAI Codex`}
+                                title={disabledProviders.includes('codex-cli') ? t('Enable provider') : t('Disable provider')}
+                            />
                         </div>
-                    </div>
-                    <AipSwitch
-                        checked={!disabledProviders.includes('codex-cli')}
-                        onChange={() => handleToggleProvider('codex-cli', disabledProviders.includes('codex-cli'))}
-                        label={`${disabledProviders.includes('codex-cli') ? t('Enable') : t('Disable')} OpenAI Codex`}
-                        title={disabledProviders.includes('codex-cli') ? t('Enable provider') : t('Disable provider')}
-                    />
-                </div>
 
-                {/* Mounted-but-hidden live region, same reasoning as Antigravity's. */}
-                <p className="text-xs aip-muted" role="status" hidden={!codexOauthInProgress && !codexOauthStatus.signedIn}>
-                    {codexOauthInProgress ? t('Waiting for browser…')
-                        : codexOauthStatus.signedIn
-                            ? `${codexOauthStatus.source === 'codex-cli' ? t('Using your Codex CLI login') : t('Codex connected')}${codexOauthStatus.email ? ` · ${codexOauthStatus.email}` : ''}`
-                            : ''}
-                </p>
+                        {/* Mounted-but-hidden live region, same reasoning as Antigravity's. */}
+                        <p className="text-xs aip-muted" role="status" hidden={!codexOauthInProgress && !codexOauthStatus.signedIn}>
+                            {codexOauthInProgress ? t('Waiting for browser…')
+                                : codexOauthStatus.signedIn
+                                    ? `${codexOauthStatus.source === 'codex-cli' ? t('Using your Codex CLI login') : t('Codex connected')}${codexOauthStatus.email ? ` · ${codexOauthStatus.email}` : ''}`
+                                    : ''}
+                        </p>
 
-                <div className="flex flex-wrap gap-2">
-                    {/* Refresh / Sign out act on Natively's own tokens only, so a
+                        <div className="flex flex-wrap gap-2">
+                            {/* Refresh / Sign out act on MeetFloo's own tokens only, so a
                         `codex login` session gets the sign-in button instead —
                         signing in here takes precedence over the CLI login. */}
-                    {!codexOauthStatus.signedIn || codexOauthStatus.source === 'codex-cli' ? (
-                        /* Full-width row, and NEUTRAL: data-variant="accent" tints it
-                           periwinkle, which the Antigravity bar deliberately does not do. */
-                        <button
-                            type="button"
-                            onClick={() => handleCodexAuthAction('login')}
-                            disabled={codexOauthInProgress || codexAuthAction !== 'idle'}
-                            className="aip-btn flex-1"
-                            data-size="row"
-                        >
-                            {codexOauthInProgress || codexAuthAction === 'login'
-                                ? <><Loader2 size={13} strokeWidth={1.75} className="aip-spinner" /> {t('Waiting for browser…')}</>
-                                : <><ExternalLink size={13} strokeWidth={1.75} /> {t('Sign in with ChatGPT')}</>}
-                        </button>
-                    ) : <>
-                        {/* Plain aip-btn in a wrap row, matching Antigravity's
-                            Reload models / Disconnect pair. Glyphs kept: they cost
-                            nothing here and the two actions are easy to confuse. */}
-                        <button type="button" onClick={handleCodexRefresh} disabled={codexOauthInProgress} className="aip-btn" title={t("Refresh session")}>
-                            <RefreshCw size={13} strokeWidth={1.75} /> {t('Refresh')}
-                        </button>
-                        <button type="button" onClick={handleCodexSignOut} disabled={codexOauthInProgress} className="aip-btn">
-                            <LogOut size={13} strokeWidth={1.75} /> {t('Sign out')}
-                        </button>
-                    </>}
-                </div>
-
-                {/* The Codex CLI's `codex login` works too, read-only: Natively
-                    never refreshes it (that would sign the CLI out), so an
-                    expired one is refreshed from the CLI side. */}
-                {!codexOauthStatus.signedIn && (
-                    <p className="text-xs aip-muted">
-                        {codexOauthStatus.cliLogin === 'expired'
-                            ? t('Your Codex CLI login has expired — run any `codex` command to refresh it, or sign in with ChatGPT here.')
-                            : codexOauthStatus.cliLogin === 'api-key'
-                                ? t('Your Codex CLI is logged in with an API key, which Codex here cannot use — sign in with ChatGPT here, or run `codex login` with your ChatGPT account.')
-                                : t('Or run `codex login` in a terminal — MeetFloo can use that ChatGPT login too.')}
-                    </p>
-                )}
-                {codexOauthStatus.signedIn && codexOauthStatus.source === 'codex-cli' && (
-                    <p className="text-xs aip-muted">
-                        {t('MeetFloo uses this login read-only. When it expires, run any `codex` command to refresh it.')}
-                    </p>
-                )}
-
-                {codexAuthMessage && (
-                    <p className={`text-xs ${codexAuthStatus === 'error' ? 'aip-danger-fg' : 'aip-ok-fg'}`} role="alert">
-                        {codexAuthMessage}
-                    </p>
-                )}
-
-                {/* Model + settings — only shown once signed in */}
-                {codexOauthStatus.signedIn && (
-                        <>
-                            {codexModelsFromCli && (
-                                <p className="text-xs aip-muted">
-                                    {t('Model list from your Codex CLI')}
-                                    {codexModelCatalog?.fetchedAt && !Number.isNaN(Date.parse(codexModelCatalog.fetchedAt))
-                                        ? ` · ${t('updated')} ${new Date(codexModelCatalog.fetchedAt).toLocaleDateString()}`
-                                        : ''}
-                                </p>
-                            )}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <CodexCliModelField
-                                    label={t("Model")}
-                                    value={codexCliConfig.model}
-                                    options={codexModels}
-                                    fromCodexCli={codexModelsFromCli}
-                                    onSelect={(model) => {
-                                        setCodexCliConfig(prev => ({ ...prev, model }));
-                                        saveCodexCliConfig({ ...codexCliConfig, model });
-                                    }}
-                                />
-                                <CodexCliModelField
-                                    label={t("Fast Mode Model")}
-                                    value={codexCliConfig.fastModel}
-                                    options={codexModels}
-                                    fromCodexCli={codexModelsFromCli}
-                                    onSelect={(fastModel) => {
-                                        setCodexCliConfig(prev => ({ ...prev, fastModel }));
-                                        saveCodexCliConfig({ ...codexCliConfig, fastModel });
-                                    }}
-                                />
-                                <label className="space-y-1 block min-w-0">
-                                    <span className="aip-label">{t('Reasoning Effort')}</span>
-                                    <ModelSelect
-                                        value={(() => {
-                                            const valid = getValidCodexReasoningEfforts(codexCliConfig.model);
-                                            if (!codexCliConfig.modelReasoningEffort) return '';
-                                            return valid.includes(codexCliConfig.modelReasoningEffort)
-                                                ? codexCliConfig.modelReasoningEffort
-                                                : '';
-                                        })()}
-                                        options={(() => {
-                                            const valid = getValidCodexReasoningEfforts(codexCliConfig.model);
-                                            return [
-                                                { id: '', name: t('None (default)') },
-                                                ...CODEX_MODEL_REASONING_EFFORTS
-                                                    .filter(e => e !== 'none' && valid.includes(e))
-                                                    .map(e => ({ id: e, name: e.charAt(0).toUpperCase() + e.slice(1) })),
-                                            ];
-                                        })()}
-                                        onChange={(effort) => saveCodexCliConfig({ ...codexCliConfig, modelReasoningEffort: effort || undefined })}
-                                        placeholder={t("None (default)")}
-                                    />
-                                    {(() => {
-                                        const valid = getValidCodexReasoningEfforts(codexCliConfig.model);
-                                        const saved = codexCliConfig.modelReasoningEffort;
-                                        if (saved && !valid.includes(saved)) {
-                                            return (
-                                                <p className="aip-meta aip-warn-fg flex items-center gap-1.5">
-                                                    <AipBadge tone="warn" label={t('Unsupported')} />
-                                                    '{saved}' {t("unsupported by this model — will default to 'low'.")}
-                                                </p>
-                                            );
-                                        }
-                                        return null;
-                                    })()}
-                                </label>
-                                <label className="space-y-1 block min-w-0">
-                                    <span className="aip-label">{t('Service Tier')}</span>
-                                    <ModelSelect
-                                        value={codexCliConfig.serviceTier ?? 'default'}
-                                        options={CODEX_SERVICE_TIERS.map(t => ({ id: t, name: t.charAt(0).toUpperCase() + t.slice(1) }))}
-                                        onChange={(serviceTier) => saveCodexCliConfig({ ...codexCliConfig, serviceTier: serviceTier as typeof CODEX_SERVICE_TIERS[number] })}
-                                        placeholder={t("Default")}
-                                    />
-                                </label>
-                            </div>
-                            <div className="flex items-end justify-between gap-4 mt-1">
-                                <label className="space-y-1 block min-w-0">
-                                    <span className="aip-label">{t('Timeout (ms)')}</span>
-                                    <input
-                                        type="number"
-                                        value={codexCliConfig.timeoutMs}
-                                        onChange={e => setCodexCliConfig(prev => ({ ...prev, timeoutMs: Number(e.target.value) }))}
-                                        onBlur={() => saveCodexCliConfig()}
-                                        data-mono="true"
-                                        className="aip-input"
-                                        min={1000}
-                                    />
-                                    {codexCliStatus === 'error' && codexCliError && (
-                                        <p className="text-[10px] aip-danger-fg mt-1">{codexCliError}</p>
-                                    )}
-                                </label>
-                                {/* Fixed min-width + centred content: a label change
-                                    ("Test Connection" → "Testing…") must not reflow
-                                    the row it sits in. */}
+                            {!codexOauthStatus.signedIn || codexOauthStatus.source === 'codex-cli' ? (
+                                /* Full-width row, and NEUTRAL: data-variant="accent" tints it
+                                   periwinkle, which the Antigravity bar deliberately does not do. */
                                 <button
                                     type="button"
-                                    onClick={handleTestCodexCli}
-                                    disabled={codexCliStatus === 'testing'}
-                                    className="aip-btn shrink-0 min-w-[124px]"
-                                    data-tone={codexCliStatus === 'success' ? 'ok' : codexCliStatus === 'error' ? 'danger' : undefined}
+                                    onClick={() => handleCodexAuthAction('login')}
+                                    disabled={codexOauthInProgress || codexAuthAction !== 'idle'}
+                                    className="aip-btn flex-1"
+                                    data-size="row"
                                 >
-                                    {codexCliStatus === 'testing' ? (
-                                        <><Loader2 size={12} strokeWidth={1.75} className="aip-spinner" /> {t('Testing…')}</>
-                                    ) : codexCliStatus === 'success' ? (
-                                        <><Check size={12} strokeWidth={2} className="aip-check" /> {t('Passed')}</>
-                                    ) : codexCliStatus === 'error' ? (
-                                        <><AlertCircle size={12} strokeWidth={1.75} /> {t('Failed')}</>
-                                    ) : (
-                                        t('Test Connection')
-                                    )}
+                                    {codexOauthInProgress || codexAuthAction === 'login'
+                                        ? <><Loader2 size={13} strokeWidth={1.75} className="aip-spinner" /> {t('Waiting for browser…')}</>
+                                        : <><ExternalLink size={13} strokeWidth={1.75} /> {t('Sign in with ChatGPT')}</>}
                                 </button>
-                            </div>
-                        </>
-                    )}
-            </div>
+                            ) : <>
+                                {/* Plain aip-btn in a wrap row, matching Antigravity's
+                            Reload models / Disconnect pair. Glyphs kept: they cost
+                            nothing here and the two actions are easy to confuse. */}
+                                <button type="button" onClick={handleCodexRefresh} disabled={codexOauthInProgress} className="aip-btn" title={t("Refresh session")}>
+                                    <RefreshCw size={13} strokeWidth={1.75} /> {t('Refresh')}
+                                </button>
+                                <button type="button" onClick={handleCodexSignOut} disabled={codexOauthInProgress} className="aip-btn">
+                                    <LogOut size={13} strokeWidth={1.75} /> {t('Sign out')}
+                                </button>
+                            </>}
+                        </div>
 
-            </div>
+                        {/* The Codex CLI's `codex login` works too, read-only: MeetFloo
+                    never refreshes it (that would sign the CLI out), so an
+                    expired one is refreshed from the CLI side. */}
+                        {!codexOauthStatus.signedIn && (
+                            <p className="text-xs aip-muted">
+                                {codexOauthStatus.cliLogin === 'expired'
+                                    ? t('Your Codex CLI login has expired — run any `codex` command to refresh it, or sign in with ChatGPT here.')
+                                    : codexOauthStatus.cliLogin === 'api-key'
+                                        ? t('Your Codex CLI is logged in with an API key, which Codex here cannot use — sign in with ChatGPT here, or run `codex login` with your ChatGPT account.')
+                                        : t('Or run `codex login` in a terminal — MeetFloo can use that ChatGPT login too.')}
+                            </p>
+                        )}
+                        {codexOauthStatus.signedIn && codexOauthStatus.source === 'codex-cli' && (
+                            <p className="text-xs aip-muted">
+                                {t('MeetFloo uses this login read-only. When it expires, run any `codex` command to refresh it.')}
+                            </p>
+                        )}
+
+                        {codexAuthMessage && (
+                            <p className={`text-xs ${codexAuthStatus === 'error' ? 'aip-danger-fg' : 'aip-ok-fg'}`} role="alert">
+                                {codexAuthMessage}
+                            </p>
+                        )}
+
+                        {/* Model + settings — only shown once signed in */}
+                        {codexOauthStatus.signedIn && (
+                            <>
+                                {codexModelsFromCli && (
+                                    <p className="text-xs aip-muted">
+                                        {t('Model list from your Codex CLI')}
+                                        {codexModelCatalog?.fetchedAt && !Number.isNaN(Date.parse(codexModelCatalog.fetchedAt))
+                                            ? ` · ${t('updated')} ${new Date(codexModelCatalog.fetchedAt).toLocaleDateString()}`
+                                            : ''}
+                                    </p>
+                                )}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <CodexCliModelField
+                                        label={t("Model")}
+                                        value={codexCliConfig.model}
+                                        options={codexModels}
+                                        fromCodexCli={codexModelsFromCli}
+                                        onSelect={(model) => {
+                                            setCodexCliConfig(prev => ({ ...prev, model }));
+                                            saveCodexCliConfig({ ...codexCliConfig, model });
+                                        }}
+                                    />
+                                    <CodexCliModelField
+                                        label={t("Fast Mode Model")}
+                                        value={codexCliConfig.fastModel}
+                                        options={codexModels}
+                                        fromCodexCli={codexModelsFromCli}
+                                        onSelect={(fastModel) => {
+                                            setCodexCliConfig(prev => ({ ...prev, fastModel }));
+                                            saveCodexCliConfig({ ...codexCliConfig, fastModel });
+                                        }}
+                                    />
+                                    <label className="space-y-1 block min-w-0">
+                                        <span className="aip-label">{t('Reasoning Effort')}</span>
+                                        <ModelSelect
+                                            value={(() => {
+                                                const valid = getValidCodexReasoningEfforts(codexCliConfig.model);
+                                                if (!codexCliConfig.modelReasoningEffort) return '';
+                                                return valid.includes(codexCliConfig.modelReasoningEffort)
+                                                    ? codexCliConfig.modelReasoningEffort
+                                                    : '';
+                                            })()}
+                                            options={(() => {
+                                                const valid = getValidCodexReasoningEfforts(codexCliConfig.model);
+                                                return [
+                                                    { id: '', name: t('None (default)') },
+                                                    ...CODEX_MODEL_REASONING_EFFORTS
+                                                        .filter(e => e !== 'none' && valid.includes(e))
+                                                        .map(e => ({ id: e, name: e.charAt(0).toUpperCase() + e.slice(1) })),
+                                                ];
+                                            })()}
+                                            onChange={(effort) => saveCodexCliConfig({ ...codexCliConfig, modelReasoningEffort: effort || undefined })}
+                                            placeholder={t("None (default)")}
+                                        />
+                                        {(() => {
+                                            const valid = getValidCodexReasoningEfforts(codexCliConfig.model);
+                                            const saved = codexCliConfig.modelReasoningEffort;
+                                            if (saved && !valid.includes(saved)) {
+                                                return (
+                                                    <p className="aip-meta aip-warn-fg flex items-center gap-1.5">
+                                                        <AipBadge tone="warn" label={t('Unsupported')} />
+                                                        '{saved}' {t("unsupported by this model — will default to 'low'.")}
+                                                    </p>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+                                    </label>
+                                    <label className="space-y-1 block min-w-0">
+                                        <span className="aip-label">{t('Service Tier')}</span>
+                                        <ModelSelect
+                                            value={codexCliConfig.serviceTier ?? 'default'}
+                                            options={CODEX_SERVICE_TIERS.map(t => ({ id: t, name: t.charAt(0).toUpperCase() + t.slice(1) }))}
+                                            onChange={(serviceTier) => saveCodexCliConfig({ ...codexCliConfig, serviceTier: serviceTier as typeof CODEX_SERVICE_TIERS[number] })}
+                                            placeholder={t("Default")}
+                                        />
+                                    </label>
+                                </div>
+                                <div className="flex items-end justify-between gap-4 mt-1">
+                                    <label className="space-y-1 block min-w-0">
+                                        <span className="aip-label">{t('Timeout (ms)')}</span>
+                                        <input
+                                            type="number"
+                                            value={codexCliConfig.timeoutMs}
+                                            onChange={e => setCodexCliConfig(prev => ({ ...prev, timeoutMs: Number(e.target.value) }))}
+                                            onBlur={() => saveCodexCliConfig()}
+                                            data-mono="true"
+                                            className="aip-input"
+                                            min={1000}
+                                        />
+                                        {codexCliStatus === 'error' && codexCliError && (
+                                            <p className="text-[10px] aip-danger-fg mt-1">{codexCliError}</p>
+                                        )}
+                                    </label>
+                                    {/* Fixed min-width + centred content: a label change
+                                    ("Test Connection" → "Testing…") must not reflow
+                                    the row it sits in. */}
+                                    <button
+                                        type="button"
+                                        onClick={handleTestCodexCli}
+                                        disabled={codexCliStatus === 'testing'}
+                                        className="aip-btn shrink-0 min-w-[124px]"
+                                        data-tone={codexCliStatus === 'success' ? 'ok' : codexCliStatus === 'error' ? 'danger' : undefined}
+                                    >
+                                        {codexCliStatus === 'testing' ? (
+                                            <><Loader2 size={12} strokeWidth={1.75} className="aip-spinner" /> {t('Testing…')}</>
+                                        ) : codexCliStatus === 'success' ? (
+                                            <><Check size={12} strokeWidth={2} className="aip-check" /> {t('Passed')}</>
+                                        ) : codexCliStatus === 'error' ? (
+                                            <><AlertCircle size={12} strokeWidth={1.75} /> {t('Failed')}</>
+                                        ) : (
+                                            t('Test Connection')
+                                        )}
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                </div>
             )}
 
             {activeTab === 'gateways' && (
-            <div
-                id={tabPanelId('gateways')}
-                role="tabpanel"
-                aria-labelledby={tabButtonId('gateways')}
-                tabIndex={0}
-                className="space-y-5 aip-panel-fade"
-                data-stagger-skip
-            >
-            {/* LiteLLM — OpenAI-compatible AI gateway, grouped with the other gateways. */}
-            <div className="space-y-5">
-                <div className="space-y-4">
-                    {/* LiteLLM — OpenAI-compatible AI gateway (100+ providers via one proxy).
+                <div
+                    id={tabPanelId('gateways')}
+                    role="tabpanel"
+                    aria-labelledby={tabButtonId('gateways')}
+                    tabIndex={0}
+                    className="space-y-5 aip-panel-fade"
+                    data-stagger-skip
+                >
+                    {/* LiteLLM — OpenAI-compatible AI gateway, grouped with the other gateways. */}
+                    <div className="space-y-5">
+                        <div className="space-y-4">
+                            {/* LiteLLM — OpenAI-compatible AI gateway (100+ providers via one proxy).
                         Three fields: proxy base URL (required), optional virtual key, and an
                         optional max-output-tokens override. Models are auto-discovered from
                         the proxy and appear in the model selector with a "litellm/" prefix. */}
-                    <div className="aip-card p-5 space-y-4">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-start gap-2.5 min-w-0">
-                                <AipProviderMark provider="litellm" name="LiteLLM Proxy" className="mt-0.5" />
-                                <div className="min-w-0">
-                                <label className="block text-xs font-bold aip-hero mb-0">LiteLLM Proxy</label>
-                                <p className="text-[10px] aip-muted">
-                                    {t('OpenAI-compatible gateway to 100+ providers. Models auto-discovered from the proxy.')}{' '}
-                                    <a href="https://docs.litellm.ai/docs/simple_proxy" target="_blank" rel="noreferrer" className="aip-link">{t('Docs')}</a>
-                                </p>
-                                </div>
-                            </div>
-                            {hasStoredKey.litellm && (
-                                <div className="flex items-center gap-2 shrink-0">
-                                    {/* Model count and re-discovery both live in the
+                            <div className="aip-card p-5 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-start gap-2.5 min-w-0">
+                                        <AipProviderMark provider="litellm" name="LiteLLM Proxy" className="mt-0.5" />
+                                        <div className="min-w-0">
+                                            <label className="block text-xs font-bold aip-hero mb-0">LiteLLM Proxy</label>
+                                            <p className="text-[10px] aip-muted">
+                                                {t('OpenAI-compatible gateway to 100+ providers. Models auto-discovered from the proxy.')}{' '}
+                                                <a href="https://docs.litellm.ai/docs/simple_proxy" target="_blank" rel="noreferrer" className="aip-link">{t('Docs')}</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {hasStoredKey.litellm && (
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            {/* Model count and re-discovery both live in the
                                         <AipModelList> below now — same as every cloud card.
                                         Keeping a second Refresh up here would give the card
                                         two controls for one action. */}
-                                    <AipBadge tone="ok" label={t('Configured')} />
-                                    <AipSwitch
-                                        checked={!disabledProviders.includes('litellm')}
-                                        onChange={() => handleToggleProvider('litellm', disabledProviders.includes('litellm'))}
-                                        label={`${disabledProviders.includes('litellm') ? t('Enable') : t('Disable')} LiteLLM`}
-                                        title={disabledProviders.includes('litellm') ? t('Enable provider') : t('Disable provider (keeps your configuration)')}
-                                    />
+                                            <AipBadge tone="ok" label={t('Configured')} />
+                                            <AipSwitch
+                                                checked={!disabledProviders.includes('litellm')}
+                                                onChange={() => handleToggleProvider('litellm', disabledProviders.includes('litellm'))}
+                                                label={`${disabledProviders.includes('litellm') ? t('Enable') : t('Disable')} LiteLLM`}
+                                                title={disabledProviders.includes('litellm') ? t('Enable provider') : t('Disable provider (keeps your configuration)')}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <label className="space-y-1 block min-w-0">
-                                <span className="aip-label">{t('Proxy Base URL')}</span>
-                                <input
-                                    value={litellmBaseURL}
-                                    onChange={e => setLitellmBaseURL(e.target.value)}
-                                    data-mono="true"
-                                    className="aip-input"
-                                    placeholder="http://localhost:4000/v1"
-                                />
-                            </label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <label className="space-y-1 block min-w-0">
+                                        <span className="aip-label">{t('Proxy Base URL')}</span>
+                                        <input
+                                            value={litellmBaseURL}
+                                            onChange={e => setLitellmBaseURL(e.target.value)}
+                                            data-mono="true"
+                                            className="aip-input"
+                                            placeholder="http://localhost:4000/v1"
+                                        />
+                                    </label>
 
-                            <label className="space-y-1 block min-w-0">
-                                <span className="aip-label">{t('Virtual Key (optional)')}</span>
-                                <input
-                                    type="password"
-                                    value={litellmApiKey}
-                                    onChange={e => setLitellmApiKey(e.target.value)}
-                                    data-mono="true"
-                                    className="aip-input"
-                                    placeholder={hasStoredKey.litellm ? t('•••••••• (leave blank to keep)') : t('sk-... (only if proxy requires auth)')}
-                                />
-                            </label>
-                        </div>
+                                    <label className="space-y-1 block min-w-0">
+                                        <span className="aip-label">{t('Virtual Key (optional)')}</span>
+                                        <input
+                                            type="password"
+                                            value={litellmApiKey}
+                                            onChange={e => setLitellmApiKey(e.target.value)}
+                                            data-mono="true"
+                                            className="aip-input"
+                                            placeholder={hasStoredKey.litellm ? t('•••••••• (leave blank to keep)') : t('sk-... (only if proxy requires auth)')}
+                                        />
+                                    </label>
+                                </div>
 
-                        <div className="space-y-1">
-                            <span className="block aip-label">{t('Max Output Tokens')}</span>
-                            <ModelSelect
-                                value={litellmMaxTokens}
-                                options={LITELLM_MAX_TOKENS_OPTIONS}
-                                onChange={setLitellmMaxTokens}
-                                placeholder={t("Auto (per-model)")}
-                            />
-                            <p className="text-[10px] aip-muted">
-                                {t("Auto reads each model's real output budget from the proxy's")} <span className="aip-code-inline">/model/info</span> {t('(falls back to 8,192 if unavailable). Pick a fixed value to override.')}
-                            </p>
-                        </div>
+                                <div className="space-y-1">
+                                    <span className="block aip-label">{t('Max Output Tokens')}</span>
+                                    <ModelSelect
+                                        value={litellmMaxTokens}
+                                        options={LITELLM_MAX_TOKENS_OPTIONS}
+                                        onChange={setLitellmMaxTokens}
+                                        placeholder={t("Auto (per-model)")}
+                                    />
+                                    <p className="text-[10px] aip-muted">
+                                        {t("Auto reads each model's real output budget from the proxy's")} <span className="aip-code-inline">/model/info</span> {t('(falls back to 8,192 if unavailable). Pick a fixed value to override.')}
+                                    </p>
+                                </div>
 
-                        {/* flex-wrap, not plain flex: <AipModelList> is a fragment whose
+                                {/* flex-wrap, not plain flex: <AipModelList> is a fragment whose
                             summary is `order-2` (so it lands after these order-0 buttons)
                             and whose panel is `basis-full order-4` (so it wraps onto its
                             own line). Both only work as direct children of a wrapping flex
                             row — outside one the classes are inert and the panel squeezes. */}
-                        <div className="flex flex-wrap items-center gap-2">
-                            <button
-                                type="button"
-                                onClick={handleSaveLitellm}
-                                disabled={!litellmBaseURL.trim() || !!savingStatus.litellm}
-                                className="aip-btn min-w-[92px]"
-                                data-variant="accent"
-                            >
-                                {savingStatus.litellm
-                                    ? <><Loader2 size={12} strokeWidth={1.75} className="aip-spinner" /> {t('Saving…')}</>
-                                    : savedStatus.litellm
-                                        ? <><Check size={12} strokeWidth={2} className="aip-check" /> {t('Saved')}</>
-                                        : t('Save')}
-                            </button>
-                            {hasStoredKey.litellm && (
-                                <button
-                                    type="button"
-                                    onClick={handleRemoveLitellm}
-                                    className="aip-btn"
-                                    data-variant="ghost"
-                                >
-                                    {t('Remove')}
-                                </button>
-                            )}
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={handleSaveLitellm}
+                                        disabled={!litellmBaseURL.trim() || !!savingStatus.litellm}
+                                        className="aip-btn min-w-[92px]"
+                                        data-variant="accent"
+                                    >
+                                        {savingStatus.litellm
+                                            ? <><Loader2 size={12} strokeWidth={1.75} className="aip-spinner" /> {t('Saving…')}</>
+                                            : savedStatus.litellm
+                                                ? <><Check size={12} strokeWidth={2} className="aip-check" /> {t('Saved')}</>
+                                                : t('Save')}
+                                    </button>
+                                    {hasStoredKey.litellm && (
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveLitellm}
+                                            className="aip-btn"
+                                            data-variant="ghost"
+                                        >
+                                            {t('Remove')}
+                                        </button>
+                                    )}
 
-                            {/* The proxy can expose dozens of models; without this the Active
+                                    {/* The proxy can expose dozens of models; without this the Active
                                 Model dropdown gets all of them. Reuses the cloud providers'
                                 allow-list wholesale — `cloudEnabledModels` is keyed by provider
                                 string, so 'litellm' needs no dedicated store or IPC channel.
@@ -4734,291 +4734,291 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                                 is read back by refreshRuntimeDefaultIfUnavailable(), which would
                                 otherwise install whichever model the proxy happens to list first
                                 when the active model becomes unavailable. */}
-                            {hasStoredKey.litellm && (
-                                <AipModelList
-                                    models={effectiveModels('litellm')}
-                                    enabled={cloudEnabledModels['litellm'] || []}
-                                    onToggle={(modelId) => handleToggleModel('litellm', modelId)}
-                                    onReset={() => handleResetModels('litellm')}
-                                    defaultId={preferredModels['litellm']}
-                                    onSetDefault={(modelId) => handleSetDefaultModel('litellm', modelId)}
-                                    // A gateway fronts the upstream's whole catalogue (300+ is
-                                    // normal), so this list is opt-in: nothing reaches the model
-                                    // picker until it is ticked here.
-                                    optIn
-                                    onBulkToggle={(ids, enable) => handleBulkToggleModels('litellm', ids, enable)}
-                                    error={modelSaveError['litellm'] ? 'save-failed' : null}
-                                    refreshing={isRefreshingLitellm}
-                                    onRefresh={handleRefreshLitellmModels}
-                                    // Deliberately NOT gated on litellmModels.length: an empty
-                                    // catalogue (proxy down at save time, or the cache cleared)
-                                    // is exactly when the user needs Refresh, and this list is
-                                    // now the only place it lives.
-                                    onFirstOpen={() => {
-                                        if (litellmModels.length === 0) handleRefreshLitellmModels();
+                                    {hasStoredKey.litellm && (
+                                        <AipModelList
+                                            models={effectiveModels('litellm')}
+                                            enabled={cloudEnabledModels['litellm'] || []}
+                                            onToggle={(modelId) => handleToggleModel('litellm', modelId)}
+                                            onReset={() => handleResetModels('litellm')}
+                                            defaultId={preferredModels['litellm']}
+                                            onSetDefault={(modelId) => handleSetDefaultModel('litellm', modelId)}
+                                            // A gateway fronts the upstream's whole catalogue (300+ is
+                                            // normal), so this list is opt-in: nothing reaches the model
+                                            // picker until it is ticked here.
+                                            optIn
+                                            onBulkToggle={(ids, enable) => handleBulkToggleModels('litellm', ids, enable)}
+                                            error={modelSaveError['litellm'] ? 'save-failed' : null}
+                                            refreshing={isRefreshingLitellm}
+                                            onRefresh={handleRefreshLitellmModels}
+                                            // Deliberately NOT gated on litellmModels.length: an empty
+                                            // catalogue (proxy down at save time, or the cache cleared)
+                                            // is exactly when the user needs Refresh, and this list is
+                                            // now the only place it lives.
+                                            onFirstOpen={() => {
+                                                if (litellmModels.length === 0) handleRefreshLitellmModels();
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Local (Ollama) Providers */}
+                    <div className="space-y-5">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-start gap-2.5 min-w-0">
+                                <AipProviderMark provider="ollama" name="Ollama" className="mt-0.5" />
+                                <div className="min-w-0">
+                                    <h3 className="text-sm font-bold aip-hero mb-1">{t('Local Models (Ollama)')}</h3>
+                                    <p className="text-xs aip-muted">{t('Run open-source models locally.')}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                                <button
+                                    onClick={async () => {
+                                        setIsRefreshingOllama(true);
+                                        await checkOllama(false);
+                                        // Add a small delay for visual feedback if the check is too fast
+                                        setTimeout(() => setIsRefreshingOllama(false), 500);
                                     }}
+                                    className="aip-btn"
+                                    data-icon="true"
+                                    data-variant="ghost"
+                                    title={t("Refresh Ollama")}
+                                    disabled={isRefreshingOllama}
+                                >
+                                    <RefreshCw size={16} strokeWidth={1.75} className={isRefreshingOllama ? "aip-spinner" : ""} />
+                                </button>
+                                <AipSwitch
+                                    checked={!disabledProviders.includes('ollama')}
+                                    onChange={() => handleToggleProvider('ollama', disabledProviders.includes('ollama'))}
+                                    label={`${disabledProviders.includes('ollama') ? t('Enable') : t('Disable')} Ollama`}
+                                    title={disabledProviders.includes('ollama') ? t('Enable provider') : t('Disable provider')}
                                 />
-                            )}
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
 
-            {/* Local (Ollama) Providers */}
-            <div className="space-y-5">
-                <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-start gap-2.5 min-w-0">
-                        <AipProviderMark provider="ollama" name="Ollama" className="mt-0.5" />
-                        <div className="min-w-0">
-                            <h3 className="text-sm font-bold aip-hero mb-1">{t('Local Models (Ollama)')}</h3>
-                            <p className="text-xs aip-muted">{t('Run open-source models locally.')}</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                        <button
-                            onClick={async () => {
-                                setIsRefreshingOllama(true);
-                                await checkOllama(false);
-                                // Add a small delay for visual feedback if the check is too fast
-                                setTimeout(() => setIsRefreshingOllama(false), 500);
-                            }}
-                            className="aip-btn"
-                            data-icon="true"
-                            data-variant="ghost"
-                            title={t("Refresh Ollama")}
-                            disabled={isRefreshingOllama}
-                        >
-                            <RefreshCw size={16} strokeWidth={1.75} className={isRefreshingOllama ? "aip-spinner" : ""} />
-                        </button>
-                        <AipSwitch
-                            checked={!disabledProviders.includes('ollama')}
-                            onChange={() => handleToggleProvider('ollama', disabledProviders.includes('ollama'))}
-                            label={`${disabledProviders.includes('ollama') ? t('Enable') : t('Disable')} Ollama`}
-                            title={disabledProviders.includes('ollama') ? t('Enable provider') : t('Disable provider')}
-                        />
-                    </div>
-                </div>
-
-                {/* NOTE: nothing in this block may carry an entrance animation.
+                        {/* NOTE: nothing in this block may carry an entrance animation.
                     checkOllama() polls every 3s, so anything keyed on
                     ollamaStatus would re-fire forever and a transient blip
                     would flash the block twice. */}
-                <div className="aip-card p-5">
-                    {ollamaStatus === 'checking' && (
-                        <div className="flex items-center gap-2 text-xs aip-muted">
-                            <AipBadge tone="info" label={t('Checking')} busy />
-                            {t('Checking for Ollama...')}
-                        </div>
-                    )}
+                        <div className="aip-card p-5">
+                            {ollamaStatus === 'checking' && (
+                                <div className="flex items-center gap-2 text-xs aip-muted">
+                                    <AipBadge tone="info" label={t('Checking')} busy />
+                                    {t('Checking for Ollama...')}
+                                </div>
+                            )}
 
-                    {ollamaStatus === 'fixing' && (
-                        <div className="flex items-center gap-2 text-xs aip-muted">
-                            <AipBadge tone="info" label={t('Fixing')} busy />
-                            {t('Attempting to auto-fix connection...')}
-                        </div>
-                    )}
+                            {ollamaStatus === 'fixing' && (
+                                <div className="flex items-center gap-2 text-xs aip-muted">
+                                    <AipBadge tone="info" label={t('Fixing')} busy />
+                                    {t('Attempting to auto-fix connection...')}
+                                </div>
+                            )}
 
-                    {ollamaStatus === 'not-found' && (
-                        <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2">
-                                <AipBadge tone="danger" label={t('Not found')} />
-                                <span className="text-xs aip-danger-fg">{t('Ollama not detected')}</span>
-                            </div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                                {/* Kept as one translated key — it exists in all four
+                            {ollamaStatus === 'not-found' && (
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <AipBadge tone="danger" label={t('Not found')} />
+                                        <span className="text-xs aip-danger-fg">{t('Ollama not detected')}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        {/* Kept as one translated key — it exists in all four
                                     generated dictionaries. Splitting it out to wrap
                                     `ollama serve` in .aip-code-inline is Stage 5's job
                                     and needs the dictionaries regenerated. */}
-                                <p className="text-xs aip-muted">
-                                    {t('Ensure Ollama is running (`ollama serve`).')}
-                                </p>
-                                <button
-                                    onClick={handleFixOllama}
-                                    className="aip-btn"
-                                    data-size="sm"
-                                >
-                                    {t('Auto-Fix Connection')}
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {ollamaStatus === 'detected' && ollamaModels.length > 0 && (
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-2 mb-3">
-                                <AipBadge tone="ok" label={t('Running')} />
-                                <span className="text-xs aip-muted">{t('Ollama connected')}</span>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-2">
-                                {ollamaModels.map(model => (
-                                    <div key={model} className="aip-well flex items-center justify-between gap-2 p-2">
-                                        <span className="aip-mono truncate">{model}</span>
-                                        <AipBadge tone="neutral" label={t('Local')} />
+                                        <p className="text-xs aip-muted">
+                                            {t('Ensure Ollama is running (`ollama serve`).')}
+                                        </p>
+                                        <button
+                                            onClick={handleFixOllama}
+                                            className="aip-btn"
+                                            data-size="sm"
+                                        >
+                                            {t('Auto-Fix Connection')}
+                                        </button>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                    {ollamaStatus === 'detected' && ollamaModels.length === 0 && (
-                        <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2">
-                                <AipBadge tone="ok" label={t('Running')} />
-                                <span className="text-xs aip-muted">{t('Ollama connected')}</span>
-                            </div>
-                            {/* "no models found" was true of the old raw list and
+                                </div>
+                            )}
+
+                            {ollamaStatus === 'detected' && ollamaModels.length > 0 && (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <AipBadge tone="ok" label={t('Running')} />
+                                        <span className="text-xs aip-muted">{t('Ollama connected')}</span>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {ollamaModels.map(model => (
+                                            <div key={model} className="aip-well flex items-center justify-between gap-2 p-2">
+                                                <span className="aip-mono truncate">{model}</span>
+                                                <AipBadge tone="neutral" label={t('Local')} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {ollamaStatus === 'detected' && ollamaModels.length === 0 && (
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <AipBadge tone="ok" label={t('Running')} />
+                                        <span className="text-xs aip-muted">{t('Ollama connected')}</span>
+                                    </div>
+                                    {/* "no models found" was true of the old raw list and
                                 is not true now: this list is generation-capable
                                 models, and a fresh install can hold exactly the
-                                nomic-embed-text Natively pulled for retrieval.
+                                nomic-embed-text MeetFloo pulled for retrieval.
                                 Telling that user nothing is installed sends them
                                 to fix something that is not broken. */}
-                            <div className="text-xs aip-muted">
-                                {t('No model here can generate text yet. Embedding models, such as the one MeetFloo uses for retrieval, cannot chat. Run `ollama pull qwen2.5:3b` to add one.')}
-                            </div>
+                                    <div className="text-xs aip-muted">
+                                        {t('No model here can generate text yet. Embedding models, such as the one MeetFloo uses for retrieval, cannot chat. Run `ollama pull qwen2.5:3b` to add one.')}
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Custom Providers */}
-            <div className="space-y-5">
-                <div className="flex items-center justify-between mb-2">
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-sm font-bold aip-hero">{t('Custom Providers')}</h3>
-                            <AipBadge tone="warn" label={t('Experimental')} />
-                        </div>
-                        <p className="text-xs aip-muted">{t('Add your own AI endpoints via cURL.')}</p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                        {!isEditingCustom && (
-                            <button
-                                onClick={handleNewProvider}
-                                className="aip-btn"
-                            >
-                                <Plus size={14} strokeWidth={1.75} /> {t('Add Provider')}
-                            </button>
-                        )}
-                        {customProviders.length > 0 && (
-                            <AipSwitch
-                                checked={!disabledProviders.includes('custom')}
-                                onChange={() => handleToggleProvider('custom', disabledProviders.includes('custom'))}
-                                label={`${disabledProviders.includes('custom') ? t('Enable') : t('Disable')} custom providers`}
-                                title={disabledProviders.includes('custom') ? t('Enable custom providers') : t('Disable custom providers (keeps them saved)')}
-                            />
-                        )}
-                    </div>
-                </div>
 
-                {isEditingCustom ? (
-                    <div className="aip-card p-5 aip-panel-fade">
-                        <h4 className="text-sm font-bold aip-hero mb-4">{editingProvider ? t('Edit Provider') : t('New Provider')}</h4>
-
-                        <div className="space-y-4">
+                    {/* Custom Providers */}
+                    <div className="space-y-5">
+                        <div className="flex items-center justify-between mb-2">
                             <div>
-                                <label className="block aip-label mb-1">{t('Provider Name')}</label>
-                                <input
-                                    type="text"
-                                    value={customName}
-                                    onChange={(e) => setCustomName(e.target.value)}
-                                    placeholder={t("My Custom LLM")}
-                                    className="aip-input"
-                                />
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="text-sm font-bold aip-hero">{t('Custom Providers')}</h3>
+                                    <AipBadge tone="warn" label={t('Experimental')} />
+                                </div>
+                                <p className="text-xs aip-muted">{t('Add your own AI endpoints via cURL.')}</p>
                             </div>
-
-                            <div>
-                                <label className="block aip-label mb-1">{t('cURL Command')}</label>
-                                <div className="relative">
-                                    <textarea
-                                        value={customCurl}
-                                        onChange={(e) => setCustomCurl(e.target.value)}
-                                        placeholder={`curl https://api.openai.com/v1/chat/completions ... "content": "{{TEXT}}"`}
-                                        data-mono="true"
-                                        rows={7}
-                                        className="aip-input"
+                            <div className="flex items-center gap-2 shrink-0">
+                                {!isEditingCustom && (
+                                    <button
+                                        onClick={handleNewProvider}
+                                        className="aip-btn"
+                                    >
+                                        <Plus size={14} strokeWidth={1.75} /> {t('Add Provider')}
+                                    </button>
+                                )}
+                                {customProviders.length > 0 && (
+                                    <AipSwitch
+                                        checked={!disabledProviders.includes('custom')}
+                                        onChange={() => handleToggleProvider('custom', disabledProviders.includes('custom'))}
+                                        label={`${disabledProviders.includes('custom') ? t('Enable') : t('Disable')} custom providers`}
+                                        title={disabledProviders.includes('custom') ? t('Enable custom providers') : t('Disable custom providers (keeps them saved)')}
                                     />
-                                </div>
+                                )}
                             </div>
+                        </div>
 
-                            <div>
-                                <label className="block aip-label mb-1">
-                                    {t('Response JSON Path')} <span className="aip-faint normal-case font-normal">{t('(Optional)')}</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={customResponsePath}
-                                    onChange={(e) => setCustomResponsePath(e.target.value)}
-                                    placeholder={t("e.g. choices[0].message.content")}
-                                    data-mono="true"
-                                    className="aip-input"
-                                />
-                                <p className="text-[10px] aip-muted mt-1">
-                                    {t('Dot notation path to the answer text in the JSON response. If empty, the full JSON is returned.')}
-                                </p>
-                            </div>
+                        {isEditingCustom ? (
+                            <div className="aip-card p-5 aip-panel-fade">
+                                <h4 className="text-sm font-bold aip-hero mb-4">{editingProvider ? t('Edit Provider') : t('New Provider')}</h4>
 
-                            <div>
-                                <label className="block aip-label mb-1">
-                                    {t('Screenshot / Vision Support')}
-                                </label>
-                                {/* A native <select> ignores every --aip-* token; swapping
-                                    it for AipSelect is Stage 5's job (the option labels
-                                    are translated keys that need re-plumbing). */}
-                                <select
-                                    value={customVision}
-                                    onChange={(e) => setCustomVision(e.target.value as 'auto' | 'on' | 'off')}
-                                    className="aip-input"
-                                >
-                                    <option value="auto">{t('Auto-detect (recommended)')}</option>
-                                    <option value="on">{t('Always send screenshots')}</option>
-                                    <option value="off">{t('Never send screenshots (text only)')}</option>
-                                </select>
-                                <p className="text-[10px] aip-muted mt-1">
-                                    {t('Auto-detect enables vision when your cURL uses')} <code className="aip-code-inline">{"{{IMAGE_BASE64}}"}</code> {t('or an OpenAI-style')} <code className="aip-code-inline">messages</code> {t('body. Choose “Always” only if your endpoint accepts images another way; “Never” keeps this provider out of screenshot analysis.')}
-                                </p>
-                            </div>
-
-                            <div className="aip-well mt-4">
-                                <div className="px-4 py-3 flex items-center justify-between border-b" style={{ borderColor: 'var(--aip-divider)' }}>
-                                    <h5 className="block aip-label">
-                                        {t('Configuration Guide')}
-                                    </h5>
-                                </div>
-
-                                <div className="p-4 space-y-4 min-w-0">
+                                <div className="space-y-4">
                                     <div>
-                                        <p className="text-xs aip-muted mb-2 font-medium">{t('Available Variables')}</p>
-                                        <div className="grid grid-cols-1 gap-2">
-                                            <div className="flex items-center gap-2 text-xs">
-                                                <code className="aip-code-inline shrink-0">{"{{TEXT}}"}</code>
-                                                <span className="aip-muted">{t('Combined System + Context + Message (Recommended)')}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs">
-                                                <code className="aip-code-inline shrink-0">{"{{IMAGE_BASE64}}"}</code>
-                                                <span className="aip-muted">{t('Screenshot data (if available)')}</span>
-                                            </div>
+                                        <label className="block aip-label mb-1">{t('Provider Name')}</label>
+                                        <input
+                                            type="text"
+                                            value={customName}
+                                            onChange={(e) => setCustomName(e.target.value)}
+                                            placeholder={t("My Custom LLM")}
+                                            className="aip-input"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block aip-label mb-1">{t('cURL Command')}</label>
+                                        <div className="relative">
+                                            <textarea
+                                                value={customCurl}
+                                                onChange={(e) => setCustomCurl(e.target.value)}
+                                                placeholder={`curl https://api.openai.com/v1/chat/completions ... "content": "{{TEXT}}"`}
+                                                data-mono="true"
+                                                rows={7}
+                                                className="aip-input"
+                                            />
                                         </div>
                                     </div>
 
-                                    <div className="min-w-0">
-                                        <p className="text-xs aip-muted mb-2 font-medium">{t('Examples')}</p>
-                                        <div className="space-y-3 min-w-0">
-                                            {/* Ollama Example */}
-                                            <div className="min-w-0">
-                                                <div className="aip-label mb-1.5">{t('Local (Ollama)')}</div>
-                                                <div className="aip-well aip-scroll-x p-2.5 min-w-0">
-                                                    <code className="aip-mono whitespace-pre block">
-                                                        curl http://localhost:11434/api/generate -d '{"{"}"model": "llama3", "prompt": "{`{{TEXT}}`}"{"}"}'
-                                                    </code>
+                                    <div>
+                                        <label className="block aip-label mb-1">
+                                            {t('Response JSON Path')} <span className="aip-faint normal-case font-normal">{t('(Optional)')}</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={customResponsePath}
+                                            onChange={(e) => setCustomResponsePath(e.target.value)}
+                                            placeholder={t("e.g. choices[0].message.content")}
+                                            data-mono="true"
+                                            className="aip-input"
+                                        />
+                                        <p className="text-[10px] aip-muted mt-1">
+                                            {t('Dot notation path to the answer text in the JSON response. If empty, the full JSON is returned.')}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <label className="block aip-label mb-1">
+                                            {t('Screenshot / Vision Support')}
+                                        </label>
+                                        {/* A native <select> ignores every --aip-* token; swapping
+                                    it for AipSelect is Stage 5's job (the option labels
+                                    are translated keys that need re-plumbing). */}
+                                        <select
+                                            value={customVision}
+                                            onChange={(e) => setCustomVision(e.target.value as 'auto' | 'on' | 'off')}
+                                            className="aip-input"
+                                        >
+                                            <option value="auto">{t('Auto-detect (recommended)')}</option>
+                                            <option value="on">{t('Always send screenshots')}</option>
+                                            <option value="off">{t('Never send screenshots (text only)')}</option>
+                                        </select>
+                                        <p className="text-[10px] aip-muted mt-1">
+                                            {t('Auto-detect enables vision when your cURL uses')} <code className="aip-code-inline">{"{{IMAGE_BASE64}}"}</code> {t('or an OpenAI-style')} <code className="aip-code-inline">messages</code> {t('body. Choose “Always” only if your endpoint accepts images another way; “Never” keeps this provider out of screenshot analysis.')}
+                                        </p>
+                                    </div>
+
+                                    <div className="aip-well mt-4">
+                                        <div className="px-4 py-3 flex items-center justify-between border-b" style={{ borderColor: 'var(--aip-divider)' }}>
+                                            <h5 className="block aip-label">
+                                                {t('Configuration Guide')}
+                                            </h5>
+                                        </div>
+
+                                        <div className="p-4 space-y-4 min-w-0">
+                                            <div>
+                                                <p className="text-xs aip-muted mb-2 font-medium">{t('Available Variables')}</p>
+                                                <div className="grid grid-cols-1 gap-2">
+                                                    <div className="flex items-center gap-2 text-xs">
+                                                        <code className="aip-code-inline shrink-0">{"{{TEXT}}"}</code>
+                                                        <span className="aip-muted">{t('Combined System + Context + Message (Recommended)')}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-xs">
+                                                        <code className="aip-code-inline shrink-0">{"{{IMAGE_BASE64}}"}</code>
+                                                        <span className="aip-muted">{t('Screenshot data (if available)')}</span>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            {/* OpenAI Example */}
                                             <div className="min-w-0">
-                                                <div className="aip-label mb-1.5">{t('OpenAI Compatible')}</div>
-                                                <div className="aip-well aip-scroll-x p-2.5 min-w-0">
-                                                    <code className="aip-mono whitespace-pre block">
-                                                        {`curl https://api.openai.com/v1/chat/completions \\
+                                                <p className="text-xs aip-muted mb-2 font-medium">{t('Examples')}</p>
+                                                <div className="space-y-3 min-w-0">
+                                                    {/* Ollama Example */}
+                                                    <div className="min-w-0">
+                                                        <div className="aip-label mb-1.5">{t('Local (Ollama)')}</div>
+                                                        <div className="aip-well aip-scroll-x p-2.5 min-w-0">
+                                                            <code className="aip-mono whitespace-pre block">
+                                                                curl http://localhost:11434/api/generate -d '{"{"}"model": "llama3", "prompt": "{`{{TEXT}}`}"{"}"}'
+                                                            </code>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* OpenAI Example */}
+                                                    <div className="min-w-0">
+                                                        <div className="aip-label mb-1.5">{t('OpenAI Compatible')}</div>
+                                                        <div className="aip-well aip-scroll-x p-2.5 min-w-0">
+                                                            <code className="aip-mono whitespace-pre block">
+                                                                {`curl https://api.openai.com/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
@@ -5029,190 +5029,190 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
     ],
     "temperature": 0.7
   }'`}
-                                                    </code>
+                                                            </code>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
 
-                            {curlError && (
-                                <div
-                                    className="flex items-start gap-2 p-3 rounded-lg text-xs aip-danger-fg"
-                                    style={{ background: 'var(--aip-danger-bg)', border: '1px solid var(--aip-danger-border)' }}
-                                >
-                                    <AlertCircle size={14} strokeWidth={1.75} className="shrink-0 mt-0.5" />
-                                    <span>{curlError}</span>
-                                </div>
-                            )}
+                                    {curlError && (
+                                        <div
+                                            className="flex items-start gap-2 p-3 rounded-lg text-xs aip-danger-fg"
+                                            style={{ background: 'var(--aip-danger-bg)', border: '1px solid var(--aip-danger-border)' }}
+                                        >
+                                            <AlertCircle size={14} strokeWidth={1.75} className="shrink-0 mt-0.5" />
+                                            <span>{curlError}</span>
+                                        </div>
+                                    )}
 
-                            <div className="flex justify-end gap-2 pt-2">
-                                <button
-                                    onClick={() => setIsEditingCustom(false)}
-                                    className="aip-btn"
-                                    data-variant="ghost"
-                                >
-                                    {t('Cancel')}
-                                </button>
-                                <button
-                                    onClick={handleSaveCustom}
-                                    className="aip-btn"
-                                    data-variant="accent"
-                                >
-                                    <Save size={14} strokeWidth={1.75} /> {t('Save Provider')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="space-y-3">
-                        {customProviders.length === 0 ? (
-                            <div className="aip-card aip-card-dashed text-center py-8">
-                                <p className="text-xs aip-muted">{t('No custom providers added yet.')}</p>
+                                    <div className="flex justify-end gap-2 pt-2">
+                                        <button
+                                            onClick={() => setIsEditingCustom(false)}
+                                            className="aip-btn"
+                                            data-variant="ghost"
+                                        >
+                                            {t('Cancel')}
+                                        </button>
+                                        <button
+                                            onClick={handleSaveCustom}
+                                            className="aip-btn"
+                                            data-variant="accent"
+                                        >
+                                            <Save size={14} strokeWidth={1.75} /> {t('Save Provider')}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         ) : (
-                            customProviders.map((provider) => (
-                                <div key={provider.id} className="aip-card aip-row p-4 flex items-center justify-between gap-3">
-                                    <div className="flex items-center gap-3 min-w-0">
-                                        {/* Custom providers reuse the monogram tile with the
+                            <div className="space-y-3">
+                                {customProviders.length === 0 ? (
+                                    <div className="aip-card aip-card-dashed text-center py-8">
+                                        <p className="text-xs aip-muted">{t('No custom providers added yet.')}</p>
+                                    </div>
+                                ) : (
+                                    customProviders.map((provider) => (
+                                        <div key={provider.id} className="aip-card aip-row p-4 flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                {/* Custom providers reuse the monogram tile with the
                                             panel accent as their brand hue. */}
-                                        <AipMonogram mono={provider.name} />
-                                        <div className="min-w-0">
-                                            <h4 className="aip-card-title truncate">{provider.name}</h4>
-                                            <p className="aip-mono aip-muted truncate max-w-[240px]">
-                                                {provider.curlCommand.substring(0, 30)}...
-                                            </p>
-                                            {provider.responsePath && (
-                                                <p className="aip-meta truncate mt-0.5">
-                                                    {t('path:')} {provider.responsePath}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {/* Was opacity-0 group-hover:opacity-100 — invisible to
+                                                <AipMonogram mono={provider.name} />
+                                                <div className="min-w-0">
+                                                    <h4 className="aip-card-title truncate">{provider.name}</h4>
+                                                    <p className="aip-mono aip-muted truncate max-w-[240px]">
+                                                        {provider.curlCommand.substring(0, 30)}...
+                                                    </p>
+                                                    {provider.responsePath && (
+                                                        <p className="aip-meta truncate mt-0.5">
+                                                            {t('path:')} {provider.responsePath}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            {/* Was opacity-0 group-hover:opacity-100 — invisible to
                                         keyboard and touch. 0.5 → 1 on hover OR focus-within. */}
-                                    <div className="aip-row-actions flex items-center gap-1 shrink-0">
-                                        <button
-                                            onClick={() => handleEditProvider(provider)}
-                                            className="aip-btn"
-                                            data-icon="true"
-                                            data-variant="ghost"
-                                            title={t("Edit")}
-                                        >
-                                            <Edit2 size={14} strokeWidth={1.75} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteCustom(provider.id)}
-                                            className="aip-btn"
-                                            data-icon="true"
-                                            data-variant="danger-ghost"
-                                            title={t("Delete")}
-                                        >
-                                            <Trash2 size={14} strokeWidth={1.75} />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))
+                                            <div className="aip-row-actions flex items-center gap-1 shrink-0">
+                                                <button
+                                                    onClick={() => handleEditProvider(provider)}
+                                                    className="aip-btn"
+                                                    data-icon="true"
+                                                    data-variant="ghost"
+                                                    title={t("Edit")}
+                                                >
+                                                    <Edit2 size={14} strokeWidth={1.75} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteCustom(provider.id)}
+                                                    className="aip-btn"
+                                                    data-icon="true"
+                                                    data-variant="danger-ghost"
+                                                    title={t("Delete")}
+                                                >
+                                                    <Trash2 size={14} strokeWidth={1.75} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
                         )}
                     </div>
-                )}
-            </div>
 
-            </div>
+                </div>
             )}
 
             {activeTab === 'vision' && (
-            <div
-                id={tabPanelId('vision')}
-                role="tabpanel"
-                aria-labelledby={tabButtonId('vision')}
-                tabIndex={0}
-                className="space-y-5 aip-panel-fade"
-                data-stagger-skip
-            >
-            {/* Screenshots — the privacy-relevant half of screenUnderstandingMode.
+                <div
+                    id={tabPanelId('vision')}
+                    role="tabpanel"
+                    aria-labelledby={tabButtonId('vision')}
+                    tabIndex={0}
+                    className="space-y-5 aip-panel-fade"
+                    data-stagger-skip
+                >
+                    {/* Screenshots — the privacy-relevant half of screenUnderstandingMode.
                 Was three radios (Vision first / Vision only / Private vision) whose
                 copy could only describe itself as "Recommended" vs "Stricter" — a
                 fallback-strategy distinction the user has no way to reason about.
                 Now two switches over the same enum; see applyVisionMode(). */}
-            <div className="space-y-5">
-                <div>
-                    <h3 className="text-sm font-bold aip-hero mb-1">{t('Screenshots')}</h3>
-                    <p className="text-xs aip-muted mb-2">{t('Controls where screenshots of your screen are processed.')}</p>
-                </div>
-                <div className="aip-card p-5 flex flex-col gap-3">
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="flex flex-col min-w-0">
-                            <span className="text-xs aip-hero font-semibold">{t('Keep screenshots on this device')}</span>
-                            <span className="aip-meta leading-snug mt-0.5">
-                                {t('Use a local vision model (Ollama) only. Cloud vision is never called.')}
-                            </span>
+                    <div className="space-y-5">
+                        <div>
+                            <h3 className="text-sm font-bold aip-hero mb-1">{t('Screenshots')}</h3>
+                            <p className="text-xs aip-muted mb-2">{t('Controls where screenshots of your screen are processed.')}</p>
                         </div>
-                        <AipSwitch
-                            checked={visionLocalOnly}
-                            label={t('Keep screenshots on this device')}
-                            onChange={(next) => applyVisionMode(next, visionRequired)}
-                        />
-                    </div>
+                        <div className="aip-card p-5 flex flex-col gap-3">
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-xs aip-hero font-semibold">{t('Keep screenshots on this device')}</span>
+                                    <span className="aip-meta leading-snug mt-0.5">
+                                        {t('Use a local vision model (Ollama) only. Cloud vision is never called.')}
+                                    </span>
+                                </div>
+                                <AipSwitch
+                                    checked={visionLocalOnly}
+                                    label={t('Keep screenshots on this device')}
+                                    onChange={(next) => applyVisionMode(next, visionRequired)}
+                                />
+                            </div>
 
-                    {visionLocalOnly && !localFallbackAvailable && (
-                        <div className="aip-inline-warn flex items-start gap-2">
-                            <AlertCircle size={12} strokeWidth={1.75} className="shrink-0 mt-0.5" aria-hidden="true" />
-                            <span>{t('No local vision model is installed. Screenshot questions will be refused rather than sent to the cloud. Install a vision-capable model under Local & Gateways.')}</span>
-                        </div>
-                    )}
+                            {visionLocalOnly && !localFallbackAvailable && (
+                                <div className="aip-inline-warn flex items-start gap-2">
+                                    <AlertCircle size={12} strokeWidth={1.75} className="shrink-0 mt-0.5" aria-hidden="true" />
+                                    <span>{t('No local vision model is installed. Screenshot questions will be refused rather than sent to the cloud. Install a vision-capable model under Local & Gateways.')}</span>
+                                </div>
+                            )}
 
-                    <div className="flex items-center justify-between gap-3 pt-3 border-t" style={{ borderColor: 'var(--aip-divider)' }}>
-                        <div className="flex flex-col min-w-0">
-                            <span className={`text-xs font-semibold ${visionLocalOnly ? 'aip-faint' : 'aip-hero'}`}>
-                                {t('Require a vision-capable provider')}
-                            </span>
-                            <span className="aip-meta leading-snug mt-0.5">
-                                {visionLocalOnly
-                                    ? t('Always on while screenshots stay on this device.')
-                                    : t('Fail with a clear error instead of quietly answering without the screenshot.')}
-                            </span>
-                        </div>
-                        <AipSwitch
-                            checked={visionRequired}
-                            disabled={visionLocalOnly}
-                            label={t('Require a vision-capable provider')}
-                            onChange={(next) => applyVisionMode(visionLocalOnly, next)}
-                        />
-                    </div>
+                            <div className="flex items-center justify-between gap-3 pt-3 border-t" style={{ borderColor: 'var(--aip-divider)' }}>
+                                <div className="flex flex-col min-w-0">
+                                    <span className={`text-xs font-semibold ${visionLocalOnly ? 'aip-faint' : 'aip-hero'}`}>
+                                        {t('Require a vision-capable provider')}
+                                    </span>
+                                    <span className="aip-meta leading-snug mt-0.5">
+                                        {visionLocalOnly
+                                            ? t('Always on while screenshots stay on this device.')
+                                            : t('Fail with a clear error instead of quietly answering without the screenshot.')}
+                                    </span>
+                                </div>
+                                <AipSwitch
+                                    checked={visionRequired}
+                                    disabled={visionLocalOnly}
+                                    label={t('Require a vision-capable provider')}
+                                    onChange={(next) => applyVisionMode(visionLocalOnly, next)}
+                                />
+                            </div>
 
 
-                    {/* Capture quality, not privacy — but it is about screenshots, and
+                            {/* Capture quality, not privacy — but it is about screenshots, and
                         this is the screenshots card, so it groups by subject rather than
                         by which engine owns it. */}
-                    <div className="flex items-center justify-between gap-3 pt-3 border-t" style={{ borderColor: 'var(--aip-divider)' }}>
-                        <div className="flex flex-col min-w-0">
-                            <span className="text-xs aip-hero font-semibold">{t('High-resolution capture for code')}</span>
-                            {/* Scope qualifier restored. This writes
+                            <div className="flex items-center justify-between gap-3 pt-3 border-t" style={{ borderColor: 'var(--aip-divider)' }}>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-xs aip-hero font-semibold">{t('High-resolution capture for code')}</span>
+                                    {/* Scope qualifier restored. This writes
                                 `technicalInterviewVisionFirst`, whose only consumer is
                                 ScreenUnderstandingService.pickOptimizationProfile, and only
                                 when the active mode is a technical template. Copy that
                                 promised it for screenshots generally described a setting
                                 that does nothing on the hotkey/attachment capture path. */}
-                            <span className="aip-meta leading-snug mt-0.5">{t('In technical interview and coding modes, captures at the highest-resolution profile so small code text stays legible. Costs more tokens per screenshot.')}</span>
-                        </div>
-                        <AipSwitch
-                            checked={technicalInterviewVisionFirst}
-                            label={t('High-resolution capture for code')}
-                            onChange={(next) => {
-                                setTechnicalInterviewVisionFirst(next);
-                                const api: any = window.electronAPI;
-                                if (api?.setTechnicalInterviewVisionFirst) {
-                                    api.setTechnicalInterviewVisionFirst(next);
-                                } else {
-                                    window.electronAPI?.setTechnicalInterviewDirectVision?.(next);
-                                }
-                            }}
-                        />
-                    </div>
+                                    <span className="aip-meta leading-snug mt-0.5">{t('In technical interview and coding modes, captures at the highest-resolution profile so small code text stays legible. Costs more tokens per screenshot.')}</span>
+                                </div>
+                                <AipSwitch
+                                    checked={technicalInterviewVisionFirst}
+                                    label={t('High-resolution capture for code')}
+                                    onChange={(next) => {
+                                        setTechnicalInterviewVisionFirst(next);
+                                        const api: any = window.electronAPI;
+                                        if (api?.setTechnicalInterviewVisionFirst) {
+                                            api.setTechnicalInterviewVisionFirst(next);
+                                        } else {
+                                            window.electronAPI?.setTechnicalInterviewDirectVision?.(next);
+                                        }
+                                    }}
+                                />
+                            </div>
 
-                    {/* The two cards answer overlapping questions and previously never
+                            {/* The two cards answer overlapping questions and previously never
                         referenced each other, leaving the user to reconcile them.
 
                         The note used to assert "behaves as on-device only" with no
@@ -5221,22 +5221,22 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                         without it — the opposite of on-device processing, and the same
                         card's own "Omitted" badge already said so. Each branch below
                         states what actually happens, mirroring visionPolicy.ts. */}
-                    {!visionLocalOnly && providerDataScopes.screenshots === false && (
-                        <div className="flex items-start gap-2 pt-3 border-t" style={{ borderColor: 'var(--aip-divider)' }}>
-                            <Info size={12} strokeWidth={1.75} className="aip-faint shrink-0 mt-0.5" aria-hidden="true" />
-                            <p className="aip-meta leading-relaxed">
-                                {localFallbackAvailable
-                                    ? t('Screenshots are already blocked from cloud providers by the data scope below, so your local vision model handles them.')
-                                    : visionRequired
-                                        ? t('Screenshots are blocked from cloud providers by the data scope below, and no local vision model is installed. Screenshot questions will be refused rather than answered without the image.')
-                                        : t('Screenshots are blocked from cloud providers by the data scope below, and no local vision model is installed — so the screenshot is discarded and the question is answered without it.')}
-                            </p>
+                            {!visionLocalOnly && providerDataScopes.screenshots === false && (
+                                <div className="flex items-start gap-2 pt-3 border-t" style={{ borderColor: 'var(--aip-divider)' }}>
+                                    <Info size={12} strokeWidth={1.75} className="aip-faint shrink-0 mt-0.5" aria-hidden="true" />
+                                    <p className="aip-meta leading-relaxed">
+                                        {localFallbackAvailable
+                                            ? t('Screenshots are already blocked from cloud providers by the data scope below, so your local vision model handles them.')
+                                            : visionRequired
+                                                ? t('Screenshots are blocked from cloud providers by the data scope below, and no local vision model is installed. Screenshot questions will be refused rather than answered without the image.')
+                                                : t('Screenshots are blocked from cloud providers by the data scope below, and no local vision model is installed — so the screenshot is discarded and the question is answered without it.')}
+                                    </p>
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
-            </div>
+                    </div>
 
-            {/* Cloud Provider Data Scopes — fail-closed cloud share controls.
+                    {/* Cloud Provider Data Scopes — fail-closed cloud share controls.
                 Was six equal-weight rows of bare nouns, each growing a WRAPPED second
                 line when switched off, plus a permanent footnote restating what those
                 lines already said. The card got taller and noisier the more you locked
@@ -5244,28 +5244,28 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
                 by shape rather than by reading six similar words, a one-word pill
                 instead of a sentence, a count so the overall state is legible without
                 reading any row, and the footnote only when it carries new information. */}
-            <div className="space-y-5">
-                <div className="flex items-end justify-between gap-3">
-                    <div className="min-w-0">
-                        <h3 className="text-sm font-bold aip-hero mb-1">{t('Cloud provider data scopes')}</h3>
-                        <p className="text-xs aip-muted">{t('What cloud AI providers are allowed to receive.')}</p>
-                    </div>
-                    <span className="aip-meta tabular-nums shrink-0 pb-0.5">
-                        {SCOPE_ROWS.length - disabledScopeCount}/{SCOPE_ROWS.length} {t('shared')}
-                    </span>
-                </div>
-                <div className="aip-card p-4 flex flex-col gap-2">
-                    {SCOPE_ROWS.map(({ key, labelKey, Icon }) => {
-                        const allowed = providerDataScopes[key] !== false;
-                        const label = t(labelKey);
-                        return (
-                            <div
-                                key={key}
-                                className="flex items-center gap-3"
-                            >
-                                <Icon size={13} strokeWidth={1.75} className={allowed ? 'aip-faint shrink-0' : 'aip-warn-fg shrink-0'} aria-hidden="true" />
-                                <span className="text-xs aip-hero min-w-0 truncate">{label}</span>
-                                {/* A disabled scope is not inert: LLMHelper reroutes it to a local
+                    <div className="space-y-5">
+                        <div className="flex items-end justify-between gap-3">
+                            <div className="min-w-0">
+                                <h3 className="text-sm font-bold aip-hero mb-1">{t('Cloud provider data scopes')}</h3>
+                                <p className="text-xs aip-muted">{t('What cloud AI providers are allowed to receive.')}</p>
+                            </div>
+                            <span className="aip-meta tabular-nums shrink-0 pb-0.5">
+                                {SCOPE_ROWS.length - disabledScopeCount}/{SCOPE_ROWS.length} {t('shared')}
+                            </span>
+                        </div>
+                        <div className="aip-card p-4 flex flex-col gap-2">
+                            {SCOPE_ROWS.map(({ key, labelKey, Icon }) => {
+                                const allowed = providerDataScopes[key] !== false;
+                                const label = t(labelKey);
+                                return (
+                                    <div
+                                        key={key}
+                                        className="flex items-center gap-3"
+                                    >
+                                        <Icon size={13} strokeWidth={1.75} className={allowed ? 'aip-faint shrink-0' : 'aip-warn-fg shrink-0'} aria-hidden="true" />
+                                        <span className="text-xs aip-hero min-w-0 truncate">{label}</span>
+                                        {/* A disabled scope is not inert: LLMHelper reroutes it to a local
                                     model, or DROPS it when none exists. One word each, so the row
                                     never wraps and the card never grows.
 
@@ -5276,60 +5276,60 @@ export const AIProvidersSettings: React.FC<AIProvidersSettingsProps> = ({
 
                                     Transcripts is special-cased again below: denying it does not
                                     merely trim context, it fails the whole request. */}
-                                {!allowed && (() => {
-                                    const rowLocal = localFallbackFor(key);
-                                    const isKillSwitch = key === 'transcript' && !rowLocal;
-                                    return (
-                                    <span
-                                        className="aip-badge shrink-0"
-                                        data-tone={rowLocal ? 'neutral' : 'warn'}
-                                        title={rowLocal
-                                            ? t('Handled on-device by your local model.')
-                                            : isKillSwitch
-                                                ? t('Cloud requests are refused entirely — there is no local model to fall back to.')
-                                                : t('Omitted from context — no local model to fall back to.')}
-                                    >
-                                        {rowLocal ? <Laptop size={9} strokeWidth={2} aria-hidden="true" /> : null}
-                                        <span className="aip-badge-label">{rowLocal ? t('On-device') : isKillSwitch ? t('Blocks cloud') : t('Omitted')}</span>
-                                    </span>
-                                    );
-                                })()}
-                                <div className="ml-auto shrink-0">
-                                    <AipSwitch
-                                        checked={allowed}
-                                        label={`${t('Allow')} ${label} ${t('to cloud providers')}`}
-                                        onChange={() => {
-                                            const next = { ...providerDataScopes, [key]: !allowed };
-                                            setProviderDataScopes(next);
-                                            window.electronAPI?.setProviderDataScopes?.(next);
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-                {/* Only when it says something the pills do not. The old version showed a
+                                        {!allowed && (() => {
+                                            const rowLocal = localFallbackFor(key);
+                                            const isKillSwitch = key === 'transcript' && !rowLocal;
+                                            return (
+                                                <span
+                                                    className="aip-badge shrink-0"
+                                                    data-tone={rowLocal ? 'neutral' : 'warn'}
+                                                    title={rowLocal
+                                                        ? t('Handled on-device by your local model.')
+                                                        : isKillSwitch
+                                                            ? t('Cloud requests are refused entirely — there is no local model to fall back to.')
+                                                            : t('Omitted from context — no local model to fall back to.')}
+                                                >
+                                                    {rowLocal ? <Laptop size={9} strokeWidth={2} aria-hidden="true" /> : null}
+                                                    <span className="aip-badge-label">{rowLocal ? t('On-device') : isKillSwitch ? t('Blocks cloud') : t('Omitted')}</span>
+                                                </span>
+                                            );
+                                        })()}
+                                        <div className="ml-auto shrink-0">
+                                            <AipSwitch
+                                                checked={allowed}
+                                                label={`${t('Allow')} ${label} ${t('to cloud providers')}`}
+                                                onChange={() => {
+                                                    const next = { ...providerDataScopes, [key]: !allowed };
+                                                    setProviderDataScopes(next);
+                                                    window.electronAPI?.setProviderDataScopes?.(next);
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        {/* Only when it says something the pills do not. The old version showed a
                     permanent restatement of the per-row text. */}
-                {providerDataScopes.transcript === false && !localFallbackFor('transcript') && (
-                    <div className="aip-inline-warn flex items-start gap-2" role="status">
-                        <AlertCircle size={12} strokeWidth={1.75} className="shrink-0 mt-0.5" aria-hidden="true" />
-                        {/* Transcripts is not a context trim. Every request carries a
+                        {providerDataScopes.transcript === false && !localFallbackFor('transcript') && (
+                            <div className="aip-inline-warn flex items-start gap-2" role="status">
+                                <AlertCircle size={12} strokeWidth={1.75} className="shrink-0 mt-0.5" aria-hidden="true" />
+                                {/* Transcripts is not a context trim. Every request carries a
                             transcript scope at the provider boundary, so denying it with
                             no local fallback makes the whole cascade refuse and the user
                             sees "All AI providers failed" with no stated cause. Said
                             plainly here because nothing else in the UI says it. */}
-                        <span>{t('With Transcripts off and no local model selected, cloud requests are refused entirely — answers will fail rather than run without the transcript. Select Ollama under Local & Gateways to keep answering on-device.')}</span>
+                                <span>{t('With Transcripts off and no local model selected, cloud requests are refused entirely — answers will fail rather than run without the transcript. Select Ollama under Local & Gateways to keep answering on-device.')}</span>
+                            </div>
+                        )}
+                        {disabledScopeCount > 0 && !localFallbackFor('reference_files') && providerDataScopes.transcript !== false && (
+                            <div className="aip-inline-warn flex items-start gap-2" role="status">
+                                <AlertCircle size={12} strokeWidth={1.75} className="shrink-0 mt-0.5" aria-hidden="true" />
+                                <span>{t('Disabled types are dropped from context, not handled on-device — select a local model under Local & Gateways to keep them.')}</span>
+                            </div>
+                        )}
                     </div>
-                )}
-                {disabledScopeCount > 0 && !localFallbackFor('reference_files') && providerDataScopes.transcript !== false && (
-                    <div className="aip-inline-warn flex items-start gap-2" role="status">
-                        <AlertCircle size={12} strokeWidth={1.75} className="shrink-0 mt-0.5" aria-hidden="true" />
-                        <span>{t('Disabled types are dropped from context, not handled on-device — select a local model under Local & Gateways to keep them.')}</span>
-                    </div>
-                )}
-            </div>
-            </div>
+                </div>
             )}
 
             {/* LAST child on purpose: as the first child of a `space-y-5` stack it

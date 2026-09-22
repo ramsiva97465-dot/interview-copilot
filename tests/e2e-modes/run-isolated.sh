@@ -12,9 +12,9 @@ mkdir -p "$OUT"
 for m in $MODES; do
   bash tests/e2e-modes/ensure-backend.sh >/dev/null 2>&1
   # kill any stray electron before each mode
-  ps aux | grep "natively-cluely-ai-assistant/node_modules/electron" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {} 2>/dev/null
-  pkill -9 -f "^Natively$" 2>/dev/null
-  rm -f ~/Library/Application\ Support/Electron/natively.db* 2>/dev/null
+  ps aux | grep "MeetFloo-cluely-ai-assistant/node_modules/electron" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {} 2>/dev/null
+  pkill -9 -f "^MeetFloo$" 2>/dev/null
+  rm -f ~/Library/Application\ Support/Electron/MeetFloo.db* 2>/dev/null
   echo ">>> MODE $m @ $(date -u +%H:%M:%S)"
   MODE_FILTER="$m" RUN_N="$RUN-$m" JUDGE="${JUDGE:-1}" node tests/e2e-modes/runMatrix.mjs > "$OUT/mode-run-$m.log" 2>&1 &
   P=$!
@@ -24,5 +24,5 @@ for m in $MODES; do
   cp "test-results/modes-autopilot/run-$RUN-$m/mode-$m.json" "$OUT/" 2>/dev/null
   grep -E "pass=|MATRIX SUMMARY|vectorReady" "$OUT/mode-run-$m.log" 2>/dev/null | tail -8
 done
-ps aux | grep "natively-cluely-ai-assistant/node_modules/electron" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {} 2>/dev/null
+ps aux | grep "MeetFloo-cluely-ai-assistant/node_modules/electron" | grep -v grep | awk '{print $2}' | xargs -I{} kill -9 {} 2>/dev/null
 echo "=== ISOLATED RUN DONE — per-mode json in $OUT/ ==="

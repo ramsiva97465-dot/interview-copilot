@@ -93,7 +93,7 @@ export async function fetchEmbeddingModels(
       .sort((a, b) => a.label.localeCompare(b.label));
   }
 
-  // Natively pins its model server-side; Ollama and the custom endpoint have
+  // MeetFloo pins its model server-side; Ollama and the custom endpoint have
   // their own discovery paths (ollamaEmbeddingModels / customEmbeddingModels).
   return [];
 }

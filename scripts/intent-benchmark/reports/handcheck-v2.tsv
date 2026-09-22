@@ -1,4 +1,4 @@
-# Natively interaction-router dataset, hand check
+# MeetFloo interaction-router dataset, hand check
 # 399 rows sampled from 2008 (20%).
 #
 # HOW TO FILL THIS IN
@@ -16,7 +16,7 @@
 #   needs_response is now just yes/no. "optional" is gone; it had become a
 #     bin for the user thinking aloud on their own mic, which is "no".
 #
-# The one that matters most is needs_response. "no" means Natively should
+# The one that matters most is needs_response. "no" means MeetFloo should
 # stay silent: backchannels, the other party thinking aloud, your own voice
 # on your own mic, admin chatter.
 #

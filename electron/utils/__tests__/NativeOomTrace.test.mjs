@@ -211,17 +211,17 @@ test('actual trace records the RSS threshold crossing once across repeated sampl
   const traceFs = {
     appendFileSync: (_path, line) => writes.push(JSON.parse(line)),
     existsSync: () => false,
-    mkdirSync: () => {},
+    mkdirSync: () => { },
     statSync: () => ({ size: 0 }),
   };
   const starts = [];
   const actual = new NativeOomTrace({
     enabled: true,
     contentTraceEnabled: true,
-    electronApp: { getPath: () => '/tmp/natively-test' },
+    electronApp: { getPath: () => '/tmp/MeetFloo-test' },
     tracing: {
       startRecording: async (options) => { starts.push(options); },
-      stopRecording: async () => {},
+      stopRecording: async () => { },
     },
     traceFs,
     now: () => 1,
@@ -248,8 +248,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const source = fs.readFileSync(path.resolve(here, '..', 'NativeOomTrace.ts'), 'utf8');
 
 test('native OOM trace is explicitly opt-in and bounded', () => {
-  assert.match(source, /NATIVELY_NATIVE_OOM_TRACE/);
-  assert.match(source, /NATIVELY_NATIVE_OOM_CONTENT_TRACE/);
+  assert.match(source, /MEETFLOO_NATIVE_OOM_TRACE/);
+  assert.match(source, /MEETFLOO_NATIVE_OOM_CONTENT_TRACE/);
   assert.match(source, /MAX_TRACE_BYTES = 5 \* 1024 \* 1024/);
   assert.match(source, /CONTENT_TRACE_DURATION_MS = 25_000/);
   assert.match(source, /trace_buffer_size_in_kb: 16 \* 1024/);

@@ -1,5 +1,5 @@
 // Converts an authored transcript (benchmark/transcripts/src/<ID>.txt, `S<n>: text` lines)
-// into Natively's real TranscriptSegment[] shape (electron/SessionTracker.ts):
+// into MeetFloo's real TranscriptSegment[] shape (electron/SessionTracker.ts):
 //   { speaker, speakerId?, text, timestamp, final, confidence?, origin }
 //
 // Channel mapping mirrors production capture:

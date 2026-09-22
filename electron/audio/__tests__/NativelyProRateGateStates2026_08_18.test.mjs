@@ -30,17 +30,17 @@ Module._load = function patched(request) {
   return origLoad.apply(this, arguments);
 };
 
-const { NativelyProSTT } = await import(pathToFileURL(path.join(distRoot, 'NativelyProSTT.js')).href);
+const { MeetFlooProSTT } = await import(pathToFileURL(path.join(distRoot, 'MeetFlooProSTT.js')).href);
 
 function probe({ readyState, isConnected }) {
-  const stt = new NativelyProSTT('audit-key', 'system');
-  stt.on('error', () => {});
+  const stt = new MeetFlooProSTT('audit-key', 'system');
+  stt.on('error', () => { });
   let closed = false;
   stt.isActive = true;
   stt.isConnected = isConnected;
   stt.ws = readyState === null ? null : {
     readyState,
-    removeAllListeners() {}, on() {}, send() {},
+    removeAllListeners() { }, on() { }, send() { },
     close() { closed = true; },
   };
   stt.setSampleRate(48000);

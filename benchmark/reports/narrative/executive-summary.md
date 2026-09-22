@@ -1,4 +1,4 @@
-**No GPT-5.6 Luna configuration should replace DeepSeek V4.1 Flash for Natively summaries.** On the real Natively pipeline, every Luna effort level fails the stated requirement of being "significantly cheaper". Each is also more than twice as slow, and each non-max level retains measurably fewer facts.
+**No GPT-5.6 Luna configuration should replace DeepSeek V4.1 Flash for MeetFloo summaries.** On the real MeetFloo pipeline, every Luna effort level fails the stated requirement of being "significantly cheaper". Each is also more than twice as slow, and each non-max level retains measurably fewer facts.
 
 | | Current: DS V4.1 Flash, thinking off | Luna none | Luna low | Luna medium | Luna max |
 |---|---|---|---|---|---|

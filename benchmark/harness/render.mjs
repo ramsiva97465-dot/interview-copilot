@@ -1,4 +1,4 @@
-// Renders a Natively V3 summary object (the saved detailedSummary) to Markdown in the order
+// Renders a MeetFloo V3 summary object (the saved detailedSummary) to Markdown in the order
 // the app surfaces it: title, overview, Summary (tldr), mode template sections (rendered notes),
 // then the structured blocks that drive export / follow-up (actions, decisions, questions,
 // risks) and the follow-up draft. Nothing about the producing model is included.

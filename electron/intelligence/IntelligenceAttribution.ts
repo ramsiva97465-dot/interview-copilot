@@ -107,8 +107,8 @@ const ATTR_RING_MAX = 200;
 interface AttrSlot { ring: IntelligenceAttribution[]; seq: number }
 const _attr: AttrSlot = (() => {
   const g = globalThis as unknown as Record<string, AttrSlot | undefined>;
-  if (!g.__nativelyIntelAttributionV1__) g.__nativelyIntelAttributionV1__ = { ring: [], seq: 0 };
-  return g.__nativelyIntelAttributionV1__;
+  if (!g.__MeetFlooIntelAttributionV1__) g.__MeetFlooIntelAttributionV1__ = { ring: [], seq: 0 };
+  return g.__MeetFlooIntelAttributionV1__;
 })();
 
 const SHORT_LABEL_RE = /^[\w .:_/+-]{0,48}$/;
@@ -190,7 +190,7 @@ export function buildAttribution(input: AttributionInput): IntelligenceAttributi
  * `[IntelligenceAttribution]` line. Never throws. Returns the record (handy for tests).
  *
  * The log line is gated on the `trace` intelligence flag OR an explicit
- * NATIVELY_INTELLIGENCE_ATTRIBUTION=true env (so it can be turned on without enabling
+ * MEETFLOO_INTELLIGENCE_ATTRIBUTION=true env (so it can be turned on without enabling
  * the full trace _attr.ring). The RING is always populated (cheap, content-free) so the
  * verify:memory-context harness can read attribution even with logging off.
  */
@@ -208,8 +208,8 @@ export function recordAttribution(input: AttributionInput): IntelligenceAttribut
   try {
     let on = false;
     try {
-      const env = (process.env.NATIVELY_INTELLIGENCE_ATTRIBUTION || '').trim().toLowerCase();
-      const traceEnv = (process.env.NATIVELY_INTELLIGENCE_TRACE || '').trim().toLowerCase();
+      const env = (process.env.MEETFLOO_INTELLIGENCE_ATTRIBUTION || '').trim().toLowerCase();
+      const traceEnv = (process.env.MEETFLOO_INTELLIGENCE_TRACE || '').trim().toLowerCase();
       on = env === 'true' || env === '1' || traceEnv === 'true' || traceEnv === '1';
     } catch { /* ignore */ }
     if (on) {

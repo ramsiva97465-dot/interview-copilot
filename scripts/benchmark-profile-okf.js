@@ -35,15 +35,15 @@ const outDir = path.join(repoRoot, 'debug-artifacts', 'okf-profile-benchmark');
 const MODE_OFF = process.argv.includes('--off');
 
 // ── flag env (set BEFORE loading any dist module that reads flags) ──
-if (!process.env.NATIVELY_TEST_USERDATA) {
-  process.env.NATIVELY_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'okf-profile-bench-'));
+if (!process.env.MEETFLOO_TEST_USERDATA) {
+  process.env.MEETFLOO_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'okf-profile-bench-'));
 }
 if (MODE_OFF) {
-  process.env.NATIVELY_OKF_PROFILE_PACKS = '0';
-  process.env.NATIVELY_OKF_PROFILE_HYBRID_RETRIEVAL = '0';
+  process.env.MEETFLOO_OKF_PROFILE_PACKS = '0';
+  process.env.MEETFLOO_OKF_PROFILE_HYBRID_RETRIEVAL = '0';
 } else {
-  process.env.NATIVELY_OKF_PROFILE_PACKS = '1';
-  process.env.NATIVELY_OKF_PROFILE_HYBRID_RETRIEVAL = '1';
+  process.env.MEETFLOO_OKF_PROFILE_PACKS = '1';
+  process.env.MEETFLOO_OKF_PROFILE_HYBRID_RETRIEVAL = '1';
 }
 
 function req(rel) {
@@ -57,15 +57,23 @@ function loadFixture() {
   // CJS script has no ESM-interop dance. Kept in sync with
   // electron/services/knowledge/__tests__/fixtures/profile-fixture.mjs.
   const FIXTURE_RESUME = {
-    identity: { name: 'Alex Rivera', email: 'alex.rivera@example.com', location: 'Austin, TX', github: 'github.com/alexrivera',
-      summary: 'Backend-leaning full-stack engineer with 6 years building distributed systems and developer tools. Ships pragmatic, well-tested services and mentors junior engineers.' },
-    skills: { languages: ['Python', 'TypeScript', 'Go', 'SQL'], frameworks: ['FastAPI', 'React', 'Next.js'], cloud: ['AWS', 'GCP'],
-      databases: ['PostgreSQL', 'Redis'], ml: ['PyTorch', 'LangChain'], devops: ['Docker', 'Kubernetes', 'Terraform'], tools: ['Git', 'Datadog'] },
+    identity: {
+      name: 'Alex Rivera', email: 'alex.rivera@example.com', location: 'Austin, TX', github: 'github.com/alexrivera',
+      summary: 'Backend-leaning full-stack engineer with 6 years building distributed systems and developer tools. Ships pragmatic, well-tested services and mentors junior engineers.'
+    },
+    skills: {
+      languages: ['Python', 'TypeScript', 'Go', 'SQL'], frameworks: ['FastAPI', 'React', 'Next.js'], cloud: ['AWS', 'GCP'],
+      databases: ['PostgreSQL', 'Redis'], ml: ['PyTorch', 'LangChain'], devops: ['Docker', 'Kubernetes', 'Terraform'], tools: ['Git', 'Datadog']
+    },
     experience: [
-      { company: 'Nimbus Data', role: 'Senior Software Engineer', start_date: '2022-03', end_date: null,
-        bullets: ['Built a real-time ingestion pipeline that reduced event processing latency by 40%.', 'Led migration of a monolith to 6 independent services, cutting deploy time from 45 to 8 minutes.', 'Mentored 3 junior engineers and ran the team code-review guild.'] },
-      { company: 'Loop Analytics', role: 'Software Engineer', start_date: '2019-06', end_date: '2022-02',
-        bullets: ['Designed a PostgreSQL-backed reporting API serving 2M requests/day.', 'Cut cloud spend 25% by right-sizing Kubernetes workloads.'] },
+      {
+        company: 'Nimbus Data', role: 'Senior Software Engineer', start_date: '2022-03', end_date: null,
+        bullets: ['Built a real-time ingestion pipeline that reduced event processing latency by 40%.', 'Led migration of a monolith to 6 independent services, cutting deploy time from 45 to 8 minutes.', 'Mentored 3 junior engineers and ran the team code-review guild.']
+      },
+      {
+        company: 'Loop Analytics', role: 'Software Engineer', start_date: '2019-06', end_date: '2022-02',
+        bullets: ['Designed a PostgreSQL-backed reporting API serving 2M requests/day.', 'Cut cloud spend 25% by right-sizing Kubernetes workloads.']
+      },
     ],
     projects: [{ name: 'OpenTrace', description: 'An open-source distributed tracing sidecar for FastAPI services.', technologies: ['Python', 'FastAPI', 'OpenTelemetry'], url: 'github.com/alexrivera/opentrace' }],
     education: [{ institution: 'University of Texas at Austin', degree: 'B.S.', field: 'Computer Science', start_date: '2015-08', end_date: '2019-05', gpa: '3.7' }],
@@ -82,8 +90,10 @@ function loadFixture() {
     technologies: ['Go', 'Kubernetes', 'Kafka', 'gRPC', 'PostgreSQL'], keywords: ['distributed systems', 'reliability', 'scale', 'event-driven'],
   };
   const FIXTURE_ARTIFACTS = {
-    gapAnalysis: { match_percentage: 78, matched_skills: ['Python', 'Go', 'Kubernetes', 'PostgreSQL', 'distributed systems'],
-      gaps: [{ skill: 'Kafka', gap_type: 'missing' }, { skill: 'gRPC', gap_type: 'weak' }] },
+    gapAnalysis: {
+      match_percentage: 78, matched_skills: ['Python', 'Go', 'Kubernetes', 'PostgreSQL', 'distributed systems'],
+      gaps: [{ skill: 'Kafka', gap_type: 'missing' }, { skill: 'gRPC', gap_type: 'weak' }]
+    },
     negotiationScript: { salary_range: { min: 210000, max: 260000, currency: 'USD' }, anchor_script: 'Based on my distributed-systems track record and the staff scope here, I am targeting the upper end of the band.', rationale: 'Six years of relevant experience plus proven latency and cost wins.' },
     mockQuestions: [{ question: 'How would you design a fleet-coordination service for 10k robots?', category: 'system_design', difficulty: 'hard' }],
     cultureMappings: { values: ['ownership', 'reliability', 'pragmatism'], mappings: [{ value: 'ownership', evidence: 'Led a full monolith-to-services migration end to end.' }] },

@@ -28,8 +28,8 @@ const { RAGRetriever } = await import(dist('electron/rag/RAGRetriever.js'));
 const { getRelevantNodes } = await import(dist('premium/electron/knowledge/HybridSearchEngine.js'));
 
 afterEach(() => {
-  delete process.env.NATIVELY_MIN_SIMILARITY_BY_SPACE;
-  delete process.env.NATIVELY_SEMANTIC_ADMISSION_GATE;
+  delete process.env.MEETFLOO_MIN_SIMILARITY_BY_SPACE;
+  delete process.env.MEETFLOO_SEMANTIC_ADMISSION_GATE;
 });
 
 // ── 1. resolveMinSimilarity ─────────────────────────────────────────────────
@@ -41,14 +41,14 @@ test('every space resolves to the legacy 0.25 by default (plumbing, not retuning
   assert.equal(resolveMinSimilarity(null), 0.25);
 });
 
-test('NATIVELY_MIN_SIMILARITY_BY_SPACE overrides one space without touching others', () => {
-  process.env.NATIVELY_MIN_SIMILARITY_BY_SPACE = JSON.stringify({ 'gemini:gemini-embedding-2:768': 0.2 });
+test('MEETFLOO_MIN_SIMILARITY_BY_SPACE overrides one space without touching others', () => {
+  process.env.MEETFLOO_MIN_SIMILARITY_BY_SPACE = JSON.stringify({ 'gemini:gemini-embedding-2:768': 0.2 });
   assert.equal(resolveMinSimilarity('gemini:gemini-embedding-2:768'), 0.2);
   assert.equal(resolveMinSimilarity('local:Xenova/all-MiniLM-L6-v2:384'), 0.25);
 });
 
 test('malformed override falls back to defaults', () => {
-  process.env.NATIVELY_MIN_SIMILARITY_BY_SPACE = 'not-json{';
+  process.env.MEETFLOO_MIN_SIMILARITY_BY_SPACE = 'not-json{';
   assert.equal(resolveMinSimilarity('gemini:gemini-embedding-2:768'), 0.25);
 });
 
@@ -70,10 +70,10 @@ function makeRetrieverCapture() {
 }
 
 test('RAGRetriever passes the space-resolved minSimilarity to searchSimilar (both paths)', async () => {
-  process.env.NATIVELY_MIN_SIMILARITY_BY_SPACE = JSON.stringify({ 'gemini:gemini-embedding-2:768': 0.19 });
+  process.env.MEETFLOO_MIN_SIMILARITY_BY_SPACE = JSON.stringify({ 'gemini:gemini-embedding-2:768': 0.19 });
   const { retriever, captured } = makeRetrieverCapture();
-  await retriever.retrieve('what was decided?', 'meeting-1').catch(() => {});
-  await retriever.retrieveGlobal?.('what was decided across meetings?')?.catch?.(() => {});
+  await retriever.retrieve('what was decided?', 'meeting-1').catch(() => { });
+  await retriever.retrieveGlobal?.('what was decided across meetings?')?.catch?.(() => { });
   assert.ok(captured.length >= 1, 'searchSimilar must have been called');
   for (const options of captured) {
     assert.equal(options.minSimilarity, 0.19,
@@ -84,7 +84,7 @@ test('RAGRetriever passes the space-resolved minSimilarity to searchSimilar (bot
 
 test('RAGRetriever default is byte-identical to legacy (0.25)', async () => {
   const { retriever, captured } = makeRetrieverCapture();
-  await retriever.retrieve('what was decided?', 'meeting-1').catch(() => {});
+  await retriever.retrieve('what was decided?', 'meeting-1').catch(() => { });
   assert.ok(captured.length >= 1);
   assert.equal(captured[0].minSimilarity, 0.25);
 });
@@ -107,7 +107,7 @@ async function captureTelemetry(runFn) {
 }
 
 test('telemetry fires in OBSERVE mode (kill switch env=off) with per-candidate cosine/boostSum/admitted', async () => {
-  process.env.NATIVELY_SEMANTIC_ADMISSION_GATE = 'off';
+  process.env.MEETFLOO_SEMANTIC_ADMISSION_GATE = 'off';
   const { result, lines } = await captureTelemetry(() =>
     getRelevantNodes('tell me things', [NODE], async () => [1, 0], {
       embeddingSpaceKey: 'gemini:gemini-embedding-2:768',
@@ -127,7 +127,7 @@ test('telemetry fires in OBSERVE mode (kill switch env=off) with per-candidate c
 });
 
 test('telemetry reflects enforcement at the DEFAULT (env unset — gate is ON since 2026-08-14)', async () => {
-  delete process.env.NATIVELY_SEMANTIC_ADMISSION_GATE;
+  delete process.env.MEETFLOO_SEMANTIC_ADMISSION_GATE;
   const { lines } = await captureTelemetry(() =>
     getRelevantNodes('tell me things', [NODE], async () => [1, 0], {
       embeddingSpaceKey: 'gemini:gemini-embedding-2:768',

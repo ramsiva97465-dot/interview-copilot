@@ -1,7 +1,7 @@
 // electron/llm/__tests__/SilenceShareInstrument2026_09_04.test.mjs
 //
 // Phase 1b of the interaction-router campaign. The routing audit
-// (docs/natively-current-routing-map.md) could not report what share of live
+// (docs/MeetFloo-current-routing-map.md) could not report what share of live
 // WTA generations end in a silence string, because the decision is made by the
 // cloud LLM after a full generation rather than by a pre-check. This guards the
 // instrument that measures it.

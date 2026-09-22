@@ -3,7 +3,7 @@
 // Boots a REAL Electron main process (temp userData) and validates this
 // session's changes against REAL APIs:
 //   S1  DeepSeek provider sanity (deepseek-v4-flash, DIRECT api.deepseek.com —
-//       never through natively-api/server.js, which writes billing rows).
+//       never through MeetFloo-api/server.js, which writes billing rows).
 //   S2  Doc-grounded custom mode through streamChat's INTERNAL retrieval —
 //       the unified Phase 2 site-2 path (shouldUseHybridRetrieval +
 //       runHybridModeRetrieval) — 10 critical seminar questions.
@@ -46,7 +46,7 @@ const GEMINI_KEY = process.env.GEMINI_API_KEY || '';
 if (!DEEPSEEK_KEY) { console.error('[e2e] FATAL: DEEPSEEK_API_KEY missing from .env'); process.exit(1); }
 console.log(`[e2e] keys: deepseek=present gemini=${GEMINI_KEY ? 'present' : 'ABSENT (local embedder fallback)'}`);
 
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-e2e-semrepair-'));
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-e2e-semrepair-'));
 app.setPath('userData', tmpUserData);
 
 const CUSTOM_PROMPT = [
@@ -130,7 +130,7 @@ async function main() {
 
   // ── S2: doc-grounded via streamChat INTERNAL retrieval (Phase 2 site 2) ──
   const mm = ModesManager.getInstance();
-  for (const m of mm.getModes()) { if (/seminar/i.test(m.name)) { try { mm.deleteMode(m.id); } catch (_) {} } }
+  for (const m of mm.getModes()) { if (/seminar/i.test(m.name)) { try { mm.deleteMode(m.id); } catch (_) { } } }
   const mode = mm.createMode({ name: 'Seminar Presentation Assistant (E2E)', templateType: 'general' });
   // Mirror a REAL user-configured doc-grounded mode: the template seed stamps
   // origin 'default_new_mode', and strictDocumentGroundedFromContract requires
@@ -234,15 +234,15 @@ async function main() {
   try {
     // Kill switch — the ONLY way to observe legacy admission now that the
     // gate defaults ON (2026-08-14).
-    process.env.NATIVELY_SEMANTIC_ADMISSION_GATE = 'off';
+    process.env.MEETFLOO_SEMANTIC_ADMISSION_GATE = 'off';
     legacyOut = await getRelevantNodes(QUERY, NODES, embedFn, { embeddingSpaceKey: spaceKey });
     // DEFAULT posture: env unset → gate ON with the calibrated floor
     // (gemini-768: 0.69; local-384: no floor → this run behaves legacy).
-    delete process.env.NATIVELY_SEMANTIC_ADMISSION_GATE;
+    delete process.env.MEETFLOO_SEMANTIC_ADMISSION_GATE;
     defaultOut = await getRelevantNodes(QUERY, NODES, embedFn, { embeddingSpaceKey: spaceKey });
   } finally {
     console.log = origLog;
-    delete process.env.NATIVELY_SEMANTIC_ADMISSION_GATE;
+    delete process.env.MEETFLOO_SEMANTIC_ADMISSION_GATE;
   }
   record('S4-admission-gate', 'telemetry emitted for both runs', telemetry.length === 2, `${telemetry.length} lines`);
   const [obs, enf] = telemetry;
@@ -259,7 +259,7 @@ async function main() {
     if (spaceKey.startsWith('gemini')) {
       record('S4-admission-gate', 'DEFAULT posture (calibrated 0.69): P0 node excluded, relevant nodes kept',
         !defaultOut.some((s) => s.node.id === 'recent-irrelevant')
-          && defaultOut.some((s) => s.node.id === 'relevant-project'),
+        && defaultOut.some((s) => s.node.id === 'relevant-project'),
         `default=[${defaultOut.map((s) => s.node.id).join(',')}]`);
     } else {
       record('S4-admission-gate', 'DEFAULT posture (local space, no calibrated floor): legacy admission preserved',
@@ -292,11 +292,11 @@ async function main() {
     },
   };
   const db = {
-    initializeSchema() {}, getDocumentByType(t) { return t === 'resume' ? RESUME : t === 'job_description' ? JD : null; },
+    initializeSchema() { }, getDocumentByType(t) { return t === 'resume' ? RESUME : t === 'job_description' ? JD : null; },
     getAllNodes() { return NODES; }, getNodeCount() { return NODES.length; }, getIntro() { return null; },
     getGapAnalysis() { return null; }, getNegotiationScript() { return null; }, getMockQuestions() { return null; },
-    getCultureMappings() { return null; }, updateDocumentStructuredData() {}, getNodesNeedingReembed() { return []; },
-    updateNodeEmbedding() {},
+    getCultureMappings() { return null; }, updateDocumentStructuredData() { }, getNodesNeedingReembed() { return []; },
+    updateNodeEmbedding() { },
   };
   const orchestrator = new KnowledgeOrchestrator(db);
   orchestrator.setKnowledgeMode(true);
@@ -339,12 +339,12 @@ async function main() {
     console.log('[e2e] failures:');
     for (const f of results.failures) console.log(`  - [${f.section}] ${f.name} ${f.detail || ''}`);
   }
-  try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch (_) { }
   process.exit(totalFail === 0 ? 0 : 1);
 }
 
 main().catch((err) => {
   console.error('[e2e] FATAL:', err);
-  try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch (_) { }
   process.exit(2);
 });

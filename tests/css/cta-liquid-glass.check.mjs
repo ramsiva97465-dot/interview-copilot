@@ -64,8 +64,8 @@ function loadCss() {
   if (!existsSync(SOURCE)) {
     throw new Error(
       `component not found at ${SOURCE} — run this from the repo root ` +
-        `(npm run test:css:cta-liquid-glass), not from a subdirectory. This is a ` +
-        `harness problem, not a CSS regression.`,
+      `(npm run test:css:cta-liquid-glass), not from a subdirectory. This is a ` +
+      `harness problem, not a CSS regression.`,
     );
   }
   const src = readFileSync(SOURCE, 'utf8');
@@ -151,7 +151,7 @@ const countRings = (shadow) => (String(shadow).match(/inset/g) || []).length;
 
 async function measure() {
   const win = new BrowserWindow({ width: 900, height: 700, show: false });
-  const fixture = join(tmpdir(), 'natively-cta-liquid-glass.html');
+  const fixture = join(tmpdir(), 'MeetFloo-cta-liquid-glass.html');
   writeFileSync(fixture, page(loadCss()));
   try {
     await win.loadFile(fixture);

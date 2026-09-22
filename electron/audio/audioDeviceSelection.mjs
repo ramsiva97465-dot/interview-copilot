@@ -20,10 +20,10 @@
  */
 
 /**
- * Devices Natively creates for its OWN capture pipeline and must never offer
+ * Devices MeetFloo creates for its OWN capture pipeline and must never offer
  * as a microphone.
  *
- * "NativelySystemAudioTap" is the CoreAudio aggregate device built by
+ * "MeetFlooSystemAudioTap" is the CoreAudio aggregate device built by
  * native-module/src/speaker/core_audio.rs (`agg_name`) to tap system audio.
  * It is created with kAudioAggregateDeviceIsPrivateKey — but "private" only
  * hides it from OTHER processes. cpal's host.input_devices(), running inside
@@ -34,11 +34,11 @@
  * It is not a microphone. It exists only while a meeting is capturing system
  * audio, and the mic channel starts BEFORE the tap is created — so a stored
  * selection makes every subsequent meeting fail with
- * "Input device 'NativelySystemAudioTap' not found".
+ * "Input device 'MeetFlooSystemAudioTap' not found".
  *
  * Keep in sync with `agg_name` in native-module/src/speaker/core_audio.rs.
  */
-export const INTERNAL_CAPTURE_DEVICE_NAMES = Object.freeze(['NativelySystemAudioTap']);
+export const INTERNAL_CAPTURE_DEVICE_NAMES = Object.freeze(['MeetFlooSystemAudioTap']);
 
 /**
  * The synthetic "use the system default" row that Rust's list_input_devices()
@@ -65,7 +65,7 @@ export function normalizeDeviceName(value) {
   return stripped.replace(/[–—−]/g, '-').toLowerCase();
 }
 
-/** True when the id or name refers to one of Natively's own capture devices. */
+/** True when the id or name refers to one of MeetFloo's own capture devices. */
 export function isInternalCaptureDevice(idOrName) {
   if (typeof idOrName !== 'string' || !idOrName.trim()) return false;
   const normalized = normalizeDeviceName(idOrName);
@@ -75,7 +75,7 @@ export function isInternalCaptureDevice(idOrName) {
 }
 
 /**
- * Drop Natively's own capture devices from an enumerated device list.
+ * Drop MeetFloo's own capture devices from an enumerated device list.
  *
  * Applied to BOTH pickers at their single choke point (AudioDevices):
  *   - input:  the tap is enumerated by cpal's host.input_devices()

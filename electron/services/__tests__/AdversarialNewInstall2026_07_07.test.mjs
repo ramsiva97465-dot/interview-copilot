@@ -38,7 +38,7 @@ const EMBED_PATH = path.join(repoRoot, 'dist-electron/electron/rag/providers/Loc
 const SMOKE_PATH = path.join(repoRoot, 'scripts/smoke-packaged-local-fallback.mjs');
 
 function clearModule(p) {
-  try { delete require.cache[require.resolve(p)]; } catch {}
+  try { delete require.cache[require.resolve(p)]; } catch { }
 }
 
 function stubElectron({ isPackaged = true, getAppPath = '/tmp' } = {}) {
@@ -174,16 +174,16 @@ describe('OllamaManager — adversarial coverage', () => {
     try {
       const { OllamaManager } = require(OLLAMA_PATH);
       OllamaManager.getInstance().__resetForTests();
-    } catch {}
+    } catch { }
     clearModule(OLLAMA_PATH);
   });
 
   // Note: B1-B3 are skipped by default because OllamaManager.ensureRunning
   // may start a long-lived poll loop that the test runner cannot tear down
   // even via __resetForTests (the singleton holds the interval handle).
-  // Set NATIVELY_ADVERSARIAL_OLLAMA=1 to run them.
+  // Set MEETFLOO_ADVERSARIAL_OLLAMA=1 to run them.
 
-  const runOllamaTests = process.env.NATIVELY_ADVERSARIAL_OLLAMA === '1';
+  const runOllamaTests = process.env.MEETFLOO_ADVERSARIAL_OLLAMA === '1';
 
   test('B1: missingBackoffUntil puts the deadline in the future when ENOENT is the failure mode', {
     skip: !runOllamaTests,
@@ -350,7 +350,7 @@ describe('smoke regex markers — adversarial coverage', () => {
     // This is the critical adversarial check: does the smoke's regex
     // markers fire on a real packaged build? We've seen it work in the
     // previous run; this test confirms the artifacts of that are present.
-    const debugLogPath = path.join(os.homedir(), 'Documents', 'natively_debug.log');
+    const debugLogPath = path.join(os.homedir(), 'Documents', 'MeetFloo_debug.log');
     if (!fs.existsSync(debugLogPath)) {
       // Skip — no packaged run has happened in this environment yet.
       return;
@@ -378,11 +378,11 @@ describe('IPC handler selection gate — adversarial coverage', () => {
     try {
       const { OllamaManager } = require(OLLAMA_PATH);
       OllamaManager.getInstance().__resetForTests();
-    } catch {}
+    } catch { }
     try {
       const { ProviderStatusRegistry } = require(REGISTRY_PATH);
       ProviderStatusRegistry.getInstance().clearForTests();
-    } catch {}
+    } catch { }
     clearModule(OLLAMA_PATH);
     clearModule(REGISTRY_PATH);
   });

@@ -90,7 +90,7 @@ export class HuggingFaceModelDownloader implements ModelDownloader {
   }
 
   private headers(): Record<string, string> {
-    const h: Record<string, string> = { 'User-Agent': 'Natively' };
+    const h: Record<string, string> = { 'User-Agent': 'MeetFloo' };
     const token = this.options.getToken?.();
     if (token) h.Authorization = `Bearer ${token}`;
     return h;

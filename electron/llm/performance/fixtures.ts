@@ -108,7 +108,7 @@ export function visionProbeImagePath(): string | null {
     const os = require('node:os');
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const path = require('node:path');
-    const dir = path.join(os.tmpdir(), 'natively-capability-probe');
+    const dir = path.join(os.tmpdir(), 'MeetFloo-capability-probe');
     fs.mkdirSync(dir, { recursive: true });
     const file = path.join(dir, 'probe-8x8.png');
     // Content-addressed by construction (the fixture is a constant), so a

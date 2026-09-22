@@ -8,7 +8,7 @@
 // widen/narrow, and clamps. What it did NOT have was anything to adapt FROM on
 // most routes. `LLMHelper.answerLatencyKey()` returns null for every route
 // except Custom / cURL / LiteLLM / NIM, so Gemini, Groq, Claude, OpenAI,
-// DeepSeek, the natively cascade and Ollama were measured not at all, the map
+// DeepSeek, the MeetFloo cascade and Ollama were measured not at all, the map
 // died with the process, and the one deadline with no adaptation whatsoever —
 // the inter-token stall guard — had no distribution to be derived from.
 //
@@ -19,7 +19,7 @@
 // outside Electron.
 
 /**
- * Which of Natively's request paths produced a sample.
+ * Which of MeetFloo's request paths produced a sample.
  *
  * Not an invention — these are exactly the five cases `totalHardTimeoutMs`
  * already branches on, and each one's budget is justified by something in THAT
@@ -29,7 +29,7 @@
 export type RouteKind =
   | 'local'            // Ollama / Codex CLI — cold weight load precedes first token
   | 'vision'           // image-bearing turn, served by the vision chain
-  | 'server_cascade'   // natively-api, which rotates providers at its own 10s cutover
+  | 'server_cascade'   // MeetFloo-api, which rotates providers at its own 10s cutover
   | 'user_endpoint'    // Custom / cURL / LiteLLM / NVIDIA NIM
   | 'default_provider'; // a shipped provider called directly
 
@@ -44,9 +44,9 @@ export type RouteKind =
 export type WorkloadClass = 'small' | 'medium' | 'large' | 'vision';
 
 /**
- * How much the user is waiting, derived from Natively's OWN `streamRoute`
+ * How much the user is waiting, derived from MeetFloo's OWN `streamRoute`
  * vocabulary — not an invented taxonomy (Phase 12: "Do not invent modes that
- * don't exist. Use real Natively modes.").
+ * don't exist. Use real MeetFloo modes.").
  *
  * The real values in the codebase are `wta_live`, `manual_chat_stream`,
  * `phone_mirror` and `unknown`, and they genuinely differ in urgency:

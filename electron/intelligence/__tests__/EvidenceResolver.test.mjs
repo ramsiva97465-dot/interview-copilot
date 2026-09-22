@@ -17,8 +17,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 // repair/00_BASELINE.md). This test process turns them on to exercise the
 // OKF branch; production/dev defaults are unaffected (env read fresh, no
 // process-wide state this file could leak into another test file's run).
-process.env.NATIVELY_OKF_KNOWLEDGE_PACKS = '1';
-process.env.NATIVELY_OKF_HYBRID_RETRIEVAL = '1';
+process.env.MEETFLOO_OKF_KNOWLEDGE_PACKS = '1';
+process.env.MEETFLOO_OKF_HYBRID_RETRIEVAL = '1';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.resolve(__dirname, '../../../dist-electron/electron');

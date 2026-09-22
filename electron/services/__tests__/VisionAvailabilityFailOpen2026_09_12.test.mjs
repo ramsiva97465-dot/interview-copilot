@@ -35,8 +35,8 @@ require.cache[electronPath] = {
 
 const { LLMHelper } = require(dist('LLMHelper.js'));
 
-const CRED_SLOT = '__nativelyCredentialsManagerV1__';
-const ANTIGRAVITY_SLOT = '__nativelyAntigravityServiceV1__';
+const CRED_SLOT = '__MeetFlooCredentialsManagerV1__';
+const ANTIGRAVITY_SLOT = '__MeetFlooAntigravityServiceV1__';
 let credBefore;
 
 beforeEach(() => {

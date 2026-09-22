@@ -1,19 +1,19 @@
 // scripts/hindsight-llm-config.mjs
 //
 // Builds the litellm.Router config JSON that Hindsight consumes via
-// HINDSIGHT_API_LLM_LITELLMROUTER_CONFIG. This is Natively's LLM provider chain +
+// HINDSIGHT_API_LLM_LITELLMROUTER_CONFIG. This is MeetFloo's LLM provider chain +
 // automatic retry/fallback for Hindsight's memory operations (fact extraction on
 // retain, synthesis on reflect) — so a memory op always gets an answer even when the
 // primary model/provider fails.
 //
 // HOW IT WORKS (no Python/adapter code — pure config):
 //   Hindsight (config.py) parses this JSON and forwards it VERBATIM to
-//   litellm.Router(**config). litellm.Router natively rotates through `model_list` on
+//   litellm.Router(**config). litellm.Router MeetFloo rotates through `model_list` on
 //   failure (`fallbacks`) and retries transient errors (`num_retries`). litellm reads
 //   each provider's key from the standard env var (GEMINI_API_KEY, OPENAI_API_KEY, …),
 //   so a model entry is only useful when its key is present — we gate inclusion on that.
 //
-// PRIORITY (Natively-API is intentionally DEFERRED — see docs/HINDSIGHT_LOCAL_SETUP.md):
+// PRIORITY (MeetFloo-API is intentionally DEFERRED — see docs/HINDSIGHT_LOCAL_SETUP.md):
 //   Gemini → OpenAI → Claude → DeepSeek → Groq → Ollama
 //   Within Gemini: 3.6-flash → 3.1-flash-lite → 3.1-pro-preview.
 //

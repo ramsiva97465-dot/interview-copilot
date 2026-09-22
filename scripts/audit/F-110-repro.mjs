@@ -13,9 +13,9 @@
 // exact hazard at the verification-flags assert, which exits explicitly.
 //
 // Realistic external injections were attempted first: a corrupted
-// natively-preferences-secure.json self-heals (fallback credentials), and a
+// MeetFloo-preferences-secure.json self-heals (fallback credentials), and a
 // read-only userData dir kills Chromium before app code runs. The
-// NATIVELY_TEST_INIT_FAULT env hook (inert unless set) makes the contract
+// MEETFLOO_TEST_INIT_FAULT env hook (inert unless set) makes the contract
 // deterministically testable.
 //
 // Expected (correct): process exits within the window after the injected
@@ -32,8 +32,8 @@ try {
     env: {
       ...process.env,
       NODE_ENV: 'production',
-      NATIVELY_DEV_BYPASS_SCREEN_TCC: '1',
-      NATIVELY_TEST_INIT_FAULT: '1',
+      MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1',
+      MEETFLOO_TEST_INIT_FAULT: '1',
     },
     timeout: 30_000,
   });

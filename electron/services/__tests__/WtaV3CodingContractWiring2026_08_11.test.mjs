@@ -1,6 +1,6 @@
 // electron/services/__tests__/WtaV3CodingContractWiring2026_08_11.test.mjs
 //
-// ROOT CAUSE of the live "O(?)" scaffold (natively-api, 2026-08-11).
+// ROOT CAUSE of the live "O(?)" scaffold (MeetFloo-api, 2026-08-11).
 //
 // Chased backwards from the symptom: the delivered answer carried
 // "Time Complexity: O(?) — state the actual time bound and why" and a generic

@@ -26,7 +26,7 @@
 // Flag: `semanticAdmissionGate`, DEFAULT ON since 2026-08-14 (kill-switch
 // model — the calibrated-floor flip; see isSemanticAdmissionGateEnabled's doc
 // for the full contract):
-//   - env  NATIVELY_SEMANTIC_ADMISSION_GATE = 'off' | 'false' | '0' | 'disabled' → disabled
+//   - env  MEETFLOO_SEMANTIC_ADMISSION_GATE = 'off' | 'false' | '0' | 'disabled' → disabled
 //   - settings  semanticAdmissionGate === false                                  → disabled
 // Uncached by design (per-call string compare; caching is what makes env-flag
 // tests race — see the profileGroundingV2 P2 notes).
@@ -59,7 +59,7 @@ const DEFAULT_SEMANTIC_FLOORS: Record<string, number> = {
  * DEFAULT ON (kill-switch model, mirroring profileGroundingV2): calibrated
  * floors + live E2E (22/22, scripts/e2e-semantic-repair-deepseek.js) gated
  * the production flip. Disableable at runtime WITHOUT a redeploy:
- *   - env  NATIVELY_SEMANTIC_ADMISSION_GATE = 'off' | 'false' | '0' | 'disabled' → disabled
+ *   - env  MEETFLOO_SEMANTIC_ADMISSION_GATE = 'off' | 'false' | '0' | 'disabled' → disabled
  *   - settings  semanticAdmissionGate === false                                  → disabled
  * ('on'/'true'/'1' still accepted for explicitness / older configs.)
  * Enforcement additionally requires a calibrated floor for the ACTIVE
@@ -68,19 +68,19 @@ const DEFAULT_SEMANTIC_FLOORS: Record<string, number> = {
  * corpora by construction.
  */
 export const isSemanticAdmissionGateEnabled = (): boolean =>
-  isKillSwitchFlagEnabled('NATIVELY_SEMANTIC_ADMISSION_GATE', 'semanticAdmissionGate');
+  isKillSwitchFlagEnabled('MEETFLOO_SEMANTIC_ADMISSION_GATE', 'semanticAdmissionGate');
 
 /**
  * Resolve the cosine admission floor for an embedding space.
  * Returns null when no calibrated floor exists (unknown space, or no space
  * threaded by the caller) — callers MUST treat null as "use legacy admission".
  *
- * Config override: NATIVELY_SEMANTIC_FLOORS='{"<spaceKey>":0.5,...}' merges
+ * Config override: MEETFLOO_SEMANTIC_FLOORS='{"<spaceKey>":0.5,...}' merges
  * over the defaults (rollback/tuning lever without a redeploy, mirroring
- * NATIVELY_GEMINI_EMBED_MODEL's role in EmbeddingProviderResolver).
+ * MEETFLOO_GEMINI_EMBED_MODEL's role in EmbeddingProviderResolver).
  */
 export const resolveSemanticFloor = (spaceKey?: string | null): number | null =>
-  resolveSpaceKeyedValue('NATIVELY_SEMANTIC_FLOORS', DEFAULT_SEMANTIC_FLOORS, spaceKey) ?? null;
+  resolveSpaceKeyedValue('MEETFLOO_SEMANTIC_FLOORS', DEFAULT_SEMANTIC_FLOORS, spaceKey) ?? null;
 
 /**
  * Shared env→JSON→merge resolver for space-keyed numeric config (code-review
@@ -130,9 +130,9 @@ const MIN_SIMILARITY_BY_SPACE: Record<string, number> = {};
  * returns a number (unlike resolveSemanticFloor — vector search always had a
  * threshold, so the legacy 0.25 is the safe universal fallback).
  *
- * Config override: NATIVELY_MIN_SIMILARITY_BY_SPACE='{"<spaceKey>":0.2}'
+ * Config override: MEETFLOO_MIN_SIMILARITY_BY_SPACE='{"<spaceKey>":0.2}'
  * merges over the defaults.
  */
 export const resolveMinSimilarity = (spaceKey?: string | null): number =>
-  resolveSpaceKeyedValue('NATIVELY_MIN_SIMILARITY_BY_SPACE', MIN_SIMILARITY_BY_SPACE, spaceKey)
-    ?? DEFAULT_MIN_SIMILARITY;
+  resolveSpaceKeyedValue('MEETFLOO_MIN_SIMILARITY_BY_SPACE', MIN_SIMILARITY_BY_SPACE, spaceKey)
+  ?? DEFAULT_MIN_SIMILARITY;

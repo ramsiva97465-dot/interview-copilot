@@ -97,7 +97,7 @@ function main() {
   );
 
   // Re-exec node under the correct arch on macOS so the entire toolchain
-  // (node-gyp, the C++ compiler invocation) runs natively, not translated.
+  // (node-gyp, the C++ compiler invocation) runs MeetFloo, not translated.
   const useArchWrapper = os.platform() === 'darwin';
   const cmd = useArchWrapper ? 'arch' : process.execPath;
   const cmdArgs = useArchWrapper ? [`-${arch === 'x64' ? 'x86_64' : arch}`, process.execPath, ...args] : args;

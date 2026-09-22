@@ -147,7 +147,7 @@ export class EmbeddingPipeline {
         console.log('[EmbeddingPipeline] Initializing with config:', {
             openaiKey: !!config.openaiKey,
             geminiKey: !!config.geminiKey,
-            nativelyApiKey: !!config.nativelyApiKey,
+            MeetFlooApiKey: !!config.MeetFlooApiKey,
             ollamaUrl: config.ollamaUrl || null,
             geminiEmbeddingModel: config.geminiEmbeddingModel || null,
             geminiEmbeddingDims: config.geminiEmbeddingDims || null,
@@ -403,7 +403,7 @@ export class EmbeddingPipeline {
      * the corpus" apart from "the pinned provider is missing or down, and this
      * is a temporary stand-in". Both look identical to
      * getIncompatibleSpaceCount(), which compares rows against whatever is
-     * active and knows nothing about intent — so a Natively pin whose key had
+     * active and knows nothing about intent — so a MeetFloo pin whose key had
      * been cleared cleared every 2048-d voyage-4 vector and re-embedded the
      * whole corpus at 384-d MiniLM, then did it again in reverse once the key
      * came back. Measured 2026-09-13 against Evin's live corpus.
@@ -465,7 +465,7 @@ export class EmbeddingPipeline {
         });
 
         queueAll();
-        
+
         // NOTE: Provider metadata is written on the first successful embedding
         // for this meeting (inside embedChunk), not here — to avoid marking a
         // meeting as embedded if the queue crashes before any work is done.
@@ -786,7 +786,7 @@ export class EmbeddingPipeline {
             }, EMBED_TIMEOUT_MS);
             provider.embedBatch(texts).then(
                 (results) => { clearTimeout(timer); resolve(results); },
-                (err)     => { clearTimeout(timer); reject(err); }
+                (err) => { clearTimeout(timer); reject(err); }
             );
         });
     }
@@ -883,7 +883,7 @@ export class EmbeddingPipeline {
                 }, EMBED_TIMEOUT_MS);
                 fallback.embedBatch(texts).then(
                     (results) => { clearTimeout(timer); resolve(results); },
-                    (err)     => { clearTimeout(timer); reject(err); }
+                    (err) => { clearTimeout(timer); reject(err); }
                 );
             });
             this.promoteFallbackProvider(fallback);
@@ -973,7 +973,7 @@ export class EmbeddingPipeline {
             }, QUERY_EMBED_TIMEOUT_MS);
             p.embedQuery(text).then(
                 (result) => { clearTimeout(timer); resolve(result); },
-                (err)    => { clearTimeout(timer); reject(err); }
+                (err) => { clearTimeout(timer); reject(err); }
             );
         });
 
@@ -1204,7 +1204,7 @@ export class EmbeddingPipeline {
 
             provider.embed(text).then(
                 (result) => { clearTimeout(timer); resolve(result); },
-                (err)    => { clearTimeout(timer); reject(err); }
+                (err) => { clearTimeout(timer); reject(err); }
             );
         });
     }

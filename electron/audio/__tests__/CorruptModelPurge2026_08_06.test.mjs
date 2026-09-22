@@ -78,7 +78,7 @@ const isCorruptModelError = loadIsCorruptModelError();
 describe('corrupt local model purge', () => {
     test('the real observed failure is classified as corrupt', () => {
         // Verbatim from the reported log.
-        const real = 'Load model from /Users/evin/Library/Application Support/natively/'
+        const real = 'Load model from /Users/evin/Library/Application Support/MeetFloo/'
             + 'whisper-models/distil-whisper/distil-small.en/onnx/encoder_model.onnx '
             + 'failed:Protobuf parsing failed.';
         assert.equal(

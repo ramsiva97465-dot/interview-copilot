@@ -99,8 +99,8 @@ export const OrchestratedToasterHost: React.FC = () => {
             // Write the legacy flag so future launches don't re-show on first
             // launch. Mac TCC revocation is still detected via checkPermissions
             // and re-triggers via macTCCBlocked user-state.
-            try { localStorage.setItem('natively_perms_shown_v1', '1'); } catch {}
-            window.electronAPI?.onboardingSetFlag?.('permsShown', true).catch(() => {});
+            try { localStorage.setItem('MeetFloo_perms_shown_v1', '1'); } catch { }
+            window.electronAPI?.onboardingSetFlag?.('permsShown', true).catch(() => { });
             // Reflect permsShown in the live orchestrator user-state *now*.
             // Without this, `permsShown` stays false in-session (it is only
             // re-read from localStorage on the next App.tsx effect / relaunch),
@@ -133,7 +133,7 @@ export const OrchestratedToasterHost: React.FC = () => {
       return (
         <TrialPromoToaster
           isOpen={true}
-          hasNativelyKey={orch.getUserState().hasNativelyKey}
+          hasMeetFlooKey={orch.getUserState().hasMeetFlooKey}
           hasTrialToken={orch.getUserState().hasTrialToken}
           onDismiss={onDismiss('trial_promo')}
           onStartTrial={async () => {
@@ -158,7 +158,7 @@ export const OrchestratedToasterHost: React.FC = () => {
 
     case 'ads':
       // The 5 ad toasters are driven by useAdCampaigns.ts which still runs in
-      // App.tsx and consults natively_ads_shown_history. The orchestrator's
+      // App.tsx and consults MeetFloo_ads_shown_history. The orchestrator's
       // role for `ads` is purely as a gate — when eligible, it just allows
       // useAdCampaigns to proceed (the activeAd state already controls which
       // component renders).

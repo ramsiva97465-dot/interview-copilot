@@ -1,7 +1,7 @@
 /**
  * A registry entry whose payload directory is gone must not count as installed.
  *
- * Found live on 2026-09-03. `~/.natively/extensions/registry.json` held two
+ * Found live on 2026-09-03. `~/.MeetFloo/extensions/registry.json` held two
  * enabled `type: reranker` entries -- `probe-reranker` (a leftover probe whose
  * payload directory had been deleted) and the user's real `jina-reranker-v35`.
  *
@@ -41,7 +41,7 @@ function manifestFor(id) {
     id, name: id, version: '1.0.0', apiVersion: '1', type: 'reranker',
     entrypoint: 'dist/index.js', author: 'community',
     homepage: 'https://github.com/example/x',
-    engines: { natively: '>=2.8.0' },
+    engines: { MeetFloo: '>=2.8.0' },
     permissions: ['filesystem.models'], models: [], config: {},
   };
 }
@@ -66,7 +66,7 @@ function stage(root, ids, { withPayload }) {
 }
 
 test('an entry whose payload directory is gone is dropped, and says why', () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-stale-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-stale-'));
   const file = stage(root, ['live-reranker', 'ghost-reranker'], { withPayload: ['live-reranker'] });
 
   const registry = new ExtensionRegistry({ filePath: file, appVersion: APP_VERSION, rootOverride: root });
@@ -80,17 +80,17 @@ test('the dead entry no longer blocks the rerank seam', () => {
   // This is the user-visible consequence: two enabled rerankers means the
   // registry refuses to choose and the built-in keeps the seam. Dropping the
   // dead one leaves exactly one, so the real extension is used again.
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-stale-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-stale-'));
   const file = stage(root, ['live-reranker', 'ghost-reranker'], { withPayload: ['live-reranker'] });
 
   const registry = new ExtensionRegistry({ filePath: file, appVersion: APP_VERSION, rootOverride: root });
   const source = {
     list: () => registry.list(),
     running: () => [],
-    load: async () => {},
+    load: async () => { },
     rerank: async () => null,
   };
-  const rr = new RerankerRegistry({ isEnabled: () => true, source, logger: { warn() {} } });
+  const rr = new RerankerRegistry({ isEnabled: () => true, source, logger: { warn() { } } });
 
   assert.equal(rr.activeExtensionId(), 'live-reranker');
 });
@@ -98,7 +98,7 @@ test('the dead entry no longer blocks the rerank seam', () => {
 test('a live entry is still kept when both payloads exist', () => {
   // Guard against over-correcting: the drop must be about a MISSING payload,
   // not about having more than one extension installed.
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-stale-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-stale-'));
   const file = stage(root, ['a-reranker', 'b-reranker'], { withPayload: ['a-reranker', 'b-reranker'] });
 
   const registry = new ExtensionRegistry({ filePath: file, appVersion: APP_VERSION, rootOverride: root });

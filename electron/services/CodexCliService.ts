@@ -74,14 +74,14 @@ const RAW_IMAGE_MIN_BYTES = 64;
 // matched via isCodexAuthError() rather than re-typed as string literals at
 // each call site — a reword here would otherwise silently stop matching and
 // users would be back to the generic text with no test catching it.
-// Either sign-in works: Natively's own, or the Codex CLI's `codex login`
+// Either sign-in works: MeetFloo's own, or the Codex CLI's `codex login`
 // session (read-only — see CodexCliAuth). Name both, since the CLI one is the
 // first thing a Codex CLI user will try (issue #558).
 export const CODEX_NOT_SIGNED_IN_MESSAGE =
   'Not signed in to ChatGPT. Sign in from Settings → AI Providers → OpenAI Codex, or run `codex login` in your terminal.';
 export const CODEX_SESSION_EXPIRED_MESSAGE =
   'Codex session expired. Please sign in again from Settings → AI Providers.';
-// Natively never refreshes the CLI's session (that would sign the CLI out), so
+// MeetFloo never refreshes the CLI's session (that would sign the CLI out), so
 // the fix is on the CLI side: any `codex` command refreshes it.
 export const CODEX_CLI_LOGIN_EXPIRED_MESSAGE =
   'Your Codex CLI login has expired. Run any `codex` command to refresh it, or sign in with ChatGPT from Settings → AI Providers → OpenAI Codex.';
@@ -97,12 +97,12 @@ export function isCodexAuthError(err: unknown): boolean {
 
 /**
  * Which ChatGPT sign-in Codex requests would use, WITHOUT the token — this is
- * the shape the renderer and routing predicates see. Natively's own sign-in
+ * the shape the renderer and routing predicates see. MeetFloo's own sign-in
  * wins when both exist: the user chose it inside the app.
  */
 export interface CodexAuthStatus {
   signedIn: boolean;
-  source: 'natively' | 'codex-cli' | null;
+  source: 'MeetFloo' | 'codex-cli' | null;
   email?: string;
   expiresAt?: number;
   /** State of the Codex CLI's `codex login` session, whichever source wins. */
@@ -111,9 +111,9 @@ export interface CodexAuthStatus {
 
 export function getCodexAuthStatus(readCli: () => CodexCliAuthState = readCodexCliAuth): CodexAuthStatus {
   const cli = readCli();
-  const natively = CodexOAuthService.getInstance().getStatus();
-  if (natively.signedIn) {
-    return { signedIn: true, source: 'natively', email: natively.email, expiresAt: natively.expiresAt, cliLogin: cli.status };
+  const MeetFloo = CodexOAuthService.getInstance().getStatus();
+  if (MeetFloo.signedIn) {
+    return { signedIn: true, source: 'MeetFloo', email: MeetFloo.email, expiresAt: MeetFloo.expiresAt, cliLogin: cli.status };
   }
   if (cli.status === 'ok') {
     return { signedIn: true, source: 'codex-cli', email: cli.email, expiresAt: cli.expiresAt, cliLogin: 'ok' };
@@ -130,7 +130,7 @@ export function codexSignedOutMessage(status: Pick<CodexAuthStatus, 'cliLogin'>)
 }
 
 interface CodexCredential {
-  source: 'natively' | 'codex-cli';
+  source: 'MeetFloo' | 'codex-cli';
   accessToken: string;
   accountId?: string;
 }
@@ -162,23 +162,23 @@ export const CODEX_MODEL_REASONING_EFFORTS: readonly CodexModelReasoningEffort[]
 const CODEX_MODEL_REASONING_SETS: ReadonlyArray<readonly [string, readonly CodexModelReasoningEffort[]]> = [
   // Original gpt-5 line — minimal accepted (not exposed); low/medium/high.
   ['gpt-5-2025-08-07', ['low', 'medium', 'high']],
-  ['gpt-5-mini',       ['low', 'medium', 'high']],
-  ['gpt-5-nano',       ['low', 'medium', 'high']],
+  ['gpt-5-mini', ['low', 'medium', 'high']],
+  ['gpt-5-nano', ['low', 'medium', 'high']],
   // Bare 'gpt-5' (NOT 5.x) — must come AFTER 5.x entries to avoid swallowing them.
-  ['gpt-5',            ['low', 'medium', 'high']],
+  ['gpt-5', ['low', 'medium', 'high']],
   // gpt-5.1+ chat — `none` accepted; `xhigh` only on 5.2+.
-  ['gpt-5.1',          ['none', 'low', 'medium', 'high']],
-  ['gpt-5.2',          ['none', 'low', 'medium', 'high', 'xhigh']],
-  ['gpt-5.4',          ['none', 'low', 'medium', 'high', 'xhigh']],
-  ['gpt-5.5',          ['none', 'low', 'medium', 'high', 'xhigh']],
+  ['gpt-5.1', ['none', 'low', 'medium', 'high']],
+  ['gpt-5.2', ['none', 'low', 'medium', 'high', 'xhigh']],
+  ['gpt-5.4', ['none', 'low', 'medium', 'high', 'xhigh']],
+  ['gpt-5.5', ['none', 'low', 'medium', 'high', 'xhigh']],
   // codex variants — `none` not supported; `xhigh` only on 5.2-codex+.
-  ['gpt-5.5-codex',    ['low', 'medium', 'high', 'xhigh']],
-  ['gpt-5.4-codex',    ['low', 'medium', 'high', 'xhigh']],
+  ['gpt-5.5-codex', ['low', 'medium', 'high', 'xhigh']],
+  ['gpt-5.4-codex', ['low', 'medium', 'high', 'xhigh']],
   ['gpt-5.3-codex-spark', ['low', 'medium', 'high']],
-  ['gpt-5.3-codex',    ['low', 'medium', 'high']],
-  ['gpt-5.2-codex',    ['low', 'medium', 'high', 'xhigh']],
-  ['gpt-5.1-codex',    ['low', 'medium', 'high']],
-  ['gpt-5-codex',      ['low', 'medium', 'high']],
+  ['gpt-5.3-codex', ['low', 'medium', 'high']],
+  ['gpt-5.2-codex', ['low', 'medium', 'high', 'xhigh']],
+  ['gpt-5.1-codex', ['low', 'medium', 'high']],
+  ['gpt-5-codex', ['low', 'medium', 'high']],
 ];
 
 /**
@@ -333,7 +333,7 @@ export class CodexCliService {
    * open-sse's `resolveCacheSessionId()` (codex.md:195-204).
    */
   public static readonly SESSION_ID: string =
-    `natively-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    `MeetFloo-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 
   /**
    * @deprecated The HTTP-direct implementation does not use a CLI binary
@@ -631,7 +631,7 @@ export class CodexCliService {
   }
 
   /**
-   * The bearer to send: Natively's own sign-in first (refreshed proactively by
+   * The bearer to send: MeetFloo's own sign-in first (refreshed proactively by
    * CodexOAuthService), else the Codex CLI's `codex login` session read from
    * disk. The CLI session is used as-is and never refreshed — see CodexCliAuth.
    */
@@ -640,7 +640,7 @@ export class CodexCliService {
     if (oauth.getStatus().signedIn) {
       const accessToken = await oauth.getAccessToken();
       if (!accessToken) throw new Error(CODEX_NOT_SIGNED_IN_MESSAGE);
-      return { source: 'natively', accessToken, accountId: oauth.getCachedTokens()?.accountId };
+      return { source: 'MeetFloo', accessToken, accountId: oauth.getCachedTokens()?.accountId };
     }
     const cli = readCodexCliAuth();
     if (cli.status === 'ok') return { source: 'codex-cli', accessToken: cli.accessToken, accountId: cli.accountId };
@@ -893,7 +893,7 @@ export class CodexCliService {
           // swallow). We intentionally IGNORE `[DONE]` here: ignoring
           // it lets the parser keep reading the body until the real
           // terminal event arrives or the body closes, which matches
-          // the natively path at LLMHelper.ts:4897-4900 (also ignores
+          // the MeetFloo path at LLMHelper.ts:4897-4900 (also ignores
           // `[DONE]` and relies on the terminal event).
           if (parsed.data === '[DONE]') continue;
           let json: any;
@@ -918,8 +918,8 @@ export class CodexCliService {
           // AbortError on reader.read() is post-completion cleanup
           // noise — don't surface it.
           if (json && (json.type === 'response.completed' ||
-              json.type === 'response.incomplete' ||
-              json.type === 'response.failed')) {
+            json.type === 'response.incomplete' ||
+            json.type === 'response.failed')) {
             sawTerminalEvent = true;
             break;
           }
@@ -942,8 +942,8 @@ export class CodexCliService {
                 : new Error(errMsg);
             }
             if (json && (json.type === 'response.completed' ||
-                json.type === 'response.incomplete' ||
-                json.type === 'response.failed')) {
+              json.type === 'response.incomplete' ||
+              json.type === 'response.failed')) {
               sawTerminalEvent = true;
             }
           } catch { /* not JSON, ignore */ }
@@ -980,7 +980,7 @@ export class CodexCliService {
       throw e;
     } finally {
       // CANCEL — not releaseLock — to actively tear down the HTTP
-      // body. The natively path at LLMHelper.ts:4935 uses the same
+      // body. The MeetFloo path at LLMHelper.ts:4935 uses the same
       // pattern; releaseLock() only drops the consumer lock on the
       // stream and leaves the body open on the server. The ChatGPT
       // OAuth endpoint specifically keeps the SSE body alive for

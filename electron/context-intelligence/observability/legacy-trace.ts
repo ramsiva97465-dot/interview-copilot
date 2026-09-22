@@ -31,7 +31,7 @@ import type {
   AnswerSurface, GroundingPolicy, QuestionType, RetrievalPath, Answerability, EvidenceScope,
 } from '../contracts/types';
 
-const ENV_KEY = 'NATIVELY_CI_V3_TRACE';
+const ENV_KEY = 'MEETFLOO_CI_V3_TRACE';
 
 export function isLegacyTraceEnabled(env: Record<string, string | undefined> = process.env): boolean {
   const v = env[ENV_KEY];
@@ -48,7 +48,7 @@ export interface TraceSink {
  *  would be its own production incident. */
 export class MemoryTraceSink implements TraceSink {
   private readonly buf: AnswerTrace[] = [];
-  constructor(private readonly capacity = 200) {}
+  constructor(private readonly capacity = 200) { }
   write(t: AnswerTrace): void {
     this.buf.push(t);
     if (this.buf.length > this.capacity) this.buf.shift();
@@ -63,7 +63,7 @@ export class MemoryTraceSink implements TraceSink {
 // rollout-counters incident — a harness importing this module read an EMPTY
 // ring while turns were being traced into another bundle's copy, so the F2
 // evidence this module exists to collect silently read as "no traces".
-const SINK_KEY = '__nativelyLegacyTraceSinkV1__';
+const SINK_KEY = '__MeetFlooLegacyTraceSinkV1__';
 function sinkSlot(): { sink: TraceSink } {
   const g = globalThis as unknown as Record<string, { sink: TraceSink } | undefined>;
   if (!g[SINK_KEY]) g[SINK_KEY] = { sink: new MemoryTraceSink() };

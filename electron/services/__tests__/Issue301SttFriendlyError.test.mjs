@@ -21,14 +21,14 @@ test('sttErrorMapper maps invalid_key_format to a user-friendly auth message', (
   assert.match(source, /Authentication Failed|auth/, 'invalid_key_format must map to auth category');
 });
 
-test('NativelyInterface uses sttErrorMapper for the chat-message STT error', () => {
-  const source = read('src/components/NativelyInterface.tsx');
+test('MeetFlooInterface uses sttErrorMapper for the chat-message STT error', () => {
+  const source = read('src/components/MeetFlooInterface.tsx');
 
   // The static import must be present (Fix 1 from issue #301)
   assert.match(
     source,
     /import\s*\{[^}]*categorizeSttError[^}]*\}\s*from\s*['"]\.\.\/lib\/sttErrorMapper['"]/,
-    'categorizeSttError must be statically imported in NativelyInterface.tsx',
+    'categorizeSttError must be statically imported in MeetFlooInterface.tsx',
   );
 
   // The chat message must NOT contain the raw error code pattern
@@ -51,9 +51,9 @@ test('NativelyInterface uses sttErrorMapper for the chat-message STT error', () 
   );
 });
 
-test('sttErrorMapper auth category covers all NativelyPro fatal error codes', () => {
+test('sttErrorMapper auth category covers all MeetFlooPro fatal error codes', () => {
   const source = read('src/lib/sttErrorMapper.ts');
-  // These are the fatal codes NativelyProSTT emits that cause state='failed'
+  // These are the fatal codes MeetFlooProSTT emits that cause state='failed'
   assert.match(source, /invalid_key_format/, 'must map invalid_key_format');
   assert.match(source, /auth_timeout/, 'must map auth_timeout');
   assert.match(source, /invalid_key|invalid api|authentication/, 'must map auth patterns');

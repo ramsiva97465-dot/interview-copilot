@@ -3,7 +3,7 @@
 // NODE_ENV-only (or app.isPackaged-only, one-sided) check that a sibling in
 // this codebase already hardened with the paired condition, but that never
 // got propagated to these files. Each was reproduced live in a real packaged
-// (ad-hoc signed, app.isPackaged === true) Natively.app before being fixed:
+// (ad-hoc signed, app.isPackaged === true) MeetFloo.app before being fixed:
 //
 //   - Settings/Cropper/ModelSelector windows: with NODE_ENV=development
 //     leaked into the packaged launch's environment, all three windows still
@@ -77,7 +77,7 @@ test('ScreenshotHelper TCC bypass requires both !app.isPackaged and the explicit
   );
   assert.match(
     fn,
-    /if \(!app\.isPackaged && process\.env\.NATIVELY_DEV_BYPASS_SCREEN_TCC === '1'\) return;/,
-    'the dev bypass must require the explicit NATIVELY_DEV_BYPASS_SCREEN_TCC=1 opt-in, matching main.ts\'s isDevTccBypassEnabled()',
+    /if \(!app\.isPackaged && process\.env\.MEETFLOO_DEV_BYPASS_SCREEN_TCC === '1'\) return;/,
+    'the dev bypass must require the explicit MEETFLOO_DEV_BYPASS_SCREEN_TCC=1 opt-in, matching main.ts\'s isDevTccBypassEnabled()',
   );
 });

@@ -25,7 +25,7 @@ let DatabaseManager, co;
 describe('Context OS H3 — verified claim persistence (REAL)', () => {
   before(() => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxos-claims-'));
-    process.env.NATIVELY_TEST_USERDATA = tmp;
+    process.env.MEETFLOO_TEST_USERDATA = tmp;
     DatabaseManager = require(DB_MODULE).DatabaseManager;
     co = require(CO);
   });

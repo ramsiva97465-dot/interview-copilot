@@ -30,20 +30,20 @@ let tmpDir;
 describe('ModeSourceContract — persisted across a real DatabaseManager restart (2026-07-11)', () => {
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mode-source-contract-test-'));
-    process.env.NATIVELY_TEST_USERDATA = tmpDir;
-    try { delete require.cache[DB_PATH]; } catch {}
-    try { delete require.cache[CONTRACT_PATH]; } catch {}
+    process.env.MEETFLOO_TEST_USERDATA = tmpDir;
+    try { delete require.cache[DB_PATH]; } catch { }
+    try { delete require.cache[CONTRACT_PATH]; } catch { }
     DatabaseManager = require(DB_PATH).DatabaseManager;
     contractMod = require(CONTRACT_PATH);
     dbMgr = DatabaseManager.getInstance();
   });
 
   afterEach(() => {
-    try { dbMgr?.close?.(); } catch {}
-    try { delete require.cache[DB_PATH]; } catch {}
-    try { delete require.cache[CONTRACT_PATH]; } catch {}
-    delete process.env.NATIVELY_TEST_USERDATA;
-    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+    try { dbMgr?.close?.(); } catch { }
+    try { delete require.cache[DB_PATH]; } catch { }
+    try { delete require.cache[CONTRACT_PATH]; } catch { }
+    delete process.env.MEETFLOO_TEST_USERDATA;
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { }
   });
 
   test('migration v24 -> v25 adds source_contract_json without touching existing rows', () => {

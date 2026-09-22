@@ -3,7 +3,7 @@ import { motion, useReducedMotion, useMotionValue, useTransform, useSpring } fro
 
 // Shared hover primitive for the purchase cards in Plans & Billing.
 //
-// Extracted from NativelyProSettings so the Natively API tier card can use the
+// Extracted from MeetFlooProSettings so the MeetFloo API tier card can use the
 // SAME hover as the Pro cards. The visible part of that hover is not CSS: it is
 // a cursor-tracked radial spotlight plus a press-scale spring. A CSS-only
 // imitation on :hover can copy the shadow geometry, but never the glow that
@@ -120,8 +120,8 @@ export function InteractiveCard({
     const dynamicStyle = prefersReducedMotion
         ? {}
         : {
-              scale,
-          };
+            scale,
+        };
 
     // `transparent 100%`, not 80%: at 80% the gradient hit zero at 144px rather
     // than 180px, a steeper slope that made the glow read as a cone with a
@@ -150,21 +150,21 @@ export function InteractiveCard({
                 blueprint grid and the content, not washed over the ink.
                 Everything else about this overlay's paint — the edge mask that
                 stops the gradient reaching the rim, and the asymmetric
-                enter/leave opacity timing — lives in `.natively-interactive-glow`
+                enter/leave opacity timing — lives in `.MeetFloo-interactive-glow`
                 in index.css, so the mask and both halves of the transition are
                 readable in one place. An inline `transition` here would also be
                 outranked by the `!important` ones there. */}
             {!suspendGlow && (
-            <motion.div
-                className="natively-interactive-glow absolute inset-0 pointer-events-none z-0 opacity-0 group-hover:opacity-100"
-                style={{
-                    background: prefersReducedMotion
-                        // Reduced motion means gentler, not absent: a fixed centred
-                        // glow still marks the hover, it just doesn't track.
-                        ? `radial-gradient(circle 180px at 50% 50%, ${glowColor}, transparent 100%)`
-                        : spotlightBg,
-                }}
-            />
+                <motion.div
+                    className="MeetFloo-interactive-glow absolute inset-0 pointer-events-none z-0 opacity-0 group-hover:opacity-100"
+                    style={{
+                        background: prefersReducedMotion
+                            // Reduced motion means gentler, not absent: a fixed centred
+                            // glow still marks the hover, it just doesn't track.
+                            ? `radial-gradient(circle 180px at 50% 50%, ${glowColor}, transparent 100%)`
+                            : spotlightBg,
+                    }}
+                />
             )}
             {children}
         </motion.div>

@@ -73,7 +73,7 @@ describe('validateDocumentGroundedAnswer ships a correct answer grounded in V3 e
       // count such as "42 retailers" is not unit-anchored and is deliberately
       // not a token — see NUM_UNIT_RE.)
       answer: 'PriceX covered 42 retailers and processed 9 GB of pricing data daily.',
-      retrievedBlock: v3Block('Founder, Natively (2025–present). Live-meeting copilot.'),
+      retrievedBlock: v3Block('Founder, MeetFloo (2025–present). Live-meeting copilot.'),
     });
     assert.notEqual(v.action, 'ship', 'an unsupported measured value must not ship');
   });

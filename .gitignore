@@ -14,16 +14,16 @@ FIXES.md
 python-installer.pkg
 Sales20260405-60-494j8t.csv
 /Sales20260405-60-494j8t.csv
-/natively
-natively/
-.natively
+/MeetFloo
+MeetFloo/
+.MeetFloo
 settings.json
-natively/pro_licenses.json
+MeetFloo/pro_licenses.json
 env
 /env
 *.log
-/Users/evin/natively-cluely-ai-assistant/natively
-natively
+/Users/evin/MeetFloo-cluely-ai-assistant/MeetFloo
+MeetFloo
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -37,11 +37,11 @@ tmp
 .cursorrules
 .windsurfrules
 change.md
-# nativelyapi is a separate git repo — exclude from parent repo tracking
-/nativelyapi
+# MeetFlooapi is a separate git repo — exclude from parent repo tracking
+/MeetFlooapi
 README
 pro_licenses.json
-natively/pro_licenses.json  
+MeetFloo/pro_licenses.json  
 AGENTS.md
 LICENSE.md
 
@@ -100,7 +100,7 @@ dist/
 
 # Compiled Apple Speech helper. Built explicitly for local development and
 # injected per target architecture during electron-builder afterPack.
-/resources/apple-speech/natively-apple-speech
+/resources/apple-speech/MeetFloo-apple-speech
 
 # husky auto-generated machinery — only the user-facing hook files
 # (e.g. .husky/pre-commit) are committed.
@@ -354,23 +354,23 @@ FINAL_PROFILE_INTELLIGENCE_RELEASE_REPORT.md
 _verify_backend_architect.md
 _verify_code_review.md
 _verify_test_engineer.md
-\# Natively Intelligence OS — Phase-by-Ph.md
+\# MeetFloo Intelligence OS — Phase-by-Ph.md
 ANSWER_DIVERSITY_REPORT.md
 BACKGROUND_JOB_ISOLATION_REPORT.md
 FINAL_PROFILE_INTELLIGENCE_PRODUCT_QUALITY_REPORT.md
 LATENCY_DEGRADATION_REPORT.md
 MANUAL_SEQUENTIAL_STRESS_REPORT.md
-NATIVELY_EXTERNAL_RESEARCH_NOTES.md
-NATIVELY_INTELLIGENCE_OS_E2E_VERIFICATION_REPORT.md
-NATIVELY_INTELLIGENCE_OS_FINAL_REPORT.md
-NATIVELY_INTELLIGENCE_OS_IMPLEMENTATION_PLAN.md
-NATIVELY_INTELLIGENCE_OS_LIVE_VERIFICATION.md
-NATIVELY_INTELLIGENCE_OS_OBSERVABILITY.md
-NATIVELY_INTELLIGENCE_OS_ROLLOUT.md
-NATIVELY_INTELLIGENCE_OS_WIRING_FINAL_REPORT.md
-NATIVELY_INTELLIGENCE_OS_WIRING_STATUS.md
-natively-intelligence-e2e-results.json
-natively-intelligence-e2e-verdict.json
+MEETFLOO_EXTERNAL_RESEARCH_NOTES.md
+MEETFLOO_INTELLIGENCE_OS_E2E_VERIFICATION_REPORT.md
+MEETFLOO_INTELLIGENCE_OS_FINAL_REPORT.md
+MEETFLOO_INTELLIGENCE_OS_IMPLEMENTATION_PLAN.md
+MEETFLOO_INTELLIGENCE_OS_LIVE_VERIFICATION.md
+MEETFLOO_INTELLIGENCE_OS_OBSERVABILITY.md
+MEETFLOO_INTELLIGENCE_OS_ROLLOUT.md
+MEETFLOO_INTELLIGENCE_OS_WIRING_FINAL_REPORT.md
+MEETFLOO_INTELLIGENCE_OS_WIRING_STATUS.md
+MeetFloo-intelligence-e2e-results.json
+MeetFloo-intelligence-e2e-verdict.json
 REAL_LONG_SESSION_MANUAL_TEST_REPORT.md
 Untitled-1.md
 
@@ -398,7 +398,7 @@ _external_research/
 CREDENTIALS-INTAKE.local.md
 
 # Local sprint reports / scratch notes / leaked-prompt reference (not vendored)
-NATIVELY_*_REPORT.md
+MEETFLOO_*_REPORT.md
 CORE_PIPELINE_AUDIT_REPORT.md
 reportforgpt.md
 PHASE_STATUS.md
@@ -443,13 +443,13 @@ scripts/combine_*_single_file.py
 /*_DISPUTE_*.md
 # Autopilot campaign prompts — internal docs, not source
 /HANDOFF*.md
-/NATIVELY_CONTEXT_SYSTEM_SIMPLIFICATION_PROMPT.md
+/MEETFLOO_CONTEXT_SYSTEM_SIMPLIFICATION_PROMPT.md
 # Evidence/data-access briefing for investigation agents. Carries no secret
 # VALUES, but in a PUBLIC repo it is still a map of the admin surface: which
 # /admin/* endpoints exist, that x-admin-secret gates them, the prod API and
 # Dodo base URLs, the Supabase table names, and which .env variable unlocks
 # each one. That is reconnaissance, so it stays local.
-/NATIVELY-EVIDENCE-ACCESS-REFERENCE.md
+/MEETFLOO-EVIDENCE-ACCESS-REFERENCE.md
 # Generated Vite build output that mirrors src/**/*.{tsx,ts}
 /src/**/*.js
 
@@ -552,19 +552,19 @@ benchmark-results/
 
 # Working-directory artifacts that are NOT part of this application.
 # These accumulated as untracked noise; none of them belong in the app repo.
-#   natively-control/    a separate 1.8 GB / 41k-file project checkout
+#   MeetFloo-control/    a separate 1.8 GB / 41k-file project checkout
 #   chargeback_evidence/ payment-dispute documents (business records, not code)
 #   undefined/           written by a bug that resolved a path to the literal
 #                        string "undefined" — if this reappears, fix the caller
-#   natively_debug.size* one-off debug dumps
+#   MeetFloo_debug.size* one-off debug dumps
 #   pitch/               investor pitch deck + DPIIT notes (business material,
 #                        and this repo is public — a deck does not belong in it)
 #   researc              a personal chat transcript, saved by a shell redirect
 #                        that lost its filename. Kept locally, never committed.
-/natively-control/
+/MeetFloo-control/
 /chargeback_evidence/
 /undefined/
-/natively_debug.size*
+/MeetFloo_debug.size*
 /pitch/
 /researc
 

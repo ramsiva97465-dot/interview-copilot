@@ -22,7 +22,7 @@
 //    Nine of eleven overlapping-label failures on this axis were `optional`
 //    against `yes`. A middle category that neither a human labeller nor a model
 //    separates reliably is not carrying information, and this is the axis with
-//    the clearest product consequence, since it decides whether Natively speaks
+//    the clearest product consequence, since it decides whether MeetFloo speaks
 //    at all.
 //
 //    Where the 226 optional rows GO was decided by looking at what they

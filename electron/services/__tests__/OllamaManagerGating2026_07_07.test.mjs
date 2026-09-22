@@ -36,11 +36,11 @@ const OM_PATH = '../../../dist-electron/electron/services/OllamaManager.js';
 
 describe('OllamaManager gating (2026-07-07)', () => {
   beforeEach(() => {
-    try { delete require.cache[require.resolve(OM_PATH)]; } catch {}
-    delete process.env.NATIVELY_AUTO_START_OLLAMA;
+    try { delete require.cache[require.resolve(OM_PATH)]; } catch { }
+    delete process.env.MEETFLOO_AUTO_START_OLLAMA;
   });
   afterEach(() => {
-    try { delete require.cache[require.resolve(OM_PATH)]; } catch {}
+    try { delete require.cache[require.resolve(OM_PATH)]; } catch { }
   });
 
   test('init() with no reason does NOT spawn; registers optional skipped status', async () => {

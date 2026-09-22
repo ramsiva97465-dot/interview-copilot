@@ -1,5 +1,5 @@
-// src/components/NativelyQuotaBanner.tsx
-// Startup banner shown when any Natively quota bucket reaches ≥90% usage.
+// src/components/MeetFlooQuotaBanner.tsx
+// Startup banner shown when any MeetFloo quota bucket reaches ≥90% usage.
 // Checks on every startup — no throttle.
 
 import React, { useEffect, useState } from 'react';
@@ -17,10 +17,10 @@ interface NearLimitBucket {
 }
 
 const STARTUP_DELAY_MS = 3000;
-const THRESHOLD_PCT    = 90;
-const UPGRADE_URL      = 'https://checkout.dodopayments.com/buy/pdt_0NbFixGmD8CSeawb5qvVl';
+const THRESHOLD_PCT = 90;
+const UPGRADE_URL = 'https://checkout.dodopayments.com/buy/pdt_0NbFixGmD8CSeawb5qvVl';
 
-export const NativelyQuotaBanner: React.FC = () => {
+export const MeetFlooQuotaBanner: React.FC = () => {
     const [nearLimitBuckets, setNearLimitBuckets] = useState<NearLimitBucket[]>([]);
     const [visible, setVisible] = useState(false);
 
@@ -32,17 +32,17 @@ export const NativelyQuotaBanner: React.FC = () => {
             if (cancelled) return;
 
             try {
-                const result = await window.electronAPI?.getNativelyUsage?.();
-                console.log('[NativelyQuotaBanner] usage:', JSON.stringify(result));
+                const result = await window.electronAPI?.getMeetFlooUsage?.();
+                console.log('[MeetFlooQuotaBanner] usage:', JSON.stringify(result));
 
                 if (cancelled || !result?.ok || !result.quota) {
-                    console.log('[NativelyQuotaBanner] no quota data — skipping');
+                    console.log('[MeetFlooQuotaBanner] no quota data — skipping');
                     return;
                 }
 
                 const quota = normalizeQuota(result.quota);
                 if (!quota) {
-                    console.log('[NativelyQuotaBanner] unrecognised quota shape — skipping');
+                    console.log('[MeetFlooQuotaBanner] unrecognised quota shape — skipping');
                     return;
                 }
 
@@ -57,11 +57,11 @@ export const NativelyQuotaBanner: React.FC = () => {
                 // how the banner and the settings panel end up disagreeing by a
                 // rounding step about whether someone is at their limit.
                 const candidates: Array<{ label: string; meter: UsageMeter | undefined }> = [
-                    { label: 'AI Usage',   meter: quota.ai },
+                    { label: 'AI Usage', meter: quota.ai },
                     { label: 'Embeddings', meter: quota.knowledge?.embedding },
-                    { label: 'Reranking',  meter: quota.knowledge?.reranker },
+                    { label: 'Reranking', meter: quota.knowledge?.reranker },
                     { label: 'Voice Usage', meter: quota.voice },
-                    { label: 'Research',   meter: quota.research },
+                    { label: 'Research', meter: quota.research },
                 ];
 
                 const near: NearLimitBucket[] = candidates
@@ -76,14 +76,14 @@ export const NativelyQuotaBanner: React.FC = () => {
                         pct: Math.round(meter.percent),
                     }));
 
-                console.log('[NativelyQuotaBanner] near-limit:', near);
+                console.log('[MeetFlooQuotaBanner] near-limit:', near);
 
                 if (near.length === 0) return;
 
                 setNearLimitBuckets(near);
                 setVisible(true);
             } catch (e: any) {
-                console.log('[NativelyQuotaBanner] error:', e?.message);
+                console.log('[MeetFlooQuotaBanner] error:', e?.message);
             }
         };
 
@@ -97,8 +97,8 @@ export const NativelyQuotaBanner: React.FC = () => {
         <AnimatePresence>
             <motion.div
                 initial={{ opacity: 0, y: 20, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0,  scale: 1    }}
-                exit={{    opacity: 0, y: 16,  scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 16, scale: 0.96 }}
                 transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
                 className="fixed bottom-6 right-6 z-[9999] pointer-events-auto w-[320px]"
             >

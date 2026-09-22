@@ -42,15 +42,15 @@ fs.writeFileSync(stubPng, await sharp(Buffer.from(svg)).png().toBuffer());
 // ── launch the real app ─────────────────────────────────────────────────────
 const env = {
   ...process.env,
-  NATIVELY_E2E: '1',
+  MEETFLOO_E2E: '1',
   NODE_ENV: 'development',
-  NATIVELY_DEV_BYPASS_SCREEN_TCC: '1',
-  NATIVELY_E2E_LOCAL_TEST_TOKEN: 'local-test',
+  MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1',
+  MEETFLOO_E2E_LOCAL_TEST_TOKEN: 'local-test',
   OLLAMA_URL: 'http://127.0.0.1:1',
 };
 const app = await electron.launch({ args: ['dist-electron/electron/main.js'], env, timeout: 60000, cwd: ROOT });
 const win = await app.firstWindow({ timeout: 30000 });
-await win.waitForLoadState('domcontentloaded').catch(() => {});
+await win.waitForLoadState('domcontentloaded').catch(() => { });
 const page = () => app.windows()[0];
 
 // The real renderer chat transport: invoke gemini-chat-stream and collect the
@@ -91,7 +91,7 @@ const grade = (id, text, checks) => {
 };
 
 try {
-  await page().evaluate(async () => (window.electronAPI || window.api).e2eInvoke('__e2e__:enable-pro')).catch(() => {});
+  await page().evaluate(async () => (window.electronAPI || window.api).e2eInvoke('__e2e__:enable-pro')).catch(() => { });
 
   // ── A. chat-attach: stub screenshot + deictic ask ─────────────────────────
   const a = await chat('solve this', [stubPng]);
@@ -120,7 +120,7 @@ try {
     ['code fence appeared on a sales turn', !/```/.test(c)],
   ]);
 } finally {
-  await app.close().catch(() => {});
+  await app.close().catch(() => { });
 }
 
 const passed = results.filter((r) => r.pass).length;

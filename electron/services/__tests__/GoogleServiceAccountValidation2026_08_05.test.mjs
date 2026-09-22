@@ -97,7 +97,7 @@ describe('DEFINITE rejections — safe to evict the stored path', () => {
       { files: { '/k/client.json': JSON.stringify({ installed: { client_id: 'x', client_secret: 'y' } }) } },
       'not_service_account'],
     ['a package.json', '/k/package.json',
-      { files: { '/k/package.json': JSON.stringify({ name: 'natively', version: '1.0.0' }) } },
+      { files: { '/k/package.json': JSON.stringify({ name: 'MeetFloo', version: '1.0.0' }) } },
       'not_service_account'],
     ['service_account type but no private_key', '/k/partial.json',
       { files: { '/k/partial.json': JSON.stringify({ type: 'service_account', client_email: 'a@b.com' }) } },

@@ -108,7 +108,7 @@ export interface TurnPlan {
     /** If set, the assembler MUST inject this literal phrase (the candidate's
      *  full name from the resume) immediately before the identity-answer
      *  template. Closes the C3M-001 live-trace failure: the model answered
-     *  "I'm Natively, an AI assistant" instead of the candidate name because
+     *  "I'm MeetFloo, an AI assistant" instead of the candidate name because
      *  CORE_IDENTITY's identity-question rule took precedence over a buried
      *  resume-block mention. */
     candidateIdentityOverride?: string | null;
@@ -362,7 +362,7 @@ function groundingProfileFor(input: TurnPlanInput): GroundingProfile {
   //      field, shipped in iter4). Per-mode override — highest priority.
   //   2. `sourceContract.templateType === 'seminar'` (per-mode signal;
   //      Sets the strictest profile automatically without a migration).
-  //   3. NATIVELY_SEMINAR_MODE env flag (legacy / global toggle for the
+  //   3. MEETFLOO_SEMINAR_MODE env flag (legacy / global toggle for the
   //      Seminar strict profile, used during the migration window).
   //   4. DEFAULT_GROUNDING_PROFILE (preferred / answer_general_labeled —
   //      the right behavior for the 7 existing built-in modes).
@@ -374,7 +374,7 @@ function groundingProfileFor(input: TurnPlanInput): GroundingProfile {
   }
   const seminarEnabled =
     typeof process !== 'undefined'
-    && process.env?.NATIVELY_SEMINAR_MODE === '1';
+    && process.env?.MEETFLOO_SEMINAR_MODE === '1';
   if (seminarEnabled) return SEMINAR_GROUNDING_PROFILE;
   return DEFAULT_GROUNDING_PROFILE;
 }

@@ -35,7 +35,7 @@ const ledger = grab(/TRACE:LEDGER\] ledger_parity_check (\{.*\})/g);
 
 if (!answers.length) {
   console.error(`No [TRACE:ANSWER] entries in ${path.basename(target)}.`);
-  console.error('The launcher sets NATIVELY_TRACE_ANSWERS=1; a session started before that flag existed will not have them.');
+  console.error('The launcher sets MEETFLOO_TRACE_ANSWERS=1; a session started before that flag existed will not have them.');
   process.exit(2);
 }
 

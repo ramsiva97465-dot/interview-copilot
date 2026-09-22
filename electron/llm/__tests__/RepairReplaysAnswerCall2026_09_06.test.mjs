@@ -42,14 +42,14 @@ electronStub.exports = {
     isReady: () => true,
     getPath: (n) => (n === 'userData' ? tmpUserData : os.tmpdir()),
     getAppPath: () => root,
-    getName: () => 'natively-test',
+    getName: () => 'MeetFloo-test',
     getVersion: () => '0.0.0-test',
     isPackaged: false,
-    on: () => {},
+    on: () => { },
   },
   shell: { openPath: async () => '' },
   safeStorage: { isEncryptionAvailable: () => false },
-  ipcMain: { on: () => {}, handle: () => {}, removeAllListeners: () => {} },
+  ipcMain: { on: () => { }, handle: () => { }, removeAllListeners: () => { } },
   BrowserWindow: { getAllWindows: () => [] },
   desktopCapturer: { getSources: async () => [] },
   net: { isOnline: () => true },
@@ -339,7 +339,7 @@ describe('a selected single provider now fails over — or retries itself in par
   // Until 2026-09-06 the Custom / cURL / LiteLLM / NVIDIA NIM branches returned
   // unconditionally, so a user on their own gateway had NO failover on the text
   // path. Worse, the only mechanism in LLMHelper that turns SLOWNESS into
-  // failover is the Natively TTFT race, which those users never reach: a gateway
+  // failover is the MeetFloo TTFT race, which those users never reach: a gateway
   // that connects then goes quiet throws nothing, so no catch fires and nothing
   // falls through. The outer live deadline was the only thing that noticed, and
   // a deadline can only give up.
@@ -403,7 +403,7 @@ describe('a selected single provider now fails over — or retries itself in par
   });
 
   test('Groq keeps its own error ladder', () => {
-    // Groq is the one branch that ALREADY falls through, into the Natively TTFT
+    // Groq is the one branch that ALREADY falls through, into the MeetFloo TTFT
     // race. Wrapping it would sit between its auth-disable / over-capacity /
     // commit.emitted branches and that fall-through.
     excludedBranch(
@@ -427,7 +427,7 @@ describe('a selected single provider now fails over — or retries itself in par
   test('a provider can never be its own spare', () => {
     assert.match(llm, /buildTextSpareRungs\(opts\.userContent, opts\.finalSystemPrompt, opts\.thinkingBudget, \[opts\.id,/);
     assert.match(llm, /const skip = new Set\(excludeIds\);/);
-    for (const id of ['natively', 'gemini_flash', 'groq']) {
+    for (const id of ['MeetFloo', 'gemini_flash', 'groq']) {
       assert.match(llm, new RegExp(`!skip\\.has\\('${id}'\\)`), `${id} spare must be skippable`);
     }
   });

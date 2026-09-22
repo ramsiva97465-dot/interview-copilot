@@ -2,7 +2,7 @@
 //
 // WHY THIS EXISTS. The policy was stated four times — the client ledger
 // (electron/services/ReviewPromptLogic.ts), its backend twin
-// (natively-api/reviews.js), a dead private copy in ReviewService.ts, and the
+// (MeetFloo-api/reviews.js), a dead private copy in ReviewService.ts, and the
 // onboarding catalog (src/lib/onboarding/stageCatalog.*). Nothing tied them
 // together, and they drifted in BOTH directions at once:
 //
@@ -43,13 +43,13 @@ function readConstant(source, name) {
 
 const LEDGERS = [
   { label: 'client ledger', path: join(REPO, 'electron/services/ReviewPromptLogic.ts') },
-  { label: 'backend ledger', path: join(REPO, 'natively-api/reviews.js') },
+  { label: 'backend ledger', path: join(REPO, 'MeetFloo-api/reviews.js') },
 ];
 
 for (const { label, path } of LEDGERS) {
   test(`${label} agrees with the onboarding catalog`, (t) => {
     if (!existsSync(path)) {
-      // natively-api is a submodule; a shallow checkout should skip, not fail.
+      // MeetFloo-api is a submodule; a shallow checkout should skip, not fail.
       t.skip(`${path} not present`);
       return;
     }

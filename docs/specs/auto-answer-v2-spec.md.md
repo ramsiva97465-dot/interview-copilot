@@ -1,8 +1,8 @@
-# Natively Auto Answer V2 — Implementation Specification
+# MeetFloo Auto Answer V2 — Implementation Specification
 
 ## Objective
 
-Rebuild Natively's Auto Answer feature into a robust, low-latency, speaker-aware, question-opportunity pipeline.
+Rebuild MeetFloo's Auto Answer feature into a robust, low-latency, speaker-aware, question-opportunity pipeline.
 
 The goal is **not** merely to detect `?` or wait 900 ms after an STT final.
 
@@ -369,7 +369,7 @@ The endpoint timer should:
 
 Pluely currently exposes roughly 1s / 1.5s / 2.5s pacing and explicitly waits for a real quiet window before responding. Use this only as a product benchmark, not as an implementation dependency.
 
-Keep Natively's defaults slightly more latency-sensitive because this is interview assistance.
+Keep MeetFloo's defaults slightly more latency-sensitive because this is interview assistance.
 
 ---
 
@@ -1683,7 +1683,7 @@ This is mandatory.
 
 The worst Auto Answer failure is:
 
-> interviewer asks Q2, Natively answers Q1.
+> interviewer asks Q2, MeetFloo answers Q1.
 
 ---
 
@@ -1801,7 +1801,7 @@ Measure rather than guess. The system should add as little latency beyond the tr
 
 # 50. Important implementation principle
 
-Do not rewrite large unrelated portions of Natively.
+Do not rewrite large unrelated portions of MeetFloo.
 
 Make the smallest architectural change that creates this pipeline:
 
@@ -1894,10 +1894,10 @@ Reuse existing abstractions wherever they already satisfy the requirement.
 
 The most important product invariant is:
 
-> **Natively must never confidently answer something the interviewer did not actually ask, and it must never answer the previous question after the interviewer has moved to a new one.**
+> **MeetFloo must never confidently answer something the interviewer did not actually ask, and it must never answer the previous question after the interviewer has moved to a new one.**
 
 The second most important invariant is:
 
-> **When the interviewer really has asked a question, Natively should recognize and answer it with the minimum possible delay after the actual end of the question.**
+> **When the interviewer really has asked a question, MeetFloo should recognize and answer it with the minimum possible delay after the actual end of the question.**
 
 Optimize the implementation for those two invariants first.

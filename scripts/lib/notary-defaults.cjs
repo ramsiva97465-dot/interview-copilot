@@ -16,7 +16,7 @@
  */
 
 /** notarytool keychain profile used by the local signed build. */
-const DEFAULT_KEYCHAIN_PROFILE = 'natively-notary';
+const DEFAULT_KEYCHAIN_PROFILE = 'MeetFloo-notary';
 
 /** Apple Developer Team ID (matches the Developer ID Application certificate). */
 const DEFAULT_TEAM_ID = 'BJM29W3UQ6';

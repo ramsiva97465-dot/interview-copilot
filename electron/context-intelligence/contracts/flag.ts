@@ -18,7 +18,7 @@
 //
 // See docs/context-intelligence-v3/12_ROLLOUT_AND_ROLLBACK.md §2
 
-const ENV_KEY = 'NATIVELY_CONTEXT_INTELLIGENCE_V3';
+const ENV_KEY = 'MEETFLOO_CONTEXT_INTELLIGENCE_V3';
 
 /**
  * Where the opt-in is persisted.
@@ -28,7 +28,7 @@ const ENV_KEY = 'NATIVELY_CONTEXT_INTELLIGENCE_V3';
  * to inherit and no dev-only default to accidentally adopt), and a rollout
  * opt-in should not require a settings migration to exist.
  *
- * Test isolation uses NATIVELY_TEST_USERDATA, the same variable every harness
+ * Test isolation uses MEETFLOO_TEST_USERDATA, the same variable every harness
  * here already sets, so a developer's real opt-in can never leak into a test run
  * and flip an assertion about the default.
  */
@@ -38,7 +38,7 @@ function settingsPath(): string | null {
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const path = require('path');
-    if (process.env.NATIVELY_TEST_USERDATA) return path.join(process.env.NATIVELY_TEST_USERDATA, SETTING_FILE);
+    if (process.env.MEETFLOO_TEST_USERDATA) return path.join(process.env.MEETFLOO_TEST_USERDATA, SETTING_FILE);
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { app } = require('electron');
     if (app?.getPath) return path.join(app.getPath('userData'), SETTING_FILE);
@@ -104,7 +104,7 @@ const falsy = (v: string | undefined): boolean => {
 // they keep protecting the actual invariant through the rollout.
 //
 // Rollback is unchanged and still a flip: set this to false, or set
-// NATIVELY_CONTEXT_INTELLIGENCE_V3=0, or persist { "enabled": false }.
+// MEETFLOO_CONTEXT_INTELLIGENCE_V3=0, or persist { "enabled": false }.
 export const DEFAULT_ENABLED = true;
 
 export interface FlagOverrides {

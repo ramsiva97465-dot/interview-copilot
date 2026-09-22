@@ -45,7 +45,7 @@ function makeFakeChild() {
 
 /** A real directory with a real entrypoint file, because the host stats it. */
 function makeExtensionDir() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-host-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-host-'));
   fs.mkdirSync(path.join(dir, 'dist'), { recursive: true });
   fs.writeFileSync(path.join(dir, 'dist', 'index.js'), 'module.exports = {};');
   return dir;
@@ -61,7 +61,7 @@ function manifest(overrides = {}) {
     entrypoint: 'dist/index.js',
     author: 'community',
     homepage: 'https://github.com/example/x',
-    engines: { natively: '>=2.8.0' },
+    engines: { MeetFloo: '>=2.8.0' },
     permissions: ['filesystem.models', 'process.spawn', 'network.localhost'],
     allowedBinaries: ['llama-server'],
     models: [],
@@ -80,7 +80,7 @@ function makeHost(overrides = {}) {
     broker: createPermissionBroker('darwin'),
     config: {},
     logger: {
-      debug() {}, info() {},
+      debug() { }, info() { },
       warn: (m) => warnings.push(String(m)),
       error: (m) => warnings.push(String(m)),
     },

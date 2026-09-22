@@ -1,6 +1,6 @@
 // electron/services/screen/ScreenUnderstandingService.ts
 //
-// VISION-FIRST screen understanding pipeline for Natively.
+// VISION-FIRST screen understanding pipeline for MeetFloo.
 //
 // Flow:
 //   request
@@ -221,7 +221,7 @@ export class ScreenUnderstandingService {
     // Validate paths.
     const userDataDir =
       (app?.getPath ? app.getPath('userData') : undefined) ||
-      process.env.NATIVELY_TEST_USER_DATA ||
+      process.env.MEETFLOO_TEST_USER_DATA ||
       '';
     const validPaths: string[] = [];
     for (const p of imagePaths) {
@@ -274,7 +274,7 @@ export class ScreenUnderstandingService {
         imageHash,
         unavailableReason: mode === 'private_vision'
           ? 'No local vision provider is available. Configure Ollama with a vision-capable model (llava, qwen2.5-vl, llama3.2-vision, etc.) or enable Codex CLI vision.'
-          : 'No vision-capable provider is configured. Add an API key for OpenAI, Claude, Gemini, Groq, or Natively, or configure a local Ollama vision model.',
+          : 'No vision-capable provider is configured. Add an API key for OpenAI, Claude, Gemini, Groq, or MeetFloo, or configure a local Ollama vision model.',
       });
     }
 
@@ -301,8 +301,8 @@ export class ScreenUnderstandingService {
       // streamVisionWithFallback. Every millisecond spent here is added to
       // time-to-first-token for a structured extraction the turn can do without.
       //
-      // It had no total bound at all. In natively_debug (3).log that cost the
-      // user 8.0s on 31 of 33 turns — the Natively rung's inner timeout, which
+      // It had no total bound at all. In MeetFloo_debug (3).log that cost the
+      // user 8.0s on 31 of 33 turns — the MeetFloo rung's inner timeout, which
       // happened to be the only thing stopping the chain because their build
       // then skipped every remaining rung. On a build that walks the whole chain
       // (post-3e29a67f) the same failure would have cost 8s PLUS a real call to
@@ -318,10 +318,10 @@ export class ScreenUnderstandingService {
     // The chain's attempt ledger is otherwise WRITE-ONLY: runVisionFallback
     // reports through `params.telemetry?.()`, this call site passed no callback,
     // and `result.attempts` only ever reached the IPC response — never a log.
-    // A user debug log therefore showed a bare "[NativelyAPI] JSON pre-response
+    // A user debug log therefore showed a bare "[MeetFlooAPI] JSON pre-response
     // failure" and then nothing, with no way to tell a rung that was SKIPPED
     // (not configured / not vision-capable) from one that was tried and failed.
-    // Diagnosing natively_debug (3).log needed source archaeology and a build-
+    // Diagnosing MeetFloo_debug (3).log needed source archaeology and a build-
     // dating exercise to answer "did it even try the user's own provider?".
     // One line, every turn, answers it.
     console.log('[ScreenUnderstanding] vision chain', {

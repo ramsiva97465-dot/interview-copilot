@@ -25,11 +25,13 @@ const distDir = (() => {
   if (fs.existsSync(bundled)) return path.resolve(repoRoot, 'dist-electron');
   const target = fs.mkdtempSync(path.join(os.tmpdir(), 'csi-dist-'));
   fs.symlinkSync(path.join(repoRoot, 'node_modules'), path.join(target, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
-  try { execFileSync(process.execPath, [
-    path.join('node_modules', 'typescript', 'bin', 'tsc'),
-    '-p', path.join('electron', 'tsconfig.json'),
-    '--outDir', target,
-  ], { cwd: repoRoot, stdio: 'pipe' }); } catch { /* expected partial */ }
+  try {
+    execFileSync(process.execPath, [
+      path.join('node_modules', 'typescript', 'bin', 'tsc'),
+      '-p', path.join('electron', 'tsconfig.json'),
+      '--outDir', target,
+    ], { cwd: repoRoot, stdio: 'pipe' });
+  } catch { /* expected partial */ }
   return target;
 })();
 
@@ -37,7 +39,7 @@ const distDir = (() => {
 // `customModeSourceEnforcement` flag (default OFF). Enable it for THIS suite so
 // the v2 (blacklist-free) behavior is exercised. Set before requiring the
 // compiled module so the flag read picks it up.
-process.env.NATIVELY_CUSTOM_MODE_SOURCE_ENFORCEMENT = '1';
+process.env.MEETFLOO_CUSTOM_MODE_SOURCE_ENFORCEMENT = '1';
 
 const cjsRequire = createRequire(import.meta.url);
 const dgMod = cjsRequire(path.resolve(distDir, 'electron/llm/documentGroundedPrompt.js'));
@@ -156,7 +158,7 @@ Chapter 4: Results and Discussion
 `;
 
 const PROFILE_BLOCK = `
-[Project: Natively — privacy-first AI meeting assistant, 2024-2025]
+[Project: MeetFloo — privacy-first AI meeting assistant, 2024-2025]
 [Project: TalentScope — talent matching platform]
 [Project: agenticVLA — Vision-Language-Action agent]
 `;
@@ -265,11 +267,11 @@ test('SourceArbiter: general no-mode → ask_if_ambiguous', () => {
   assert.equal(c.evidenceRequired, false);
 });
 
-// ── Test 7: REGRESSION A — "four main phases" Natively leak ────────────────
+// ── Test 7: REGRESSION A — "four main phases" MeetFloo leak ────────────────
 
-test('REGRESSION A: list_answer with "Natively" leak is rejected by contract validator', () => {
+test('REGRESSION A: list_answer with "MeetFloo" leak is rejected by contract validator', () => {
   const contract = contractFor(DOC_GROUNDED_INPUT);
-  const wrongAnswer = 'My project Natively is a privacy-first AI meeting assistant. Phase 1: Requirements, Phase 2: Design, Phase 3: Implementation, Phase 4: Testing.';
+  const wrongAnswer = 'My project MeetFloo is a privacy-first AI meeting assistant. Phase 1: Requirements, Phase 2: Design, Phase 3: Implementation, Phase 4: Testing.';
   const result = validateAgainstSourceContract({
     contract,
     question: 'What are the four main phases of the project?',
@@ -277,7 +279,7 @@ test('REGRESSION A: list_answer with "Natively" leak is rejected by contract val
     retrievedBlock: THESIS_BLOCK,
   });
   assert.equal(result.ok, false, `expected rejection, got ok=true: ${result.reason}`);
-  assert.ok(result.entityLeaks.includes('Natively'), `expected Natively in entityLeaks, got: ${JSON.stringify(result.entityLeaks)}`);
+  assert.ok(result.entityLeaks.includes('MeetFloo'), `expected MeetFloo in entityLeaks, got: ${JSON.stringify(result.entityLeaks)}`);
   assert.equal(result.action, 'retry', `expected retry (contract.repairable=true), got: ${result.action}`);
 });
 
@@ -369,26 +371,26 @@ test('REGRESSION C: fabricated cost answer is rejected', () => {
   assert.equal(result.ok, false, `expected rejection of fabricated cost, got ok=true`);
 });
 
-// ── Test 10: REGRESSION D — explicit "what is my project Natively?" ────────
+// ── Test 10: REGRESSION D — explicit "what is my project MeetFloo?" ────────
 
 test('REGRESSION D: profile-question slipped into doc-grounded mode is rejected', () => {
   const contract = contractFor(DOC_GROUNDED_INPUT);
-  const wrongAnswer = 'My project Natively is a privacy-first AI meeting assistant.';
+  const wrongAnswer = 'My project MeetFloo is a privacy-first AI meeting assistant.';
   const result = validateAgainstSourceContract({
     contract,
-    question: 'What is my project Natively?',
+    question: 'What is my project MeetFloo?',
     answer: wrongAnswer,
     retrievedBlock: THESIS_BLOCK,
   });
   assert.equal(result.ok, false, `expected rejection of profile leak, got ok=true`);
-  assert.ok(result.entityLeaks.includes('Natively'), `expected Natively in entityLeaks`);
+  assert.ok(result.entityLeaks.includes('MeetFloo'), `expected MeetFloo in entityLeaks`);
 });
 
 // ── Test 11: REGRESSION E — profile mode accepts profile content ──────────
 
-test('REGRESSION E: profile mode accepts Natively project answer', () => {
+test('REGRESSION E: profile mode accepts MeetFloo project answer', () => {
   const contract = contractFor(PROFILE_INPUT);
-  const goodAnswer = 'Your best projects include Natively, TalentScope, and agenticVLA.';
+  const goodAnswer = 'Your best projects include MeetFloo, TalentScope, and agenticVLA.';
   const result = validateAgainstSourceContract({
     contract,
     question: 'What are my best projects?',
@@ -478,18 +480,18 @@ test('OWNERSHIP: doc-grounded "List the four objectives." (list) → profile NOT
 // ── Doc-grounded + explicit profile ask → clarify / offer to switch ────────
 
 test('OWNERSHIP: doc-grounded EXPLICIT "what is my project X?" → clarify, no profile leak', () => {
-  const d = ownershipFor('What is my project Natively?', 'reference_files_only');
+  const d = ownershipFor('What is my project MeetFloo?', 'reference_files_only');
   assert.equal(d.profileAllowed, false, 'never leak the profile');
   assert.equal(d.explicitProfileAsk, true, 'possessive "my project" is detected generically');
   assert.equal(d.shouldClarifyInsteadOfProfile, true, 'explicit profile ask in a doc mode → clarify');
   // The clarify line is source-honest and names no specific document/project.
   const line = buildSourceSwitchClarification(d.owner);
   assert.match(line, /uploaded material/i);
-  assert.doesNotMatch(line, /Natively/i);
+  assert.doesNotMatch(line, /MeetFloo/i);
 });
 
 test('OWNERSHIP: explicit-profile shape detector is generic (not an entity list)', () => {
-  assert.equal(isExplicitProfileAsk('what is my project Natively?'), true);
+  assert.equal(isExplicitProfileAsk('what is my project MeetFloo?'), true);
   assert.equal(isExplicitProfileAsk('tell me about my resume'), true);
   assert.equal(isExplicitProfileAsk('from my background, what fits?'), true);
   assert.equal(isExplicitProfileAsk('your skills for this role'), true);
@@ -542,9 +544,9 @@ test('ENTITY: extractCandidateEntities finds proper nouns + product tokens gener
 });
 
 test('ENTITY: unsupportedEntities flags any answer entity absent from evidence — no hardcoded names', () => {
-  // "Natively" is absent from the thesis block → flagged.
-  const leaks = unsupportedEntities('My project Natively uses Electron and Rust.', THESIS_BLOCK);
-  assert.ok(leaks.includes('Natively'), `expected Natively flagged, got ${JSON.stringify(leaks)}`);
+  // "MeetFloo" is absent from the thesis block → flagged.
+  const leaks = unsupportedEntities('My project MeetFloo uses Electron and Rust.', THESIS_BLOCK);
+  assert.ok(leaks.includes('MeetFloo'), `expected MeetFloo flagged, got ${JSON.stringify(leaks)}`);
   // A brand-new invented entity is ALSO flagged with zero code changes.
   const leaks2 = unsupportedEntities('The system runs on QuantumForge9000.', THESIS_BLOCK);
   assert.ok(leaks2.includes('QuantumForge9000'), `expected the invented entity flagged, got ${JSON.stringify(leaks2)}`);

@@ -123,21 +123,21 @@ function defaultRnntIntraOpThreads(): number {
  * Kept as a fresh object per call (session_options is merged/mutated by
  * transformers.js internals — never share one object across sessions).
  *
- * `NATIVELY_ONNX_INTRA_OP_THREADS` still overrides every workload, so the
+ * `MEETFLOO_ONNX_INTRA_OP_THREADS` still overrides every workload, so the
  * measurements above stay reproducible without a new build.
  */
 export function getBoundedOnnxSessionOptions(workload: OnnxWorkload = 'default'): OnnxThreadBounds {
     const intraDefault = workload === 'rnnt-decode' ? defaultRnntIntraOpThreads() : 1;
     return {
-        intraOpNumThreads: readIntEnv('NATIVELY_ONNX_INTRA_OP_THREADS', intraDefault),
-        interOpNumThreads: readIntEnv('NATIVELY_ONNX_INTER_OP_THREADS', 1),
+        intraOpNumThreads: readIntEnv('MEETFLOO_ONNX_INTRA_OP_THREADS', intraDefault),
+        interOpNumThreads: readIntEnv('MEETFLOO_ONNX_INTER_OP_THREADS', 1),
         executionMode: 'sequential',
         // Disable ORT's persistent BFCArena/memory-pattern reuse by default.
         // The crash forensics above point at BFCArena::Extend; standard system
         // allocations are safer inside Electron. Env vars keep this reversible
         // for perf experiments without shipping a new build.
-        enableCpuMemArena: readBoolEnv('NATIVELY_ONNX_ENABLE_CPU_MEM_ARENA', false),
-        enableMemPattern: readBoolEnv('NATIVELY_ONNX_ENABLE_MEM_PATTERN', false),
+        enableCpuMemArena: readBoolEnv('MEETFLOO_ONNX_ENABLE_CPU_MEM_ARENA', false),
+        enableMemPattern: readBoolEnv('MEETFLOO_ONNX_ENABLE_MEM_PATTERN', false),
     };
 }
 
@@ -176,14 +176,14 @@ interface OnnxSemaphore {
 }
 const _sem: OnnxSemaphore = (() => {
     const g = globalThis as unknown as Record<string, OnnxSemaphore | undefined>;
-    if (!g.__nativelyOnnxSemaphoreV1__) {
-        g.__nativelyOnnxSemaphoreV1__ = { inFlightNormal: 0, inFlightHigh: 0, exclusiveInFlight: 0, waitersNormal: [], waitersHigh: [] };
+    if (!g.__MeetFlooOnnxSemaphoreV1__) {
+        g.__MeetFlooOnnxSemaphoreV1__ = { inFlightNormal: 0, inFlightHigh: 0, exclusiveInFlight: 0, waitersNormal: [], waitersHigh: [] };
     }
-    return g.__nativelyOnnxSemaphoreV1__;
+    return g.__MeetFlooOnnxSemaphoreV1__;
 })();
 
 function readMaxConcurrent(): number {
-    return readIntEnv('NATIVELY_ONNX_MAX_CONCURRENT_SESSIONS', 2);
+    return readIntEnv('MEETFLOO_ONNX_MAX_CONCURRENT_SESSIONS', 2);
 }
 
 /**
@@ -202,11 +202,11 @@ function readMaxConcurrent(): number {
  * only when the user explicitly enabled per-channel local models.
  */
 function readHighPriorityBudget(): number {
-    return readIntEnv('NATIVELY_ONNX_HIGH_PRIORITY_SESSIONS', 2);
+    return readIntEnv('MEETFLOO_ONNX_HIGH_PRIORITY_SESSIONS', 2);
 }
 
 function readMinFreeGB(): number {
-    const raw = process.env.NATIVELY_ONNX_MIN_FREE_GB;
+    const raw = process.env.MEETFLOO_ONNX_MIN_FREE_GB;
     if (!raw) return 2.0;
     const n = Number.parseFloat(raw);
     return Number.isFinite(n) && n >= 0 ? n : 2.0;
@@ -226,7 +226,7 @@ function readMinFreeGB(): number {
 // (matching readMaxConcurrent/readMinFreeGB's own pattern) so tests don't
 // need to hand-wait the real default.
 function readExclusiveTimeoutMs(): number {
-    return readIntEnv('NATIVELY_ONNX_EXCLUSIVE_TIMEOUT_MS', 15000);
+    return readIntEnv('MEETFLOO_ONNX_EXCLUSIVE_TIMEOUT_MS', 15000);
 }
 
 function canAcquireNow(priority: OnnxSlotPriority, weight: number): boolean {
@@ -446,7 +446,7 @@ export function acquireOnnxSlotWithin(
             clearTimeout(slowLog);
             reject(new Error(
                 `${label}: no ONNX session slot became free within ${timeoutMs}ms — ${describeOnnxGate()}. ` +
-                `Raise NATIVELY_ONNX_HIGH_PRIORITY_SESSIONS (STT channels) or NATIVELY_ONNX_MAX_CONCURRENT_SESSIONS ` +
+                `Raise MEETFLOO_ONNX_HIGH_PRIORITY_SESSIONS (STT channels) or MEETFLOO_ONNX_MAX_CONCURRENT_SESSIONS ` +
                 `(background models), or use a cloud STT provider.`,
             ));
         }, timeoutMs);
@@ -475,11 +475,11 @@ export function acquireOnnxSlotWithin(
  * `os.freemem()` when the platform-specific probe is unavailable or throws.
  * Cached for AVAIL_MEM_CACHE_TTL_MS to avoid spawning vm_stat per model load.
  *
- * Override for tests / incident tuning with NATIVELY_ONNX_AVAILABLE_MEM_GB
+ * Override for tests / incident tuning with MEETFLOO_ONNX_AVAILABLE_MEM_GB
  * (a fixed value forces the gate deterministically).
  */
 export function getAvailableMemoryGB(): number {
-    const override = process.env.NATIVELY_ONNX_AVAILABLE_MEM_GB;
+    const override = process.env.MEETFLOO_ONNX_AVAILABLE_MEM_GB;
     if (override) {
         const n = Number.parseFloat(override);
         if (Number.isFinite(n) && n >= 0) return n;
@@ -511,7 +511,7 @@ export function getAvailableMemoryGB(): number {
 
 /**
  * Available-memory floor for admitting a new ONNX session. Returns true if the
- * system has at least `NATIVELY_ONNX_MIN_FREE_GB` (default 2.0 GB) of
+ * system has at least `MEETFLOO_ONNX_MIN_FREE_GB` (default 2.0 GB) of
  * AVAILABLE memory (free + OS-reclaimable cache), NOT merely `os.freemem()`.
  * See getAvailableMemoryGB() for why the distinction is load-bearing on macOS.
  *

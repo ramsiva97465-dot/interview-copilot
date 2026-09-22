@@ -2,7 +2,7 @@
 //
 // Which locally-installed Ollama models can GENERATE text.
 //
-// `/api/tags` lists everything pulled, embedders included, and Natively pulls
+// `/api/tags` lists everything pulled, embedders included, and MeetFloo pulls
 // `nomic-embed-text` itself on first launch (electron/main.ts) for retrieval.
 // Handed that raw list, the app offered an embedding model as a chat model in
 // every model picker, and `initializeOllamaModel()` could auto-select it as THE

@@ -43,7 +43,7 @@
 // Per the migration plan's own gate: item 6 is PULLED from Slice 0.
 // `classifyRequestedProperty` is NOT deleted. A real unification is future
 // work, gated behind a to-be-added dev/test-scoped flag
-// (NATIVELY_REQUESTED_PROPERTY_UNIFY) once the name mismatch is resolved —
+// (MEETFLOO_REQUESTED_PROPERTY_UNIFY) once the name mismatch is resolved —
 // not attempted here.
 //
 // This file is a permanent regression/documentation artifact: if a future

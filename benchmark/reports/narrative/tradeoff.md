@@ -7,4 +7,4 @@ Only two configurations score higher than the current one on quality, and neithe
 | DeepSeek V4.1 Flash, thinking ON | +1.5 pp [−2.8, +5.1] | 1.87× | 2.75× (114 s) | 29/33 runs |
 | GPT-5.6 Luna max | +2.8 pp [−0.8, +7.3] (8 conversations) | 7.05× | 14.5× (598 s) | 20/20 runs |
 
-If Natively later decides a few points of retention are worth paying for, DeepSeek-thinking is the far cheaper and faster way to get them. Neither is justified by this data for a high-volume default.
+If MeetFloo later decides a few points of retention are worth paying for, DeepSeek-thinking is the far cheaper and faster way to get them. Neither is justified by this data for a high-volume default.

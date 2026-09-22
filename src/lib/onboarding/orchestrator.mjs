@@ -76,7 +76,7 @@ export function shouldShowToaster(config, ctx) {
 export const DEFAULT_USER_STATE = {
   isPremium: false,
   hasProfile: false,
-  hasNativelyKey: false,
+  hasMeetFlooKey: false,
   hasTrialToken: false,
   extensionConnected: false,
   extensionSupported: true,

@@ -23,7 +23,7 @@ function loadDotEnv(file) {
   }
 }
 loadDotEnv(path.join(repoRoot, '.env'));
-loadDotEnv(path.join(repoRoot, 'natively-api', '.env'));
+loadDotEnv(path.join(repoRoot, 'MeetFloo-api', '.env'));
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
 if (!GEMINI_KEY) {
@@ -31,12 +31,12 @@ if (!GEMINI_KEY) {
   process.exit(2);
 }
 
-const enforce = process.env.NATIVELY_CUSTOM_MODE_SOURCE_ENFORCEMENT === '1' || process.env.ENFORCE_SOURCE === '1';
-process.env.NATIVELY_CUSTOM_MODE_SOURCE_ENFORCEMENT = enforce ? '1' : '0';
-process.env.NATIVELY_RETRIEVAL_DIAGNOSTICS = process.env.NATIVELY_RETRIEVAL_DIAGNOSTICS || '1';
-process.env.NATIVELY_TRACE = process.env.NATIVELY_TRACE || '1';
+const enforce = process.env.MEETFLOO_CUSTOM_MODE_SOURCE_ENFORCEMENT === '1' || process.env.ENFORCE_SOURCE === '1';
+process.env.MEETFLOO_CUSTOM_MODE_SOURCE_ENFORCEMENT = enforce ? '1' : '0';
+process.env.MEETFLOO_RETRIEVAL_DIAGNOSTICS = process.env.MEETFLOO_RETRIEVAL_DIAGNOSTICS || '1';
+process.env.MEETFLOO_TRACE = process.env.MEETFLOO_TRACE || '1';
 
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), `natively-cmsi-${enforce ? 'on' : 'off'}-`));
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), `MeetFloo-cmsi-${enforce ? 'on' : 'off'}-`));
 app.setPath('userData', tmpUserData);
 
 const outDir = path.join(repoRoot, 'debug-artifacts', 'custom-mode-source-regression');
@@ -112,7 +112,7 @@ function parseSnippets(block) {
     const source = (m[1].match(/<source>([\s\S]*?)<\/source>/) || [])[1] || '';
     const text = xmlUnescape((m[1].match(/<text>([\s\S]*?)<\/text>/) || [])[1] || '');
     let src = null;
-    try { src = JSON.parse(source); } catch {}
+    try { src = JSON.parse(source); } catch { }
     out.push({
       source: src,
       text,
@@ -126,7 +126,7 @@ function parseSnippets(block) {
 function judge(question, answer, validation) {
   const a = answer.toLowerCase();
   const fails = [];
-  if (/natively/i.test(answer)) fails.push('mentions Natively');
+  if (/MeetFloo/i.test(answer)) fails.push('mentions MeetFloo');
   if (question.includes('processor controls')) {
     if (!/jetson\s+xavier/i.test(answer) || !/jetson\s+nano/i.test(answer)) fails.push('missing Jetson Xavier + Jetson Nano');
     if (/esp32/i.test(answer)) fails.push('mentions ESP32 for processor question');
@@ -204,7 +204,7 @@ async function main() {
   const csi = require(path.join(distRoot, 'llm', 'customModeExecutionContract.js'));
 
   const mm = ModesManager.getInstance();
-  for (const m of mm.getModes()) if (/source regression|seminar/i.test(m.name)) { try { mm.deleteMode(m.id); } catch {} }
+  for (const m of mm.getModes()) if (/source regression|seminar/i.test(m.name)) { try { mm.deleteMode(m.id); } catch { } }
   const mode = mm.createMode({ name: `Source Regression ${enforce ? 'ON' : 'OFF'}`, templateType: 'general' });
   mm.updateMode(mode.id, { customContext: CUSTOM_PROMPT });
   for (const f of FIXTURE_FILES) await addFile(mm, mode.id, f);
@@ -379,12 +379,12 @@ async function main() {
   fs.writeFileSync(outFile, JSON.stringify(summary, null, 2));
   console.log(`[live-regression] wrote ${outFile}`);
   console.log(`[live-regression] score ${summary.pass}/${summary.total}`);
-  try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch {}
+  try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch { }
   process.exit(summary.pass >= (summary.total === 6 ? 6 : 28) ? 0 : 1);
 }
 
 main().catch((e) => {
   console.error('[live-regression] FATAL', e);
-  try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch {}
+  try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch { }
   process.exit(2);
 });

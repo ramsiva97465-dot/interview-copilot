@@ -283,13 +283,13 @@ font silently invalidates them. Measured drift on the "Not now" label:
 | face | span | vs SF Pro |
 | --- | --- | --- |
 | SF Pro | 197.3px | — |
-| Inter *(Natively's default sans)* | 201.1px | +1.9% |
+| Inter *(MeetFloo's default sans)* | 201.1px | +1.9% |
 | Arial *(end of the Windows chain)* | 212.3px | **+7.6%, and bold** |
 
 Arial is the sharp edge. `font-weight: 505` is a variable-font value; Arial
 ships only 400 and 700, and CSS font matching rounds a request above 500
 *upward*, so the label lands on Bold. The stack therefore runs SF Pro first
-(macOS, exactly as measured), then Inter — which Natively bundles and which,
+(macOS, exactly as measured), then Inter — which MeetFloo bundles and which,
 being variable, honours 505 properly on Windows — before any generic fallback.
 
 Cross-platform note: this component has only been rendered on macOS. Windows

@@ -2,7 +2,7 @@
 //
 // The punctuation-restoration model, hosted in its own worker thread.
 //
-// The worker is not optional and not ceremony. Natively already hit fatal
+// The worker is not optional and not ceremony. MeetFloo already hit fatal
 // ORT BFCArena::Extend aborts on macOS from running multiple ONNX sessions on
 // one thread, and every local-model loader in the app (IntentClassifier,
 // LocalEmbeddingProvider, LocalReranker, Whisper) is built this way as a

@@ -25,7 +25,7 @@ const modPath = path.resolve(root, 'dist-electron/electron/rag/embeddingSelectio
 const { validateEmbeddingSelection } = await import(pathToFileURL(modPath).href);
 
 const CATALOG = [
-  { id: 'natively', name: 'Natively', available: false, unavailableReason: 'no_key', models: [] },
+  { id: 'MeetFloo', name: 'MeetFloo', available: false, unavailableReason: 'no_key', models: [] },
   { id: 'gemini', name: 'Gemini', available: false, unavailableReason: 'no_key', models: [] },
   { id: 'openai', name: 'OpenAI', available: true, models: [{ id: 'text-embedding-3-small' }] },
   { id: 'ollama', name: 'Ollama', available: false, unavailableReason: 'not_running', models: [] },

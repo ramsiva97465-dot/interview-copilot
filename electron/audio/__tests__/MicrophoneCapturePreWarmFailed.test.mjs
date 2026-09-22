@@ -79,7 +79,7 @@ Module._load = function patchedLoad(request, parent, isMain) {
     if (request === 'electron') {
         return {
             app: {
-                getAppPath: () => '/tmp/fake-natively-app',
+                getAppPath: () => '/tmp/fake-MeetFloo-app',
                 isPackaged: false,
                 isReady: () => false,
             },
@@ -116,7 +116,7 @@ test('MicrophoneCapture emits pre_warm_failed when deferred pre-warm constructor
     // Suppress unhandled 'error' just in case (the fix only emits
     // 'pre_warm_failed', but be defensive so a regression doesn't blow up the
     // test runner via EventEmitter's unhandled-error semantics).
-    cap.on('error', () => {});
+    cap.on('error', () => { });
 
     // start() constructs the monitor (instance #1, succeeds). It does NOT
     // construct a second one — start() reuses the monitor it just built.

@@ -27,7 +27,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const { LLMHelper } = require(path.resolve(__dirname, '../../../dist-electron/electron/LLMHelper.js'));
 
-const DENY_ENV = 'NATIVELY_DENY_PROVIDER_SCOPES';
+const DENY_ENV = 'MEETFLOO_DENY_PROVIDER_SCOPES';
 
 /** Bare instance: prototype methods against an object we control. No network,
  *  no settings store, no provider clients. */

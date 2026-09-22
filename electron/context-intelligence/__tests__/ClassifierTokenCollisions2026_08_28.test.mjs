@@ -189,7 +189,7 @@ describe('T2 — genuine recruiting questions still claim identity', () => {
 describe('T2 — the kill switch restores the pre-fix behaviour exactly', () => {
   // Read per call, so setting it here is enough — see the comment on
   // `tokenFramingOn` in turn-classifier.ts for why that matters.
-  const ENV = 'NATIVELY_RETRIEVAL_CLASSIFIER_TOKEN_FRAMING';
+  const ENV = 'MEETFLOO_RETRIEVAL_CLASSIFIER_TOKEN_FRAMING';
 
   test('flag off => `sync` misroutes again (the behaviour being reverted to)', () => {
     const q = 'What is the retry backoff on the Sync project?';

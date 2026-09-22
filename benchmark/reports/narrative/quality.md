@@ -1,5 +1,5 @@
 **How to read this section.** The most reliable signal is the per-fact verdicts against the gold fact sheets, aggregated as importance-weighted fact retention and compared **paired by conversation**. The 1-10 "overall", "structure", "conciseness" and "readability" scores are compressed into 1.9-5.9 for every configuration, and mostly measure model-independent pipeline behaviour:
-- The deterministic reducer duplicates the same items across mode sections and structured blocks. Natively's copy/export repeats them too.
+- The deterministic reducer duplicates the same items across mode sections and structured blocks. MeetFloo's copy/export repeats them too.
 - Notes can only say "Speaker 1"/"Me".
 - Superseded values from earlier chunks survive the merge (see Failure Analysis).
 

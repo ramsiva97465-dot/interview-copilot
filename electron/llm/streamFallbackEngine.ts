@@ -526,7 +526,7 @@ export async function* runStreamingFallback(
         // When it does, the consumer (raceStreamWithDeadline) has already given
         // up, painted its fallback line and stopped reading — so whatever
         // arrives now is not an answer, it is debris from the abort. Measured
-        // in a real session (natively_debug (3).log, 7/33 turns): the outer
+        // in a real session (MeetFloo_debug (3).log, 7/33 turns): the outer
         // ceiling aborted at 13.00s, streamWithCustom's catch yielded a
         // non-empty string, and this block then ran anyway — booking a turn
         // that delivered ZERO tokens to the user as

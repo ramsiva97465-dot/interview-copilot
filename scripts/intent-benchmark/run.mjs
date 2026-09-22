@@ -60,10 +60,10 @@ async function buildProvider(id) {
       'nli-mobilebert-frame': { modelId: 'Xenova/mobilebert-uncased-mnli', mode: 'frame', localOnly: true },
       // Escalation candidates. All downloaded on first use; sizes are reported
       // by tools/model-sizes.mjs after a sweep.
-      'nli-deberta-xsmall':      { modelId: 'MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33', mode: 'legacy', localOnly: false },
-      'nli-deberta-small':       { modelId: 'Xenova/nli-deberta-v3-small', mode: 'legacy', localOnly: false },
-      'nli-deberta-base':        { modelId: 'Xenova/nli-deberta-v3-base', mode: 'legacy', localOnly: false },
-      'nli-modernbert-base':     { modelId: 'MoritzLaurer/ModernBERT-base-zeroshot-v2.0', mode: 'legacy', localOnly: false },
+      'nli-deberta-xsmall': { modelId: 'MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33', mode: 'legacy', localOnly: false },
+      'nli-deberta-small': { modelId: 'Xenova/nli-deberta-v3-small', mode: 'legacy', localOnly: false },
+      'nli-deberta-base': { modelId: 'Xenova/nli-deberta-v3-base', mode: 'legacy', localOnly: false },
+      'nli-modernbert-base': { modelId: 'MoritzLaurer/ModernBERT-base-zeroshot-v2.0', mode: 'legacy', localOnly: false },
       // Frame configs for the best NLI, to measure the per-label cost on a
       // model that can actually classify.
       'nli-deberta-xsmall-frame': { modelId: 'MoritzLaurer/deberta-v3-xsmall-zeroshot-v1.1-all-33', mode: 'frame', localOnly: false },
@@ -78,12 +78,12 @@ async function buildProvider(id) {
       // Already resident in the app for retrieval, so on this variant the
       // marginal cost of routing is a vector comparison, not a second model.
       'proto-minilm-centroid': { modelId: 'Xenova/all-MiniLM-L6-v2', rule: 'centroid', localOnly: true },
-      'proto-minilm-topk':     { modelId: 'Xenova/all-MiniLM-L6-v2', rule: 'topk', k: 15, localOnly: true },
+      'proto-minilm-topk': { modelId: 'Xenova/all-MiniLM-L6-v2', rule: 'topk', k: 15, localOnly: true },
       'proto-bge-small-centroid': { modelId: 'Xenova/bge-small-en-v1.5', rule: 'centroid', localOnly: false },
-      'proto-bge-small-topk':     { modelId: 'Xenova/bge-small-en-v1.5', rule: 'topk', k: 15, localOnly: false },
+      'proto-bge-small-topk': { modelId: 'Xenova/bge-small-en-v1.5', rule: 'topk', k: 15, localOnly: false },
       // Static embeddings: a table lookup per token, no transformer at all.
       // The only candidate with a plausible route to sub-millisecond routing.
-      'proto-potion-centroid':   { modelId: 'minishlab/potion-base-8M', rule: 'centroid', localOnly: true, staticEmbed: true, dtype: 'fp32' },
+      'proto-potion-centroid': { modelId: 'minishlab/potion-base-8M', rule: 'centroid', localOnly: true, staticEmbed: true, dtype: 'fp32' },
     };
     const cfg = REGISTRY[id];
     if (!cfg) throw new Error(`unknown prototype provider ${id}. Known: ${Object.keys(REGISTRY).join(', ')}`);
@@ -95,11 +95,11 @@ async function buildProvider(id) {
   if (id.startsWith('head-')) {
     const { MultiHeadProvider } = await import('./providers/multihead.mjs');
     const REGISTRY = {
-      'head-minilm': { dir: 'resources/models/natively/router-minilm-multihead' },
+      'head-minilm': { dir: 'resources/models/MeetFloo/router-minilm-multihead' },
       // 3-layer MiniLM: the latency-focused primary row of the matrix.
-      'head-tiny': { dir: 'resources/models/natively/router-tiny-multihead' },
-      'head-deberta': { dir: 'resources/models/natively/router-deberta-multihead' },
-      'head-modernbert': { dir: 'resources/models/natively/router-modernbert-multihead' },
+      'head-tiny': { dir: 'resources/models/MeetFloo/router-tiny-multihead' },
+      'head-deberta': { dir: 'resources/models/MeetFloo/router-deberta-multihead' },
+      'head-modernbert': { dir: 'resources/models/MeetFloo/router-modernbert-multihead' },
     };
     const cfg = REGISTRY[id];
     if (!cfg) throw new Error(`unknown head provider ${id}. Known: ${Object.keys(REGISTRY).join(', ')}`);
@@ -109,7 +109,7 @@ async function buildProvider(id) {
     const { GliClassProvider } = await import('./providers/gliclass.mjs');
     const REGISTRY = {
       'gliclass-small': { modelId: 'knowledgator/gliclass-small-v1.0' },
-      'gliclass-base':  { modelId: 'knowledgator/gliclass-base-v1.0' },
+      'gliclass-base': { modelId: 'knowledgator/gliclass-base-v1.0' },
     };
     const cfg = REGISTRY[id];
     if (!cfg) throw new Error(`unknown gliclass ${id}. Known: ${Object.keys(REGISTRY).join(', ')}`);
@@ -129,7 +129,7 @@ async function buildProvider(id) {
     const { HeadWithPrototypesProvider } = await import('./providers/headWithPrototypes.mjs');
     const trainRows = rows.filter((r) => r.split === 'train' && (r.language ?? 'en') === 'en');
     const REGISTRY = {
-      'headproto-minilm': { dir: 'resources/models/natively/router-minilm-multihead', prototypeAxes: ['mode_intent'] },
+      'headproto-minilm': { dir: 'resources/models/MeetFloo/router-minilm-multihead', prototypeAxes: ['mode_intent'] },
     };
     const cfg = REGISTRY[id];
     if (!cfg) throw new Error(`unknown headproto ${id}. Known: ${Object.keys(REGISTRY).join(', ')}`);
@@ -144,7 +144,7 @@ async function buildProvider(id) {
       id: 'potion', modelId: 'minishlab/potion-base-8M', rule: 'centroid',
       localOnly: true, staticEmbed: true, dtype: 'fp32', trainRows,
     });
-    const head = new MultiHeadProvider({ id: 'head', dir: 'resources/models/natively/router-minilm-multihead' });
+    const head = new MultiHeadProvider({ id: 'head', dir: 'resources/models/MeetFloo/router-minilm-multihead' });
     const REGISTRY = {
       // The head owns every low-cardinality axis; the prototype owns the only
       // high-cardinality one. Measured per-axis, not assigned by intuition.
@@ -194,24 +194,24 @@ async function buildProvider(id) {
       id: 'potion', modelId: 'minishlab/potion-base-8M', rule: 'centroid',
       localOnly: true, staticEmbed: true, dtype: 'fp32', trainRows,
     });
-    const head = () => new MultiHeadProvider({ id: 'head', dir: 'resources/models/natively/router-minilm-multihead' });
+    const head = () => new MultiHeadProvider({ id: 'head', dir: 'resources/models/MeetFloo/router-minilm-multihead' });
     const nli = () => new NliProvider({ id: 'nli', modelId: 'Xenova/mobilebert-uncased-mnli', mode: 'frame', localOnly: true, modeIntents: MODE_INTENTS });
 
     const REGISTRY = {
       // The brief's four hybrid rows, built from whatever actually won its tier.
-      'hybrid-rules-nli':        () => ({ rules: new RulesProvider(), primary: nli() }),
-      'hybrid-rules-proto-nli':  () => ({ rules: new RulesProvider(), primary: potion(), escalation: nli() }),
+      'hybrid-rules-nli': () => ({ rules: new RulesProvider(), primary: nli() }),
+      'hybrid-rules-proto-nli': () => ({ rules: new RulesProvider(), primary: potion(), escalation: nli() }),
       'hybrid-rules-proto-head': () => ({ rules: new RulesProvider(), primary: potion(), escalation: head() }),
       // Same as above with a tighter margin, to trace the accuracy/latency
       // curve rather than reporting a single arbitrary operating point.
-      'hybrid-tight':            () => ({ rules: new RulesProvider(), primary: potion(), escalation: head(), marginThreshold: 0.10 }),
-      'hybrid-wide':             () => ({ rules: new RulesProvider(), primary: potion(), escalation: head(), marginThreshold: 0.50 }),
+      'hybrid-tight': () => ({ rules: new RulesProvider(), primary: potion(), escalation: head(), marginThreshold: 0.10 }),
+      'hybrid-wide': () => ({ rules: new RulesProvider(), primary: potion(), escalation: head(), marginThreshold: 0.50 }),
       // The tight end of the curve. The frontier between "cheap primary alone"
       // and "escalation on everything" is the actual deliverable here; a single
       // operating point would hide whether the ladder buys anything at all.
-      'hybrid-m001':             () => ({ rules: new RulesProvider(), primary: potion(), escalation: head(), marginThreshold: 0.01 }),
-      'hybrid-m003':             () => ({ rules: new RulesProvider(), primary: potion(), escalation: head(), marginThreshold: 0.03 }),
-      'hybrid-m005':             () => ({ rules: new RulesProvider(), primary: potion(), escalation: head(), marginThreshold: 0.05 }),
+      'hybrid-m001': () => ({ rules: new RulesProvider(), primary: potion(), escalation: head(), marginThreshold: 0.01 }),
+      'hybrid-m003': () => ({ rules: new RulesProvider(), primary: potion(), escalation: head(), marginThreshold: 0.03 }),
+      'hybrid-m005': () => ({ rules: new RulesProvider(), primary: potion(), escalation: head(), marginThreshold: 0.05 }),
     };
     const build = REGISTRY[id];
     if (!build) throw new Error(`unknown hybrid ${id}. Known: ${Object.keys(REGISTRY).join(', ')}`);
@@ -302,10 +302,12 @@ const scored = scoreRun({
   // and summarize.mjs tables whatever it finds, so without this a report scored
   // on an older corpus sits in the same table as a new one and nothing on the
   // page says which is which.
-  meta: { ...provider.meta(), dataset: path.basename(IN), datasetRows: rows.length, loadMs, split: SPLIT, language: LANG, punctuated: PUNCTUATED, failed,
+  meta: {
+    ...provider.meta(), dataset: path.basename(IN), datasetRows: rows.length, loadMs, split: SPLIT, language: LANG, punctuated: PUNCTUATED, failed,
     // Stamped so a later reader can tell whether the latency in this report is
     // trustworthy, without having to remember what else was running that day.
-    machineLoad: Number(loadRatio.toFixed(2)), latencyTrustworthy: !MACHINE_BUSY },
+    machineLoad: Number(loadRatio.toFixed(2)), latencyTrustworthy: !MACHINE_BUSY
+  },
 });
 scored.roundTrip = { p50: percentile(roundTripMs, 50), p95: percentile(roundTripMs, 95) };
 scored.latencySource = workerMs.length ? 'worker' : 'round-trip';

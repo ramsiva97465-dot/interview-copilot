@@ -1,7 +1,7 @@
 // electron/llm/__tests__/LeakedInternalTagBlockGuard.test.mjs
 //
 // Grounding campaign (2026-07-18): while root-causing run-023 press A7's
-// fabricated-identity leak (fixed at the natively-api think-tag-stripper
+// fabricated-identity leak (fixed at the MeetFloo-api think-tag-stripper
 // layer for its specific `</mm:think>`-closed shape), a SIBLING bug was
 // found: the model sometimes opens its ENTIRE visible answer with a leaked
 // internal instruction/state-tracking block instead of a real spoken answer
@@ -83,7 +83,7 @@ describe('isLeakedInternalTagBlock (pure detector)', async () => {
       '<conversation_state>\nNo active conversation yet. Waiting for the user to share what they need help with.\n</conversation_state>'
     ), true);
   });
-  test('run-023 A7: the fabricated-identity leak (<resume>) — belt-and-suspenders alongside the natively-api think-tag fix', () => {
+  test('run-023 A7: the fabricated-identity leak (<resume>) — belt-and-suspenders alongside the MeetFloo-api think-tag fix', () => {
     assert.equal(isLeakedInternalTagBlock(
       '<resume>\n**Vaibhav Singh**\nDistributed Systems & Database Engineer\nGitHub: github.com/svaibhav07...'
     ), true);
@@ -115,7 +115,7 @@ describe('isLeakedInternalTagBlock (pure detector)', async () => {
 });
 
 function makeHelper() {
-  return { setNegotiationCoachingHandler() {} };
+  return { setNegotiationCoachingHandler() { } };
 }
 
 async function makeEngineWithAnswer(chunks) {

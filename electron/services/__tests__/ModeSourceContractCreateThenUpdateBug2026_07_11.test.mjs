@@ -41,9 +41,9 @@ let tmpDir;
 describe('ModesManager.getOrMigrateSourceContract — create-then-update migration timing bug (2026-07-11)', () => {
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'modes-manager-migration-bug-test-'));
-    process.env.NATIVELY_TEST_USERDATA = tmpDir;
-    try { delete require.cache[DB_PATH]; } catch {}
-    try { delete require.cache[MODES_PATH]; } catch {}
+    process.env.MEETFLOO_TEST_USERDATA = tmpDir;
+    try { delete require.cache[DB_PATH]; } catch { }
+    try { delete require.cache[MODES_PATH]; } catch { }
     DatabaseManager = require(DB_PATH).DatabaseManager;
     ModesManager = require(MODES_PATH).ModesManager;
     dbMgr = DatabaseManager.getInstance();
@@ -51,11 +51,11 @@ describe('ModesManager.getOrMigrateSourceContract — create-then-update migrati
   });
 
   afterEach(() => {
-    try { dbMgr?.close?.(); } catch {}
-    try { delete require.cache[DB_PATH]; } catch {}
-    try { delete require.cache[MODES_PATH]; } catch {}
-    delete process.env.NATIVELY_TEST_USERDATA;
-    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+    try { dbMgr?.close?.(); } catch { }
+    try { delete require.cache[DB_PATH]; } catch { }
+    try { delete require.cache[MODES_PATH]; } catch { }
+    delete process.env.MEETFLOO_TEST_USERDATA;
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { }
   });
 
   test('INCIDENT REGRESSION: a mode created, THEN given a prompt + reference file, migrates correctly (not frozen at the empty-mode default)', () => {

@@ -16,7 +16,7 @@
 // and the bug arrived in the first place because a model swap silently changed
 // what the content channel contains. DeepSeek (`deepseek-v4-flash`), NVIDIA NIM,
 // LiteLLM and user-configured custom providers all forward `delta.content` the
-// same way and can serve a thinking model at any time. natively-api has its own
+// same way and can serve a thinking model at any time. MeetFloo-api has its own
 // stripper for MiniMax's `</mm:think>` shape; nothing client-side did.
 //
 // WHY A STATE MACHINE and not a regex: the tags arrive split across deltas.
@@ -117,7 +117,7 @@ export class StreamingReasoningFilter {
     let out = '';
     // Each pass either emits, transitions, or returns for more input. A
     // transition always shortens `buf`, so this terminates.
-    for (;;) {
+    for (; ;) {
       if (this.mode === 'passthrough') {
         out += this.buf;
         this.buf = '';

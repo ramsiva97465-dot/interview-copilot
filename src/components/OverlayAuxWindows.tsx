@@ -17,7 +17,7 @@ import { getGlassOverlayAppearance, getOverlayAppearance } from '../lib/overlayA
 // renderer, which invokes the exact same handlers the inline components used.
 
 export interface OverlayUiState {
-  /** Vertical show/hide (Cmd+B) — mirrors NativelyInterface's isExpanded. */
+  /** Vertical show/hide (Cmd+B) — mirrors MeetFlooInterface's isExpanded. */
   expanded?: boolean;
   /** Whether the shell is at its wide width — drives the toggle's icon. */
   shellWide?: boolean;
@@ -59,7 +59,7 @@ function useOverlayAuxAppearance(state: OverlayUiState) {
 }
 
 const sendAction = (type: string) => {
-  window.electronAPI?.sendOverlayUiAction?.({ type }).catch(() => {});
+  window.electronAPI?.sendOverlayUiAction?.({ type }).catch(() => { });
 };
 
 // Clicking the pill or toggle counts as "outside the dropdowns" — dismiss any
@@ -69,7 +69,7 @@ const sendAction = (type: string) => {
 function useDismissPopoversOnMouseDown() {
   useEffect(() => {
     const onMouseDown = () => {
-      window.electronAPI?.dismissOverlayPopovers?.().catch(() => {});
+      window.electronAPI?.dismissOverlayPopovers?.().catch(() => { });
     };
     window.addEventListener('mousedown', onMouseDown, true);
     return () => window.removeEventListener('mousedown', onMouseDown, true);
@@ -80,7 +80,7 @@ function useDismissPopoversOnMouseDown() {
 // The pill does NOT use an OS drag region on either desktop platform. Pointer
 // deltas go to main, which moves the whole group. Same mechanism, two reasons:
 //   • macOS: the pill is an AppKit CHILD of the shell. Propagation is
-//     parent→child only, so a natively-dragged child moves ALONE and tears the
+//     parent→child only, so a MeetFloo-dragged child moves ALONE and tears the
 //     group apart — the exact artifact welding exists to remove. Dragging the
 //     PARENT makes AppKit carry pill and toggle in the same transaction.
 //   • Windows: there is no weld, but `-webkit-app-region: drag` enters the
@@ -106,7 +106,7 @@ function useManagedGroupDrag(rootRef: React.RefObject<HTMLDivElement | null>): b
       .then((v) => {
         if (alive) setManaged(!!v);
       })
-      .catch(() => {});
+      .catch(() => { });
     return () => {
       alive = false;
     };
@@ -127,7 +127,7 @@ function useManagedGroupDrag(rootRef: React.RefObject<HTMLDivElement | null>): b
       const next = pending;
       pending = null;
       if (!next) return;
-      window.electronAPI?.sendOverlayGroupDrag?.({ ...next, phase: 'move' }).catch(() => {});
+      window.electronAPI?.sendOverlayGroupDrag?.({ ...next, phase: 'move' }).catch(() => { });
     };
 
     const onPointerDown = (e: PointerEvent) => {
@@ -145,7 +145,7 @@ function useManagedGroupDrag(rootRef: React.RefObject<HTMLDivElement | null>): b
         // Capture is an optimisation; the listeners still work without it.
       }
       // Anchor main on the shell's current origin before any movement lands.
-      window.electronAPI?.sendOverlayGroupDrag?.({ phase: 'start' }).catch(() => {});
+      window.electronAPI?.sendOverlayGroupDrag?.({ phase: 'start' }).catch(() => { });
     };
 
     const onPointerMove = (e: PointerEvent) => {
@@ -169,7 +169,7 @@ function useManagedGroupDrag(rootRef: React.RefObject<HTMLDivElement | null>): b
       }
       flush();
       // Settle: release the anchor and re-assert exact geometry.
-      window.electronAPI?.sendOverlayGroupDrag?.({ phase: 'end' }).catch(() => {});
+      window.electronAPI?.sendOverlayGroupDrag?.({ phase: 'end' }).catch(() => { });
     };
 
     el.addEventListener('pointerdown', onPointerDown);
@@ -205,7 +205,7 @@ export function OverlayPillWindow() {
       const width = el.offsetWidth;
       const height = el.offsetHeight;
       if (width > 0 && height > 0) {
-        window.electronAPI?.updateContentDimensions({ width, height }).catch?.(() => {});
+        window.electronAPI?.updateContentDimensions({ width, height }).catch?.(() => { });
       }
     };
     report();

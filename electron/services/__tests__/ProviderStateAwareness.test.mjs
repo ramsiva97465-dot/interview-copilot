@@ -61,7 +61,7 @@ describe('LLMHelper key setters clear in-memory provider clients', () => {
 
 describe('Codex availability uses OAuth state, not only enabled config', () => {
   test('isCodexAvailable requires enabled config plus a usable ChatGPT sign-in', () => {
-    // Issue #558: the sign-in is Natively's own OR the Codex CLI's `codex login`
+    // Issue #558: the sign-in is MeetFloo's own OR the Codex CLI's `codex login`
     // (read-only), unified in getCodexAuthStatus() — no longer CodexOAuthService
     // alone. The property is unchanged: enabled config is not enough.
     const source = read('electron/LLMHelper.ts');

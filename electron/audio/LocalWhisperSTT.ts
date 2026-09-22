@@ -1,7 +1,7 @@
 /**
  * LocalWhisperSTT — local Whisper / Distil-Whisper / Moonshine STT provider.
  *
- * Dual-channel architecture: Natively captures Mic and System Audio as two
+ * Dual-channel architecture: MeetFloo captures Mic and System Audio as two
  * completely separate native streams. createSTTProvider() instantiates this
  * class TWICE — once per channel. No diarization model is needed; speaker
  * attribution is free from the hardware.
@@ -59,7 +59,7 @@ import { acquireOnnxSlotWithin, hasEnoughMemoryForOnnxSession, getMinFreeGBForOn
  * symptom was "No speech detected". Env-overridable so tests can shorten it.
  */
 const WORKER_READY_TIMEOUT_MS = (() => {
-    const n = Number(process.env.NATIVELY_LOCAL_STT_READY_TIMEOUT_MS);
+    const n = Number(process.env.MEETFLOO_LOCAL_STT_READY_TIMEOUT_MS);
     return Number.isFinite(n) && n > 0 ? n : 120_000;
 })();
 /** Log once at this point so a slow (but progressing) load is visible in the log. */
@@ -335,12 +335,12 @@ export class LocalWhisperSTT extends EventEmitter {
     }
 
     setSampleRate(rate: number): void { this.inputSampleRate = rate; }
-    setAudioChannelCount(_count: number): void {}
+    setAudioChannelCount(_count: number): void { }
     setRecognitionLanguage(key: string): void {
         this.language = key || 'auto';
         if (this.isNemotronModel) this.resolveAndApplyNemotronLanguage();
     }
-    setCredentials(_credPath: string): void {}
+    setCredentials(_credPath: string): void { }
 
     /**
      * Optional human-readable channel label (e.g. 'mic', 'system') for log
@@ -389,8 +389,8 @@ export class LocalWhisperSTT extends EventEmitter {
      * wrong, corrected here. Nemotron has no real auto-detect mode (its
      * lang_id conditioning requires one explicit locale per session), so
      * this follows the SAME precedent AppState.setRecognitionLanguage
-     * already applies for every other non-NativelyProSTT provider (main.ts:
-     * "'auto' is only meaningful for NativelyProSTT — other providers fall
+     * already applies for every other non-MeetFlooProSTT provider (main.ts:
+     * "'auto' is only meaningful for MeetFlooProSTT — other providers fall
      * back to en-US"). This normalization must also live HERE, not only at
      * that call site, because createSTTProvider() (main.ts) calls
      * setRecognitionLanguage() with the RAW persisted value at construction
@@ -916,7 +916,7 @@ export class LocalWhisperSTT extends EventEmitter {
         const fn = [...this.finalLatencies].sort((a, b) => a - b);
         return {
             firstPartial: { count: fp.length, p50: this.percentile(fp, 50), p95: this.percentile(fp, 95), p99: this.percentile(fp, 99) },
-            final:        { count: fn.length, p50: this.percentile(fn, 50), p95: this.percentile(fn, 95), p99: this.percentile(fn, 99) },
+            final: { count: fn.length, p50: this.percentile(fn, 50), p95: this.percentile(fn, 95), p99: this.percentile(fn, 99) },
         };
     }
 

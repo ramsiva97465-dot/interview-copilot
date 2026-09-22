@@ -14,7 +14,7 @@ const PROBE_TIMEOUT_MS = 15_000;
 const LIST_TIMEOUT_MS = 5_000;
 
 /** Text used to measure a model's output width. Content is irrelevant; only length of the result matters. */
-const DIMENSION_PROBE_TEXT = 'natively embedding dimension probe';
+const DIMENSION_PROBE_TEXT = 'MeetFloo embedding dimension probe';
 
 export interface OllamaEmbeddingModel {
   name: string;

@@ -59,7 +59,7 @@ const CATALOG_MODELS = [
         state: 'not-installed', bytesOnDisk: 0, selected: false,
         extensionId: null, extensionInstalled: null, requiresBinary: null,
         supported: false,
-        unsupportedReason: 'Its ONNX export is the transformer only — the scoring head is a separate Sentence-Transformers module chain that Natively cannot run yet.',
+        unsupportedReason: 'Its ONNX export is the transformer only — the scoring head is a separate Sentence-Transformers module chain that MeetFloo cannot run yet.',
         activatable: false,
     },
     {
@@ -108,7 +108,7 @@ const params = new URLSearchParams(location.search);
 const SLOW = params.has('slow');
 const HANG = params.has('hang');   // never resolves — the stuck-skeleton repro
 const delay = <T,>(v: T): Promise<T> =>
-    HANG ? new Promise<T>(() => {})
+    HANG ? new Promise<T>(() => { })
         : SLOW ? new Promise(r => setTimeout(() => r(v), 4000))
             : Promise.resolve(v);
 
@@ -148,8 +148,8 @@ export const RERANKER_SETTINGS_API = {
     downloadExtensionModel: async () => ({ success: true }),
     cancelExtensionModelDownload: async () => ({ success: true }),
     browseExtensionRegistry: async () => ({ ok: true, entries: [] }),
-    onLocalRerankerModelProgress: () => () => {},
-    onExtensionModelProgress: () => () => {},
+    onLocalRerankerModelProgress: () => () => { },
+    onExtensionModelProgress: () => () => { },
     platform: 'darwin',
-    openExternal: () => {},
+    openExternal: () => { },
 };

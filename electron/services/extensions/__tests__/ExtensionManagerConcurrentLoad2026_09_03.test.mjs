@@ -53,7 +53,7 @@ const manifest = {
   author: 'test',
   main: 'index.js',
   permissions: [],
-  natively: { minVersion: '0.0.1' },
+  MeetFloo: { minVersion: '0.0.1' },
 };
 
 const record = { id: 'test-ext', manifest, config: {}, enabled: true, installedAt: 0 };
@@ -69,7 +69,7 @@ function makeManager() {
     modelStore: { modelDir: () => path.join(repoRoot, 'no-such-model-dir') },
     appVersion: '2.8.8',
     confirmInstall: async () => true,
-    logger: { info() {}, warn() {}, error() {} },
+    logger: { info() { }, warn() { }, error() { } },
     rootOverride: path.join(repoRoot, 'no-such-extension-root'),
     createHost: () => {
       const host = {
@@ -161,14 +161,14 @@ test('a failed start() is not cached — a later load() may retry', async () => 
     modelStore: { modelDir: () => path.join(repoRoot, 'no-such-model-dir') },
     appVersion: '2.8.8',
     confirmInstall: async () => true,
-    logger: { info() {}, warn() {}, error() {} },
+    logger: { info() { }, warn() { }, error() { } },
     rootOverride: path.join(repoRoot, 'no-such-extension-root'),
     createHost: () => {
       attempts += 1;
       const failing = attempts === 1;
       return {
         async start() { if (failing) throw new Error('boom'); },
-        async stop() {},
+        async stop() { },
       };
     },
   });

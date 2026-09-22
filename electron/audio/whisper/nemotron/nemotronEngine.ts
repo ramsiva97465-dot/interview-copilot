@@ -221,10 +221,10 @@ export class NemotronEngine {
   // lives in the engine where every caller (app, tests, sims) gets it. Cost:
   // the first chunk needs 50ms less real audio to fill (slightly EARLIER
   // first inference) and one 800-sample memcpy per segment.
-  // Env-overridable for measurement (NATIVELY_NEMOTRON_PREROLL_MS); the
+  // Env-overridable for measurement (MEETFLOO_NEMOTRON_PREROLL_MS); the
   // shipped default is the measured minimum that recovers weak first words.
   private static readonly PREROLL_SAMPLES = (() => {
-    const ms = Number.parseInt(process.env.NATIVELY_NEMOTRON_PREROLL_MS ?? '', 10);
+    const ms = Number.parseInt(process.env.MEETFLOO_NEMOTRON_PREROLL_MS ?? '', 10);
     return Number.isFinite(ms) && ms >= 0 ? Math.round((ms / 1000) * 16000) : 800; // 50ms @ 16kHz
   })();
   private prerollPending = true;

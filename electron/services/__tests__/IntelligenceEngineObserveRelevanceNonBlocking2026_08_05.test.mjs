@@ -31,11 +31,11 @@ const sessionPath = path.resolve(__dirname, '../../../dist-electron/electron/Ses
 after(() => new Promise(resolve => setTimeout(() => { process.exit(0); resolve(); }, 200)));
 const require = createRequire(import.meta.url);
 
-const FLAG = 'NATIVELY_ANSWER_RELEVANCE_GUARD_LIVE';
+const FLAG = 'MEETFLOO_ANSWER_RELEVANCE_GUARD_LIVE';
 
 function makeHelper() {
   return {
-    setNegotiationCoachingHandler() {},
+    setNegotiationCoachingHandler() { },
     isUsingOllama() { return false; },
     async *streamChat() {
       throw new Error('observe mode must never request a repair stream');

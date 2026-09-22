@@ -1,5 +1,5 @@
 // Regression test for the permission-routing fix (2026-08) in
-// src/components/NativelyInterface.tsx.
+// src/components/MeetFlooInterface.tsx.
 //
 // Pre-fix the banner picked its macOS System Settings pane from the audio
 // CHANNEL:
@@ -38,7 +38,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '../../..');
 const source = fs.readFileSync(
-  path.join(root, 'src/components/NativelyInterface.tsx'),
+  path.join(root, 'src/components/MeetFlooInterface.tsx'),
   'utf8',
 );
 
@@ -56,14 +56,14 @@ describe('audio warning banner routes by fault reason, not by audio channel', ()
       block,
       /const\s+rawTitleKey\s*=\s*systemAudioWarning\.titleKey\s*\?\?\s*['"]{2}/,
       'BUG: the predicate must read `systemAudioWarning.titleKey` raw. Matching a ' +
-        'localised title (t(titleKey)) breaks pane routing for ja/ru users only — a ' +
-        'defect no English-locale test or manual check would ever surface.',
+      'localised title (t(titleKey)) breaks pane routing for ja/ru users only — a ' +
+      'defect no English-locale test or manual check would ever surface.',
     );
     assert.doesNotMatch(
       block,
       /\bt\s*\(/,
       'BUG: the routing predicate must not call t(). Titles are i18n KEYS; ' +
-        'substring-matching the rendered translation silently mis-routes localised users.',
+      'substring-matching the rendered translation silently mis-routes localised users.',
     );
   });
 
@@ -78,8 +78,8 @@ describe('audio warning banner routes by fault reason, not by audio channel', ()
     assert.ok(
       micIdx < screenIdx,
       'BUG: `wantsMicrophonePane` must be computed before `wantsScreenCapturePane` so the ' +
-        'screen-capture branch can exclude it. Reversing them re-opens the mic-fault → ' +
-        '"Open Screen Settings" mis-route.',
+      'screen-capture branch can exclude it. Reversing them re-opens the mic-fault → ' +
+      '"Open Screen Settings" mis-route.',
     );
 
     const screenAssignment = block.slice(screenIdx, block.indexOf('const deepLinkUrl'));
@@ -87,8 +87,8 @@ describe('audio warning banner routes by fault reason, not by audio channel', ()
       screenAssignment,
       /!\s*wantsMicrophonePane/,
       'BUG: `wantsScreenCapturePane` must be gated on `!wantsMicrophonePane`. Without it, ' +
-        "`channel === 'system'` swallows microphone faults again (they are all emitted on " +
-        'the system channel by sendSystemAudioPermissionDenied).',
+      "`channel === 'system'` swallows microphone faults again (they are all emitted on " +
+      'the system channel by sendSystemAudioPermissionDenied).',
     );
 
     // The deep-link ternary must test the mic pane first for the same reason.
@@ -106,8 +106,8 @@ describe('audio warning banner routes by fault reason, not by audio channel', ()
       m[0],
       /channel\s*!==\s*['"]mic['"]/,
       "BUG: `channel` is optional on SystemAudioWarning and forwarded verbatim from " +
-        "payload.channel. `channel !== 'mic'` treats an ABSENT channel as a system fault " +
-        'and deep-links it to Screen Recording instead of falling back to internal Settings.',
+      "payload.channel. `channel !== 'mic'` treats an ABSENT channel as a system fault " +
+      'and deep-links it to Screen Recording instead of falling back to internal Settings.',
     );
   });
 });

@@ -19,25 +19,25 @@ import {
 // Verbatim `gh release download V2.8.7 --pattern latest-mac.yml`, 2026-08-26.
 const PUBLISHED = `version: 2.8.7
 files:
-  - url: Natively-2.8.7-mac.zip
+  - url: MeetFloo-2.8.7-mac.zip
     sha512: 1G1C82pqV1KyAlvHhqozxTlasHo1RH1vdIn3lYTZ6da4R7NkBhE2HnREl6032YlrTS8l5KjXpjr6UUNlHswf6w==
     size: 988882979
-  - url: Natively-2.8.7-arm64-mac.zip
+  - url: MeetFloo-2.8.7-arm64-mac.zip
     sha512: v9DFSfZijqPm1lCvZaZT4NrzE5kjB2e8wbUKFvQJzekbJ4QflOyO93VLiEH4fH8VdK2DS0fdlQoqemF0yafs2A==
     size: 983972024
-path: Natively-2.8.7-mac.zip
+path: MeetFloo-2.8.7-mac.zip
 sha512: 1G1C82pqV1KyAlvHhqozxTlasHo1RH1vdIn3lYTZ6da4R7NkBhE2HnREl6032YlrTS8l5KjXpjr6UUNlHswf6w==
 releaseDate: '2026-08-26T02:10:41.756Z'
 `;
 
 const PUBLISHED_FILES = [
-  { url: 'Natively-2.8.7-mac.zip', sha512: '1G1C82pqV1KyAlvHhqozxTlasHo1RH1vdIn3lYTZ6da4R7NkBhE2HnREl6032YlrTS8l5KjXpjr6UUNlHswf6w==', size: 988882979 },
-  { url: 'Natively-2.8.7-arm64-mac.zip', sha512: 'v9DFSfZijqPm1lCvZaZT4NrzE5kjB2e8wbUKFvQJzekbJ4QflOyO93VLiEH4fH8VdK2DS0fdlQoqemF0yafs2A==', size: 983972024 },
+  { url: 'MeetFloo-2.8.7-mac.zip', sha512: '1G1C82pqV1KyAlvHhqozxTlasHo1RH1vdIn3lYTZ6da4R7NkBhE2HnREl6032YlrTS8l5KjXpjr6UUNlHswf6w==', size: 988882979 },
+  { url: 'MeetFloo-2.8.7-arm64-mac.zip', sha512: 'v9DFSfZijqPm1lCvZaZT4NrzE5kjB2e8wbUKFvQJzekbJ4QflOyO93VLiEH4fH8VdK2DS0fdlQoqemF0yafs2A==', size: 983972024 },
 ];
 
 // The artifacts actually on disk after the 2026-08-26 rebuild — same names, DIFFERENT
 // bytes. This pairing is the whole reason the tool exists.
-const ON_DISK_SIZES = { 'Natively-2.8.7-mac.zip': 988958558, 'Natively-2.8.7-arm64-mac.zip': 984047576 };
+const ON_DISK_SIZES = { 'MeetFloo-2.8.7-mac.zip': 988958558, 'MeetFloo-2.8.7-arm64-mac.zip': 984047576 };
 
 test('renders byte-for-byte what electron-builder published', () => {
   const out = renderMacUpdateManifest({
@@ -50,7 +50,7 @@ test('renders byte-for-byte what electron-builder published', () => {
 
 test('the legacy top-level path/sha512 point at the FIRST (x64) file', () => {
   const out = renderMacUpdateManifest({ version: '9.9.9', files: PUBLISHED_FILES, releaseDate: 'D' });
-  assert.match(out, /\npath: Natively-2\.8\.7-mac\.zip\n/);
+  assert.match(out, /\npath: MeetFloo-2\.8\.7-mac\.zip\n/);
   assert.match(out, new RegExp(`\\nsha512: ${PUBLISHED_FILES[0].sha512.replace(/[+/=]/g, (c) => `\\${c}`)}\\nreleaseDate`));
 });
 
@@ -59,9 +59,9 @@ test('refuses to render an empty manifest', () => {
 });
 
 test('zip names follow electron-builder: x64 unsuffixed, arm64 suffixed, x64 first', () => {
-  assert.deepEqual(macZipNames('Natively', '2.8.7'), [
-    'Natively-2.8.7-mac.zip',
-    'Natively-2.8.7-arm64-mac.zip',
+  assert.deepEqual(macZipNames('MeetFloo', '2.8.7'), [
+    'MeetFloo-2.8.7-mac.zip',
+    'MeetFloo-2.8.7-arm64-mac.zip',
   ]);
 });
 

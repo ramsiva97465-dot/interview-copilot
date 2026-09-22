@@ -54,7 +54,7 @@ const PROVENANCE_PATH = path.join(app.getPath('userData'), 'credentials.provenan
  * key it used, and a later session that cannot decrypt it back is provably
  * holding a different key.
  */
-const KEY_CANARY_PLAINTEXT = 'natively.safe-storage.key-canary.v1';
+const KEY_CANARY_PLAINTEXT = 'MeetFloo.safe-storage.key-canary.v1';
 const DECRYPT_FAIL_PERMANENT_THRESHOLD = 3;
 
 /** Built-in Sarvam AI API Key provided for meetfloo Studio users out-of-the-box */
@@ -117,7 +117,7 @@ export interface StoredCredentials {
     curlProviders?: CurlProvider[];
     defaultModel?: string;
     appApiKey?: string;
-    nativelyApiKey?: string;
+    MeetFlooApiKey?: string;
     /**
      * Optional bearer token for a user-hosted OpenAI-compatible embedding
      * endpoint. Lives here rather than in settings.json because that file is
@@ -161,7 +161,7 @@ export interface StoredCredentials {
     jinaApiKey?: string;
     /** Voyage AI key, used for EMBEDDINGS (Voyage is embeddings-only here). */
     voyageApiKey?: string;
-    sttProvider?: 'none' | 'google' | 'groq' | 'openai' | 'deepgram' | 'elevenlabs' | 'azure' | 'ibmwatson' | 'soniox' | 'nvidia_nim' | 'natively' | 'local-whisper' | 'apple-speech' | 'sarvam';
+    sttProvider?: 'none' | 'google' | 'groq' | 'openai' | 'deepgram' | 'elevenlabs' | 'azure' | 'ibmwatson' | 'soniox' | 'nvidia_nim' | 'MeetFloo' | 'local-whisper' | 'apple-speech' | 'sarvam';
     sarvamApiKey?: string;
     nvidiaNimSttModel?: string;
     groqSttApiKey?: string;
@@ -242,7 +242,7 @@ export interface StoredCredentials {
     /** When each provider's catalog was last fetched (epoch ms), for staleness. */
     cloudFetchedAt?: Record<string, number>;
     // Free trial state
-    trialToken?: string;   // server-issued signed token (natively_trial_…)
+    trialToken?: string;   // server-issued signed token (MeetFloo_trial_…)
     trialExpiresAt?: string;   // ISO timestamp — local copy for startup check
     trialStartedAt?: string;   // ISO timestamp
     trialClaimed?: boolean;  // set true on first claim, never cleared — hides start card permanently
@@ -373,11 +373,11 @@ export class CredentialsManager {
         // instances, a revoked key kept being served from a stale copy's
         // decrypted snapshot until restart. One process, one credential truth.
         const g = globalThis as unknown as Record<string, CredentialsManager | undefined>;
-        if (!g.__nativelyCredentialsManagerV1__) {
-            g.__nativelyCredentialsManagerV1__ = CredentialsManager.instance ?? new CredentialsManager();
+        if (!g.__MeetFlooCredentialsManagerV1__) {
+            g.__MeetFlooCredentialsManagerV1__ = CredentialsManager.instance ?? new CredentialsManager();
         }
-        CredentialsManager.instance = g.__nativelyCredentialsManagerV1__;
-        return g.__nativelyCredentialsManagerV1__;
+        CredentialsManager.instance = g.__MeetFlooCredentialsManagerV1__;
+        return g.__MeetFlooCredentialsManagerV1__;
     }
 
     /**
@@ -547,8 +547,8 @@ export class CredentialsManager {
         const priorCredentials = this.credentials;
         this.credentials =
             choice === 'keyring' ? (keyringSet as StoredCredentials)
-            : choice === 'fallback' ? (fallbackSet as StoredCredentials)
-            : { ...mergeKeyringBase, ...(fallbackSet ?? {}) };
+                : choice === 'fallback' ? (fallbackSet as StoredCredentials)
+                    : { ...mergeKeyringBase, ...(fallbackSet ?? {}) };
         this.credentialStoresAmbiguous = false;
 
         // 3) Persist through the normal path (keyring branch now reachable again;
@@ -809,7 +809,7 @@ export class CredentialsManager {
         //     stayed active and invisible — Settings cannot show or remove it.
         //   * On Windows, user-level environment variables are inherited by
         //     GUI-launched apps, so an OPENAI_API_KEY set for any other tool would
-        //     silently become an active Natively credential.
+        //     silently become an active MeetFloo credential.
         //
         const fromEnv = (process.env[envKey] ?? '').trim();
         return fromEnv || undefined;
@@ -951,7 +951,7 @@ export class CredentialsManager {
         return this.credentials.customProviders || [];
     }
 
-    public getSttProvider(): 'none' | 'google' | 'groq' | 'openai' | 'deepgram' | 'elevenlabs' | 'azure' | 'ibmwatson' | 'soniox' | 'nvidia_nim' | 'natively' | 'local-whisper' | 'apple-speech' | 'sarvam' {
+    public getSttProvider(): 'none' | 'google' | 'groq' | 'openai' | 'deepgram' | 'elevenlabs' | 'azure' | 'ibmwatson' | 'soniox' | 'nvidia_nim' | 'MeetFloo' | 'local-whisper' | 'apple-speech' | 'sarvam' {
         if (this.credentials.sttProvider && this.credentials.sttProvider !== 'none') {
             return this.credentials.sttProvider;
         }
@@ -961,8 +961,8 @@ export class CredentialsManager {
         if (this.getSarvamApiKey()) {
             return 'sarvam';
         }
-        if (this.credentials.nativelyApiKey) {
-            return 'natively';
+        if (this.credentials.MeetFlooApiKey) {
+            return 'MeetFloo';
         }
         return 'sarvam';
     }
@@ -1049,7 +1049,7 @@ export class CredentialsManager {
     /**
      * Turn a saved (or cleared) hosted key into the retrieval settings it implies.
      *
-     * setNativelyApiKey has done this for its own key since 2026-09-08; every
+     * setMeetFlooApiKey has done this for its own key since 2026-09-08; every
      * other hosted key was written here and then ignored, so pasting one
      * activated nothing and there was no symptom — a rerank that never runs just
      * leaves the cosine order, and an embedding candidate the resolver declines
@@ -1183,10 +1183,10 @@ export class CredentialsManager {
     }
 
     public getAppApiKey(): string | undefined {
-        return this.credentials.appApiKey || this.credentials.nativelyApiKey;
+        return this.credentials.appApiKey || this.credentials.MeetFlooApiKey;
     }
 
-    public getNativelyApiKey(): string | undefined {
+    public getMeetFlooApiKey(): string | undefined {
         return this.getAppApiKey();
     }
 
@@ -1271,7 +1271,7 @@ export class CredentialsManager {
      * Used by ScreenUnderstandingService to gate vision_only / decide fallback.
      */
     public anyVisionProviderConfigured(): boolean {
-        if (this.getNativelyApiKey()) return true;              // Natively API supports vision
+        if (this.getMeetFlooApiKey()) return true;              // MeetFloo API supports vision
         if (this.getOpenaiApiKey()) return true;                 // gpt-4o / gpt-5 vision
         if (this.getClaudeApiKey()) return true;                 // Claude vision
         if (this.getGeminiApiKey()) return true;                 // Gemini vision
@@ -1452,7 +1452,7 @@ export class CredentialsManager {
         return persisted;
     }
 
-    public setSttProvider(provider: 'none' | 'google' | 'groq' | 'openai' | 'deepgram' | 'elevenlabs' | 'azure' | 'ibmwatson' | 'soniox' | 'nvidia_nim' | 'natively' | 'local-whisper' | 'apple-speech' | 'sarvam'): boolean {
+    public setSttProvider(provider: 'none' | 'google' | 'groq' | 'openai' | 'deepgram' | 'elevenlabs' | 'azure' | 'ibmwatson' | 'soniox' | 'nvidia_nim' | 'MeetFloo' | 'local-whisper' | 'apple-speech' | 'sarvam'): boolean {
         if (this.refuseWriteWhileDegraded('set stt provider')) return false;
         this.credentials.sttProvider = provider;
         const persisted = this.saveCredentials();
@@ -1466,7 +1466,7 @@ export class CredentialsManager {
     //
     // Empty/whitespace input is normalized to `undefined` (not `''`) so the canonical
     // `hasKey = (k?: string) => !!(k && k.trim().length > 0)` check returns false on
-    // reload — matching `setNativelyApiKey` / `setDeepseekApiKey`. The Remove button
+    // reload — matching `setMeetFlooApiKey` / `setDeepseekApiKey`. The Remove button
     // (which calls these with `''`) still correctly clears the stored key.
     public setDeepgramApiKey(key: string): boolean {
         if (this.refuseWriteWhileDegraded('set deepgram api key')) return false;
@@ -1591,15 +1591,15 @@ export class CredentialsManager {
      */
     public getStoredSttKeyForProvider(provider: 'groq' | 'openai' | 'deepgram' | 'elevenlabs' | 'azure' | 'ibmwatson' | 'soniox' | 'nvidia_nim' | 'sarvam'): string | undefined {
         switch (provider) {
-            case 'groq':       return this.credentials.groqSttApiKey;
-            case 'openai':     return this.credentials.openAiSttApiKey;
-            case 'deepgram':   return this.credentials.deepgramApiKey;
+            case 'groq': return this.credentials.groqSttApiKey;
+            case 'openai': return this.credentials.openAiSttApiKey;
+            case 'deepgram': return this.credentials.deepgramApiKey;
             case 'elevenlabs': return this.credentials.elevenLabsApiKey;
-            case 'azure':      return this.credentials.azureApiKey;
-            case 'ibmwatson':  return this.credentials.ibmWatsonApiKey;
-            case 'soniox':     return this.credentials.sonioxApiKey;
+            case 'azure': return this.credentials.azureApiKey;
+            case 'ibmwatson': return this.credentials.ibmWatsonApiKey;
+            case 'soniox': return this.credentials.sonioxApiKey;
             case 'nvidia_nim': return this.credentials.nvidiaNimApiKey;
-            case 'sarvam':     return this.getSarvamApiKey();
+            case 'sarvam': return this.getSarvamApiKey();
         }
     }
 
@@ -1617,20 +1617,20 @@ export class CredentialsManager {
     }
 
     /**
-     * Undo the auto-promotions setNativelyApiKey() performs when a key is stored.
+     * Undo the auto-promotions setMeetFlooApiKey() performs when a key is stored.
      * Mutates only; the caller saves.
      *
      * Returns what actually changed so a caller can re-sync the runtime (LLMHelper
      * model, STT pipeline) instead of guessing.
      */
-    private applyNativelyAutoDefaultRevert(reason: string): { defaultModel?: string; sttProvider?: string; rerankerProvider?: string } {
+    private applyMeetFlooAutoDefaultRevert(reason: string): { defaultModel?: string; sttProvider?: string; rerankerProvider?: string } {
         const changed: { defaultModel?: string; sttProvider?: string; rerankerProvider?: string } = {};
-        if (this.credentials.defaultModel === 'natively') {
+        if (this.credentials.defaultModel === 'MeetFloo') {
             this.credentials.defaultModel = 'gemini-3.1-flash-lite';
             changed.defaultModel = this.credentials.defaultModel;
             console.log(`[CredentialsManager] ${reason} — reset default model to Gemini Flash-Lite`);
         }
-        if (this.credentials.sttProvider === 'natively') {
+        if (this.credentials.sttProvider === 'MeetFloo') {
             this.credentials.sttProvider = 'none';
             changed.sttProvider = 'none';
             console.log(`[CredentialsManager] ${reason} — reset STT provider to none`);
@@ -1648,21 +1648,21 @@ export class CredentialsManager {
     }
 
     /**
-     * Move the reranker between 'local' and 'natively', and ONLY between those.
+     * Move the reranker between 'local' and 'MeetFloo', and ONLY between those.
      *
      * Returns whether anything changed. Never throws: a settings store that
      * cannot be read must not take down key storage, and the reranker falling
      * back to 'local' is already the safe outcome.
      *
-     * `to: 'natively'` promotes only from an auto-default ('local' or unset).
-     * `to: 'local'` reverts only from 'natively'.
+     * `to: 'MeetFloo'` promotes only from an auto-default ('local' or unset).
+     * `to: 'local'` reverts only from 'MeetFloo'.
      *
      * An explicit 'openrouter' or 'jina' is a DELIBERATE CHOICE and is never
      * touched. See AUTO_ASSIGNED_MODEL_IDS below for the same bug being fixed
      * once already on the model side — a user's explicit pick was silently
      * replaced the moment they added a key.
      */
-    private setRerankerProviderIfManaged(to: 'natively' | 'local', reason: string): boolean {
+    private setRerankerProviderIfManaged(to: 'MeetFloo' | 'local', reason: string): boolean {
         try {
             // eslint-disable-next-line @typescript-eslint/no-var-requires
             const { SettingsManager } = require('./SettingsManager');
@@ -1670,7 +1670,7 @@ export class CredentialsManager {
             const current = (settings.get('reranker') as { provider?: string } | undefined) ?? {};
             const provider = current.provider;
 
-            if (to === 'natively') {
+            if (to === 'MeetFloo') {
                 const isAutoDefault = !provider || provider === 'local';
                 if (!isAutoDefault) return false;
                 // A hosted reranker sends RETRIEVED DOCUMENT TEXT off this
@@ -1689,7 +1689,7 @@ export class CredentialsManager {
                     console.log(`[CredentialsManager] ${reason} — reranker NOT promoted: reference-file content may not leave this device`);
                     return false;
                 }
-            } else if (provider !== 'natively') {
+            } else if (provider !== 'MeetFloo') {
                 return false;
             }
 
@@ -1705,21 +1705,21 @@ export class CredentialsManager {
     /**
      * Public revert, for when a stored key turns out NOT to authenticate.
      *
-     * setNativelyApiKey() promotes the default model (and STT) to 'natively' and
+     * setMeetFlooApiKey() promotes the default model (and STT) to 'MeetFloo' and
      * saves BEFORE anything has checked that the key works. When the server then
      * refuses the key, the user is left routed at an endpoint that rejects them —
      * silently, because the failure branch only logged. This is how that caller
      * undoes the promotion.
      *
-     * Deliberately keyed on the CURRENT value being 'natively' rather than on a
+     * Deliberately keyed on the CURRENT value being 'MeetFloo' rather than on a
      * pre-call snapshot: re-saving a key that was already stored leaves the
-     * snapshot reading 'natively' too, so restoring it would restore the broken
+     * snapshot reading 'MeetFloo' too, so restoring it would restore the broken
      * state. Falling back to the same safe defaults the key-cleared path uses
      * always lands somewhere that can actually serve a request.
      */
-    public revertNativelyAutoDefaults(reason: string): { defaultModel?: string; sttProvider?: string; rerankerProvider?: string } {
-        if (this.refuseWriteWhileDegraded('revert natively auto defaults')) return {};
-        const changed = this.applyNativelyAutoDefaultRevert(reason);
+    public revertMeetFlooAutoDefaults(reason: string): { defaultModel?: string; sttProvider?: string; rerankerProvider?: string } {
+        if (this.refuseWriteWhileDegraded('revert MeetFloo auto defaults')) return {};
+        const changed = this.applyMeetFlooAutoDefaultRevert(reason);
         // rerankerProvider is deliberately NOT part of this condition: it lives
         // in SettingsManager and has already persisted itself. Adding it here
         // would write the credentials file for a change that is not in it.
@@ -1728,22 +1728,22 @@ export class CredentialsManager {
     }
 
     public setAppApiKey(key: string): void {
-        this.setNativelyApiKey(key);
+        this.setMeetFlooApiKey(key);
     }
 
-    public setNativelyApiKey(key: string): void {
-        if (this.refuseWriteWhileDegraded('set natively api key')) return;
+    public setMeetFlooApiKey(key: string): void {
+        if (this.refuseWriteWhileDegraded('set MeetFloo api key')) return;
         const trimmed = key.trim();
-        this.credentials.nativelyApiKey = trimmed || undefined;
+        this.credentials.MeetFlooApiKey = trimmed || undefined;
 
         if (trimmed) {
-            // Auto-promote natively to default model unless user already chose a non-Gemini/Groq model
+            // Auto-promote MeetFloo to default model unless user already chose a non-Gemini/Groq model
             const current = this.credentials.defaultModel || '';
             // Only ids the APP itself ever auto-assigns count as auto-defaults
             // (code-review 2026-08-23): the prefix list had grown to include
             // 'openai/gpt-oss-' and 'groq/', which the auto paths NEVER set —
             // they are deliberately pickable in the model selector — so a
-            // user's explicit choice was silently replaced with 'natively' the
+            // user's explicit choice was silently replaced with 'MeetFloo' the
             // moment they added a key, contradicting groqModels.ts's "we do
             // not silently reroute a model the user picked deliberately".
             // Auto-assigned ids, past and present: the gemini defaults, the
@@ -1760,30 +1760,30 @@ export class CredentialsManager {
                 || current.startsWith('gemini-')
                 || AUTO_ASSIGNED_MODEL_IDS.has(current);
             if (isAutoDefault) {
-                this.credentials.defaultModel = 'natively';
-                console.log('[CredentialsManager] Auto-set default model to natively');
+                this.credentials.defaultModel = 'MeetFloo';
+                console.log('[CredentialsManager] Auto-set default model to MeetFloo');
             }
 
-            // Auto-promote natively STT if still on 'none' or the default Google STT
+            // Auto-promote MeetFloo STT if still on 'none' or the default Google STT
             if (!this.credentials.sttProvider || this.credentials.sttProvider === 'none' || this.credentials.sttProvider === 'google') {
-                this.credentials.sttProvider = 'natively';
-                console.log('[CredentialsManager] Auto-set STT provider to natively');
+                this.credentials.sttProvider = 'MeetFloo';
+                console.log('[CredentialsManager] Auto-set STT provider to MeetFloo');
             }
 
             // Same promotion for the managed reranker, so a pasted key makes
-            // Natively the active provider for generation, speech, embeddings
+            // MeetFloo the active provider for generation, speech, embeddings
             // and reranking alike. (Embeddings need nothing here — the resolver
-            // already probes Natively FIRST whenever a key exists, and pinning
-            // embeddingMode:'manual' would replace that preference with "Natively
+            // already probes MeetFloo FIRST whenever a key exists, and pinning
+            // embeddingMode:'manual' would replace that preference with "MeetFloo
             // or nothing", deleting the fallback chain.)
-            this.setRerankerProviderIfManaged('natively', 'Natively key stored');
+            this.setRerankerProviderIfManaged('MeetFloo', 'MeetFloo key stored');
         } else {
-            // Key cleared — revert natively-auto-set defaults back to safe fallbacks
-            this.applyNativelyAutoDefaultRevert('Natively key cleared');
+            // Key cleared — revert MeetFloo-auto-set defaults back to safe fallbacks
+            this.applyMeetFlooAutoDefaultRevert('MeetFloo key cleared');
         }
 
         this.saveCredentials();
-        console.log('[CredentialsManager] Natively API Key updated');
+        console.log('[CredentialsManager] MeetFloo API Key updated');
     }
 
     public getPreferredModel(provider: PreferredModelProvider): string | undefined {
@@ -2046,7 +2046,7 @@ export class CredentialsManager {
      * Derive (once) and memoize the AES key for the app-managed fallback.
      *
      * Key-material composition:
-     *   - Stable domain/version tag (`'natively-credential-fallback-v1'`) so a
+     *   - Stable domain/version tag (`'MeetFloo-credential-fallback-v1'`) so a
      *     future KDF migration can rotate without colliding with old keys.
      *   - The per-install RANDOM 32-byte salt from SALT_PATH — this is the SOLE
      *     machine/install binding. It never leaves this box and differs per
@@ -2068,7 +2068,7 @@ export class CredentialsManager {
         if (this.fallbackKey) return this.fallbackKey;
         const salt = this.getOrCreateDeviceSalt();
         const materialParts = [
-            'natively-credential-fallback-v1', // stable domain/version tag
+            'MeetFloo-credential-fallback-v1', // stable domain/version tag
         ];
         this.fallbackKey = deriveFallbackKey(materialParts, salt);
         return this.fallbackKey;
@@ -2183,13 +2183,13 @@ export class CredentialsManager {
         console.error(
             this.keyMismatchWouldDestroy()
                 ? `[CredentialsManager] Refusing "${op}": this session holds a different encryption key than the `
-                  + 'one that wrote the stored credentials, so the change was NOT applied and the stored file is '
-                  + 'untouched. RECOVERY: start the app the same way it was started when the credentials were '
-                  + 'saved (an automated/test launcher and a normal launch do not share a key).'
+                + 'one that wrote the stored credentials, so the change was NOT applied and the stored file is '
+                + 'untouched. RECOVERY: start the app the same way it was started when the credentials were '
+                + 'saved (an automated/test launcher and a normal launch do not share a key).'
                 : `[CredentialsManager] Refusing "${op}": the stored credential file could not be read this session. `
-                  + 'The change was NOT applied in memory either, so what you see still matches what is on disk. '
-                  + 'RECOVERY: quit and reopen the app with your keychain unlocked (on Windows, signed in to the '
-                  + 'profile that saved the keys).',
+                + 'The change was NOT applied in memory either, so what you see still matches what is on disk. '
+                + 'RECOVERY: quit and reopen the app with your keychain unlocked (on Windows, signed in to the '
+                + 'profile that saved the keys).',
         );
         return true;
     }
@@ -2694,8 +2694,8 @@ export class CredentialsManager {
                             + 'The fallback is deliberately preserved until a cold start proves the new keyring item readable.');
                     } else {
                         console.warn('[CredentialsManager] Running from the app-managed fallback because the keyring file would not decrypt. '
-                        + 'Leaving the keyring file untouched in case the failure was transient — some recently-saved credentials may be missing '
-                        + 'this session, and saves are disabled until a launch that can read it.');
+                            + 'Leaving the keyring file untouched in case the failure was transient — some recently-saved credentials may be missing '
+                            + 'this session, and saves are disabled until a launch that can read it.');
                     }
                 } else if (preferFallbackThisLoad) {
                     // R-10: do NOT migrate up on the prefer path. Skipping the keyring

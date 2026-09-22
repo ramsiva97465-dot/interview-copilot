@@ -41,15 +41,15 @@ function fileFor(family) {
     return path.join(userData, `onnx-load-sentinel-${family}.json`);
 }
 
-test('defaults: NATIVELY_ONNX_SENTINEL_DISABLED is OFF; primitives active', () => {
-    delete process.env.NATIVELY_ONNX_SENTINEL_DISABLED;
+test('defaults: MEETFLOO_ONNX_SENTINEL_DISABLED is OFF; primitives active', () => {
+    delete process.env.MEETFLOO_ONNX_SENTINEL_DISABLED;
     writeLoadSentinel('intent', 'Xenova/mobilebert-uncased-mnli');
     assert.ok(fs.existsSync(fileFor('intent')), 'sentinel file should exist after write');
     clearLoadSentinel('intent');
 });
 
-test('NATIVELY_ONNX_SENTINEL_DISABLED=1 short-circuits all writes + reads', () => {
-    process.env.NATIVELY_ONNX_SENTINEL_DISABLED = '1';
+test('MEETFLOO_ONNX_SENTINEL_DISABLED=1 short-circuits all writes + reads', () => {
+    process.env.MEETFLOO_ONNX_SENTINEL_DISABLED = '1';
     try {
         writeLoadSentinel('intent', 'Xenova/mobilebert-uncased-mnli');
         assert.ok(
@@ -59,7 +59,7 @@ test('NATIVELY_ONNX_SENTINEL_DISABLED=1 short-circuits all writes + reads', () =
         const result = consumePoisonedOnnxLoad('intent');
         assert.equal(result, null, 'disabled state must not return any record');
     } finally {
-        delete process.env.NATIVELY_ONNX_SENTINEL_DISABLED;
+        delete process.env.MEETFLOO_ONNX_SENTINEL_DISABLED;
     }
     // Recover cleanly so later tests don't see leftover state.
     clearLoadSentinel('intent');

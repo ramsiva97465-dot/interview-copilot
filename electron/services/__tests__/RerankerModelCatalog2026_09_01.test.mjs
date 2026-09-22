@@ -25,7 +25,7 @@ const { RERANKER_MODEL_CATALOG, findCatalogModel } =
 const { statusOf, listCatalogStatus, installCatalogModel, removeCatalogModel, modelDirectory } =
   require(path.join(repoRoot, 'dist-electron/electron/services/reranking/localModelInstaller.js'));
 
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'natively-cat-'));
+const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-cat-'));
 
 // ── the claims must be well-formed ────────────────────────────────────────
 
@@ -107,7 +107,7 @@ test('a model whose head is outside the graph ships the files needed to apply it
     const paths = m.files.map(f => f.repoPath);
     if (!paths.includes('modules.json')) continue;   // an ordinary cross-encoder
     for (const needed of ['1_Pooling/config.json', '2_Dense/config.json', '2_Dense/model.safetensors',
-                          '3_LayerNorm/model.safetensors', '4_Dense/config.json', '4_Dense/model.safetensors']) {
+      '3_LayerNorm/model.safetensors', '4_Dense/config.json', '4_Dense/model.safetensors']) {
       assert.ok(paths.includes(needed), `${m.id} declares modules.json but not ${needed}`);
     }
     assert.equal(m.dtype, 'fp32', `${m.id} ships onnx/model.onnx, which is the fp32 variant`);
@@ -207,7 +207,7 @@ test('a non-commercial model is flagged and requires acknowledgement', () => {
 // ── install refusals ──────────────────────────────────────────────────────
 
 test('an unsupported model may still be DOWNLOADED — that is the user\'s call', () => {
-  // `supported` answers "can Natively score this yet", which is not the same
+  // `supported` answers "can MeetFloo score this yet", which is not the same
   // question as "may the user have the file". Downloading is an explicit act,
   // the card says plainly that the model is not usable, and activation still
   // refuses it. Refusing the download as well was substituting a judgement
@@ -220,7 +220,7 @@ test('an unsupported model may still be DOWNLOADED — that is the user\'s call'
 });
 
 test('an unknown id is refused', async () => {
-  const res = await installCatalogModel('no-such-model', () => {}, new AbortController().signal, { rootOverride: tmp() });
+  const res = await installCatalogModel('no-such-model', () => { }, new AbortController().signal, { rootOverride: tmp() });
   assert.equal(res.ok, false);
 });
 

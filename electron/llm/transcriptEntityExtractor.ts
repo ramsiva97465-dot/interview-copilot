@@ -60,7 +60,7 @@ const SALARY_VALUE_RE = /\b\d{2,3}\s?k\b|\b\d{1,3}\s?(?:lpa|lakh|lakhs)\b|[$Â£â‚
 
 /**
  * Extract salient entities from one turn's text. `speakerRole` lets us treat a short
- * candidate answer ("Natively.") as a project name. Returns [] for filler/noise.
+ * candidate answer ("MeetFloo.") as a project name. Returns [] for filler/noise.
  */
 export function extractTranscriptEntities(text: string, speakerRole?: 'interviewer' | 'user' | 'assistant'): ExtractedEntity[] {
   const out: ExtractedEntity[] = [];
@@ -129,7 +129,7 @@ export function extractTranscriptEntities(text: string, speakerRole?: 'interview
   const cued = t.match(/\b(?:tell me about|about|project called|called|use|using|back to)\s+([A-Z][a-z][a-zA-Z0-9]{2,})\b/);
   const cuedIsToolList = cued ? /^\s+and\s+[A-Z]/.test(t.slice(cued.index! + cued[0].length)) : false;
   if (cued && !cuedIsToolList && !STOP_PROPER.has(cued[1]) && !isSkillToken(cued[1]) && !out.some(e => e.value === cued[1])) out.push({ kind: 'project', value: cued[1] });
-  // a SHORT candidate answer that is just a proper noun ("Natively.") names a project.
+  // a SHORT candidate answer that is just a proper noun ("MeetFloo.") names a project.
   if (speakerRole !== 'interviewer') {
     const words = t.trim().replace(/[.?!,]/g, '').split(/\s+/).filter(Boolean);
     if (words.length <= 3) {
@@ -167,7 +167,7 @@ export function isCorrectionTurn(text: string): boolean {
  * college" / "in the project structure" doesn't falsely relax the boundary. */
 export function isExplicitCrossModeInvite(text: string): boolean {
   const t = String(text || '');
-  return /\b(use|using|with|in|from)\s+(my|your|this|that|the)\s+(natively|project|portfolio|own (project|code|app))\b/i.test(t)
-    || /\bin natively\b/i.test(t)
-    || /\bhave you (?:used|done|built|implemented|applied)\b[^.?!]*\bin\s+(your|my|this|that|the)\s+(natively|project|portfolio|app|product|work|experience)\b/i.test(t);
+  return /\b(use|using|with|in|from)\s+(my|your|this|that|the)\s+(MeetFloo|project|portfolio|own (project|code|app))\b/i.test(t)
+    || /\bin MeetFloo\b/i.test(t)
+    || /\bhave you (?:used|done|built|implemented|applied)\b[^.?!]*\bin\s+(your|my|this|that|the)\s+(MeetFloo|project|portfolio|app|product|work|experience)\b/i.test(t);
 }

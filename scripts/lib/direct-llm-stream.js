@@ -1,15 +1,15 @@
 // scripts/lib/direct-llm-stream.js
 //
 // Minimal direct-LLM streamer for the profile/JD benchmark harness.
-// Bypasses LLMHelper's Natively-only production routing so the harness can
+// Bypasses LLMHelper's MeetFloo-only production routing so the harness can
 // run against the Gemini API directly (`GEMINI_API_KEY` + `generativelanguage
 // .googleapis.com`) or any other OpenAI-compatible endpoint that supports
 // `POST /v1/chat/completions` (e.g. MiniMax international `api.minimax.io`).
 //
-// The production code path (LLMHelper.streamChat → setNativelyKey →
-// NATIVELY_API_URL/v1/chat) is unchanged. This module exists ONLY so the
+// The production code path (LLMHelper.streamChat → setMeetFlooKey →
+// MEETFLOO_API_URL/v1/chat) is unchanged. This module exists ONLY so the
 // benchmark harness can produce real answers in environments where the
-// Natively proxy is unreachable (sandboxed networks) but a raw vendor key
+// MeetFloo proxy is unreachable (sandboxed networks) but a raw vendor key
 // IS available. It deliberately does NOT do any retrieval / mode wiring —
 // the harness builds the question, this module just streams the answer.
 //
@@ -21,7 +21,7 @@
 //                                /v1beta/models/<model>:streamGenerateContent
 //                                x-goog-api-key: <key>
 //                                model = E2E_GEMINI_MODEL (default gemini-3.1-flash-lite)
-//   3. NATIVELY_API_KEY      → falls back to the production LLMHelper path
+//   3. MEETFLOO_API_KEY      → falls back to the production LLMHelper path
 //                                (the original behavior of the harness)
 //
 // Streaming: returns an AsyncGenerator<string> so the harness's `for await`
@@ -58,7 +58,7 @@ function readProvider() {
             authScheme: '', // header value is just the key, no scheme prefix
         };
     }
-    return null; // harness will fall back to NATIVELY_API_KEY via LLMHelper
+    return null; // harness will fall back to MEETFLOO_API_KEY via LLMHelper
 }
 
 async function* streamMiniMax(provider, prompt) {

@@ -99,7 +99,7 @@ export function createLiveTranscriptRetrievalPort(input: LiveTranscriptPortInput
   const chunkVersions = new Map<string, string>([[sourceId, 'live']]);
   const sourceScopes = new Map<string, EvidenceScope>([[sourceId, scope]]);
   const index = new Bm25Index(chunks.map((text, i) => ({ id: String(i), text })));
-  const provenance = process.env.NATIVELY_TEST_TRANSCRIPT_INJECTION === '1' ? 'TEST_TRANSCRIPT' as const : 'LIVE_STT' as const;
+  const provenance = process.env.MEETFLOO_TEST_TRANSCRIPT_INJECTION === '1' ? 'TEST_TRANSCRIPT' as const : 'LIVE_STT' as const;
 
   return createLegacyRetrievalPort({
     registry: { sourceTypes, activeVersions, chunkVersions, sourceScopes },

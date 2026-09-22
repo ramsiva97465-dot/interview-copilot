@@ -33,14 +33,14 @@ import { buildProfileJitPrompt } from '../../../../dist-electron/electron/llm/Pr
 const PROFILE = {
   identity: { name: 'Evin John' },
   experience: [{ role: 'AI Engineer', company: 'Acme', bullets: ['Built real-time AI copilots'] }],
-  projects: [{ name: 'Natively', description: 'an AI meeting copilot', technologies: ['Electron', 'TypeScript'] }],
+  projects: [{ name: 'MeetFloo', description: 'an AI meeting copilot', technologies: ['Electron', 'TypeScript'] }],
   skills: ['TypeScript', 'Python', 'Electron', 'React'],
   education: [{ degree: 'BS', field: 'CS', institution: 'State University' }],
 };
 
-const NATIVELY_LEAK = /\bi'?m natively\b|\bi am natively\b|\ban ai assistant\b|\bas an ai\b/i;
+const MEETFLOO_LEAK = /\bi'?m MeetFloo\b|\bi am MeetFloo\b|\ban ai assistant\b|\bas an ai\b/i;
 
-// The bug list from the prompt: identity questions must NOT answer "I'm Natively".
+// The bug list from the prompt: identity questions must NOT answer "I'm MeetFloo".
 const IDENTITY_QUESTIONS = [
   'introduce yourself',
   'who are you?',
@@ -63,9 +63,9 @@ function renderJitPrompt(question, route) {
   }).userPrompt;
 }
 
-describe('PHASE2 baseline — profile identity (candidate voice, no Natively leak)', () => {
+describe('PHASE2 baseline — profile identity (candidate voice, no MeetFloo leak)', () => {
   for (const q of IDENTITY_QUESTIONS) {
-    test(`"${q}" → deterministic evidence selection grounded in the real candidate, never "I am Natively"`, () => {
+    test(`"${q}" → deterministic evidence selection grounded in the real candidate, never "I am MeetFloo"`, () => {
       const route = tryBuildManualProfileFastPathAnswer({
         question: q, profile: PROFILE, source: 'what_to_answer',
       });
@@ -76,7 +76,7 @@ describe('PHASE2 baseline — profile identity (candidate voice, no Natively lea
         `"${q}" must ground on the real candidate's name`,
       );
       const rendered = renderJitPrompt(q, route);
-      assert.doesNotMatch(rendered, NATIVELY_LEAK, `"${q}"'s rendered provider prompt leaked assistant identity`);
+      assert.doesNotMatch(rendered, MEETFLOO_LEAK, `"${q}"'s rendered provider prompt leaked assistant identity`);
       assert.match(rendered, /Evin John/, `"${q}"'s rendered provider prompt must reference the candidate`);
     });
   }
@@ -96,7 +96,7 @@ describe('PHASE2 baseline — profile identity (candidate voice, no Natively lea
   });
 
   test('GENUINE app/assistant questions DO bail to the assistant path', () => {
-    for (const q of ['are you an AI?', 'what is Natively?', 'what model are you?', 'are you ChatGPT?', 'who built you?']) {
+    for (const q of ['are you an AI?', 'what is MeetFloo?', 'what model are you?', 'are you ChatGPT?', 'who built you?']) {
       assert.equal(isAssistantIdentityQuestion(q), true, `"${q}" should be assistant-meta`);
       // The fast path returns null for assistant-meta → handled by assistant identity logic.
       const route = tryBuildManualProfileFastPathAnswer({ question: q, profile: PROFILE, source: 'manual_input' });
@@ -116,6 +116,6 @@ describe('PHASE2 baseline — profile identity (candidate voice, no Natively lea
     });
     assert.ok(route);
     const rendered = renderJitPrompt('what are your projects', route);
-    assert.match(rendered, /Natively/);
+    assert.match(rendered, /MeetFloo/);
   });
 });

@@ -54,8 +54,8 @@ class FakeSession {
 }
 
 function enableDurable(on) {
-  if (on) process.env.NATIVELY_DURABLE_MEMORY_WINDOW = '1';
-  else delete process.env.NATIVELY_DURABLE_MEMORY_WINDOW;
+  if (on) process.env.MEETFLOO_DURABLE_MEMORY_WINDOW = '1';
+  else delete process.env.MEETFLOO_DURABLE_MEMORY_WINDOW;
   __resetIntelligenceFlagsCache();
 }
 

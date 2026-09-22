@@ -50,9 +50,9 @@ let tmpDir;
 describe('ModesManager.updateMode — re-seed sourceContract on templateType change (2026-07-16)', () => {
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'modes-template-switch-reseed-test-'));
-    process.env.NATIVELY_TEST_USERDATA = tmpDir;
-    try { delete require.cache[DB_PATH]; } catch {}
-    try { delete require.cache[MODES_PATH]; } catch {}
+    process.env.MEETFLOO_TEST_USERDATA = tmpDir;
+    try { delete require.cache[DB_PATH]; } catch { }
+    try { delete require.cache[MODES_PATH]; } catch { }
     DatabaseManager = require(DB_PATH).DatabaseManager;
     ModesManager = require(MODES_PATH).ModesManager;
     dbMgr = DatabaseManager.getInstance();
@@ -60,11 +60,11 @@ describe('ModesManager.updateMode — re-seed sourceContract on templateType cha
   });
 
   afterEach(() => {
-    try { dbMgr?.close?.(); } catch {}
-    try { delete require.cache[DB_PATH]; } catch {}
-    try { delete require.cache[MODES_PATH]; } catch {}
-    delete process.env.NATIVELY_TEST_USERDATA;
-    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+    try { dbMgr?.close?.(); } catch { }
+    try { delete require.cache[DB_PATH]; } catch { }
+    try { delete require.cache[MODES_PATH]; } catch { }
+    delete process.env.MEETFLOO_TEST_USERDATA;
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { }
   });
 
   test('INCIDENT REGRESSION: switching a General mode to Technical Interview re-seeds profile_only', () => {

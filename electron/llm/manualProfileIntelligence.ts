@@ -166,13 +166,13 @@ const asArray = (value: unknown): unknown[] => Array.isArray(value) ? value.filt
 const clean = (value: unknown): string => typeof value === 'string' ? value.trim() : '';
 const firstNonEmpty = (...values: unknown[]): string => values.map(clean).find(Boolean) || '';
 
-// GENUINE assistant-meta questions — these legitimately address Natively (the
+// GENUINE assistant-meta questions — these legitimately address MeetFloo (the
 // app), so the fast path bails to the LLM/assistant identity. Release 2026-06-06b:
 // narrowed so "who are you" / "what is your name" NO LONGER count as assistant-meta
 // when a candidate profile is loaded — in an interview-prep product those are the
 // candidate's identity questions and must be answered AS the candidate (the real
-// manual-chat log showed them leaking "I'm Natively, an AI assistant"). Only
-// explicit AI/bot/model/who-built-you/what-is-Natively asks remain assistant-meta.
+// manual-chat log showed them leaking "I'm MeetFloo, an AI assistant"). Only
+// explicit AI/bot/model/who-built-you/what-is-MeetFloo asks remain assistant-meta.
 // Leading discourse fillers ("so", "wait", "ok", "hey", "um", "but") tolerated so
 // "so are you an AI" / "wait, are you a bot" still classify as assistant-meta
 // (code-review 2026-06-06b MEDIUM — the ^ anchors broke on prefixes).
@@ -180,11 +180,11 @@ const FILLER = '(?:so|wait|ok(?:ay)?|um|hmm|hey|but|and|actually|just|like)?[\\s
 const ASSISTANT_IDENTITY_PATTERNS = [
   new RegExp(`^${FILLER}are\\s+you\\s+(an?\\s+)?(actually\\s+)?(ai|assistant|bot|llm|model|chatbot|language model)\\b`),
   /\bare\s+you\s+(an?\s+)?(actually\s+)?(human|real|robot|machine|program)\b/,
-  new RegExp(`^${FILLER}what\\s+(is|s)\\s+natively\\b`),
+  new RegExp(`^${FILLER}what\\s+(is|s)\\s+MeetFloo\\b`),
   /\bwhat\s+(is|s)\s+this\s+(app|tool|product|assistant)\b/,
-  new RegExp(`^${FILLER}who\\s+(made|built|created|developed|trained|designed)\\s+(you|this|natively|the app)\\b`),
+  new RegExp(`^${FILLER}who\\s+(made|built|created|developed|trained|designed)\\s+(you|this|MeetFloo|the app)\\b`),
   /\bwhat\s+(ai\s+)?model\s+(are\s+you|do\s+you\s+(use|run))\b|\bwhich\s+(llm|model)\b/,
-  /\bare\s+you\s+(chatgpt|gpt|claude|gemini|natively)\b/,
+  /\bare\s+you\s+(chatgpt|gpt|claude|gemini|MeetFloo)\b/,
 ];
 
 const NAME_PATTERNS = [
@@ -195,11 +195,11 @@ const NAME_PATTERNS = [
   // Interviewer→candidate identity asks (benchmark 2026-06-05). These are a
   // single deterministic fact (the loaded name) and MUST be answered by the
   // fast path in every mode so they can never reach the LLM and leak "I'm
-  // Natively, an AI assistant" / a false refusal.
+  // MeetFloo, an AI assistant" / a false refusal.
   // Campaign-3 fix (2026-07-19, fix/answer-policy-engine): the previous
   // alternation `what (is|s) your name` did NOT match the post-normalize form
   // `"what s your name"` that the harness's question "What's your name?"
-  // produces (apostrophe → space). Live-trace C3M-001 returned "I'm Natively,
+  // produces (apostrophe → space). Live-trace C3M-001 returned "I'm MeetFloo,
   // an AI assistant." because the identity fast path never fired. The added
   // pattern below matches `what s your name` (post-normalize) AND `what's your
   // name` (pre-normalize); redundant with the existing alternation when both
@@ -237,7 +237,7 @@ const EXPERIENCE_PATTERNS = [
 // INTRO ("tell me about yourself", "give me a quick introduction", "describe
 // yourself professionally", "introduce yourself") — answered deterministically
 // with a grounded first-person intro so it never reaches the LLM (which was
-// leaking "I'm Natively" / refusing). Distinct from a bare NAME ask.
+// leaking "I'm MeetFloo" / refusing). Distinct from a bare NAME ask.
 const INTRO_PATTERNS = [
   /\btell\s+me\s+about\s+(yourself|your\s*self)\b/,
   /\b(give|tell)\s+(me\s+)?(a\s+)?(quick|brief|short)?\s*(introduction|intro|overview of yourself|rundown)\b/,
@@ -245,7 +245,7 @@ const INTRO_PATTERNS = [
   // "introduce yourseld", "introduce urself", "hey man introduce yourself"). The
   // verb "introduc(e)" followed by an optional self-pronoun token (yourself /
   // yourselD / yoursef / urself / urslf) — greetings and trailing typos no longer
-  // drop it to the LLM (which leaked "I'm Natively").
+  // drop it to the LLM (which leaked "I'm MeetFloo").
   // Self-pronoun REQUIRED (code-review 2026-06-06b HIGH): "introduce a bug" / "how
   // would you introduce DI" must NOT fast-path to the candidate intro.
   /\bintroduce\s+(yo?u?r?se?l?[fd]|u?r?se?l?[fd]|me to (?:you|the team))\b/,
@@ -377,7 +377,7 @@ const profileSkills = (profile: MaybeStructured<StructuredProfileFacts>): SkillI
 // <role>. ..." with current role/company + a couple of grounded highlights.
 // This is the safe fallback for "tell me about yourself" / "give me a quick
 // introduction" so an intro NEVER has to reach the LLM (where it was leaking
-// "I'm Natively" / refusing). Returns '' when the name is missing.
+// "I'm MeetFloo" / refusing). Returns '' when the name is missing.
 //
 // VARIANT-AWARE (manual regression 2026-06-12): one fixed intro was reused for
 // intro/background/style questions across a whole session — users read it as a
@@ -616,8 +616,8 @@ const findProjectByName = (profile: MaybeStructured<StructuredProfileFacts>, q: 
   const entries = profileProjects(profile);
   if (!entries.length) return null;
   // Explicit name match: the project's primary name token appears in the
-  // question. Project names are often "Natively – Open Source AI Meeting Copilot"
-  // while the question just says "natively", so match on the FIRST significant
+  // question. Project names are often "MeetFloo – Open Source AI Meeting Copilot"
+  // while the question just says "MeetFloo", so match on the FIRST significant
   // name token (split on space/dash/en-dash) rather than the full string.
   for (const p of entries) {
     const name = firstNonEmpty(p.name, p.title);
@@ -632,13 +632,13 @@ const findProjectByName = (profile: MaybeStructured<StructuredProfileFacts>, q: 
   // "main responsibilities", "biggest risk", "top priorities" do NOT wrongly
   // return the flagship project (code-review 2026-06-05, HIGH).
   if (/\b(best|most important|strongest|main|biggest|favou?rite|top)\b/.test(q)
-      && /\b(project|projects|work|app|product|system|build|built)\b/.test(q)) {
+    && /\b(project|projects|work|app|product|system|build|built)\b/.test(q)) {
     return entries[0];
   }
   return null;
 };
 // Joining "is" + a description that starts with a capitalized article produced
-// "My project Natively is A privacy-first..." (real manual log 2026-06-12).
+// "My project MeetFloo is A privacy-first..." (real manual log 2026-06-12).
 // Lowercase a leading article/pronoun when it follows the copula; also strip a
 // trailing period so the sentence doesn't double-stop.
 const afterCopula = (description: string): string => {
@@ -809,10 +809,10 @@ const formatSkillExperience = (profile: MaybeStructured<StructuredProfileFacts>,
   // ("A high-performance e-commerce engine...") not a first-person bullet.
   const projectEvidenceNounPhrase = projects.length
     ? (() => {
-        const p = profileProjects(profile).find((proj) => firstNonEmpty(proj.name, proj.title) === projects[0]);
-        const desc = p ? firstNonEmpty((p as Record<string, unknown>).description, (p as Record<string, unknown>).summary) : '';
-        return desc ? trimEvidenceBullet(desc) : '';
-      })()
+      const p = profileProjects(profile).find((proj) => firstNonEmpty(proj.name, proj.title) === projects[0]);
+      const desc = p ? firstNonEmpty((p as Record<string, unknown>).description, (p as Record<string, unknown>).summary) : '';
+      return desc ? trimEvidenceBullet(desc) : '';
+    })()
     : '';
   const finalWhere = projects.length ? formatInlineList(projects, 2) : where;
   const finalEvidenceBullet = projects.length ? '' : evidenceBullet;

@@ -49,8 +49,8 @@ function readSource(path, what) {
   if (!existsSync(path)) {
     throw new Error(
       `${what} not found at ${path} — run this from the repo root ` +
-        `(npm run test:css:split-audio-select), not from a subdirectory. This is a ` +
-        `harness problem, not a UI regression.`,
+      `(npm run test:css:split-audio-select), not from a subdirectory. This is a ` +
+      `harness problem, not a UI regression.`,
     );
   }
   return readFileSync(path, 'utf8');
@@ -66,7 +66,7 @@ function loadAipCss() {
   if (start === -1) {
     throw new Error(
       `"export const AIP_CSS = \`" not found in AIProvidersSettings.tsx — the sheet ` +
-        `was renamed or moved. Update this check rather than deleting it.`,
+      `was renamed or moved. Update this check rather than deleting it.`,
     );
   }
   const bodyStart = start + marker.length;
@@ -78,7 +78,7 @@ function loadAipCss() {
   if (!css.includes('.aip-select {')) {
     throw new Error(
       `extracted AIP_CSS has no ".aip-select {" rule — the slice is wrong, so a ` +
-        `passing result would be meaningless.`,
+      `passing result would be meaningless.`,
     );
   }
   return css;
@@ -97,7 +97,7 @@ function readOverflowStates() {
   if (at === -1) {
     throw new Error(
       `the System Audio column (key="system") was not found in LocalWhisperModelPanel.tsx ` +
-        `— it was renamed or restructured. Update this check rather than deleting it.`,
+      `— it was renamed or restructured. Update this check rather than deleting it.`,
     );
   }
   const styleStart = src.indexOf('style={{', at);
@@ -114,8 +114,8 @@ function readOverflowStates() {
   if (!m) {
     throw new Error(
       `no "overflow:" entry in the System column style object. If the clip moved ` +
-        `elsewhere, update this check — do not delete it: an unconditional clip here ` +
-        `is exactly the shipped bug.`,
+      `elsewhere, update this check — do not delete it: an unconditional clip here ` +
+      `is exactly the shipped bug.`,
     );
   }
   const expr = m[1].trim();
@@ -126,7 +126,7 @@ function readOverflowStates() {
   } catch (err) {
     throw new Error(
       `the overflow expression "${expr}" no longer depends only on ` +
-        `(columnAnimating, reduceMotion): ${err.message}. Update this check.`,
+      `(columnAnimating, reduceMotion): ${err.message}. Update this check.`,
     );
   }
   return {
@@ -207,7 +207,7 @@ async function probeBoth() {
   const win = new BrowserWindow({ width: 700, height: 640, show: false });
   const written = [];
   const load = async (systemOverflow) => {
-    const fixture = join(tmpdir(), `natively-split-audio-select-${systemOverflow}.html`);
+    const fixture = join(tmpdir(), `MeetFloo-split-audio-select-${systemOverflow}.html`);
     writeFileSync(fixture, page(css, systemOverflow));
     written.push(fixture);
     await win.loadFile(fixture);
@@ -240,21 +240,21 @@ app.whenReady().then(async () => {
     check(
       overflow.atRest === 'visible',
       `the System column's overflow resolves to "${overflow.atRest}" AT REST ` +
-        `(expression: ${overflow.expr}). A permanent clip removes the System Audio ` +
-        `dropdown entirely — that is the shipped bug this check exists for.`,
+      `(expression: ${overflow.expr}). A permanent clip removes the System Audio ` +
+      `dropdown entirely — that is the shipped bug this check exists for.`,
     );
     check(
       overflow.whileAnimating === 'hidden',
       `the System column's overflow resolves to "${overflow.whileAnimating}" WHILE ANIMATING ` +
-        `(expression: ${overflow.expr}), expected "hidden". Deleting the clip is not the ` +
-        `fix: the trigger's ~39px minimum (padding + non-shrinking chevron) then spills ` +
-        `over the Mic column for the length of the open/close spring.`,
+      `(expression: ${overflow.expr}), expected "hidden". Deleting the clip is not the ` +
+      `fix: the trigger's ~39px minimum (padding + non-shrinking chevron) then spills ` +
+      `over the Mic column for the length of the open/close spring.`,
     );
     check(
       overflow.reducedMotion === 'visible',
       `under reduced motion the System column resolves to "${overflow.reducedMotion}", ` +
-        `expected "visible" — there is no width animation on that path, so there is ` +
-        `nothing to clip and clipping only hides the dropdown.`,
+      `expected "visible" — there is no width animation on that path, so there is ` +
+      `nothing to clip and clipping only hides the dropdown.`,
     );
 
     // Harness sanity: both fixtures must actually lay the options out on screen,
@@ -264,7 +264,7 @@ app.whenReady().then(async () => {
         check(
           res[id].laidOut && res[id].inViewport,
           `harness problem: the ${id} option in the ${name} fixture is not laid out in ` +
-            `the viewport (${JSON.stringify(res[id])}) — nothing below this is meaningful.`,
+          `the viewport (${JSON.stringify(res[id])}) — nothing below this is meaningful.`,
         );
       }
     }
@@ -273,27 +273,27 @@ app.whenReady().then(async () => {
     check(
       fixed.mic.reachable,
       `the MIC model option is not hit-testable at rest (elementFromPoint returned ` +
-        `"${fixed.mic.hitTag}") — the Mic column has no clipper, so this is a harness fault.`,
+      `"${fixed.mic.hitTag}") — the Mic column has no clipper, so this is a harness fault.`,
     );
     check(
       fixed.system.reachable,
       `the SYSTEM AUDIO model option is not hit-testable at rest (elementFromPoint ` +
-        `returned "${fixed.system.hitTag}"). This is the reported bug: the split-audio ` +
-        `system dropdown opens and nothing can be clicked.`,
+      `returned "${fixed.system.hitTag}"). This is the reported bug: the split-audio ` +
+      `system dropdown opens and nothing can be clicked.`,
     );
 
     // 4 — and with the clip restored it must break again, or case 3 proves nothing.
     check(
       !clipped.system.reachable,
       `baseline (overflow:hidden restored) still reports the SYSTEM option as ` +
-        `hit-testable — the clip no longer reaches the popup, so the passing case above ` +
-        `is vacuous. Either the popup stopped being positioned inside .aip-select or the ` +
-        `fixture drifted from the panel.`,
+      `hit-testable — the clip no longer reaches the popup, so the passing case above ` +
+      `is vacuous. Either the popup stopped being positioned inside .aip-select or the ` +
+      `fixture drifted from the panel.`,
     );
     check(
       clipped.mic.reachable,
       `baseline reports the MIC option as unreachable too — the fixture is clipping both ` +
-        `columns, so it does not reproduce the reported asymmetry (mic works, system does not).`,
+      `columns, so it does not reproduce the reported asymmetry (mic works, system does not).`,
     );
 
     if (failures.length) {
@@ -307,8 +307,8 @@ app.whenReady().then(async () => {
     }
     console.log(
       `✓ split-audio-model-select check passed (System column clips only while animating; ` +
-        `both model dropdowns hit-testable at rest; clipped baseline kills the system one ` +
-        `and spares mic, Electron ${process.versions.electron} / Chrome ${process.versions.chrome})`,
+      `both model dropdowns hit-testable at rest; clipped baseline kills the system one ` +
+      `and spares mic, Electron ${process.versions.electron} / Chrome ${process.versions.chrome})`,
     );
     app.exit(0);
   } catch (err) {

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * esbuild bundler for the Natively companion browser extension (MV3).
+ * esbuild bundler for the MeetFloo companion browser extension (MV3).
  *
  * Mirrors the repo's electron toolchain (scripts/build-electron.js): plain
  * esbuild, transpile + bundle, no webpack/vite. Each MV3 surface is its own

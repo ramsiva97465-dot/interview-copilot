@@ -1,7 +1,7 @@
 // Launcher window aspect-ratio contract.
 //
 // The launcher is FREELY RESIZABLE but its shape is LOCKED to 3:2. The lock
-// itself is enforced natively by BrowserWindow.setAspectRatio() (see
+// itself is enforced MeetFloo by BrowserWindow.setAspectRatio() (see
 // WindowHelper.createWindow), which is documented for BOTH darwin and win32 —
 // electron.d.ts tags platform-limited APIs with `@platform`, and
 // setAspectRatio carries no such tag.

@@ -16,7 +16,7 @@ Specs: `docs/specs/auto-answer-v2-spec.md.md` (note: file has a doubled `.md.md`
 
 Workspace note: at campaign start the tree carried two uncommitted edits that are NOT mine and
 were left untouched: a cosmetic `src/components/SettingsOverlay.tsx` change (icon + copy for the
-Auto Answer row) and a dirty `natively-api` submodule pointer. Neither will be staged by this campaign.
+Auto Answer row) and a dirty `MeetFloo-api` submodule pointer. Neither will be staged by this campaign.
 
 ## Call graph findings (Phase 0)
 
@@ -732,7 +732,7 @@ executed**.
 
 ### Live-run repairs (2026-08-24, after the first physical toggle-ON session)
 First real session (YouTube mock interview, Soniox relay): the pipeline ran and every candidate was evaluated, but
-every skip was wrong or debatable. The persisted transcripts (natively.db) were replayed VERBATIM through the
+every skip was wrong or debatable. The persisted transcripts (MeetFloo.db) were replayed VERBATIM through the
 controller to reproduce each decision offline, then fixed:
 
 1. **Directed question + elaboration killed as rhetorical.** The session's only real ask — "I'm just curious: are
@@ -757,7 +757,7 @@ fires the greeting and the CoderPad question, meeting 2 stays silent; Auto Answe
 green (precision 1.0, recall unchanged); full suite 8510 / 8445 / 2 (Ollama pair only); both typechecks clean.
 
 Unrelated live observation, NOT this branch: the STT relay auto-detected `de-DE` mid-session on English video
-audio (gen 5), which degraded every transcript of that meeting — a NativelyProSTT/relay language-pinning issue.
+audio (gen 5), which degraded every transcript of that meeting — a MeetFlooProSTT/relay language-pinning issue.
 
 ### Live-run repairs, round 2 (2026-08-24 — the system-design session)
 Second physical session (meeting 343d1321, a system-design mock interview): 35 candidates, ALL skipped. The full
@@ -781,7 +781,7 @@ full suite 8513 / 8448 / 2 (Ollama pair) · typecheck clean. Full-meeting replay
 3 offer-band cards (requirement fragments — Tab-gated, never auto), everything else silent.
 
 ### A/B harness (2026-08-24, temporary)
-`NATIVELY_AUTO_ANSWER_ENGINE=legacy` routes the trigger through
+`MEETFLOO_AUTO_ANSWER_ENGINE=legacy` routes the trigger through
 `electron/intelligence/LegacyAutoAnswerTrigger.ts` — a byte-faithful reproduction of the PR #497 path (bare 900 ms
 debounce restarted per final, single last turn as the question, hardcoded confidence 0.9, old gate, no rearm, no
 dual-channel/dedup/endpoints, its known starvation defect INCLUDED on purpose). Anything else (or unset) = the V3
@@ -817,7 +817,7 @@ exactly as designed; echo mode is the speakers-degradation path and reads as suc
 
 ### Live-run repairs, round 4 (2026-08-24 — the A/B session; Wordle coding round, meeting fd28a1af)
 Same video, headphones in (no echo this time): LEGACY again fired garbage constantly ("Cool.", ".", "five-letter.",
-"attempt."), V3 fired ZERO. Replaying the saved meeting verbatim from natively.db found the two real asking points
+"attempt."), V3 fired ZERO. Replaying the saved meeting verbatim from MeetFloo.db found the two real asking points
 and three defects around them:
 
 7. **The task never matched `DESIGN_TASK`.** The ask was "and your task **Connor** is / to **recreate** this game in
@@ -863,7 +863,7 @@ unchanged; only the JUDGMENT is dynamic.
   heuristic verdict routes byte-identically to the pre-judge pipeline. `routeHeuristic`/`holdIncomplete`/
   `ignoreCandidate` extracted so both paths share one implementation.
 - main.ts: hook wired to `llmHelper.generateContentStructured(prompt, { preferFast: true })` (flash-lite-led);
-  `modeName` from ModesManager. `NATIVELY_AUTO_ANSWER_JUDGE=off` removes the hook (pure heuristic pipeline for
+  `modeName` from ModesManager. `MEETFLOO_AUTO_ANSWER_JUDGE=off` removes the hook (pure heuristic pipeline for
   A/B and offline). Telemetry `auto_answer_judged` carries outcome/act/scores/latency, never text.
 - **Live-probed on the real model** (flash-lite, temperature 0, key from .env): 12-case set built from the four
   live meetings + non-interview scenarios — wordle task, wordle question, two rule-exposition turns, self-answered,
@@ -948,7 +948,7 @@ suppresses the auto answer. Test live#9; word floor mutation-probed red. Suite 2
 After six rounds the user called V3 "unnecessarily overcomplicated" and legacy "undercomplicated", and asked for
 the middle ground: fire like legacy on interviewer stoppages, but gate every firing through ONE LLM request that
 answers finished/ask/directed/type/follow-up in a single verdict. Built as `SimpleAutoAnswer.ts` (~300 lines) and
-made the DEFAULT engine; `NATIVELY_AUTO_ANSWER_ENGINE=v3|legacy` keeps the old engines for A/B.
+made the DEFAULT engine; `MEETFLOO_AUTO_ANSWER_ENGINE=v3|legacy` keeps the old engines for A/B.
 
 Flow: interviewer finals AND interims restart a STABILITY_MS=900 window (provider endpoint shortens to 350) →
 stoppage → zero-cost prefilter (unchanged-text / backchannel / <4-word non-'?' / dup-vs-answered) → one judge
@@ -1112,7 +1112,7 @@ A live run showed ~5.7 s from the end of a question to the first token: 900 ms s
 30. **Automatic answers run in FAST routing.** An automatic answer appears unasked while someone is still
     talking, so time-to-first-token matters more than the last points of depth. `groqFastTextMode` is now enabled
     for the duration of an automatic run and restored in the `finally` (a manual press is untouched; a user who
-    already has fast mode on is left alone). `NATIVELY_AUTO_ANSWER_FAST=off` restores the default route.
+    already has fast mode on is left alone). `MEETFLOO_AUTO_ANSWER_FAST=off` restores the default route.
 31. **NVIDIA Nemotron now emits provider endpoints.** `NvidiaNimStreamingSTT` had no `endpoint` event, so every
     stoppage paid the full 900 ms window instead of the 350 ms endpoint confirm — main.ts had been wiring the
     listener to a provider that never fired it. Riva's `is_final` IS the end-of-utterance signal; it now emits
@@ -1139,7 +1139,7 @@ network variance swamped the effect — worth remembering before trusting any la
 | Nemotron endpoint emission | 3 deterministic tests on the real handler (injected stream factory) | **CONFIRMED** (the 550 ms is arithmetic 900→350, not measured live) |
 | 180 s judge window helps detection | two constructed follow-ups whose referent lives only in the older turns: 3/3 fire on BOTH windows | **NO MEASURED EFFECT** — an alignment, not a win |
 
-Consequences applied: **fast routing now defaults OFF** (`NATIVELY_AUTO_ANSWER_FAST=on` enables it) — it swaps to
+Consequences applied: **fast routing now defaults OFF** (`MEETFLOO_AUTO_ANSWER_FAST=on` enables it) — it swaps to
 a different, smaller model, so leaving it on traded answer quality for nothing. `NvidiaNimStreamingSTT` took an
 injectable stream factory so its response handling is testable without a network, key or audio (esbuild inlines
 `rivaProto` into the bundle, so require-cache stubbing does not work — the earlier attempt made a real gRPC call
@@ -1210,7 +1210,7 @@ testing over speakers looks worse than a real meeting. Deepgram already had diar
 never reached Auto Answer anyway.
 
 Now: the interviewer channel requests diarization where the provider supports it
-(`NATIVELY_AUTO_ANSWER_DIARIZE=off` opts out), the engine keeps the `speakerId` of each interviewer final, and the
+(`MEETFLOO_AUTO_ANSWER_DIARIZE=off` opts out), the engine keeps the `speakerId` of each interviewer final, and the
 judge receives BOTH the labelled context turns and — the part that matters — **the candidate split by speaker**.
 
 The first cut labelled only the context and measured as a regression: identical text was judged
@@ -1256,7 +1256,7 @@ than a vague "should be fine":
 Getting real evidence needs one of: pushing the branch so the Windows leg runs (an outward-facing action, so it
 is the user's call), or a physical Windows machine.
 
-#### Where the Natively (default) provider sits on diarization
+#### Where the MeetFloo (default) provider sits on diarization
 Worth stating, because the app's own speaker separation is easy to undersell: **channel separation IS the
 primary diarization, and it is the stronger kind** — mic and system audio are two devices and two STT sessions,
 so user-vs-others is MEASURED, not inferred from a model. The dual-channel replay of the Google interview is the
@@ -1265,18 +1265,18 @@ proof: 2 dispatches / 0 garbage with channels, 15 / 13 on the same content flatt
 What separation cannot reach is several voices INSIDE the meeting-audio channel — a panel, a colleague answering
 a colleague, a two-speaker video. For that:
 - **Deepgram**: works end to end today (`setDiarize` → `speakerId` → judge).
-- **Natively (default)**: relays to Soniox `stt-rt-v5`, which supports per-token speaker labels — but the relay's
+- **MeetFloo (default)**: relays to Soniox `stt-rt-v5`, which supports per-token speaker labels — but the relay's
   config frame never requests them (`enable_speaker_diarization` absent, server.js ~8497) and no speaker tag is
   forwarded to the client, even though the relay already does exactly that pattern for per-token `language`.
-  Enabling it is a **server-side** change in `natively-api` (a submodule this campaign must not commit):
+  Enabling it is a **server-side** change in `MeetFloo-api` (a submodule this campaign must not commit):
   add `enable_speaker_diarization: true` to the Soniox config, and forward the token's speaker beside the text.
-- **Client side is now ready**: `NativelyProSTT` reads `speaker` / `speaker_id` off the relay message in the
+- **Client side is now ready**: `MeetFlooProSTT` reads `speaker` / `speaker_id` off the relay message in the
   shapes it might plausibly send and emits `speakerId`. Absent field → absent label → today's behaviour exactly,
   so this is inert until (and unless) the server sends one.
 - **NVIDIA Nemotron** (the current default provider) does not diarize at all.
 
 ### Real-interview latency: it is the BUSY path, not the pipeline (2026-08-25)
-The user ran an actual interview and reported "10 seconds plus". `natively_debug.log` + telemetry give the
+The user ran an actual interview and reported "10 seconds plus". `MeetFloo_debug.log` + telemetry give the
 per-dispatch breakdown, and it is not what the offline benches predicted:
 
 | dispatch | speech end → verdict | verdict → decision | answer TTFT | total |
@@ -1302,7 +1302,7 @@ Expected on the q5 shape: ~9.4 s → ~6.7 s. The remainder is a manual answer le
 that is not latency to optimise away — it is the user's own request finishing.
 
 **Not fixable from the client**: the 0.9 s stability window is the floor on this provider. Deepgram and Nemotron
-emit endpoints (350 ms confirm), but the interview ran on NativelyPro→Soniox, whose relay strips the `<end>`
+emit endpoints (350 ms confirm), but the interview ran on MeetFlooPro→Soniox, whose relay strips the `<end>`
 sentinel and whose `is_final` messages are incremental commits, not utterance ends — so a final cannot be treated
 as an endpoint. Forwarding the endpoint is the same class of server-side change as diarization.
 
@@ -1349,7 +1349,7 @@ Suite 42/42, three recorded meetings unchanged, typecheck clean.
 - `cargo clippy` has 7 pre-existing errors on main (not in this branch's files); `build:native` uses `cargo build`.
 - Pre-existing failing tests (Ollama ×2, ProviderVisibilityFilters ×3, ModesManager) untouched; a parallel session is
   editing two of those files in this working tree.
-- The `natively-api` submodule pointer is dirty in the working tree (not this campaign's; never staged).
+- The `MeetFloo-api` submodule pointer is dirty in the working tree (not this campaign's; never staged).
 
 ## Suggested PR
 **Title:** `feat(auto-answer): V3 — speaker-aware question-opportunity pipeline with endpoint fusion and offer card`
@@ -1414,11 +1414,11 @@ Mechanism (confirmed, not inferred):
 
 **Second finding — the endpoint fast path is dead code on the shipped configuration.** `onProviderEndpoint()` /
 `ENDPOINT_CONFIRM_MS = 350` only fire for STT classes that emit `endpoint`: Deepgram, NVIDIA NIM, OpenAI and
-**direct** Soniox. The default provider is `NativelyProSTT` (the Natively relay — the log says
-`[NativelyProSTT] Connected via soniox`), which never emits it: the relay collapses Soniox's token stream to
+**direct** Soniox. The default provider is `MeetFlooProSTT` (the MeetFloo relay — the log says
+`[MeetFlooProSTT] Connected via soniox`), which never emits it: the relay collapses Soniox's token stream to
 `{text, is_final, confidence, speaker}` server-side, so the `<end>` marker `SonioxStreamingSTT` keys on is gone
 before it reaches the client. Net: the app's default path has **no turn-end signal at all**, only the arrival gap.
-Forwarding `<end>` from the relay is a `natively-api` change (submodule — not committed from here), and is the
+Forwarding `<end>` from the relay is a `MeetFloo-api` change (submodule — not committed from here), and is the
 same shape as the outstanding `enable_speaker_diarization` item.
 
 Diagnostic-only changes landed (no behaviour change, typecheck clean):
@@ -1621,7 +1621,7 @@ Proposed after the live run on the reasoning that the 16,291-char system prompt 
 a 3,145-char prompt on another surface measured 1622 ms. **That was a confound** — two different surfaces, two
 different user payloads, two different moments — and a controlled experiment refutes it.
 
-Interleaved A/B against the real Natively endpoint (7 samples per arm, arms alternated so drifting provider
+Interleaved A/B against the real MeetFloo endpoint (7 samples per arm, arms alternated so drifting provider
 load hits both equally, identical user message):
 
 | system prompt | median TFFT | min | max |
@@ -1634,7 +1634,7 @@ is queue/network-bound, so cutting the prompt would buy nothing measurable while
 answer contract at risk. **Not done, deliberately.**
 
 This is the second measured dead end for answer latency. The first is already recorded in
-`IntelligenceEngine.handleSuggestionTrigger`: `NATIVELY_AUTO_ANSWER_FAST` routes to a smaller model and paired
+`IntelligenceEngine.handleSuggestionTrigger`: `MEETFLOO_AUTO_ANSWER_FAST` routes to a smaller model and paired
 real-API runs put it at 1364 vs 1415 ms (inside the spread) and *slower* at the larger prompt size.
 
 Worth noting for anyone re-measuring: the live run's 2690 ms TFFT came at a total prompt of ~23.1k chars

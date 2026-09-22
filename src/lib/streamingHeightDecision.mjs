@@ -1,6 +1,6 @@
 /**
  * Pure decision for the overlay's streaming height channel (unit-tested).
- * Extracted from NativelyInterface.tsx's driveStreamingHeight on 2026-09-12
+ * Extracted from MeetFlooInterface.tsx's driveStreamingHeight on 2026-09-12
  * after a live repro of the "window size changes rapidly when sending
  * screenshots" review: the +96px headroom was committed the instant the empty
  * placeholder row mounted, then the exact height was reported again before

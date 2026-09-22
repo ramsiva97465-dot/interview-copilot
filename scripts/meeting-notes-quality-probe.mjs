@@ -5,8 +5,8 @@
 //
 // Two input modes:
 //   --meeting <id-prefix>   Loads a real meeting's transcript (read-only) from the local
-//                           Natively sqlite DB (~/Library/Application Support/Natively/natively.db
-//                           on macOS, %APPDATA%/Natively/natively.db on Windows) via the `sqlite3`
+//                           MeetFloo sqlite DB (~/Library/Application Support/MeetFloo/MeetFloo.db
+//                           on macOS, %APPDATA%/MeetFloo/MeetFloo.db on Windows) via the `sqlite3`
 //                           CLI in -readonly mode. Rows come from `transcripts` (meeting_id,
 //                           speaker, content, timestamp_ms) and are mapped to the
 //                           { speaker, text, timestamp, final } shape assembleSummary expects
@@ -56,10 +56,10 @@ const probeUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'notes-quality-probe
 const fakeElectron = {
   app: {
     getPath: () => probeUserData,
-    getName: () => 'Natively',
+    getName: () => 'MeetFloo',
     getVersion: () => '0.0.0-probe',
     isPackaged: false,
-    on: () => {},
+    on: () => { },
     whenReady: () => Promise.resolve(),
   },
   safeStorage: {
@@ -67,8 +67,8 @@ const fakeElectron = {
     encryptString: (s) => Buffer.from(String(s)),
     decryptString: (b) => Buffer.from(b).toString('utf8'),
   },
-  BrowserWindow: class {},
-  ipcMain: { on: () => {}, handle: () => {}, removeHandler: () => {} },
+  BrowserWindow: class { },
+  ipcMain: { on: () => { }, handle: () => { }, removeHandler: () => { } },
   screen: { getPrimaryDisplay: () => ({ workAreaSize: { width: 1920, height: 1080 } }) },
   nativeTheme: { shouldUseDarkColors: false },
 };
@@ -107,9 +107,9 @@ if (!args.meetingIdPrefix && !args.transcriptPath) {
 
 function defaultDbPath() {
   if (process.platform === 'win32') {
-    return path.join(process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming'), 'Natively', 'natively.db');
+    return path.join(process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming'), 'MeetFloo', 'MeetFloo.db');
   }
-  return path.join(os.homedir(), 'Library', 'Application Support', 'Natively', 'natively.db');
+  return path.join(os.homedir(), 'Library', 'Application Support', 'MeetFloo', 'MeetFloo.db');
 }
 
 /**
@@ -118,9 +118,9 @@ function defaultDbPath() {
  * for write; never prints row content.
  */
 function loadTranscriptFromDb(idPrefix) {
-  const dbPath = process.env.NATIVELY_DB_PATH || defaultDbPath();
+  const dbPath = process.env.MEETFLOO_DB_PATH || defaultDbPath();
   if (!fs.existsSync(dbPath)) {
-    throw new Error(`Natively DB not found at ${dbPath}. Set NATIVELY_DB_PATH to override.`);
+    throw new Error(`MeetFloo DB not found at ${dbPath}. Set MEETFLOO_DB_PATH to override.`);
   }
 
   // sqlite3's CLI has no first-class bind-parameter flag for a one-shot `sqlite3 db "SQL"`

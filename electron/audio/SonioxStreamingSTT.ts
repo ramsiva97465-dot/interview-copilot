@@ -33,7 +33,7 @@ const RECONNECT_MAX_DELAY_MS = 30000;
 // not the session: an exhausted-but-active session that keeps receiving
 // audio re-arms the ladder once per DEFAULT_REVIVE_COOLDOWN_MS, so a
 // permanently dead endpoint sees ~11 handshakes per ~3.5 min for the life
-// of the meeting. That is deliberate and matches NativelyProSTT, which
+// of the meeting. That is deliberate and matches MeetFlooProSTT, which
 // retries indefinitely at its 30s ceiling on the same 'streaming STT is
 // meeting-critical' rationale.
 const RECONNECT_MAX_ATTEMPTS = 10;
@@ -63,7 +63,7 @@ export class SonioxStreamingSTT extends EventEmitter {
     // back-to-back (common pattern: device route change emits both new sample
     // rate AND new language in the same tick). The second WS handshake races
     // the first; one of them loses with code 1006 and triggers a reconnect
-    // storm. Same shape as the NativelyProSTT 250ms reconnect pattern.
+    // storm. Same shape as the MeetFlooProSTT 250ms reconnect pattern.
     private pendingRestartTimer: NodeJS.Timeout | null = null;
 
     private buffer: Buffer[] = [];
@@ -138,7 +138,7 @@ export class SonioxStreamingSTT extends EventEmitter {
      *   • `enable_language_identification` used to be set UNCONDITIONALLY. That
      *     is Soniox's auto-detect mode, so a pinned session ran with full
      *     multilingual detection switched on — the setting looked inert. The
-     *     natively-api relay already scoped this to auto-only; this path did not.
+     *     MeetFloo-api relay already scoped this to auto-only; this path did not.
      *
      *   • `language_hints_strict` is sent alongside the hint because that is
      *     Soniox's documented way to restrict recognition
@@ -324,7 +324,7 @@ export class SonioxStreamingSTT extends EventEmitter {
     private connect(): void {
         if (this.isConnecting) return;
         this.isConnecting = true;
-        
+
         console.log(`[SonioxStreaming] Connecting (rate=${this.sampleRate}, ch=${this.numChannels})...`);
 
         this.configSent = false;
@@ -340,7 +340,7 @@ export class SonioxStreamingSTT extends EventEmitter {
         // (write() can no longer reach it), clear the new keepalive, and — on
         // a normal 1000 close — set isActive=false, which silently drops every
         // subsequent chunk with no 'error' emitted and no banner (total silent
-        // death until a manual Stop/Start). Mirrors NativelyProSTT's
+        // death until a manual Stop/Start). Mirrors MeetFlooProSTT's
         // documented `guard(ws === this.ws)` pattern.
         const ws = this.ws;
 

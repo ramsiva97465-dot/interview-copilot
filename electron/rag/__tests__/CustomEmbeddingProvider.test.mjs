@@ -147,7 +147,7 @@ describe('embedding', () => {
     requests = [];
     const out = await make().embedBatch(['a', 'b', 'c']);
     assert.equal(out.length, 3);
-    assert.equal(requests.length, 1, 'an OpenAI-compatible server batches natively');
+    assert.equal(requests.length, 1, 'an OpenAI-compatible server batches MeetFloo');
     assert.deepEqual(requests[0].body.input, ['a', 'b', 'c']);
   });
 

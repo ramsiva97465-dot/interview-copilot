@@ -5,7 +5,7 @@
  * calling the control-plane endpoint `POST {controlPlaneBaseUrl}/v1/stt/session`
  * (contract: docs/03-relay-session-token.md §2). It NEVER opens a WebSocket and
  * NEVER touches Electron windows — it returns a plain config object (or null)
- * that NativelyProSTT consumes to build its connection fallback chain.
+ * that MeetFlooProSTT consumes to build its connection fallback chain.
  *
  * Design contract (docs/01 §5, §1.3 fallback ladder):
  *   1. Client POSTs /v1/stt/session with key|trial_token + channel + hints.
@@ -73,7 +73,7 @@ export interface ResolveRelaySessionOpts {
     audioChannels: number;
     appVersion: string;
     platform: string;
-    /** Base URL of the Railway control plane, e.g. https://api.natively.software */
+    /** Base URL of the Railway control plane, e.g. https://api.MeetFloo.software */
     controlPlaneBaseUrl: string;
     /** Optional forced/coarse region hint ('us' | 'asia') or ISO-3166 alpha-2. */
     regionHint?: string | null;
@@ -331,8 +331,8 @@ export function clearAllCachedSessions(): void {
 /** Known relay health endpoints. Derived from the production relay hostnames; the
  *  control plane remains authoritative for routing — these are only hints. */
 const RELAY_HEALTH_URLS: Record<'us' | 'asia', string> = {
-    us: 'https://us-relay.natively.software/healthz',
-    asia: 'https://asia-relay.natively.software/healthz',
+    us: 'https://us-relay.MeetFloo.software/healthz',
+    asia: 'https://asia-relay.MeetFloo.software/healthz',
 };
 
 const PROBE_TTL_MS = 5 * 60_000;       // re-measure at most every 5 min
@@ -363,7 +363,7 @@ export function getRelayLatencyProbes(
     const fresh = _probeCache && now() - _probeCache.at < PROBE_TTL_MS;
     if (!fresh && !_probeInFlight) {
         // Fire-and-forget refresh; the result lands in the cache for NEXT time.
-        _probeInFlight = refreshRelayLatencyProbes(fetchImpl, now).then(() => {}, () => {}).finally(() => { _probeInFlight = null; });
+        _probeInFlight = refreshRelayLatencyProbes(fetchImpl, now).then(() => { }, () => { }).finally(() => { _probeInFlight = null; });
     }
     return _probeCache && Object.keys(_probeCache.probes).length > 0 ? _probeCache.probes : null;
 }

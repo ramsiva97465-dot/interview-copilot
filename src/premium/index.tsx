@@ -18,12 +18,12 @@ const nullAdCampaigns = (
   _appStartTime?: number,
   _lastMeetingEndTime?: number | null,
   _isProcessingMeeting?: boolean,
-  _hasNativelyApi?: boolean,
+  _hasMeetFlooApi?: boolean,
   _enabled?: boolean,
 ) => ({
   activeAd: null as string | null,
-  dismissAd: (_campaignId?: string) => {},
-  previewAd: (_ad: any) => {},
+  dismissAd: (_campaignId?: string) => { },
+  previewAd: (_ad: any) => { },
 });
 
 // ─── Glob-import premium modules (empty {} when premium/ is absent) ──
@@ -59,8 +59,8 @@ const _negotiationCard = import.meta.glob<any>(
   '../../premium/src/NegotiationCoachingCard.tsx',
   { eager: true }
 );
-const _nativelyApiPromo = import.meta.glob<any>(
-  '../../premium/src/NativelyApiPromoToaster.tsx',
+const _MeetFlooApiPromo = import.meta.glob<any>(
+  '../../premium/src/MeetFlooApiPromoToaster.tsx',
   { eager: true }
 );
 const _maxUltraUpgradeToaster = import.meta.glob<any>(
@@ -103,7 +103,7 @@ export const useAdCampaigns: typeof nullAdCampaigns = nullAdCampaigns;
 export const NegotiationCoachingCard: React.FC<any> =
   get(_negotiationCard, 'NegotiationCoachingCard', NullComponent);
 
-export const NativelyApiPromoToaster: React.FC<any> = NullComponent;
+export const MeetFlooApiPromoToaster: React.FC<any> = NullComponent;
 
 export const MaxUltraUpgradeToaster: React.FC<any> = NullComponent;
 

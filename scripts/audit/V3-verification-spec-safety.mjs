@@ -13,7 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const REPO = '/tmp/natively-land-wt';
+const REPO = '/tmp/MeetFloo-land-wt';
 const CC = fs.readFileSync(path.join(REPO, 'electron/llm/codingContract.ts'), 'utf8');
 const env = fs.readFileSync(path.join(REPO, '.env'), 'utf8');
 const k = (n) => env.split('\n').find((l) => l.startsWith(n + '=')).split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '');
@@ -39,19 +39,27 @@ const FENCE = /```[a-zA-Z0-9_+\-]*\n([\s\S]*?)```/;
 const HEADINGS = ['## Approach', '## Technique', '## Code', '## Dry Run', '## Complexity', '## Interviewer Follow-up'];
 
 async function ds(sys, u, max) {
-  const r = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST',
+  const r = await fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${DS}` },
-    body: JSON.stringify({ model: 'deepseek-v4-flash', temperature: 0, max_tokens: max,
-      messages: [{ role: 'system', content: sys }, { role: 'user', content: u }] }) });
+    body: JSON.stringify({
+      model: 'deepseek-v4-flash', temperature: 0, max_tokens: max,
+      messages: [{ role: 'system', content: sys }, { role: 'user', content: u }]
+    })
+  });
   const c = (await r.json()).choices[0];
   return { text: c.message.content ?? '', truncated: c.finish_reason === 'length' };
 }
 async function gm(sys, u, max) {
   const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${GM}`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ systemInstruction: { parts: [{ text: sys }] },
+    {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: sys }] },
         contents: [{ role: 'user', parts: [{ text: u }] }],
-        generationConfig: { temperature: 0, maxOutputTokens: max } }) });
+        generationConfig: { temperature: 0, maxOutputTokens: max }
+      })
+    });
   const c = (await r.json()).candidates?.[0];
   if (!c) return { text: '', truncated: false };
   return { text: (c.content?.parts ?? []).map((p) => p.text ?? '').join(''), truncated: c.finishReason === 'MAX_TOKENS' };
@@ -59,10 +67,10 @@ async function gm(sys, u, max) {
 
 // Deliberately SMALL/trivial problems — the user's concern — plus one normal one.
 const QUESTIONS = [
-  ['tiny: reverse a string',   'Reverse a string.'],
-  ['tiny: sum two numbers',    'Write a function that adds two numbers.'],
-  ['tiny: is even',            'Write a function that returns whether a number is even.'],
-  ['normal: two sum',          'Given nums and target, return indices of the two numbers adding to target.'],
+  ['tiny: reverse a string', 'Reverse a string.'],
+  ['tiny: sum two numbers', 'Write a function that adds two numbers.'],
+  ['tiny: is even', 'Write a function that returns whether a number is even.'],
+  ['normal: two sum', 'Given nums and target, return indices of the two numbers adding to target.'],
 ];
 
 for (const [mname, fn] of [['deepseek-v4-flash', ds], ['gemini-3.1-flash-lite', gm]]) {

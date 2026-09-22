@@ -14,7 +14,7 @@ const lt = await import(pathToFileURL(path.join(base, 'observability/legacy-trac
 const { compareDecisions } = await import(pathToFileURL(path.join(base, 'observability/answer-trace.js')).href);
 const { MemoryTraceSink, setTraceSink, recordLegacyTurn, isLegacyTraceEnabled, traceSafely, NO_POLICY } = lt;
 
-const ENV = 'NATIVELY_CI_V3_TRACE';
+const ENV = 'MEETFLOO_CI_V3_TRACE';
 let sink;
 beforeEach(() => { sink = new MemoryTraceSink(); setTraceSink(sink); delete process.env[ENV]; });
 

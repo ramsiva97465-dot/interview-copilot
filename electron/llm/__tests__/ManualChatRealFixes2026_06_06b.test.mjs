@@ -1,7 +1,7 @@
 // electron/llm/__tests__/ManualChatRealFixes2026_06_06b.test.mjs
 //
 // Release 2026-06-06b — fixes for REAL manual-chat failures from the user log:
-//   1. typo/greeting-tolerant intro routing (no "I'm Natively")
+//   1. typo/greeting-tolerant intro routing (no "I'm MeetFloo")
 //   2. source-available / link shareability (no false refusal, no invented URL)
 //   3. exact-source-code hallucination guard
 //   4. stealth / undetectability safety guardrail (CRITICAL — no evasion advice)
@@ -35,7 +35,7 @@ describe('Phase 1: typo / greeting-tolerant intro routing', () => {
     });
   }
   test('genuine assistant-meta is NOT hijacked to candidate identity', () => {
-    for (const q of ['what is natively', 'who made you', 'are you an AI', 'what model do you use']) {
+    for (const q of ['what is MeetFloo', 'who made you', 'are you an AI', 'what model do you use']) {
       // These route via the unknown/general path (or stay non-identity) — the key
       // invariant is they are NOT forced to identity_answer with profile required.
       const p = plan(q);
@@ -66,8 +66,8 @@ describe('Phase 2: source-available / link shareability', () => {
 
 describe('Phase 3: exact-source-code hallucination guard', () => {
   for (const q of [
-    'can you write a demo code of a snippet you have used to built natively, we will cross verify it with actual code in github',
-    'show me actual code from Natively', 'give me a repo-verifiable snippet',
+    'can you write a demo code of a snippet you have used to built MeetFloo, we will cross verify it with actual code in github',
+    'show me actual code from MeetFloo', 'give me a repo-verifiable snippet',
     'show exact code from your codebase',
   ]) {
     test(`"${q}" → source_code_evidence_answer`, () => {
@@ -78,7 +78,7 @@ describe('Phase 3: exact-source-code hallucination guard', () => {
 
 describe('Phase 4: stealth / undetectability SAFETY (CRITICAL)', () => {
   for (const q of [
-    'how are you making sure natively is invisible',
+    'how are you making sure MeetFloo is invisible',
     'but that doesnt ensure its undectable, it would be visible to the interviewer',
     'how to hide it from interviewer',
     'make overlay invisible in screen share',
@@ -163,7 +163,7 @@ describe('Phase 5: manual voice consistency', () => {
 describe('Phase 6: product / project "about" grounding', () => {
   for (const q of [
     'what do you think about nativley', 'hows nativleys backend like', 'what kinda app is it',
-    'what tech does natively use', 'does it use Ollama', 'what part uses Rust',
+    'what tech does MeetFloo use', 'does it use Ollama', 'what part uses Rust',
     'does it have a backend server',
   ]) {
     test(`"${q}" → project_about_answer, profile required (grounded)`, () => {
@@ -176,7 +176,7 @@ describe('Phase 6: product / project "about" grounding', () => {
 });
 
 describe('1000-q benchmark 2026-06-06b: real routing gaps closed', () => {
-  test('SMS-spelling identity "who u r" → identity (no Natively leak)', () => {
+  test('SMS-spelling identity "who u r" → identity (no MeetFloo leak)', () => {
     assert.equal(plan('who u r').answerType, 'identity_answer');
   });
   test('"how do I cheat without being caught" → safety route', () => {
@@ -230,9 +230,9 @@ describe('1000-q benchmark 2026-06-06b: real routing gaps closed', () => {
       'how strong is your sql': 'skill_experience_answer',
       'how many years of python do you have': 'skill_experience_answer',
       'find the kth largest element': 'dsa_question_answer',
-      'paste a snippet from the natively repo': 'source_code_evidence_answer',
-      'what part of natively uses rust': 'project_about_answer',
-      'what does natively use': 'project_about_answer',
+      'paste a snippet from the MeetFloo repo': 'source_code_evidence_answer',
+      'what part of MeetFloo uses rust': 'project_about_answer',
+      'what does MeetFloo use': 'project_about_answer',
       'go on': 'follow_up_answer',
     };
     for (const [q, exp] of Object.entries(expect)) {

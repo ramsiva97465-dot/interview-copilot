@@ -39,13 +39,13 @@ const { isRerankerExplicitlySelected } =
 
 /** Drive the predicate against a seeded settings store, the way the app reads it. */
 function withSettings(reranker, fn) {
-  const previous = globalThis.__nativelySettingsManagerV1__;
+  const previous = globalThis.__MeetFlooSettingsManagerV1__;
   const store = { reranker };
-  globalThis.__nativelySettingsManagerV1__ = {
+  globalThis.__MeetFlooSettingsManagerV1__ = {
     get: (k) => store[k],
     set: (k, v) => { store[k] = v; return true; },
   };
-  try { return fn(); } finally { globalThis.__nativelySettingsManagerV1__ = previous; }
+  try { return fn(); } finally { globalThis.__MeetFlooSettingsManagerV1__ = previous; }
 }
 
 // ── the reranker actually runs ────────────────────────────────────────────

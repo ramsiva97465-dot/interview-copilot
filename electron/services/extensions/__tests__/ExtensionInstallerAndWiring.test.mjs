@@ -31,7 +31,7 @@ const { buildInstallPromptText } =
 const { RerankerRegistry } =
   require(path.join(repoRoot, 'dist-electron/electron/services/reranking/RerankerRegistry.js'));
 
-function tmpDir() { return fs.mkdtempSync(path.join(os.tmpdir(), 'natively-ext-')); }
+function tmpDir() { return fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-ext-')); }
 
 const MANIFEST = {
   id: 'ettin-reranker',
@@ -42,7 +42,7 @@ const MANIFEST = {
   entrypoint: 'dist/index.js',
   author: 'community',
   homepage: 'https://github.com/example/x',
-  engines: { natively: '>=2.8.0' },
+  engines: { MeetFloo: '>=2.8.0' },
   permissions: ['filesystem.models'],
   models: [],
 };
@@ -79,7 +79,7 @@ test('an unbuilt extension is refused before anything is copied', () => {
   const res = stageFromDirectory(dir, { rootOverride: root });
   assert.equal(res.ok, false);
   // Otherwise it installs cleanly and then fails to start with a
-  // module-not-found error that reads like a Natively bug.
+  // module-not-found error that reads like a MeetFloo bug.
   assert.match(res.errors.join(' '), /entrypoint .* does not exist/);
 });
 
@@ -119,7 +119,7 @@ test('node_modules IS copied, because the entrypoint needs it at runtime', () =>
     'a broken install is worse than a large one');
 });
 
-test('a native addon is reported, because an ABI mismatch reads as a Natively crash', () => {
+test('a native addon is reported, because an ABI mismatch reads as a MeetFloo crash', () => {
   const { dir } = makeSource();
   fs.mkdirSync(path.join(dir, 'node_modules', 'ort', 'bin'), { recursive: true });
   fs.writeFileSync(path.join(dir, 'node_modules', 'ort', 'bin', 'onnxruntime.node'), 'binary');
@@ -154,7 +154,7 @@ test('the registry returns metadata, and an unreachable one is not an error', as
   const payload = {
     version: 1,
     extensions: [
-      { id: 'ettin-reranker', repo: 'evinjohnn/natively-ettin-reranker', latestVersion: '1.0.0', apiVersion: '1', category: 'reranker', modelLicenses: ['Apache-2.0'] },
+      { id: 'ettin-reranker', repo: 'evinjohnn/MeetFloo-ettin-reranker', latestVersion: '1.0.0', apiVersion: '1', category: 'reranker', modelLicenses: ['Apache-2.0'] },
       { id: 'broken' },  // no repo — dropped
     ],
   };
@@ -163,7 +163,7 @@ test('the registry returns metadata, and an unreachable one is not an error', as
   }));
   assert.equal(ok.ok, true);
   assert.equal(ok.entries.length, 1);
-  assert.equal(ok.entries[0].repo, 'evinjohnn/natively-ettin-reranker');
+  assert.equal(ok.entries[0].repo, 'evinjohnn/MeetFloo-ettin-reranker');
   // Nothing resembling a payload URL or code is carried across this boundary.
   assert.deepEqual(
     Object.keys(ok.entries[0]).sort(),
@@ -215,13 +215,13 @@ test('attaching an extension source does not bypass the flag', () => {
   const source = {
     list: () => [{ id: 'ettin-reranker', enabled: true, manifest: { type: 'reranker' } }],
     running: () => [],
-    load: async () => {},
+    load: async () => { },
     rerank: async () => null,
   };
-  const off = new RerankerRegistry({ isEnabled: () => false, source, logger: { warn: () => {} } });
+  const off = new RerankerRegistry({ isEnabled: () => false, source, logger: { warn: () => { } } });
   assert.equal(off.resolvePort(), null, 'the flag alone still gates it');
 
-  const on = new RerankerRegistry({ isEnabled: () => true, source, logger: { warn: () => {} } });
+  const on = new RerankerRegistry({ isEnabled: () => true, source, logger: { warn: () => { } } });
   assert.ok(on.resolvePort(), 'both gates passed');
 });
 
@@ -234,7 +234,7 @@ test('two enabled rerankers still refuse rather than picking one', () => {
         { id: 'ettin-reranker', enabled: true, manifest: { type: 'reranker' } },
         { id: 'qwen3-reranker', enabled: true, manifest: { type: 'reranker' } },
       ],
-      running: () => [], load: async () => {}, rerank: async () => null,
+      running: () => [], load: async () => { }, rerank: async () => null,
     },
     logger: { warn: (m) => warnings.push(String(m)) },
   });

@@ -15,16 +15,16 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 // The persisted-opt-in block below writes through flag.js's settingsPath(),
-// which resolves NATIVELY_TEST_USERDATA → electron app.getPath('userData') →
+// which resolves MEETFLOO_TEST_USERDATA → electron app.getPath('userData') →
 // null. Under `node --test` there is no Electron, and under
 // `ELECTRON_RUN_AS_NODE=1 electron --test` the `app` object is absent too
 // (that mode is Node, not an Electron main process) — so writePersistedSetting
 // threw "no userData path available for the V3 opt-in" under BOTH runners.
 //
-// flag.js's own header names NATIVELY_TEST_USERDATA as the isolation variable
+// flag.js's own header names MEETFLOO_TEST_USERDATA as the isolation variable
 // "every harness here already sets"; this one did not. Set before the module is
 // imported so the very first settingsPath() call resolves. (2026-08-07)
-process.env.NATIVELY_TEST_USERDATA ??= fs.mkdtempSync(path.join(os.tmpdir(), 'v3-flag-'));
+process.env.MEETFLOO_TEST_USERDATA ??= fs.mkdtempSync(path.join(os.tmpdir(), 'v3-flag-'));
 
 const base = path.resolve(process.cwd(), 'dist-electron/electron/context-intelligence');
 const flagMod = await import(pathToFileURL(path.join(base, 'contracts/flag.js')).href);
@@ -48,7 +48,7 @@ describe('flag — must not vary by environment', () => {
     // deleted by it.
     const envs = [
       {}, { NODE_ENV: 'test' }, { NODE_ENV: 'development' }, { NODE_ENV: 'production' },
-      { NATIVELY_INTERNAL: '1' }, { NATIVELY_DEV: '1' }, { BENCHMARK_MODEL: 'gemini' },
+      { MEETFLOO_INTERNAL: '1' }, { MEETFLOO_DEV: '1' }, { BENCHMARK_MODEL: 'gemini' },
     ];
     for (const env of envs) {
       assert.equal(isContextIntelligenceV3Enabled({ env }), DEFAULT_ENABLED,
@@ -322,10 +322,10 @@ describe('the persisted opt-in', () => {
 
   test('an explicit env var still wins over the persisted choice, both ways', () => {
     writePersistedSetting(true);
-    assert.equal(isContextIntelligenceV3Enabled({ env: { NATIVELY_CONTEXT_INTELLIGENCE_V3: '0' } }), false,
+    assert.equal(isContextIntelligenceV3Enabled({ env: { MEETFLOO_CONTEXT_INTELLIGENCE_V3: '0' } }), false,
       'an operator must be able to force it off without touching user state');
     writePersistedSetting(false);
-    assert.equal(isContextIntelligenceV3Enabled({ env: { NATIVELY_CONTEXT_INTELLIGENCE_V3: '1' } }), true);
+    assert.equal(isContextIntelligenceV3Enabled({ env: { MEETFLOO_CONTEXT_INTELLIGENCE_V3: '1' } }), true);
     writePersistedSetting(null);
   });
 

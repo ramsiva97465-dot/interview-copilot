@@ -33,7 +33,7 @@ function downloadVerified(url, dest, expectedSha256, expectedBytes) {
     return new Promise((resolve, reject) => {
         const tmp = dest + '.part';
         const get = (u, redirects) => {
-            https.get(u, { headers: { 'User-Agent': 'natively-download-models' } }, (res) => {
+            https.get(u, { headers: { 'User-Agent': 'MeetFloo-download-models' } }, (res) => {
                 if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location && redirects < 5) {
                     res.resume();
                     return get(new URL(res.headers.location, u).toString(), redirects + 1);
@@ -102,7 +102,7 @@ function verifyModels() {
 async function downloadModels() {
     const { pipeline, env } = await import('@huggingface/transformers');
     const modelsDir = path.join(__dirname, '../resources/models');
-    
+
     // Ensure the directory exists
     if (!fs.existsSync(modelsDir)) {
         fs.mkdirSync(modelsDir, { recursive: true });
@@ -110,7 +110,7 @@ async function downloadModels() {
 
     // Let Transformers.js handle the download but specify the local directory cache
     env.cacheDir = modelsDir;
-    
+
     try {
         // dtype MUST be explicit on transformers.js v3 (we ship 3.8.1). v2 defaulted to
         // the quantized variant and honored `quantized: true`; v3 ignores that flag and
@@ -129,7 +129,7 @@ async function downloadModels() {
 
         // 2. (removed 2026-09-05) Xenova/mobilebert-uncased-mnli, the zero-shot
         //    intent classifier. Its output never reached the dispatched prompt
-        //    on the default V3 path; see docs/natively-router-final-answer-2026-09-05.md.
+        //    on the default V3 path; see docs/MeetFloo-router-final-answer-2026-09-05.md.
 
         // 3. Cross-encoder reranker — ms-marco-MiniLM-L-6-v2 (q8, ~24MB).
         //

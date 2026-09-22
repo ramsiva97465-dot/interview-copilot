@@ -47,7 +47,7 @@ const { LLMHelper } = require(dist('LLMHelper.js'));
 // CredentialsManager is anchored on globalThis (one instance across the 22
 // bundles that inline it), so seeding that slot is how the shipped read path is
 // exercised without a real credential store.
-const CRED_SLOT = '__nativelyCredentialsManagerV1__';
+const CRED_SLOT = '__MeetFlooCredentialsManagerV1__';
 let credBefore;
 const setDisabled = (list) => {
   globalThis[CRED_SLOT] = { getDisabledProviders: () => list };
@@ -76,7 +76,7 @@ describe('the store id space and the router id space are reconciled', () => {
   test('every provider the router can select has a family mapping', () => {
     const routed = routeLLMProviders({
       capability: 'chat',
-      availability: { hasNatively: true, hasGroq: true, hasCodex: true, hasGemini: true, hasOpenAI: true, hasClaude: true, hasDeepseek: true, hasOllama: true },
+      availability: { hasMeetFloo: true, hasGroq: true, hasCodex: true, hasGemini: true, hasOpenAI: true, hasClaude: true, hasDeepseek: true, hasOllama: true },
     }).map((a) => a.provider);
     const mapped = new Set(Object.values(DISABLED_PROVIDER_FAMILY_MAP).flat());
     for (const p of routed) {

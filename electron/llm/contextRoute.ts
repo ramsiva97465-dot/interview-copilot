@@ -79,8 +79,8 @@ export const buildContextRoute = (plan: AnswerPlan): ContextRoute => {
       return { layer, selected: true, reason: 'document_grounded_custom_mode_primary_source', tokenBudget: LAYER_BUDGET[layer] ?? 1200 };
     }
     if (documentGroundedCustomModeActive
-        && (layer === 'resume' || layer === 'jd' || layer === 'negotiation' || layer === 'ai_persona')
-        && !required.has(layer)) {
+      && (layer === 'resume' || layer === 'jd' || layer === 'negotiation' || layer === 'ai_persona')
+      && !required.has(layer)) {
       return { layer, selected: false, reason: 'suppressed_by_document_grounded_custom_mode', tokenBudget: 0 };
     }
     if (forbidden.has(layer)) {
@@ -111,7 +111,7 @@ export const isLayerAllowed = (plan: AnswerPlan, layer: ContextLayer): boolean =
   if (plan.documentGroundedCustomModeActive === true) {
     if (layer === 'reference_files') return true;
     if ((layer === 'resume' || layer === 'jd' || layer === 'negotiation' || layer === 'ai_persona')
-        && !plan.requiredContextLayers.includes(layer)) return false;
+      && !plan.requiredContextLayers.includes(layer)) return false;
   }
   // RC3 fix (Phase 6 Slice 2, context-rebuild, 2026-07-25): `prior_assistant_responses`
   // flips to FAIL-CLOSED specifically — not a blanket flip across every layer
@@ -152,7 +152,7 @@ export const summarizeContextRoute = (route: ContextRoute): Record<string, unkno
  * replacing `assertNoAuthorityContradiction` (deleted Slice 0, A6— see
  * electron/intelligence/context-os/integration.ts's removal note). No-ops
  * unless verification mode is explicitly enabled
- * (`NATIVELY_VERIFICATION_MODE=1`), mirroring
+ * (`MEETFLOO_VERIFICATION_MODE=1`), mirroring
  * `assertVerificationFlagsOrThrow`'s exact opt-in convention
  * (intelligenceFlags.ts) — this NEVER affects a normal user boot, a
  * packaged build, or an ordinary dev session. When verification mode IS on,
@@ -179,7 +179,7 @@ export function assertLayerUsageAllowedOrThrow(plan: AnswerPlan, layer: ContextL
       + (context ? ` (${context})` : '')
       + ' but isLayerAllowed forbids it for this answer type. This is the required Slice 4 CI'
       + ' assertion (docs/context-rebuild/05_MIGRATION_PLAN.md) catching a real retrieval/injection'
-      + ' bug — set NATIVELY_VERIFICATION_MODE=0 to run without this check while investigating.',
+      + ' bug — set MEETFLOO_VERIFICATION_MODE=0 to run without this check while investigating.',
     );
   }
 }

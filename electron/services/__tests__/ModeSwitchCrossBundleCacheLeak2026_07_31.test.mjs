@@ -53,7 +53,7 @@ function loadModesBundle() {
 describe('mode switch invalidates the active-mode snapshot across bundles (2026-07-31)', () => {
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mode-xbundle-'));
-    process.env.NATIVELY_TEST_USERDATA = tmpDir;
+    process.env.MEETFLOO_TEST_USERDATA = tmpDir;
     delete require.cache[DB_PATH];
     dbMgr = require(DB_PATH).DatabaseManager.getInstance();
   });
@@ -62,8 +62,8 @@ describe('mode switch invalidates the active-mode snapshot across bundles (2026-
     try { dbMgr?.close?.(); } catch { /* noop */ }
     delete require.cache[DB_PATH];
     delete require.cache[MODES_PATH];
-    delete globalThis.__nativelyActiveModeInfoCacheV1__;
-    delete process.env.NATIVELY_TEST_USERDATA;
+    delete globalThis.__MeetFlooActiveModeInfoCacheV1__;
+    delete process.env.MEETFLOO_TEST_USERDATA;
     try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { /* noop */ }
   });
 
@@ -134,7 +134,7 @@ describe('mode switch invalidates the active-mode snapshot across bundles (2026-
   test('the snapshot lives in one process-wide slot, not on the instance', () => {
     if (!dbMgr.isAvailable()) return;
     const A = loadModesBundle();
-    assert.equal(A.ACTIVE_MODE_CACHE_KEY, '__nativelyActiveModeInfoCacheV1__');
+    assert.equal(A.ACTIVE_MODE_CACHE_KEY, '__MeetFlooActiveModeInfoCacheV1__');
     const mode = A.ModesManager.getInstance().createMode({ name: 'General', templateType: 'general' });
     A.ModesManager.getInstance().setActiveMode(mode.id);
     A.ModesManager.getInstance().getActiveModeInfo();

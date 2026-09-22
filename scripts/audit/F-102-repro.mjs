@@ -37,7 +37,7 @@ try {
 
 const app = await electron.launch({
   args: ['dist-electron/electron/main.js'],
-  env: { ...process.env, NODE_ENV: 'production', NATIVELY_DEV_BYPASS_SCREEN_TCC: '1' },
+  env: { ...process.env, NODE_ENV: 'production', MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1' },
   timeout: 60_000,
 });
 await app.firstWindow({ timeout: 30_000 }).catch(() => null);
@@ -70,8 +70,8 @@ const result = await app.evaluate(async () => {
 
   const sttStub = () => ({
     write: () => { st.sttWrites += 1; },
-    setSampleRate() {}, setAudioChannelCount() {}, notifySpeechEnded() {},
-    stop() {}, removeAllListeners() {}, start() {},
+    setSampleRate() { }, setAudioChannelCount() { }, notifySpeechEnded() { },
+    stop() { }, removeAllListeners() { }, start() { },
   });
 
   s.isMeetingActive = true;
@@ -84,7 +84,7 @@ const result = await app.evaluate(async () => {
   s._micRecoveryAttempts = 3;
   s.googleSTT = sttStub();
   s.googleSTT_User = sttStub();
-  s.systemAudioCapture = { __stub: true, destroy: async () => {} };
+  s.systemAudioCapture = { __stub: true, destroy: async () => { } };
   s.microphoneCapture = null;
 
   // Fire both rebuild flows in ONE synchronous turn.

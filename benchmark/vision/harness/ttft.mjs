@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(HERE, '../../..')
-const API = path.join(ROOT, 'natively-api')
+const API = path.join(ROOT, 'MeetFloo-api')
 const { buildDeepSeekBody, DEEPSEEK_CHAT_URL, parseDeepSeekStreamLine } = await import(path.join(API, 'lib/deepseekProvider.js'))
 const { thinkingConfigForModel, GEMINI_FLASH_MODEL } = await import(path.join(API, 'lib/flashModelPicker.js'))
 const { normalizeImages } = await import(path.join(API, 'lib/imageNormalizer.js'))
@@ -30,7 +30,7 @@ const readEnv = (p) => Object.fromEntries(fs.readFileSync(p, 'utf8').split('\n')
 const DS_KEY = readEnv(path.join(API, '.env')).DEEPSEEK_API_KEY
 const GEM_KEY = readEnv(path.join(ROOT, '.env')).GEMINI_API_KEY
 
-const SYSTEM = 'You are Natively, a screen-analysis assistant. Answer from the screenshot.'
+const SYSTEM = 'You are MeetFloo, a screen-analysis assistant. Answer from the screenshot.'
 // Two shapes of question: the short lookup a user fires mid-call, and the long
 // explanation where streaming matters most.
 const PROMPTS = {

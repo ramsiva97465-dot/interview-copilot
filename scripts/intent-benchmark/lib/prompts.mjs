@@ -3,7 +3,7 @@
 // The generation prompt. Its single hardest job is STT REALISM.
 //
 // A cloud LLM asked for "transcript lines" reliably produces clean prose with
-// the capitals stripped. That is not what Natively's classifier sees. If the
+// the capitals stripped. That is not what MeetFloo's classifier sees. If the
 // corpus is clean prose in disguise, every candidate is scored on an input
 // distribution that does not exist in production, and the winner is whichever
 // model likes tidy text most. No amount of careful labelling repairs that, so
@@ -14,7 +14,7 @@ const STT_RULES = `
 HOW THE \`input\` FIELD MUST LOOK
 
 \`input\` is raw output from a streaming speech-to-text model listening to a live
-call. It is NOT written text. Natively's local models (Parakeet CTC, Whisper,
+call. It is NOT written text. MeetFloo's local models (Parakeet CTC, Whisper,
 Moonshine) emit no punctuation and no capitalisation at all.
 
 Every \`input\` MUST obey all of these:

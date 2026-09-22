@@ -35,7 +35,7 @@ async function loadRetriever() {
 function mockDeps() {
   const mockDb = {
     prepare: mock.fn(() => ({ get: mock.fn(() => null), all: mock.fn(() => []), run: mock.fn() })),
-    exec: mock.fn(() => {}),
+    exec: mock.fn(() => { }),
     transaction: mock.fn((fn) => fn),
   };
   const mockVectorStore = { searchSimilar: mock.fn(() => Promise.resolve([])), hasEmbeddings: mock.fn(() => false) };
@@ -49,8 +49,8 @@ function mockDeps() {
   return { mockDb, mockVectorStore, mockEmbeddingPipeline };
 }
 
-const RERANK = 'NATIVELY_RAG_LOCAL_RERANK';
-const SPEC = 'NATIVELY_RAG_SPECULATIVE_RERANK';
+const RERANK = 'MEETFLOO_RAG_LOCAL_RERANK';
+const SPEC = 'MEETFLOO_RAG_SPECULATIVE_RERANK';
 
 function multiChunkFile() {
   // Exceed the production chunk window so the reranker has multiple candidates.
@@ -123,7 +123,7 @@ describe('Phase 3: live-path speculative rerank', () => {
     const { ModeHybridRetriever } = await loadRetriever();
     const { mockDb, mockVectorStore, mockEmbeddingPipeline } = mockDeps();
     const retriever = new ModeHybridRetriever(mockDb, mockVectorStore, mockEmbeddingPipeline);
-    retriever.__setRerankerForTests({ rerank: async () => new Promise(() => {}) });
+    retriever.__setRerankerForTests({ rerank: async () => new Promise(() => { }) });
 
     const result = await Promise.race([
       retriever.retrieve({

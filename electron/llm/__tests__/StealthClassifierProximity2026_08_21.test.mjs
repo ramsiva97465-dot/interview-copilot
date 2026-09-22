@@ -27,10 +27,10 @@ const { isStealthEvasionQuestion } = await import(dist('AnswerPlanner.js'));
 describe('RC-1a: cross-sentence pairs must NOT trip branch (b)', () => {
   test('the live session-C pair — "the call" (opener) + "noticeably" (perf question, ~700 chars later)', () => {
     const blob = "Hey Evin. Good to meet you. How's your day going? Alright, great. "
-      + 'I was looking at your resume before the call, and natively caught my attention. '
+      + 'I was looking at your resume before the call, and MeetFloo caught my attention. '
       + 'Tell me about it: what exactly does the product do? '
       + 'Okay. If I were to clone this repository today and ask you to explain the architecture to me, where would you start? '
-      + "Let's say we are running natively for a hour-long interview. The first 10 questions feel completely fine. "
+      + "Let's say we are running MeetFloo for a hour-long interview. The first 10 questions feel completely fine. "
       + 'But after 50 or 60 questions, the application starts becoming noticeably slower. '
       + "The UI isn't necessarily frozen, but everything feels less responsive. Where would you start looking?";
     assert.equal(isStealthEvasionQuestion(blob), false,
@@ -57,7 +57,7 @@ describe('RC-1a: genuine stealth asks still trip (no lost coverage)', () => {
     'Will it be visible in the screen share?',
     'If I share my screen on the call, will they detect the tool?',
     // branch (a): explicit evasion intent — stays whole-string.
-    'How do I make Natively undetectable in an interview?',
+    'How do I make MeetFloo undetectable in an interview?',
     'Keep the overlay hidden so the proctor cannot see it.',
     'How do I cheat without being caught?',
     'How do I use it without them knowing?',

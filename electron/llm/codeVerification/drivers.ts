@@ -8,16 +8,16 @@
 // introduce bugs into the thing under test.
 //
 // Design choices:
-//   - Args come via an env var (NATIVELY_TC), NOT interpolated into source, so a
+//   - Args come via an env var (MEETFLOO_TC), NOT interpolated into source, so a
 //     test input can never break out into code (no injection, no quoting bugs).
 //   - The result is printed between RESULT_SENTINEL markers so arbitrary user
 //     prints (debug output) don't confuse the judge.
 
 import type { TestCase, VerifyLanguage } from './types';
 
-export const RESULT_SENTINEL_START = '__NATIVELY_RESULT_START__';
-export const RESULT_SENTINEL_END = '__NATIVELY_RESULT_END__';
-export const TC_ENV = 'NATIVELY_TC';
+export const RESULT_SENTINEL_START = '__MEETFLOO_RESULT_START__';
+export const RESULT_SENTINEL_END = '__MEETFLOO_RESULT_END__';
+export const TC_ENV = 'MEETFLOO_TC';
 
 export interface Driver {
   /** Full source to write to a temp file and execute. */
@@ -63,7 +63,7 @@ export const isLocallyRunnable = (lang: VerifyLanguage): boolean => LOCAL_LANGUA
 
 /**
  * Build a driver that runs `entry` against the SINGLE case whose `input` array
- * is supplied to the process via the NATIVELY_TC env var (JSON-encoded). One
+ * is supplied to the process via the MEETFLOO_TC env var (JSON-encoded). One
  * process per case keeps a crashing/looping case from poisoning the others and
  * makes the timeout per-case.
  */
@@ -174,7 +174,7 @@ def __nat_encode(v, hint):
     if hint == "tree": return __nat_from_tree(v)
     return v
 
-def __natively_main():
+def __MeetFloo_main():
     raw = os.environ.get(${JSON.stringify(TC_ENV)}, "[]")
     args = json.loads(raw)
     arg_types = __HINTS.get("argTypes", [])
@@ -197,7 +197,7 @@ def __natively_main():
     sys.stdout.write(${JSON.stringify(RESULT_SENTINEL_START)} + json.dumps(result, allow_nan=False) + ${JSON.stringify(RESULT_SENTINEL_END)})
 
 if __name__ == "__main__":
-    __natively_main()
+    __MeetFloo_main()
 `;
 
 // ── JavaScript ────────────────────────────────────────────────────────────────
@@ -226,7 +226,7 @@ function __natFromTree(root){ const out=[]; const q=root?[root]:[]; while(q.leng
 function __natDecode(v,h){ return h==='list'?__natToList(v):h==='tree'?__natToTree(v):v; }
 function __natEncode(v,h){ return h==='list'?__natFromList(v):h==='tree'?__natFromTree(v):v; }
 
-(function __nativelyMain() {
+(function __MeetFlooMain() {
   let args = JSON.parse(process.env[${JSON.stringify(TC_ENV)}] || '[]');
   const at = __HINTS.argTypes || [];
   args = args.map((a,i) => __natDecode(a, at[i] || 'value'));

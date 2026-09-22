@@ -9,7 +9,7 @@
 // connection timer strips ALL listeners and then close()s — the emit finds
 // no listener and Node promotes it to uncaughtException. The same
 // strip-then-close shape exists in the 5s session timer, _closeWs,
-// ElevenLabs stop(), and NativelyProSTT.closeUpstream() (main's 21c4e22f
+// ElevenLabs stop(), and MeetFlooProSTT.closeUpstream() (main's 21c4e22f
 // fixed the last one; this branch predates it — see the merge advisory).
 //
 // Harness: REAL ws module, URL rewritten to a local TCP server that accepts
@@ -69,7 +69,7 @@ process.on('uncaughtException', (err) => {
 
 const { OpenAIStreamingSTT } = await import(pathToFileURL(path.join(distRoot, 'OpenAIStreamingSTT.js')).href);
 const stt = new OpenAIStreamingSTT('sk-audit-fake-key');
-stt.on('error', () => {}); // instance-level errors are expected and fine
+stt.on('error', () => { }); // instance-level errors are expected and fine
 stt.start();
 
 // The 10s connection timer must fire while the socket is still CONNECTING.

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Natively Deep Cleaner / Uninstaller for macOS
+# MeetFloo Deep Cleaner / Uninstaller for macOS
 # This script completely removes all cached data, local databases, models,
-# preferences, and Keychain credentials from Natively and its older versions.
+# preferences, and Keychain credentials from MeetFloo and its older versions.
 #
 # WARNING: This will permanently delete your settings, local database, and downloaded models.
 
@@ -16,7 +16,7 @@ BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 echo -e "${RED}${BOLD}=====================================================${NC}"
-echo -e "${RED}${BOLD}       Natively Deep Cleaner & Uninstaller           ${NC}"
+echo -e "${RED}${BOLD}       MeetFloo Deep Cleaner & Uninstaller           ${NC}"
 echo -e "${RED}${BOLD}=====================================================${NC}"
 echo -e "${YELLOW}This script will wipe all settings, databases, models, and credentials.${NC}"
 echo ""
@@ -39,24 +39,24 @@ remove_dir() {
     fi
 }
 
-# 1. Kill Natively processes if running
-echo -e "${CYAN}Stopping Natively if running...${NC}"
-killall Natively 2>/dev/null || true
-killall natively 2>/dev/null || true
+# 1. Kill MeetFloo processes if running
+echo -e "${CYAN}Stopping MeetFloo if running...${NC}"
+killall MeetFloo 2>/dev/null || true
+killall MeetFloo 2>/dev/null || true
 sleep 1
 
 # 2. Remove Application Support folders (current and legacy versions)
 echo -e "\n${CYAN}1. Clearing Application Support folders...${NC}"
-remove_dir "~/Library/Application Support/Natively"
-remove_dir "~/Library/Application Support/natively"
+remove_dir "~/Library/Application Support/MeetFloo"
+remove_dir "~/Library/Application Support/MeetFloo"
 remove_dir "~/Library/Application Support/answercue"
-remove_dir "~/Library/Application Support/Electron/natively.db"
-remove_dir "~/Library/Application Support/Electron/natively-preferences-secure.json"
+remove_dir "~/Library/Application Support/Electron/MeetFloo.db"
+remove_dir "~/Library/Application Support/Electron/MeetFloo-preferences-secure.json"
 
 # 3. Remove Cache directories
 echo -e "\n${CYAN}2. Clearing cache files...${NC}"
-remove_dir "~/Library/Caches/natively-updater"
-remove_dir "~/Library/Caches/natively"
+remove_dir "~/Library/Caches/MeetFloo-updater"
+remove_dir "~/Library/Caches/MeetFloo"
 remove_dir "~/Library/Caches/com.electron.meeting-notes"
 
 # 4. Remove Plist Preferences & Saved App States
@@ -76,9 +76,9 @@ delete_keychain_item() {
 }
 
 delete_keychain_item "Electron Safe Storage" "Electron Key"
-delete_keychain_item "natively Safe Storage" "natively Key"
-delete_keychain_item "Natively Safe Storage" "Natively Key"
-delete_keychain_item "Natively Safe Storage" "Electron Key"
+delete_keychain_item "MeetFloo Safe Storage" "MeetFloo Key"
+delete_keychain_item "MeetFloo Safe Storage" "MeetFloo Key"
+delete_keychain_item "MeetFloo Safe Storage" "Electron Key"
 
 # Reset macOS defaults cache so plist removal registers
 defaults delete com.electron.meeting-notes >/dev/null 2>&1 || true

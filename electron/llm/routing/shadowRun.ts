@@ -24,7 +24,7 @@ import { RouterModel } from './RouterModel';
 import { toLegacyIntent } from './legacyShim';
 import type { LegacyIntent } from './legacyShim';
 
-export const SHADOW_ENV_KEY = 'NATIVELY_ROUTER_SHADOW';
+export const SHADOW_ENV_KEY = 'MEETFLOO_ROUTER_SHADOW';
 
 /**
  * Shadow logging is separate from the router flag, and both default off.

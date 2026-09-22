@@ -1,7 +1,7 @@
 import os
 import json
 
-out_dir = '/Users/evin/natively-cluely-ai-assistant/chargeback_evidence/imsbabu89_yearly_july_2026'
+out_dir = '/Users/evin/MeetFloo-cluely-ai-assistant/chargeback_evidence/imsbabu89_yearly_july_2026'
 master_file = os.path.join(out_dir, 'MASTER_DISPUTE_INVESTIGATION_REPORT_BABU.md')
 
 def load_file(filename):
@@ -21,7 +21,7 @@ master_content = f"""# Master Forensic Payment-Dispute Investigation Report & Co
 **Full Customer Email**: `imsbabu89@gmail.com`  
 **Customer ID**: `cus_0Nja3g2Xx0AYPzMOoMDck`  
 **Business / Brand ID**: `bus_0NazdQMiJL8kBMLSp356C`  
-**Disputed Product**: Natively pro (yearly) (`pdt_0NcM4QBwy0CDcPV9CXaNP`)  
+**Disputed Product**: MeetFloo pro (yearly) (`pdt_0NcM4QBwy0CDcPV9CXaNP`)  
 **Original List Price**: $30.00 USD  
 **Discount Applied**: `INSIDER20` (`dsc_0Nflf8XdmFVgimHsHjl3b`) — 20% OFF (-$6.00 USD)  
 **Charged / Settlement Amount**: $24.00 USD (Tax: $0.00 USD)  
@@ -40,21 +40,21 @@ master_content = f"""# Master Forensic Payment-Dispute Investigation Report & Co
 ## 1. Executive Summary & Core Investigation Findings
 
 1. **Payment & Price Verification**:  
-   On July 20, 2026 at 08:11:39 UTC (13:41:39 IST), customer Babu authorized the purchase of **Natively pro (yearly)** via Mastercard ending in `9706`. The cart price of $30.00 USD was discounted by 20% (-$6.00 USD) using promo code `INSIDER20` (`dsc_0Nflf8XdmFVgimHsHjl3b`), resulting in a net charge of **$24.00 USD**. Tax was $0.00 USD. Payment status: `succeeded`.
+   On July 20, 2026 at 08:11:39 UTC (13:41:39 IST), customer Babu authorized the purchase of **MeetFloo pro (yearly)** via Mastercard ending in `9706`. The cart price of $30.00 USD was discounted by 20% (-$6.00 USD) using promo code `INSIDER20` (`dsc_0Nflf8XdmFVgimHsHjl3b`), resulting in a net charge of **$24.00 USD**. Tax was $0.00 USD. Payment status: `succeeded`.
 
 2. **Automated Entitlement Delivery**:  
-   Within **33 seconds** of payment confirmation (July 20, 2026 at 08:12:13 UTC), Natively's backend system automatically provisioned yearly Pro license `be324788-dda5-41e0-8a23-d634b5dc7260` for `imsbabu89@gmail.com` linked directly to subscription `sub_0Nja3g32BDjHkOSqf8POR`. The entitlement was created with `active: true` in Supabase `pro_licenses` and remained accessible.
+   Within **33 seconds** of payment confirmation (July 20, 2026 at 08:12:13 UTC), MeetFloo's backend system automatically provisioned yearly Pro license `be324788-dda5-41e0-8a23-d634b5dc7260` for `imsbabu89@gmail.com` linked directly to subscription `sub_0Nja3g32BDjHkOSqf8POR`. The entitlement was created with `active: true` in Supabase `pro_licenses` and remained accessible.
 
 3. **Final Sale & Non-Refundable Discount Policy**:  
-   Under Section 1.5 of Natively's Refund Policy effective April 25, 2026:  
+   Under Section 1.5 of MeetFloo's Refund Policy effective April 25, 2026:  
    *"Anything bought with a coupon (including INSIDER20), voucher, referral credit, or limited-time offer is non-refundable."*  
    Because coupon `INSIDER20` was redeemed for a 20% discount, the transaction was **final sale** at checkout. Furthermore, Sections 1.2 and 1.4 stipulate that yearly Pro subscriptions are sold on a non-refundable basis.
 
 4. **Required Checkout Terms Acceptance**:  
-   Checkout completion at `https://natively.software/pro` required acceptance of the published and linked Terms & Conditions (`https://natively.software/terms`) and Refund Policy (`https://natively.software/refundpolicy`).
+   Checkout completion at `https://MeetFloo.software/pro` required acceptance of the published and linked Terms & Conditions (`https://MeetFloo.software/terms`) and Refund Policy (`https://MeetFloo.software/refundpolicy`).
 
 5. **Zero Pre-Dispute Customer Support Contact**:  
-   An exhaustive audit of merchant support channels (`natively.contact@gmail.com`), database tables (`pro_licenses`, `api_keys`, `processed_webhooks`, `sent_marketing_emails`, `reviews`, `review_prompt_state`, `free_trials`), and Dodo transaction notes returned **zero support tickets, zero defect reports, and zero refund requests** prior to chargeback initiation.
+   An exhaustive audit of merchant support channels (`MeetFloo.contact@gmail.com`), database tables (`pro_licenses`, `api_keys`, `processed_webhooks`, `sent_marketing_emails`, `reviews`, `review_prompt_state`, `free_trials`), and Dodo transaction notes returned **zero support tickets, zero defect reports, and zero refund requests** prior to chargeback initiation.
 
 6. **Automatic Gateway Subscription Cancellation**:  
    Subscription `sub_0Nja3g32BDjHkOSqf8POR` was automatically updated to `cancelled` by Dodo Payments on July 24, 2026 at 05:01:26 UTC upon receipt of the dispute event (`dp_nQNEPcEZHFlvp2XTxgw9`). This was an automated system response to the chargeback, not a customer-requested cancellation prior to disputing.
@@ -99,8 +99,8 @@ master_content = f"""# Master Forensic Payment-Dispute Investigation Report & Co
 | 2026-07-20 08:11:39 UTC | 2026-07-20 13:41:39 IST | Dodo Payments | Checkout completed ($24.00 USD charged with INSIDER20) | Succeeded | `pay_0Nja3g2n3ZLDEcWesNJYd` |
 | 2026-07-20 08:11:39 UTC | 2026-07-20 13:41:39 IST | Dodo Payments | Yearly subscription created | Active | `sub_0Nja3g32BDjHkOSqf8POR` |
 | 2026-07-20 08:11:39 UTC | 2026-07-20 13:41:39 IST | Dodo Payments | Official invoice generated | Generated | `inv_0Nja3g2n3ZLDEcWx1JylW` |
-| 2026-07-20 08:12:13 UTC | 2026-07-20 13:42:13 IST | Natively Backend | Pro yearly entitlement issued (33s post-payment) | Active (`true`) | Supabase `pro_licenses` (`be324788...`) |
-| 2026-07-20 to 2026-07-24 | 2026-07-20 to 2026-07-24 | Natively Backend | Pro entitlement access available | Available | Supabase DB `pro_licenses` |
+| 2026-07-20 08:12:13 UTC | 2026-07-20 13:42:13 IST | MeetFloo Backend | Pro yearly entitlement issued (33s post-payment) | Active (`true`) | Supabase `pro_licenses` (`be324788...`) |
+| 2026-07-20 to 2026-07-24 | 2026-07-20 to 2026-07-24 | MeetFloo Backend | Pro entitlement access available | Available | Supabase DB `pro_licenses` |
 | 2026-07-24 05:01:25 UTC | 2026-07-24 10:31:25 IST | Card Network | Dispute opened (`product_unacceptable`) | Dispute Opened | Dodo Payments (`dp_nQNEPcEZHFlvp2XTxgw9`) |
 | 2026-07-24 05:01:26 UTC | 2026-07-24 10:31:26 IST | Dodo Payments | Subscription auto-cancelled due to dispute | Cancelled | Dodo Gateway (`sub_0Nja3g32...`) |
 | 2026-08-03 00:00:00 UTC | 2026-08-03 05:30:00 IST | Merchant Audit | Evidence package compiled for review | Complete | Audit System |

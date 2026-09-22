@@ -1,10 +1,10 @@
-# Natively summary-model benchmark — DeepSeek V4.1 Flash vs GPT-5.6 Luna
+# MeetFloo summary-model benchmark — DeepSeek V4.1 Flash vs GPT-5.6 Luna
 
-Benchmark id `natively-summary-models-2026-09-17` · generated 2026-09-16T21:00:02.673Z · 185 summary runs used (13 excluded as infra failures, 0 retries used) · 11 conversations × 6 configurations × 3 runs
+Benchmark id `MeetFloo-summary-models-2026-09-17` · generated 2026-09-16T21:00:02.673Z · 185 summary runs used (13 excluded as infra failures, 0 retries used) · 11 conversations × 6 configurations × 3 runs
 
 # Executive Summary
 
-**No GPT-5.6 Luna configuration should replace DeepSeek V4.1 Flash for Natively summaries.** On the real Natively pipeline, every Luna effort level fails the stated requirement of being "significantly cheaper". Each is also more than twice as slow, and each non-max level retains measurably fewer facts.
+**No GPT-5.6 Luna configuration should replace DeepSeek V4.1 Flash for MeetFloo summaries.** On the real MeetFloo pipeline, every Luna effort level fails the stated requirement of being "significantly cheaper". Each is also more than twice as slow, and each non-max level retains measurably fewer facts.
 
 | | Current: DS V4.1 Flash, thinking off | Luna none | Luna low | Luna medium | Luna max |
 |---|---|---|---|---|---|
@@ -27,13 +27,13 @@ Benchmark id `natively-summary-models-2026-09-17` · generated 2026-09-16T21:00:
 
 See "Requirements Screening" and "Failure Analysis" for detail. The overall 1-10 judge score is **not** a useful discriminator here: every configuration scores 4.5-5.2, dominated by model-independent duplication, "Speaker N" labels and superseded values. Use fact retention for decisions.
 
-# Current Natively Configuration
+# Current MeetFloo Configuration
 
-**Natively currently generates post-meeting summaries with DeepSeek V4.1 Flash with thinking explicitly DISABLED.** The request contains `thinking: {"type": "disabled"}`, so DeepSeek's thinking-by-default does not apply. Natively does not use any reasoning today.
+**MeetFloo currently generates post-meeting summaries with DeepSeek V4.1 Flash with thinking explicitly DISABLED.** The request contains `thinking: {"type": "disabled"}`, so DeepSeek's thinking-by-default does not apply. MeetFloo does not use any reasoning today.
 
 | Question | Answer | Evidence |
 |---|---|---|
-| Model | `deepseek-v4-flash`. DeepSeek now serves this legacy id with **DeepSeek-V4.1-Flash** and responds with `"model": "deepseek-flash"` | `natively-api/lib/deepseekProvider.js:43` (`DEEPSEEK_MODEL`); DeepSeek pricing page (checked 2026-09-17): "`deepseek-flash` → DeepSeek-V4.1-Flash; legacy names accepted: `deepseek-v4-flash`". Every benchmark response for this model reported `deepseek-flash`. |
+| Model | `deepseek-v4-flash`. DeepSeek now serves this legacy id with **DeepSeek-V4.1-Flash** and responds with `"model": "deepseek-flash"` | `MeetFloo-api/lib/deepseekProvider.js:43` (`DEEPSEEK_MODEL`); DeepSeek pricing page (checked 2026-09-17): "`deepseek-flash` → DeepSeek-V4.1-Flash; legacy names accepted: `deepseek-v4-flash`". Every benchmark response for this model reported `deepseek-flash`. |
 | Provider / endpoint | DeepSeek, `POST https://api.deepseek.com/chat/completions`, non-streaming | `deepseekProvider.js:48`, `server.js:4460` (`buildDeepSeekBody(..., { stream: false })`) |
 | Reasoning used? | **No.** Thinking is explicitly disabled on every request | `deepseekProvider.js:129` `thinking: { type: 'disabled' }`. The module header explains the choice (parity with Gemini's minimal thinking, and avoiding empty answers). |
 | If not explicit, what's the default? | It *is* explicit. For reference, DeepSeek's API default is thinking **enabled** (`thinking.type` default `enabled`; `reasoning_effort` default `high`) | DeepSeek chat-completion API reference. A live probe that dropped the `thinking` param returned `reasoning_tokens: 106` on a small prompt, while the production body returned 0. |
@@ -58,7 +58,7 @@ See "Requirements Screening" and "Failure Analysis" for detail. The overall 1-10
 
 **Client routing (Electron, `LLMHelper.generateMeetingSummary`, `electron/LLMHelper.ts:11602`).** The rungs are tried in order:
 1. The user's custom/cURL provider, if one is selected.
-2. **Natively API** (`POST {NATIVELY_API_URL}/v1/chat`, body `{messages:[{role:'user',content:'Context:\n'+context}], system, language:'auto', purpose?}`).
+2. **MeetFloo API** (`POST {MEETFLOO_API_URL}/v1/chat`, body `{messages:[{role:'user',content:'Context:\n'+context}], system, language:'auto', purpose?}`).
 3. Codex CLI.
 4. Antigravity.
 5. Groq.
@@ -67,9 +67,9 @@ See "Requirements Screening" and "Failure Analysis" for detail. The overall 1-10
 8. Gemini Pro ×5.
 9. Ollama.
 
-For a Natively-API user, rung 2 serves everything.
+For a MeetFloo-API user, rung 2 serves everything.
 
-**Server routing (natively-api `routeChat`, `server.js:4737`).**
+**Server routing (MeetFloo-api `routeChat`, `server.js:4737`).**
 - **Language.** `injectLanguagePrompt` prepends a `[LANGUAGE INSTRUCTION — HIGHEST PRIORITY]` block (language `auto`).
 - **Chunk extraction and chunk-JSON repair** (`purpose:'extraction'`) go **DeepSeek first only if system+messages ≤ 25,000 chars** (`EXTRACTION_DEEPSEEK_MAX_CHARS`, `server.js:2450`), with a 45s cap. Otherwise, or on failure, they go to Gemini `gemini-3.1-flash-lite` → `gemini-3.8-flash`, rotating keys.
 - **Polish, overview, follow-up and title** use the default DeepSeek-primary cascade (`deepseekIsDefaultPrimary`; these prompts are not "live interview" mode), with a **10s cap** (`DEEPSEEK_TTFT_CAP_MS`, applied to the whole non-streaming call). The fallback order is Gemini Flash → MiniMax-M3 → Gemini Pro.
@@ -99,7 +99,7 @@ Measured provider input tokens per summary (all calls, DeepSeek tokenizer, curre
 - **Long:** 5 conversations, 49-65 min.
 - **Very long:** 2 conversations, 90-99 min.
 
-**What the synthetic transcripts contain.** They use Natively's real channel model: mic = "Me", system audio diarized into "Speaker N", so names appear only when spoken. They include light STT artifacts. Each also deliberately plants:
+**What the synthetic transcripts contain.** They use MeetFloo's real channel model: mic = "Me", system audio diarized into "Speaker N", so names appear only when spoken. They include light STT artifacts. Each also deliberately plants:
 - important facts distributed across the whole call (≥25% of critical facts only in the final third)
 - 4-11 corrections per conversation, both explicit ("sorry, 140 not 120") and implicit (the discussion simply lands elsewhere)
 - similar names (Jon/Joan, Maya/Mia, Devin/Devon, two Alexes)
@@ -130,7 +130,7 @@ Measured provider input tokens per summary (all calls, DeepSeek tokenizer, curre
 | luna-low | gpt-5.6-luna | low | reasoning | OpenAI | POST api.openai.com/v1/responses |
 | luna-none | gpt-5.6-luna | none | none | OpenAI | POST api.openai.com/v1/responses |
 
-Only model and reasoning differ. Every configuration receives the identical production request built by natively-api (the same system prompt, including the language directive; the same `Context:\n…` user message; the same chunk boundaries). The provider-specific translations:
+Only model and reasoning differ. Every configuration receives the identical production request built by MeetFloo-api (the same system prompt, including the language directive; the same `Context:\n…` user message; the same chunk boundaries). The provider-specific translations:
 - **DeepSeek:** the production body is forwarded as-is. The thinking diagnostic removes the `thinking` field only.
 - **Luna:** messages → Responses `input`; `reasoning.effort` set; `max_tokens: 384000` → `max_output_tokens: 128000` (Luna's ceiling); `thinking` dropped because OpenAI has no such field; `store: false`. The Responses API is used because Chat Completions rejects `max` for this model.
 
@@ -146,7 +146,7 @@ Only model and reasoning differ. Every configuration receives the identical prod
 | Luna none | 33 | 33/33 | 33/33 | 32/33 | 1 | 0 |
 
 Checks the post-run checklist asked for, from `results/runs.jsonl` and the provider wire logs:
-- **Every run exists.** 11 conversations × 6 configs × 3 runs = 198 outputs, 0 crashes. **13 Luna max runs were excluded as infra failures.** The OpenAI account ran out of credits around 20:40 UTC (`429 You have no credits remaining`). The later natively-api breaker cool-down then routed the remaining calls away, as it would in production. These runs could not be retried because the account still has no credits. No other runs were excluded, and no retries were used.
+- **Every run exists.** 11 conversations × 6 configs × 3 runs = 198 outputs, 0 crashes. **13 Luna max runs were excluded as infra failures.** The OpenAI account ran out of credits around 20:40 UTC (`429 You have no credits remaining`). The later MeetFloo-api breaker cool-down then routed the remaining calls away, as it would in production. These runs could not be retried because the account still has no credits. No other runs were excluded, and no retries were used.
 - **Intended model on every call.**
   - Every DeepSeek response reported `model: deepseek-flash` (V4.1 Flash; the request sent the production id `deepseek-v4-flash`).
   - Every OpenAI response reported `gpt-5.6-luna`.
@@ -157,9 +157,9 @@ Checks the post-run checklist asked for, from `results/runs.jsonl` and the provi
   - The thinking diagnostic sent no `thinking` field and consumed 912,378 reasoning tokens across 33 runs.
 - **No silent provider fallback produced text.**
   - Server-side, every non-candidate AI host was blocked and logged.
-  - "Runs with blocked server fallback" (2 for current DS, 1 each for Luna medium/none) are all the same mechanism. A chunk returned invalid JSON; the repair payload exceeded natively-api's 25,000-char DeepSeek gate; production would have sent that repair to Gemini. The call was blocked, the chunk dropped, and the loss is counted against that model.
+  - "Runs with blocked server fallback" (2 for current DS, 1 each for Luna medium/none) are all the same mechanism. A chunk returned invalid JSON; the repair payload exceeded MeetFloo-api's 25,000-char DeepSeek gate; production would have sent that repair to Gemini. The call was blocked, the chunk dropped, and the loss is counted against that model.
   - The "No Electron fallback" misses (31/33, 32/33) are the same 4 events cascading to the client's fallback rungs, which were also blocked.
-- **No hidden reasoning stored.** The shim deletes DeepSeek `reasoning_content` before natively-api sees it, and extracts only `output_text` from OpenAI. Only token counts are kept.
+- **No hidden reasoning stored.** The shim deletes DeepSeek `reasoning_content` before MeetFloo-api sees it, and extracts only `output_text` from OpenAI. Only token counts are kept.
 - **No secrets in benchmark files.** 671 files were scanned against every value in both `.env` files (97 values, including each line of multi-line values): 0 matches. A separate key-shaped-pattern scan matched 5 times in 2 files (`outputs/ds-flash-thinking/SALES-DISC-L/run1.json` ×4, `reports/human-review/SALES-DISC-L.md` ×1). All 5 were inspected, and all are the summary text "the incumbent Zende**sk-Queue**wise…", not a key.
 - **Judge coverage.** 167 of the 185 selected runs were judged. The judge key's Gemini prepaid credits ran out during judging, and the last 18 runs (spread across configs; see "Judged runs") were left unjudged rather than scored by a different judge. Judge-to-judge noise (re-judging) could not be measured for the same reason.
 
@@ -207,7 +207,7 @@ Production summary calls are non-streaming (`stream:false`), so no first-token e
 **Production deadlines.** Measured against the deadlines in the code today:
 - **Current DeepSeek:** never breached one.
 - **DeepSeek thinking:** breached in 29/33 runs, mostly the 10 s cap on non-extraction calls (polish/follow-up/title) and the 45 s extraction cap.
-- **Every Luna level:** breached in every run. Most breaches are the server-wide undici `headersTimeout: 30 s`: OpenAI's non-streaming Responses API sends headers only when the response is complete, while DeepSeek sends headers in ~300 ms. As deployed, Natively would silently replace most Luna calls with Gemini, so adopting Luna would also require streaming or new deadlines.
+- **Every Luna level:** breached in every run. Most breaches are the server-wide undici `headersTimeout: 30 s`: OpenAI's non-streaming Responses API sends headers only when the response is complete, while DeepSeek sends headers in ~300 ms. As deployed, MeetFloo would silently replace most Luna calls with Gemini, so adopting Luna would also require streaming or new deadlines.
 
 **TTFT** does not exist on this non-streaming path, so it is reported as N/A rather than approximated.
 
@@ -269,7 +269,7 @@ Luna `none` is not cheaper than `low`: Luna low produced slightly *less* output 
 **Assumptions.**
 - List prices only (no batch discounts, no negotiated rates).
 - Cold cache (every meeting unique).
-- DeepSeek peak/off-peak weighted by hours, assuming uniform traffic. Natively's real traffic shape would move the DeepSeek number between $0.027 (all off-peak) and $0.054 (all peak).
+- DeepSeek peak/off-peak weighted by hours, assuming uniform traffic. MeetFloo's real traffic shape would move the DeepSeek number between $0.027 (all off-peak) and $0.054 (all peak).
 - Luna `cache_write_tokens` are billed as normal input.
 
 **As billed in this benchmark**, with cache hits and all runs in DeepSeek off-peak hours: $0.024 per summary for the current config.
@@ -383,7 +383,7 @@ Judge: `gemini-3.1-pro-preview` (neither candidate family), blind (opaque ids; n
 | Luna none | 57.6% | 93.9% | 1/33 | 0.03 | 202.2 | 22.1 | 11.8 |
 
 **How to read this section.** The most reliable signal is the per-fact verdicts against the gold fact sheets, aggregated as importance-weighted fact retention and compared **paired by conversation**. The 1-10 "overall", "structure", "conciseness" and "readability" scores are compressed into 1.9-5.9 for every configuration, and mostly measure model-independent pipeline behaviour:
-- The deterministic reducer duplicates the same items across mode sections and structured blocks. Natively's copy/export repeats them too.
+- The deterministic reducer duplicates the same items across mode sections and structured blocks. MeetFloo's copy/export repeats them too.
 - Notes can only say "Speaker 1"/"Me".
 - Superseded values from earlier chunks survive the merge (see Failure Analysis).
 
@@ -479,7 +479,7 @@ Examples are taken verbatim from the blind judge's flagged items or from the pip
 ### DeepSeek V4.1 Flash — current config (thinking off)
 - **Invalid JSON → dropped chunks.** 4 of 156 chunk outputs were unparseable.
   - **Cause (REAL-LECT-VL run 2).** The model copied the prompt's `TIME RANGE: 29824680:16 - …` into `"timeRange": {"startMs": 29824680:16, …}`. That value comes from `formatMs()` applied to epoch-ms timestamps.
-  - **Why it dropped the chunk.** The one-shot repair payload re-sends the ~24k-char bad output, which exceeds natively-api's 25,000-char `EXTRACTION_DEEPSEEK_MAX_CHARS`. That routes the repair to Gemini, which was blocked here, so the chunk was dropped. In production, Gemini would have repaired it.
+  - **Why it dropped the chunk.** The one-shot repair payload re-sends the ~24k-char bad output, which exceeds MeetFloo-api's 25,000-char `EXTRACTION_DEEPSEEK_MAX_CHARS`. That routes the repair to Gemini, which was blocked here, so the chunk was dropped. In production, Gemini would have repaired it.
   - **Impact (SALES-DISC-L run 2).** 2 chunks were lost, so that run missed the CFO's $40k approval threshold, the $45→$39 pricing and the "don't phase the rollout" decision. Its fact retention for SALES-DISC-L was 81.6%, versus 95%+ in the other two runs.
 - **Most distractors included** (2.6 per summary), e.g. passing suggestions such as "Mia will handle the card and flowers" written as action items.
 - **Small factual slips**, e.g. INT-M: "offsite around November 16th" (it is the week of Nov 9th).
@@ -522,7 +522,7 @@ Only two configurations score higher than the current one on quality, and neithe
 | DeepSeek V4.1 Flash, thinking ON | +1.5 pp [−2.8, +5.1] | 1.87× | 2.75× (114 s) | 29/33 runs |
 | GPT-5.6 Luna max | +2.8 pp [−0.8, +7.3] (8 conversations) | 7.05× | 14.5× (598 s) | 20/20 runs |
 
-If Natively later decides a few points of retention are worth paying for, DeepSeek-thinking is the far cheaper and faster way to get them. Neither is justified by this data for a high-volume default.
+If MeetFloo later decides a few points of retention are worth paying for, DeepSeek-thinking is the far cheaper and faster way to get them. Neither is justified by this data for a high-volume default.
 
 # Requirements Screening
 
@@ -542,9 +542,9 @@ If Natively later decides a few points of retention are worth paying for, DeepSe
 
 The 70% capability screen is not the binding constraint. Every configuration passes it; cost and latency eliminate Luna. On OpenAI Flex, Luna low/none/medium would clear the cost bar by 23-32% (7-17% vs DeepSeek off-peak), but they would still be slower than today (Flex latency unmeasured) and retain 5.8-6.7 pp fewer facts. The saving buys a quality loss, not a like-for-like replacement.
 
-# Does the current Natively prompt cause model-specific differences?
+# Does the current MeetFloo prompt cause model-specific differences?
 
-Yes. The prompts were deliberately *not* changed for this benchmark; these are observations for a follow-up. Several parts of the current Natively pipeline interact with model behaviour and change results per model:
+Yes. The prompts were deliberately *not* changed for this benchmark; these are observations for a follow-up. Several parts of the current MeetFloo pipeline interact with model behaviour and change results per model:
 
 1. **The polish "no new tokens" gate rejects mostly correct rewrites, at model-dependent rates.**
    - **Where.** `SummaryPolisher.newSignificantTokens` strips punctuation from each output token but normalizes the grounded notes differently.
@@ -563,9 +563,9 @@ None of these were fixed in this work. They would need their own reproduce-then-
 
 # Method, Fairness and Limitations
 
-**What ran.** Each summary run executes the real production code, bundled from this repo's source with the same esbuild options as `scripts/build-electron.js` (`benchmark/build/pipeline.cjs`, sha256 prefix `48a85f51891adcb6`). It runs under Electron-as-Node (same Node ABI as the app) and replicates `MeetingPersistence.processAndSaveMeeting`'s V3 branch step by step, minus the DB write, IPC and telemetry. LLM calls go through the real `LLMHelper.generateMeetingSummary` → `generateWithNatively` → an **unmodified local natively-api** (`node server.js`, local-test auth). There, the real `routeChat` / `buildDeepSeekBody` / `callDeepSeek` build the production request. **No production source file was modified.**
+**What ran.** Each summary run executes the real production code, bundled from this repo's source with the same esbuild options as `scripts/build-electron.js` (`benchmark/build/pipeline.cjs`, sha256 prefix `48a85f51891adcb6`). It runs under Electron-as-Node (same Node ABI as the app) and replicates `MeetingPersistence.processAndSaveMeeting`'s V3 branch step by step, minus the DB write, IPC and telemetry. LLM calls go through the real `LLMHelper.generateMeetingSummary` → `generateWithMeetFloo` → an **unmodified local MeetFloo-api** (`node server.js`, local-test auth). There, the real `routeChat` / `buildDeepSeekBody` / `callDeepSeek` build the production request. **No production source file was modified.**
 
-**The only substitution** is a transport shim (`benchmark/harness/provider-shim.mjs`) preloaded with `node --import`. It intercepts the `fetch` to `api.deepseek.com/chat/completions` that natively-api makes, and per configuration:
+**The only substitution** is a transport shim (`benchmark/harness/provider-shim.mjs`) preloaded with `node --import`. It intercepts the `fetch` to `api.deepseek.com/chat/completions` that MeetFloo-api makes, and per configuration:
 - **`ds-flash-prod`**: forwards the production body byte-for-byte (`thinking: disabled`).
 - **`ds-flash-thinking`**: removes only the `thinking` field (API default = enabled, default effort).
 - **`luna-*`**: sends the same system and user messages to the OpenAI **Responses API** with `reasoning.effort` = max|medium|low|none, `max_output_tokens` = min(production 384,000, Luna's 128,000 ceiling) = 128,000, and `store:false`. The visible text is reshaped into the chat-completion JSON that `callDeepSeek` parses. Everything upstream and downstream (prompts, chunking, parsing, validation, repair, reduce, polish gate, title) is identical.
@@ -578,7 +578,7 @@ None of these were fixed in this work. They would need their own reproduce-then-
 
 **Deadlines.** Production deadlines would have replaced slow outputs with a Gemini fallback, contaminating the comparison. They were therefore lifted for measurement:
 - **Server** (via env): `DEEPSEEK_TIMEOUT_MS`, `DEEPSEEK_TTFT_CAP_MS`, `AI_ROUTE_BUDGET_MS`, `EXTRACTION_DEEPSEEK_TIMEOUT_MS`, `EXTRACTION_ROUTE_BUDGET_MS`.
-- **Client:** the timeout argument of `generateWithNatively` / `withTimeout`.
+- **Client:** the timeout argument of `generateWithMeetFloo` / `withTimeout`.
 - **Shim:** its own undici agent with long timeouts.
 
 Each call's elapsed time is still checked against the real production limits and reported as "production deadline compliance".
@@ -590,8 +590,8 @@ Each call's elapsed time is still checked against the real production limits and
 No summary text in this benchmark came from a non-candidate model. When production routing *would* have used Gemini (see Failure Analysis: the 25k-char size gate on JSON repair), the call was blocked and the chunk was dropped. That is counted against the model whose invalid JSON triggered it.
 
 **Isolation from production systems.**
-- **Environment:** natively-api ran with `SUPABASE_URL` pointed at a closed local port, all ledgers, watchdogs and telemetry disabled, and Telegram, PostHog, Axiom, Sentry and Resend keys blanked, all for the child process only. `.env` was not modified.
-- **Keys:** read from the existing `.env` files and never printed or written. The OpenAI key lives in the repo-root `.env`; natively-api's `.env` has none.
+- **Environment:** MeetFloo-api ran with `SUPABASE_URL` pointed at a closed local port, all ledgers, watchdogs and telemetry disabled, and Telegram, PostHog, Axiom, Sentry and Resend keys blanked, all for the child process only. `.env` was not modified.
+- **Keys:** read from the existing `.env` files and never printed or written. The OpenAI key lives in the repo-root `.env`; MeetFloo-api's `.env` has none.
 - **Server ports:** 18701-18706 (conversations other than LECT-VL) and 18801-18806 (LECT-VL, a second orchestrator started when that transcript finished authoring).
 
 **Fairness.**
@@ -612,7 +612,7 @@ No summary text in this benchmark came from a non-candidate model. When producti
 **Limitations**
 - **Judge noise.** The judge is a single LLM. Fact-level verdicts are more stable than the 1-10 scores, but not human-verified. A blind human-review bundle is provided.
 - **Synthetic content.** The synthetic transcripts are cleaner than real STT (light artifacts only). The two real lectures are single-channel (no diarization) and sentence-cased from all-caps captions.
-- **Transcription.** Transcription was not benchmarked: no Natively STT run, no audio downloaded (the disk had <500 MB free).
+- **Transcription.** Transcription was not benchmarked: no MeetFloo STT run, no audio downloaded (the disk had <500 MB free).
 - **Caching.** Repeated runs of the same transcript can hit provider prompt caches. Cost is therefore reported cold-cache, and latency may be slightly optimistic for runs 2-3.
 - **Latency conditions.** Latency is from one machine in one region (India → provider APIs), at the concurrency used here (≤ ~20 simultaneous provider calls), on 2026-09-16 between 20:04 and 20:48 UTC (01:34-02:18 IST). That window is DeepSeek off-peak.
 - **Concurrent edits.** Other sessions edited this checkout during the benchmark. Seminar/call-center edits in `ModesManager.ts`, `MeetingModeDetector.ts` and `MeetingSummaryReducer.ts` predate the 01:20 IST bundle build and are in the bundle, but they don't touch the six modes or any prompt used here. About 15 more files (including `LLMHelper.ts`, `CredentialsManager.ts`, `ProcessingHelper.ts`) were modified at 02:33-02:37 IST. That is after all 198 runs had finished (last run 02:17 IST) and after the bundle was built, so no run could have used them. Every run used the same bundle.
@@ -632,8 +632,8 @@ All paths are relative to the repo root.
 | Full pipeline outputs (summary object, per-call timings, compressed raw model output, events) | `benchmark/outputs/<config>/<conversation>/run<N>.json` |
 | Judge evaluations | `benchmark/evaluations/<config>/<conversation>/run<N>.json` |
 | Provider wire logs (params, usage, model, latency; no text, no keys, no reasoning) | `benchmark/raw/wire/<config>.jsonl` |
-| natively-api server logs | `benchmark/raw/server-logs/<config>.log` |
-| Transcripts (authored/caption source + Natively segments) | `benchmark/transcripts/src/*.txt`, `benchmark/transcripts/*.segments.json` |
+| MeetFloo-api server logs | `benchmark/raw/server-logs/<config>.log` |
+| Transcripts (authored/caption source + MeetFloo segments) | `benchmark/transcripts/src/*.txt`, `benchmark/transcripts/*.segments.json` |
 | Gold fact sheets | `benchmark/references/*.json` |
 | Corpus manifest / config / pricing | `benchmark/manifest.json`, `benchmark/config.json` |
 | Harness (shim, worker, orchestrator, judge, analysis, report) | `benchmark/harness/` |

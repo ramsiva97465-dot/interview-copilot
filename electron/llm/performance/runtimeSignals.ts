@@ -103,7 +103,7 @@ export class RuntimeSignals {
   }
 }
 
-const GLOBAL_KEY = '__nativelyRuntimeSignals__';
+const GLOBAL_KEY = '__MeetFlooRuntimeSignals__';
 
 export function getRuntimeSignals(): RuntimeSignals {
   const g = globalThis as Record<string, unknown>;

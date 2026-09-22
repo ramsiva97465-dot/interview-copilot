@@ -13,14 +13,14 @@ import { renderSummary } from './render.mjs'
 const require = createRequire(import.meta.url)
 const BENCH = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const ROOT = path.resolve(BENCH, '..')
-const env = require(path.join(ROOT, 'natively-api/node_modules/dotenv')).parse(fs.readFileSync(path.join(ROOT, '.env')))
+const env = require(path.join(ROOT, 'MeetFloo-api/node_modules/dotenv')).parse(fs.readFileSync(path.join(ROOT, '.env')))
 const JUDGE_MODEL = 'gemini-3.1-pro-preview'
 const args = process.argv.slice(2)
 const arg = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d }
 const CONC = Number(arg('--concurrency', 6))
 const ONLY = arg('--only', null)
 const REJUDGE = Number(arg('--rejudge-sample', 0))
-const SALT = 'natively-bench-2026-09-17'
+const SALT = 'MeetFloo-bench-2026-09-17'
 
 const blindId = (rel) => 'S-' + crypto.createHash('sha256').update(SALT + rel).digest('hex').slice(0, 8)
 

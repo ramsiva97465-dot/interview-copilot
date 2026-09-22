@@ -2,7 +2,7 @@
 
 **Source transcript:** `benchmark/transcripts/src/CASUAL-M.txt`  
 **Reference fact sheet:** `benchmark/references/CASUAL-M.json`  
-**Context:** A casual video call among three old friends, Dan (the Natively user), Priya and Tom. About half the call is catch-up and banter (a TV finale, five-a-side football, Priya's new puppy, work complaints); interleaved throughout is the planning of a 3-night cabin trip for their friend Maya's 30th birthday, plus a secret surprise visit from Maya's brother.
+**Context:** A casual video call among three old friends, Dan (the MeetFloo user), Priya and Tom. About half the call is catch-up and banter (a TV finale, five-a-side football, Priya's new puppy, work complaints); interleaved throughout is the planning of a 3-night cabin trip for their friend Maya's 30th birthday, plus a secret surprise visit from Maya's brother.
 
 ## What a good summary must include
 - 3-night cabin trip for Maya's 30th at Heron Point Cabin, Birchwater Lake (F01, F03)

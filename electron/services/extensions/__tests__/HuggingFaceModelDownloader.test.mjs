@@ -28,7 +28,7 @@ const { HuggingFaceModelDownloader, isSafeRepoId, isSafeRepoPath, buildResolveUr
   require(path.join(repoRoot, 'dist-electron/electron/services/extensions/HuggingFaceModelDownloader.js'));
 
 function tmpDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'natively-dl-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-dl-'));
 }
 
 const MODEL = {
@@ -126,7 +126,7 @@ test('the pinned revision comes from the repo metadata', async () => {
         : bodyResponse(Buffer.from('x'), { headers: { 'content-length': '1' } });
     },
   });
-  await dl.download(MODEL, path.join(dir, MODEL.file), () => {}, new AbortController().signal);
+  await dl.download(MODEL, path.join(dir, MODEL.file), () => { }, new AbortController().signal);
   assert.ok(urls[1].includes('/resolve/c0ffee/'), `expected the pinned sha, got ${urls[1]}`);
 });
 
@@ -140,7 +140,7 @@ test('unresolvable metadata degrades to main rather than failing the download', 
       return bodyResponse(Buffer.from('x'), { headers: { 'content-length': '1' } });
     },
   });
-  await dl.download(MODEL, path.join(dir, MODEL.file), () => {}, new AbortController().signal);
+  await dl.download(MODEL, path.join(dir, MODEL.file), () => { }, new AbortController().signal);
   assert.ok(urls[1].includes('/resolve/main/'));
 });
 
@@ -161,7 +161,7 @@ test('a resumed download sends Range and appends the 206 tail', async () => {
     },
   });
 
-  await dl.download(MODEL, dest, () => {}, new AbortController().signal);
+  await dl.download(MODEL, dest, () => { }, new AbortController().signal);
   assert.equal(rangeHeader, 'bytes=6-');
   assert.equal(fs.readFileSync(dest, 'utf8'), 'hello model', 'the tail must append to the partial');
 });
@@ -181,7 +181,7 @@ test('a server that IGNORES Range restarts from zero instead of corrupting the f
       : bodyResponse(Buffer.from('hello model'), { status: 200, headers: { 'content-length': '11' } })),
   });
 
-  await dl.download(MODEL, dest, () => {}, new AbortController().signal);
+  await dl.download(MODEL, dest, () => { }, new AbortController().signal);
   assert.equal(fs.readFileSync(dest, 'utf8'), 'hello model');
 });
 
@@ -193,7 +193,7 @@ test('a 416 discards the partial rather than renaming something unverified', asy
 
   let calls = 0;
   const dl = new HuggingFaceModelDownloader({
-    logger: { info: () => {}, warn: () => {} },
+    logger: { info: () => { }, warn: () => { } },
     fetchImpl: async (url) => {
       if (String(url).includes('/api/models/')) return metadataResponse('abc');
       calls += 1;
@@ -203,7 +203,7 @@ test('a 416 discards the partial rather than renaming something unverified', asy
     },
   });
 
-  await dl.download(MODEL, dest, () => {}, new AbortController().signal);
+  await dl.download(MODEL, dest, () => { }, new AbortController().signal);
   assert.equal(fs.readFileSync(dest, 'utf8'), 'ok');
 });
 
@@ -243,7 +243,7 @@ test('re-downloading over an existing file replaces it', async () => {
       : bodyResponse(Buffer.from('new weights'), { headers: { 'content-length': '11' } })),
   });
 
-  await dl.download(MODEL, dest, () => {}, new AbortController().signal);
+  await dl.download(MODEL, dest, () => { }, new AbortController().signal);
   assert.equal(fs.readFileSync(dest, 'utf8'), 'new weights');
   assert.ok(!fs.existsSync(`${dest}.part`));
 });
@@ -261,7 +261,7 @@ test('a partial from a DIFFERENT revision is discarded, not resumed onto', async
 
   let rangeSeen;
   const dl = new HuggingFaceModelDownloader({
-    logger: { info: () => {}, warn: () => {} },
+    logger: { info: () => { }, warn: () => { } },
     fetchImpl: async (url, init) => {
       if (String(url).includes('/api/models/')) return metadataResponse('newsha222');
       rangeSeen = init?.headers?.Range ?? null;
@@ -269,7 +269,7 @@ test('a partial from a DIFFERENT revision is discarded, not resumed onto', async
     },
   });
 
-  await dl.download(MODEL, dest, () => {}, new AbortController().signal);
+  await dl.download(MODEL, dest, () => { }, new AbortController().signal);
   assert.equal(rangeSeen, null, 'a stale partial must not be resumed onto');
   assert.equal(fs.readFileSync(dest, 'utf8'), 'complete new file');
 });
@@ -282,14 +282,14 @@ test('an UNSTAMPED partial is treated as stale', async () => {
 
   let rangeSeen;
   const dl = new HuggingFaceModelDownloader({
-    logger: { info: () => {}, warn: () => {} },
+    logger: { info: () => { }, warn: () => { } },
     fetchImpl: async (url, init) => {
       if (String(url).includes('/api/models/')) return metadataResponse('abc');
       rangeSeen = init?.headers?.Range ?? null;
       return bodyResponse(Buffer.from('fresh'), { headers: { 'content-length': '5' } });
     },
   });
-  await dl.download(MODEL, dest, () => {}, new AbortController().signal);
+  await dl.download(MODEL, dest, () => { }, new AbortController().signal);
   assert.equal(rangeSeen, null);
   assert.equal(fs.readFileSync(dest, 'utf8'), 'fresh');
 });
@@ -310,7 +310,7 @@ test('a partial from the SAME revision is still resumed', async () => {
       return bodyResponse(Buffer.from('model'), { status: 206, headers: { 'content-length': '5' } });
     },
   });
-  await dl.download(MODEL, dest, () => {}, new AbortController().signal);
+  await dl.download(MODEL, dest, () => { }, new AbortController().signal);
   assert.equal(rangeSeen, 'bytes=6-');
   assert.equal(fs.readFileSync(dest, 'utf8'), 'hello model');
   assert.ok(!fs.existsSync(`${dest}.part.rev`), 'the stamp is cleaned up on success');
@@ -320,7 +320,7 @@ test('a persistent HTTP error eventually throws, bounded', async () => {
   const dir = tmpDir();
   let attempts = 0;
   const dl = new HuggingFaceModelDownloader({
-    logger: { info: () => {}, warn: () => {} },
+    logger: { info: () => { }, warn: () => { } },
     fetchImpl: async (url) => {
       if (String(url).includes('/api/models/')) return metadataResponse('abc');
       attempts += 1;
@@ -329,7 +329,7 @@ test('a persistent HTTP error eventually throws, bounded', async () => {
   });
 
   await assert.rejects(
-    () => dl.download(MODEL, path.join(dir, MODEL.file), () => {}, new AbortController().signal),
+    () => dl.download(MODEL, path.join(dir, MODEL.file), () => { }, new AbortController().signal),
     /HTTP 503/,
   );
   assert.ok(attempts <= 3, `retries must be bounded, saw ${attempts}`);
@@ -341,7 +341,7 @@ test('cancellation keeps the partial so the next attempt can resume', async () =
   const controller = new AbortController();
 
   const dl = new HuggingFaceModelDownloader({
-    logger: { info: () => {}, warn: () => {} },
+    logger: { info: () => { }, warn: () => { } },
     fetchImpl: async (url) => {
       if (String(url).includes('/api/models/')) return metadataResponse('abc');
       // Write something, then cancel mid-stream.
@@ -351,7 +351,7 @@ test('cancellation keeps the partial so the next attempt can resume', async () =
     },
   });
 
-  await assert.rejects(() => dl.download(MODEL, dest, () => {}, controller.signal), /cancelled/);
+  await assert.rejects(() => dl.download(MODEL, dest, () => { }, controller.signal), /cancelled/);
   assert.ok(fs.existsSync(`${dest}.part`), 'the partial must survive a cancellation');
   assert.ok(!fs.existsSync(dest), 'nothing may appear at the real path');
 });
@@ -365,7 +365,7 @@ test('a slow BODY is not aborted by the connect timeout', async () => {
   const dest = path.join(dir, MODEL.file);
 
   const dl = new HuggingFaceModelDownloader({
-    logger: { info: () => {}, warn: () => {} },
+    logger: { info: () => { }, warn: () => { } },
     fetchImpl: async (url, init) => {
       if (String(url).includes('/api/models/')) return metadataResponse('abc');
       const signal = init?.signal;
@@ -389,7 +389,7 @@ test('a slow BODY is not aborted by the connect timeout', async () => {
     },
   });
 
-  await dl.download(MODEL, dest, () => {}, new AbortController().signal);
+  await dl.download(MODEL, dest, () => { }, new AbortController().signal);
   assert.equal(fs.readFileSync(dest).length, 4);
 });
 
@@ -399,7 +399,7 @@ test('an unresolved repo id is refused before any request', async () => {
   const dl = new HuggingFaceModelDownloader({ fetchImpl: async () => { called = true; throw new Error('should not fetch'); } });
 
   await assert.rejects(
-    () => dl.download({ ...MODEL, repo: null }, path.join(dir, MODEL.file), () => {}, new AbortController().signal),
+    () => dl.download({ ...MODEL, repo: null }, path.join(dir, MODEL.file), () => { }, new AbortController().signal),
     /no resolved repository id/,
   );
   assert.equal(called, false, 'a guessed repo id must never be fetched');
@@ -409,7 +409,7 @@ test('a non-huggingface source is refused', async () => {
   const dir = tmpDir();
   const dl = new HuggingFaceModelDownloader({ fetchImpl: async () => { throw new Error('nope'); } });
   await assert.rejects(
-    () => dl.download({ ...MODEL, source: 'ollama' }, path.join(dir, MODEL.file), () => {}, new AbortController().signal),
+    () => dl.download({ ...MODEL, source: 'ollama' }, path.join(dir, MODEL.file), () => { }, new AbortController().signal),
     /unsupported model source/,
   );
 });
@@ -424,13 +424,13 @@ test('a failed revision lookup leaves the partial UNSTAMPED', async () => {
   const dest = path.join(dir, MODEL.file);
 
   const dl = new HuggingFaceModelDownloader({
-    logger: { info: () => {}, warn: () => {} },
+    logger: { info: () => { }, warn: () => { } },
     fetchImpl: async (url) => (String(url).includes('/api/models/')
       ? { ok: false, status: 503, json: async () => ({}), headers: { get: () => null } }
       : bodyResponse(Buffer.from('body'), { headers: { 'content-length': '4' } })),
   });
 
-  await dl.download(MODEL, dest, () => {}, new AbortController().signal);
+  await dl.download(MODEL, dest, () => { }, new AbortController().signal);
   assert.equal(fs.readFileSync(dest, 'utf8'), 'body');
   assert.ok(!fs.existsSync(`${dest}.part.rev`), 'no stamp survives a completed download');
 });
@@ -446,7 +446,7 @@ test('two consecutive failed lookups do NOT resume onto each other', async () =>
 
   let rangeSeen = 'unset';
   const dl = new HuggingFaceModelDownloader({
-    logger: { info: () => {}, warn: () => {} },
+    logger: { info: () => { }, warn: () => { } },
     fetchImpl: async (url, init) => {
       if (String(url).includes('/api/models/')) {
         return { ok: false, status: 500, json: async () => ({}), headers: { get: () => null } };
@@ -456,7 +456,7 @@ test('two consecutive failed lookups do NOT resume onto each other', async () =>
     },
   });
 
-  await dl.download(MODEL, dest, () => {}, new AbortController().signal);
+  await dl.download(MODEL, dest, () => { }, new AbortController().signal);
   assert.equal(rangeSeen, null, 'must refetch from zero, never Range-resume an unprovable partial');
   assert.equal(fs.readFileSync(dest, 'utf8'), 'whole');
 });
@@ -469,13 +469,13 @@ test('re-downloading over an existing model replaces it and leaves no debris', a
   fs.writeFileSync(dest, 'the previously working model');
 
   const dl = new HuggingFaceModelDownloader({
-    logger: { info: () => {}, warn: () => {} },
+    logger: { info: () => { }, warn: () => { } },
     fetchImpl: async (url) => (String(url).includes('/api/models/')
       ? metadataResponse('cafe1234')
       : bodyResponse(Buffer.from('replacement'), { headers: { 'content-length': '11' } })),
   });
 
-  await dl.download(MODEL, dest, () => {}, new AbortController().signal);
+  await dl.download(MODEL, dest, () => { }, new AbortController().signal);
   assert.equal(fs.readFileSync(dest, 'utf8'), 'replacement');
   assert.ok(!fs.existsSync(`${dest}.old`), 'the move-aside backup is cleaned up on success');
   assert.ok(!fs.existsSync(`${dest}.part`), 'no partial is left behind');
@@ -503,13 +503,13 @@ test('a failed replace keeps BOTH the old model and the resumable partial', asyn
 
   try {
     const dl = new HuggingFaceModelDownloader({
-      logger: { info: () => {}, warn: () => {} },
+      logger: { info: () => { }, warn: () => { } },
       fetchImpl: async (url) => (String(url).includes('/api/models/')
         ? metadataResponse('cafe1234')
         : bodyResponse(Buffer.from('replacement'), { headers: { 'content-length': '11' } })),
     });
     await assert.rejects(
-      () => dl.download(MODEL, dest, () => {}, new AbortController().signal),
+      () => dl.download(MODEL, dest, () => { }, new AbortController().signal),
       /in use|EBUSY/i,
     );
   } finally {
@@ -536,14 +536,14 @@ test('a pinned revision is used verbatim and skips the metadata lookup', async (
 
   const urls = [];
   const dl = new HuggingFaceModelDownloader({
-    logger: { info: () => {}, warn: () => {} },
+    logger: { info: () => { }, warn: () => { } },
     fetchImpl: async (url) => {
       urls.push(String(url));
       return bodyResponse(Buffer.from('pinned'), { headers: { 'content-length': '6' } });
     },
   });
 
-  await dl.download({ ...MODEL, revision: PIN }, dest, () => {}, new AbortController().signal);
+  await dl.download({ ...MODEL, revision: PIN }, dest, () => { }, new AbortController().signal);
 
   assert.ok(!urls.some((u) => u.includes('/api/models/')), 'a pin needs no live resolution');
   assert.ok(urls.some((u) => u.includes(`/resolve/${PIN}/`)), `expected the pin in ${urls}`);
@@ -558,7 +558,7 @@ test('a pin that is not a full commit sha is ignored, not trusted', async () => 
 
   const urls = [];
   const dl = new HuggingFaceModelDownloader({
-    logger: { info: () => {}, warn: () => {} },
+    logger: { info: () => { }, warn: () => { } },
     fetchImpl: async (url) => {
       urls.push(String(url));
       return String(url).includes('/api/models/')
@@ -567,7 +567,7 @@ test('a pin that is not a full commit sha is ignored, not trusted', async () => 
     },
   });
 
-  await dl.download({ ...MODEL, revision: 'main' }, dest, () => {}, new AbortController().signal);
+  await dl.download({ ...MODEL, revision: 'main' }, dest, () => { }, new AbortController().signal);
 
   assert.ok(urls.some((u) => u.includes('/api/models/')), 'falls back to live resolution');
   assert.ok(urls.some((u) => u.includes('/resolve/beef0000/')));

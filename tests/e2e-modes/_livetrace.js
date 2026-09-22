@@ -2,19 +2,19 @@
 // path against the LIVE polluted DB, capturing all [FIX2-TRACE] lines.
 //
 // Runs under real Electron (better-sqlite3 ABI). Points DatabaseManager at the
-// real natively userData via NATIVELY_TEST_USERDATA so we retrieve against the
+// real MeetFloo userData via MEETFLOO_TEST_USERDATA so we retrieve against the
 // ACTUAL Seminar mode + its live reference file(s).
 //
 // Usage:
-//   NATIVELY_LIVE_EMBED=1 ./node_modules/.bin/electron tests/e2e-modes/_livetrace.js
-//   (NATIVELY_LIVE_EMBED unset → force lexical-only, embeddings disabled)
+//   MEETFLOO_LIVE_EMBED=1 ./node_modules/.bin/electron tests/e2e-modes/_livetrace.js
+//   (MEETFLOO_LIVE_EMBED unset → force lexical-only, embeddings disabled)
 const path = require('path');
 const os = require('os');
 const { app } = require('electron');
 
-// Point the DB at the REAL live natively userData (not bare-electron "Electron").
-const REAL_USERDATA = path.join(os.homedir(), 'Library', 'Application Support', 'natively');
-process.env.NATIVELY_TEST_USERDATA = REAL_USERDATA;
+// Point the DB at the REAL live MeetFloo userData (not bare-electron "Electron").
+const REAL_USERDATA = path.join(os.homedir(), 'Library', 'Application Support', 'MeetFloo');
+process.env.MEETFLOO_TEST_USERDATA = REAL_USERDATA;
 
 const HARD_TIMEOUT_MS = 60000;
 setTimeout(() => { console.error('[PROBE] hard timeout'); process.exit(3); }, HARD_TIMEOUT_MS);
@@ -43,18 +43,18 @@ async function main() {
 
   // Confirm live state.
   const files = db.prepare('SELECT id, file_name, LENGTH(content) len FROM mode_reference_files WHERE mode_id=?').all(MODE_ID);
-  console.log('[PROBE] live reference files for mode:', files.map(f => ({ id: f.id.slice(0,12), name: f.file_name, len: f.len })));
+  console.log('[PROBE] live reference files for mode:', files.map(f => ({ id: f.id.slice(0, 12), name: f.file_name, len: f.len })));
   const idxRows = db.prepare('SELECT file_id, chunk_count, status, embedding_space FROM mode_reference_index_state').all();
-  console.log('[PROBE] index_state rows:', idxRows.map(r => ({ id: r.file_id.slice(0,12), chunks: r.chunk_count, status: r.status, space: r.embedding_space })));
+  console.log('[PROBE] index_state rows:', idxRows.map(r => ({ id: r.file_id.slice(0, 12), chunks: r.chunk_count, status: r.status, space: r.embedding_space })));
 
   // Wire embeddings. Try to load real credentials; if the keyring can't decrypt
   // (bare electron identity), the pipeline falls back to local — which is what
-  // a keyless user experiences. NATIVELY_LIVE_EMBED gates whether we even try.
+  // a keyless user experiences. MEETFLOO_LIVE_EMBED gates whether we even try.
   let geminiPresent = false;
   try { CredentialsManager.getInstance().init(); const k = CredentialsManager.getInstance().getGeminiApiKey(); geminiPresent = !!k && k.length > 0; } catch (e) { console.log('[PROBE] cred init err:', e && e.message); }
   console.log('[PROBE] geminiKeyPresent(from credentials)=', geminiPresent);
 
-  const wantEmbed = process.env.NATIVELY_LIVE_EMBED === '1';
+  const wantEmbed = process.env.MEETFLOO_LIVE_EMBED === '1';
   const mm = ModesManager.getInstance();
 
   if (wantEmbed) {
@@ -73,7 +73,7 @@ async function main() {
       console.log('[PROBE] embed wiring failed:', e && e.message);
     }
   } else {
-    console.log('[PROBE] NATIVELY_LIVE_EMBED not set — no embedder wired (lexical-only path).');
+    console.log('[PROBE] MEETFLOO_LIVE_EMBED not set — no embedder wired (lexical-only path).');
   }
 
   // Activate the mode (mirrors setActiveMode on the live app).

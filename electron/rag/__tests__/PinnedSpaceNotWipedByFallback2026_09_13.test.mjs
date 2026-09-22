@@ -1,11 +1,11 @@
 // A stand-in embedding provider must not migrate the corpus into its own space.
 //
 // Measured 2026-09-13 against Evin's live corpus. Settings held
-// { mode:'manual', provider:'natively', model:'voyage-4' } and the corpus was
-// natively:voyage-4:2048. The Natively key was absent at boot, so:
+// { mode:'manual', provider:'MeetFloo', model:'voyage-4' } and the corpus was
+// MeetFloo:voyage-4:2048. The MeetFloo key was absent at boot, so:
 //
-//   buildCandidates() never built NativelyEmbeddingProvider (no key)
-//   → the manual filter `c.name === 'natively'` returned an EMPTY list
+//   buildCandidates() never built MeetFlooEmbeddingProvider (no key)
+//   → the manual filter `c.name === 'MeetFloo'` returned an EMPTY list
 //   → the probe loop never ran, so demotedPinned stayed null and no re-probe
 //     was ever armed
 //   → the resolver logged the generic auto-mode "No cloud/Ollama provider
@@ -35,12 +35,12 @@ const { EmbeddingProviderResolver } = await import(pathToFileURL(
 const { EmbeddingPipeline } = await import(pathToFileURL(
   path.resolve(root, 'dist-electron/electron/rag/EmbeddingPipeline.js')).href);
 
-const PINNED_NO_KEY = { embeddingMode: 'manual', embeddingProvider: 'natively', geminiKey: 'g_key' };
+const PINNED_NO_KEY = { embeddingMode: 'manual', embeddingProvider: 'MeetFloo', geminiKey: 'g_key' };
 
 describe('a pinned provider that produced no candidate', () => {
   test('resolves to the bundled model and reports no demotion (the hole this test exists for)', async () => {
     assert.deepEqual(EmbeddingProviderResolver.buildCandidates(PINNED_NO_KEY).map(c => c.name), [],
-      'a natively pin with no key builds no candidate — not even a failing one');
+      'a MeetFloo pin with no key builds no candidate — not even a failing one');
     const r = await EmbeddingProviderResolver.resolveWithDemotion(PINNED_NO_KEY);
     assert.equal(r.provider.name, 'local');
     assert.equal(r.demotedPinned, null, 'nothing was built, so there is no instance to re-probe');
@@ -50,7 +50,7 @@ describe('a pinned provider that produced no candidate', () => {
     const warn = mock.method(console, 'warn');
     try { await EmbeddingProviderResolver.resolveWithDemotion(PINNED_NO_KEY); } finally { warn.mock.restore(); }
     const said = warn.mock.calls.map(c => String(c.arguments[0])).join('\n');
-    assert.match(said, /selected 'natively'/, 'the log must name the pin, not read as an auto-mode fallthrough');
+    assert.match(said, /selected 'MeetFloo'/, 'the log must name the pin, not read as an auto-mode fallthrough');
     assert.match(said, /not configured/);
   });
 });
@@ -65,10 +65,10 @@ function pipelineRunning({ pinned, activeName }) {
 
 describe('isRunningOnUnpinnedFallback', () => {
   test('TRUE when a pin is set and something else is active — both the no-candidate and transient-demotion cases land here', () => {
-    assert.equal(pipelineRunning({ pinned: 'natively', activeName: 'local' }).isRunningOnUnpinnedFallback(), true);
+    assert.equal(pipelineRunning({ pinned: 'MeetFloo', activeName: 'local' }).isRunningOnUnpinnedFallback(), true);
   });
   test('FALSE when the pinned provider is the one running', () => {
-    assert.equal(pipelineRunning({ pinned: 'natively', activeName: 'natively' }).isRunningOnUnpinnedFallback(), false);
+    assert.equal(pipelineRunning({ pinned: 'MeetFloo', activeName: 'MeetFloo' }).isRunningOnUnpinnedFallback(), false);
   });
   test('FALSE for a deliberate local pin — local IS the choice, so its space is the right migration target', () => {
     assert.equal(pipelineRunning({ pinned: 'local', activeName: 'local' }).isRunningOnUnpinnedFallback(), false);
@@ -77,7 +77,7 @@ describe('isRunningOnUnpinnedFallback', () => {
     assert.equal(pipelineRunning({ pinned: '', activeName: 'local' }).isRunningOnUnpinnedFallback(), false);
   });
   test('FALSE before anything has resolved — nothing active means nothing to sweep either', () => {
-    assert.equal(pipelineRunning({ pinned: 'natively', activeName: null }).isRunningOnUnpinnedFallback(), false);
+    assert.equal(pipelineRunning({ pinned: 'MeetFloo', activeName: null }).isRunningOnUnpinnedFallback(), false);
   });
 });
 
@@ -94,7 +94,7 @@ describe('scheduleAutoReindex is gated on the pin, and re-armed when it returns'
   }
 
   test('does NOT arm the corpus-clearing sweep while a stand-in is active', async () => {
-    const pipe = pipelineRunning({ pinned: 'natively', activeName: 'local' });
+    const pipe = pipelineRunning({ pinned: 'MeetFloo', activeName: 'local' });
     pipe.getActiveSpaceKey = () => 'local:xenova/all-minilm-l6-v2:384';
     pipe.getActiveProviderName = () => 'local';
     const m = await managerWith(pipe);
@@ -104,9 +104,9 @@ describe('scheduleAutoReindex is gated on the pin, and re-armed when it returns'
   });
 
   test('DOES arm it when the pinned provider is the one running', async () => {
-    const pipe = pipelineRunning({ pinned: 'natively', activeName: 'natively' });
-    pipe.getActiveSpaceKey = () => 'natively:voyage-4:2048';
-    pipe.getActiveProviderName = () => 'natively';
+    const pipe = pipelineRunning({ pinned: 'MeetFloo', activeName: 'MeetFloo' });
+    pipe.getActiveSpaceKey = () => 'MeetFloo:voyage-4:2048';
+    pipe.getActiveProviderName = () => 'MeetFloo';
     const m = await managerWith(pipe);
     m.scheduleAutoReindex();
     assert.notEqual(m._autoReindexTimer, null, 'a genuine provider switch still migrates the corpus');
@@ -114,17 +114,17 @@ describe('scheduleAutoReindex is gated on the pin, and re-armed when it returns'
   });
 
   test('promoting the pinned provider back re-arms the sweep that was deferred', () => {
-    const pipe = pipelineRunning({ pinned: 'natively', activeName: 'local' });
-    pipe.db = { prepare: () => ({ run: () => {} }) };
+    const pipe = pipelineRunning({ pinned: 'MeetFloo', activeName: 'local' });
+    pipe.db = { prepare: () => ({ run: () => { } }) };
     let rearmed = 0;
     pipe.onPinnedSpaceRestored = () => { rearmed++; };
-    pipe.promoteFallbackProvider({ name: 'natively', dimensions: 2048, space: 'natively:voyage-4:2048' });
+    pipe.promoteFallbackProvider({ name: 'MeetFloo', dimensions: 2048, space: 'MeetFloo:voyage-4:2048' });
     assert.equal(rearmed, 1, 'the deferred sweep runs once the pinned space is back — it reconciles the gap');
   });
 
   test('a promotion that does NOT restore the pin re-arms nothing', () => {
-    const pipe = pipelineRunning({ pinned: 'natively', activeName: 'natively' });
-    pipe.db = { prepare: () => ({ run: () => {} }) };
+    const pipe = pipelineRunning({ pinned: 'MeetFloo', activeName: 'MeetFloo' });
+    pipe.db = { prepare: () => ({ run: () => { } }) };
     let rearmed = 0;
     pipe.onPinnedSpaceRestored = () => { rearmed++; };
     pipe.promoteFallbackProvider({ name: 'local', dimensions: 384, space: 'local:xenova/all-minilm-l6-v2:384' });

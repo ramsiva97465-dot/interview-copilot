@@ -8,7 +8,7 @@
 // NATIVE monitor is constructed. Every recovery attempt therefore retried the
 // identical dead device id — the production symptom was
 //     [MicRecovery] Recovery attempt #1 failed: Failed: Input device
-//     'NativelySystemAudioTap' not found.
+//     'MeetFlooSystemAudioTap' not found.
 // repeating with no fallback and no terminal banner.
 //
 // The fix is retargetDevice(): after a failed start the wrapper holds no native
@@ -36,15 +36,15 @@ const fakeNativeModule = {
     getInputDevices: () => [],
     getOutputDevices: () => [],
     SystemAudioCapture: function () {
-        return { start() {}, stop() {}, getSampleRate: () => 16000 };
+        return { start() { }, stop() { }, getSampleRate: () => 16000 };
     },
     // Mirrors Rust resolve_input_device(): an unknown id throws at CONSTRUCTION
     // of the native monitor, `null`/default always succeeds.
     MicrophoneCapture: function (deviceId) {
         constructedWith.push(deviceId ?? null);
-        if (deviceId === 'NativelySystemAudioTap') {
+        if (deviceId === 'MeetFlooSystemAudioTap') {
             throw new Error(
-                "Failed: Input device 'NativelySystemAudioTap' not found. " +
+                "Failed: Input device 'MeetFlooSystemAudioTap' not found. " +
                 'Available devices: iPhone Microphone, MacBook Air Microphone',
             );
         }
@@ -79,8 +79,8 @@ const { MicrophoneCapture } = await import(
 
 test('constructing with a missing device does NOT throw — only start() does', () => {
     constructedWith.length = 0;
-    const cap = new MicrophoneCapture('NativelySystemAudioTap');
-    cap.on('error', () => {});
+    const cap = new MicrophoneCapture('MeetFlooSystemAudioTap');
+    cap.on('error', () => { });
 
     assert.equal(
         constructedWith.length,
@@ -91,13 +91,13 @@ test('constructing with a missing device does NOT throw — only start() does', 
     );
 
     assert.throws(() => cap.start(), /not found/);
-    assert.deepEqual(constructedWith, ['NativelySystemAudioTap']);
+    assert.deepEqual(constructedWith, ['MeetFlooSystemAudioTap']);
 });
 
 test('retargetDevice(null) + start() recovers onto the system default', async () => {
     constructedWith.length = 0;
-    const cap = new MicrophoneCapture('NativelySystemAudioTap');
-    cap.on('error', () => {});
+    const cap = new MicrophoneCapture('MeetFlooSystemAudioTap');
+    cap.on('error', () => { });
 
     assert.throws(() => cap.start(), /not found/);
 
@@ -107,14 +107,14 @@ test('retargetDevice(null) + start() recovers onto the system default', async ()
 
     assert.deepEqual(
         constructedWith,
-        ['NativelySystemAudioTap', null],
+        ['MeetFlooSystemAudioTap', null],
         'BUG: after a failed start the wrapper must retry on the default device. ' +
         'Retrying the same id is the loop that left the mic dead for the whole meeting.',
     );
 });
 
 test('listeners survive the retarget (no destroy/recreate)', async () => {
-    const cap = new MicrophoneCapture('NativelySystemAudioTap');
+    const cap = new MicrophoneCapture('MeetFlooSystemAudioTap');
     let errors = 0;
     let started = 0;
     cap.on('error', () => { errors += 1; });
@@ -130,7 +130,7 @@ test('listeners survive the retarget (no destroy/recreate)', async () => {
 
 test('retargetDevice refuses to run on a live wrapper', async () => {
     const cap = new MicrophoneCapture(null);
-    cap.on('error', () => {});
+    cap.on('error', () => { });
     cap.start();
 
     await assert.rejects(
@@ -149,7 +149,7 @@ test('retargetDevice waits for the deferred orphan teardown of a failed start', 
     // native handle while the first is still closing.
     halOrder.length = 0;
     const cap = new MicrophoneCapture('flaky-mic');
-    cap.on('error', () => {});
+    cap.on('error', () => { });
 
     assert.throws(() => cap.start(), /forced native start failure/);
 

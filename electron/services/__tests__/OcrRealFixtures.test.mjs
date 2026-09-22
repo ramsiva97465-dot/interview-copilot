@@ -1,13 +1,13 @@
 // LEGACY OCR PATH — TESTS SKIPPED (2026-05-17)
 // =====================================================================
 // This integration test exercises Tesseract.js directly through
-// OcrProviderManager. OCR has been removed from Natively's runtime
+// OcrProviderManager. OCR has been removed from MeetFloo's runtime
 // default in the vision-first pivot. The test is kept on disk so that
 // if a future opt-in legacy OCR mode is reintroduced, the contract
 // for Tesseract.js can be re-validated without rewriting from scratch.
 // Until then it must not run.
 // =====================================================================
-// Set NATIVELY_RUN_LEGACY_OCR_TESTS=1 to opt in.
+// Set MEETFLOO_RUN_LEGACY_OCR_TESTS=1 to opt in.
 
 import { test as _test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -15,10 +15,10 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const LEGACY_OCR_ENABLED = process.env.NATIVELY_RUN_LEGACY_OCR_TESTS === '1';
+const LEGACY_OCR_ENABLED = process.env.MEETFLOO_RUN_LEGACY_OCR_TESTS === '1';
 const test = (name, opts, fn) => {
-  if (typeof opts === 'function') return _test(name, { skip: LEGACY_OCR_ENABLED ? undefined : 'legacy OCR path disabled — set NATIVELY_RUN_LEGACY_OCR_TESTS=1 to run' }, opts);
-  return _test(name, { ...(opts || {}), skip: LEGACY_OCR_ENABLED ? undefined : 'legacy OCR path disabled — set NATIVELY_RUN_LEGACY_OCR_TESTS=1 to run' }, fn);
+  if (typeof opts === 'function') return _test(name, { skip: LEGACY_OCR_ENABLED ? undefined : 'legacy OCR path disabled — set MEETFLOO_RUN_LEGACY_OCR_TESTS=1 to run' }, opts);
+  return _test(name, { ...(opts || {}), skip: LEGACY_OCR_ENABLED ? undefined : 'legacy OCR path disabled — set MEETFLOO_RUN_LEGACY_OCR_TESTS=1 to run' }, fn);
 };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -54,7 +54,7 @@ test('OcrProviderManager extracts simple sentences from a fixture', { skip: SKIP
   const text = (result.text || '').toLowerCase();
 
   assert.match(text, /hello/i, `expected "hello" in OCR text. Got: ${result.text}`);
-  assert.match(text, /natively/i, `expected "natively" in OCR text. Got: ${result.text}`);
+  assert.match(text, /MeetFloo/i, `expected "MeetFloo" in OCR text. Got: ${result.text}`);
 
   assert.ok(typeof result.confidence === 'number', 'confidence should be a number');
   assert.ok(result.confidence >= 0 && result.confidence <= 1, 'confidence should be 0..1');

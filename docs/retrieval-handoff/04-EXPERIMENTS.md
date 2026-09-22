@@ -132,7 +132,7 @@ Settings → General → Advanced Settings → Verbose Debug Mode. Map each symp
 | `[EmbeddingProviderResolver] Selected provider` / `Primary query embedding failed via … falling back to` | RC12 provider churn. |
 | `HYBRID performHybrid vectors` (`persistedHits`, `missingCount`) | `missingCount > 0` on a settled file ⇒ space flip (RC12). |
 
-`NATIVELY_CONTEXT_DEBUG` gates richer JSONL (`electron/context-intelligence/debug/`) carrying full `attempts[]` with `rejections[]`. `PLANNED_TYPE_FILTER` / `CLAIM_AUTHORITY` appearing there on his reference chunks is the direct fingerprint of RC1.
+`MEETFLOO_CONTEXT_DEBUG` gates richer JSONL (`electron/context-intelligence/debug/`) carrying full `attempts[]` with `rejections[]`. `PLANNED_TYPE_FILTER` / `CLAIM_AUTHORITY` appearing there on his reference chunks is the direct fingerprint of RC1.
 
 **Two log traps:**
 - The `[V3]` summary can read `candidates:1, admitted:1, rejected:0` while `evidence=0` — `PLANNED_TYPE_FILTER` drops go to `attempts[].rejections`, not the summary counter. **Never triage from that line alone.**

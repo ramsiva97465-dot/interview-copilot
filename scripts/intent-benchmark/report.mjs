@@ -9,7 +9,7 @@
 import { macroF1, MIN_LABEL_SUPPORT, accuracy, expectedCalibrationError, secondaryTaskRecall, latencyStats, weightedAccuracy, perLabelScores } from './lib/metrics.mjs';
 import { SCORED_AXES } from './providers/contract.mjs';
 
-/** Production label shares, measured. See docs/natively-router-production-priors-2026-09.md */
+/** Production label shares, measured. See docs/MeetFloo-router-production-priors-2026-09.md */
 export const PRODUCTION_LEGACY_SHARES = {
   general: 0.375, deep_dive: 0.215, clarification: 0.178, coding: 0.074,
   behavioral: 0.073, summary_probe: 0.047, example_request: 0.036, follow_up: 0.002,
@@ -164,17 +164,17 @@ export function checkAcceptance(scored) {
       // replaces `actual`: this is context for the headline, not a second bar.
       thinNote: a?.thinLabels?.length
         ? (() => {
-            // Named individually only while a reader can still hold the list.
-            // mode_intent has 77 thin labels and printing them all buries the
-            // one sentence that matters. Beyond four they are counted instead.
-            const t = [...a.thinLabels].sort((x, y) => x.support - y.support);
-            const shown = t.slice(0, 4).map((x) => `${x.label} (${x.support})`).join(', ');
-            const rest = t.length > 4 ? `, and ${t.length - 4} more` : '';
-            return `${t.length} of ${a.labelsScored} labels are under ${MIN_LABEL_SUPPORT} held-out rows `
-              + `[${shown}${rest}] so their F1 is sampling noise; over the ${a.labelsWellSupported} `
-              + `adequately supported labels this axis is `
-              + `${a.macroF1WellSupported != null ? a.macroF1WellSupported.toFixed(3) : 'n/a'}`;
-          })()
+          // Named individually only while a reader can still hold the list.
+          // mode_intent has 77 thin labels and printing them all buries the
+          // one sentence that matters. Beyond four they are counted instead.
+          const t = [...a.thinLabels].sort((x, y) => x.support - y.support);
+          const shown = t.slice(0, 4).map((x) => `${x.label} (${x.support})`).join(', ');
+          const rest = t.length > 4 ? `, and ${t.length - 4} more` : '';
+          return `${t.length} of ${a.labelsScored} labels are under ${MIN_LABEL_SUPPORT} held-out rows `
+            + `[${shown}${rest}] so their F1 is sampling noise; over the ${a.labelsWellSupported} `
+            + `adequately supported labels this axis is `
+            + `${a.macroF1WellSupported != null ? a.macroF1WellSupported.toFixed(3) : 'n/a'}`;
+        })()
         : '',
       note: a ? `over ${a.labelsScored} labels with support${a.excludedLabels?.length ? `, ${a.excludedLabels.length} excluded for zero support` : ''}` : 'axis not scored',
     });

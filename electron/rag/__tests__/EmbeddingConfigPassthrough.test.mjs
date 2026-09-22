@@ -27,7 +27,7 @@ const { resolveEmbeddingCredentials, embeddingConfigFrom } = await import(pathTo
 const STORE = {
   getGeminiApiKey: () => undefined,
   getOpenaiApiKey: () => undefined,
-  getNativelyApiKey: () => undefined,
+  getMeetFlooApiKey: () => undefined,
   getCustomEmbeddingApiKey: () => undefined,
   getTrialToken: () => undefined,
 };

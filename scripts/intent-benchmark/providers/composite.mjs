@@ -4,7 +4,7 @@
 // it is actually better at.
 //
 // This is NOT the brief's escalation ladder, which was measured and ruled out
-// on p95 grounds (docs/natively-router-frontier-2026-09-04.md). A ladder runs
+// on p95 grounds (docs/MeetFloo-router-frontier-2026-09-04.md). A ladder runs
 // the second model CONDITIONALLY on uncertain turns, and any escalation rate
 // above five percent drags p95 to the escalation's latency. This runs both
 // UNCONDITIONALLY, so p95 is simply the sum, and the sum is affordable because

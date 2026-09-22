@@ -1,7 +1,7 @@
 {
   "id": "INT-TECH-L",
   "category": "interview",
-  "natively_mode": "recruiting",
+  "MeetFloo_mode": "recruiting",
   "length_bucket": "long",
   "speakers": [
     {

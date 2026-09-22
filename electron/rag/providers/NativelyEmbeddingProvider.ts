@@ -3,11 +3,11 @@ import { embeddingSpaceKey } from '../embeddingSpace';
 import { TRIAL_SENTINEL_KEY } from '../../config/constants';
 
 /**
- * Natively-managed embeddings via POST /v1/embed.
+ * MeetFloo-managed embeddings via POST /v1/embed.
  *
- * This is the provider a Natively API key is supposed to get. Before it existed,
+ * This is the provider a MeetFloo API key is supposed to get. Before it existed,
  * EmbeddingProviderResolver consulted only openaiKey/geminiKey, so a customer on
- * a Natively key — the "easiest experience" tier — silently fell through to
+ * a MeetFloo key — the "easiest experience" tier — silently fell through to
  * Ollama or the bundled MiniLM model and got the weakest retrieval in the app.
  */
 
@@ -19,7 +19,7 @@ import { TRIAL_SENTINEL_KEY } from '../../config/constants';
  * a body with no `model` gets the old Gemini waterfall, because that is what
  * every build up to 2.8.8 sends and those builds pin gemini-embedding-2 at 3072
  * dimensions. Asking for voyage-4 by name PROVES this build knows its width;
- * a version header would only have asserted it. See natively-api
+ * a version header would only have asserted it. See MeetFloo-api
  * lib/managedModels.js for the other half of the rule.
  *
  * Changing this constant changes `space` below, which the pipeline treats as a
@@ -28,15 +28,15 @@ import { TRIAL_SENTINEL_KEY } from '../../config/constants';
 const MODEL = 'voyage-4';
 
 /**
- * The width the server serves voyage-4 at (natively-api VOYAGE_EMBED_DIMENSIONS).
- * voyage-4 emits 256/512/1024/2048 on request; 2048 is what Natively asks for.
+ * The width the server serves voyage-4 at (MeetFloo-api VOYAGE_EMBED_DIMENSIONS).
+ * voyage-4 emits 256/512/1024/2048 on request; 2048 is what MeetFloo asks for.
  *
  * MUST match the server. It is half the identity of `space`, so a mismatch is
  * not a formatting difference — it is a different vector space wearing the same
  * name. validate() below refuses rather than storing one.
  *
  * NOTE ON UPGRADING FROM 2.8.x: this pair changes `space` from
- * `natively:gemini-embedding-2:3072` to `natively:voyage-4:2048`, so vectors
+ * `MeetFloo:gemini-embedding-2:3072` to `MeetFloo:voyage-4:2048`, so vectors
  * embedded by an older build are in a space this one cannot reproduce. That is
  * handled, not ignored — EmbeddingPipeline compares the active space against
  * `last_embedding_space` at startup and RAGManager.scheduleAutoReindex()
@@ -46,7 +46,7 @@ const MODEL = 'voyage-4';
 const DIMENSIONS = 2048;
 
 /**
- * Server-side per-request batch cap (natively-api DEFAULT_MAX_BATCH). Larger
+ * Server-side per-request batch cap (MeetFloo-api DEFAULT_MAX_BATCH). Larger
  * batches are SPLIT here rather than rejected: the caller is chunking a
  * document, and making it care about our transport's cap would just push the
  * same loop up a layer.
@@ -55,7 +55,7 @@ const SERVER_MAX_BATCH = 32;
 
 /**
  * Voyage embeds a query and a document into DIFFERENT projections of the same
- * space. Measured on voyage-4 through the Natively server, the same sentence
+ * space. Measured on voyage-4 through the MeetFloo server, the same sentence
  * embedded both ways comes back at cosine ~0.79 — clearly not the same vector.
  *
  * That is an ENCODING distance, not a demonstrated retrieval gain, and the two
@@ -81,19 +81,19 @@ type EmbedInputType = 'query' | 'document';
  */
 const REQUEST_TIMEOUT_MS = 25_000;
 
-export interface NativelyEmbeddingOptions {
+export interface MeetFlooEmbeddingOptions {
   baseUrl?: string;
   /** Required when the key is TRIAL_SENTINEL_KEY — trials authenticate by token. */
   trialToken?: string;
 }
 
-export class NativelyEmbeddingProvider implements IEmbeddingProvider {
-  readonly name = 'natively';
+export class MeetFlooEmbeddingProvider implements IEmbeddingProvider {
+  readonly name = 'MeetFloo';
   readonly model = MODEL;
   readonly dimensions = DIMENSIONS;
   readonly space: string;
   /**
-   * The server refuses batches above DEFAULT_MAX_BATCH (natively-api
+   * The server refuses batches above DEFAULT_MAX_BATCH (MeetFloo-api
    * lib/embeddingQuota.js). embedBatch() splits larger arrays into sequential
    * requests; declaring the ceiling lets callers size their batches so that
    * split never happens and one caller-level batch is exactly one round trip.
@@ -103,7 +103,7 @@ export class NativelyEmbeddingProvider implements IEmbeddingProvider {
   private readonly baseUrl: string;
   private readonly trialToken?: string;
 
-  constructor(private apiKey: string, opts: NativelyEmbeddingOptions = {}) {
+  constructor(private apiKey: string, opts: MeetFlooEmbeddingOptions = {}) {
     this.baseUrl = (opts.baseUrl || process.env.APP_API_URL || 'https://api.MeetFloo.com').replace(/\/+$/, '');
     this.trialToken = opts.trialToken;
     // Deliberately NOT the same space key as the direct-Gemini provider, even
@@ -118,11 +118,11 @@ export class NativelyEmbeddingProvider implements IEmbeddingProvider {
   private headers(): Record<string, string> {
     const h: Record<string, string> = { 'Content-Type': 'application/json' };
     if (this.apiKey === TRIAL_SENTINEL_KEY) {
-      if (!this.trialToken) throw new Error('Natively trial token not available for embeddings');
+      if (!this.trialToken) throw new Error('MeetFloo trial token not available for embeddings');
       h['x-trial-token'] = this.trialToken;
     } else {
       h['x-api-key'] = this.apiKey;
-      h['x-natively-key'] = this.apiKey;
+      h['x-MeetFloo-key'] = this.apiKey;
     }
     return h;
   }
@@ -146,8 +146,8 @@ export class NativelyEmbeddingProvider implements IEmbeddingProvider {
       // Never interpolate the key into a message — these strings reach logs and
       // crash reports.
       const err: any = new Error(e?.name === 'TimeoutError' || e?.name === 'AbortError'
-        ? 'Natively embedding request timed out'
-        : 'Natively embedding request failed');
+        ? 'MeetFloo embedding request timed out'
+        : 'MeetFloo embedding request failed');
       err.retryable = true;
       throw err;
     }
@@ -161,7 +161,7 @@ export class NativelyEmbeddingProvider implements IEmbeddingProvider {
       // quota refusal — both of which arrive as 429.
       const detail: any = await res.json().catch(() => ({}));
       const err: any = new Error(
-        `Natively embedding failed: ${res.status} ${res.statusText}${detail?.error ? ` (${detail.error})` : ''}`
+        `MeetFloo embedding failed: ${res.status} ${res.statusText}${detail?.error ? ` (${detail.error})` : ''}`
       );
       err.status = res.status;
       err.provider = this.name;
@@ -199,7 +199,7 @@ export class NativelyEmbeddingProvider implements IEmbeddingProvider {
     // This is also the guard that catches a server misconfiguration: if
     // /v1/embed could not route voyage-4 it answers 503 rather than quietly
     // serving Gemini, but were that ever to change, this is what stops 3072-dim
-    // Gemini vectors from being stored as `natively:voyage-4:2048`.
+    // Gemini vectors from being stored as `MeetFloo:voyage-4:2048`.
     //
     // Marked retryable and NOT a permanent auth failure on purpose: a drift is a
     // transient server-side breaker state, and EmbeddingPipeline only promotes
@@ -209,7 +209,7 @@ export class NativelyEmbeddingProvider implements IEmbeddingProvider {
     // drop the user onto MiniLM — the exact outcome this provider exists to fix.
     if (typeof model === 'string' && model !== this.model) {
       const err: any = new Error(
-        `Natively served embeddings from model '${model}', expected '${this.model}' — `
+        `MeetFloo served embeddings from model '${model}', expected '${this.model}' — `
         + `refusing to store vectors from a different embedding space`
       );
       err.retryable = true;
@@ -218,7 +218,7 @@ export class NativelyEmbeddingProvider implements IEmbeddingProvider {
     }
     if (!Array.isArray(values) || values.length !== this.dimensions) {
       const err: any = new Error(
-        `Natively embedding dimension mismatch: expected ${this.dimensions}, got `
+        `MeetFloo embedding dimension mismatch: expected ${this.dimensions}, got `
         + `${Array.isArray(values) ? values.length : typeof values}`
       );
       err.retryable = true;
@@ -231,7 +231,7 @@ export class NativelyEmbeddingProvider implements IEmbeddingProvider {
     if (!this.apiKey) return false;
     if (this.apiKey === TRIAL_SENTINEL_KEY && !this.trialToken) return false;
     try {
-      await this.embed('natively embedding availability probe');
+      await this.embed('MeetFloo embedding availability probe');
       return true;
     } catch (error: any) {
       // Let the resolver see a structural auth failure and demote at once; any
@@ -274,7 +274,7 @@ export class NativelyEmbeddingProvider implements IEmbeddingProvider {
       const vectors = data?.embeddings;
       if (!Array.isArray(vectors) || vectors.length !== slice.length) {
         const err: any = new Error(
-          `Natively batch embedding returned ${Array.isArray(vectors) ? vectors.length : typeof vectors} `
+          `MeetFloo batch embedding returned ${Array.isArray(vectors) ? vectors.length : typeof vectors} `
           + `vectors for ${slice.length} inputs`
         );
         err.retryable = true;

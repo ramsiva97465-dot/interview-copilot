@@ -1,6 +1,6 @@
 // electron/llm/__tests__/VisionDeadlineAndAbortCommit2026_09_05.test.mjs
 //
-// Two regressions from a real user session (natively_debug (3).log, v2.8.8,
+// Two regressions from a real user session (MeetFloo_debug (3).log, v2.8.8,
 // one meeting, 33 screenshot turns on a Custom/OpenRouter provider). 7 of the
 // 33 turns (21%) showed the user:
 //
@@ -15,7 +15,7 @@
 //
 // (1) THE CEILING. LIVE_TOTAL_HARD_TIMEOUT_MS is 13000 for a documented reason:
 //     "the server's 10s cutover + 3s for the next leg", where "the server" is
-//     natively-api. A user on their own OpenRouter key never reaches that
+//     MeetFloo-api. A user on their own OpenRouter key never reaches that
 //     server, so the number was being applied for a reason that did not hold —
 //     and it truncated the vision layer's own budget (ttftTimeoutMs 20_000,
 //     "Vision TTFT is slower than text"). Measured TTFT that session: p50 5.6s,
@@ -50,7 +50,7 @@ const {
 // The tail this ceiling has to cover, taken from the session above.
 const OBSERVED_MAX_SUCCESSFUL_TTFT_MS = 11_629;
 
-describe('vision turns get a ceiling that is not derived from the natively cascade', () => {
+describe('vision turns get a ceiling that is not derived from the MeetFloo cascade', () => {
   test('a screenshot turn on a non-cascade provider uses the vision ceiling', () => {
     assert.equal(
       totalHardTimeoutMs({ isVisionTurn: true, viaServerCascade: false }),
@@ -58,7 +58,7 @@ describe('vision turns get a ceiling that is not derived from the natively casca
     );
   });
 
-  test('a screenshot turn routed THROUGH natively-api keeps 13000', () => {
+  test('a screenshot turn routed THROUGH MeetFloo-api keeps 13000', () => {
     // LIVE_TOTAL_HARD_TIMEOUT_MS encodes that server's cutover ordering, which
     // DeadlineBudgetOrdering2026_08_10 pins. On that route it is still correct.
     assert.equal(
@@ -67,10 +67,10 @@ describe('vision turns get a ceiling that is not derived from the natively casca
     );
   });
 
-  test('a text turn on the natively route still uses the natively ceiling', () => {
+  test('a text turn on the MeetFloo route still uses the MeetFloo ceiling', () => {
     // This test asserted `totalHardTimeoutMs({}) === LIVE_TOTAL_HARD_TIMEOUT_MS`
     // when it was written, because on 2026-09-05 the bare default WAS the
-    // natively number — every route shared that `return`. On 2026-09-06 the
+    // MeetFloo number — every route shared that `return`. On 2026-09-06 the
     // default-provider route was given its own 8000 ceiling, so the bare case
     // moved deliberately; LiveDeadlineRouteTable2026_09_06 owns the new table.
     // What THIS file still owns is that the cascade route is untouched by the

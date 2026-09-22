@@ -123,7 +123,7 @@ export function createMeetingRetrievalPort(input: MeetingPortInput): RetrievalPo
           // TEST_TRANSCRIPT — never LIVE_STT — keeping provenance truthful in
           // test runs. Per-chunk origin fidelity requires persisting origin
           // into the chunk store (documented follow-up).
-          provenance: process.env.NATIVELY_TEST_TRANSCRIPT_INJECTION === '1'
+          provenance: process.env.MEETFLOO_TEST_TRANSCRIPT_INJECTION === '1'
             ? 'TEST_TRANSCRIPT' : 'LIVE_STT',
         });
       }

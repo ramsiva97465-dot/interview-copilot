@@ -19,7 +19,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const REPO = '/tmp/natively-land-wt';
+const REPO = '/tmp/MeetFloo-land-wt';
 const SRC = fs.readFileSync(path.join(REPO, 'electron/ipcHandlers.ts'), 'utf8');
 const KEY = fs.readFileSync(path.join(REPO, '.env'), 'utf8')
   .split('\n').find((l) => l.startsWith('DEEPSEEK_API_KEY='))
@@ -36,7 +36,7 @@ const lift = (label, anchor) => {
   return eval(body);
 };
 const looksMetaRe = lift('looksMeta ', 'const looksMeta =');
-const hasFenceRe  = lift('hasCodeFence', 'const hasCodeFence =');
+const hasFenceRe = lift('hasCodeFence', 'const hasCodeFence =');
 
 const ask = async (messages, tag) => {
   const r = await fetch('https://api.deepseek.com/chat/completions', {
@@ -69,14 +69,14 @@ console.log(first.split('\n').slice(0, 8).map((l) => '        ' + l).join('\n'))
 
 // ── 3. Run the SHIPPED predicates over the REAL output ──────────────────────
 const looksMeta = looksMetaRe.test(first);
-const hasFence  = hasFenceRe.test(first);
+const hasFence = hasFenceRe.test(first);
 const legacyWouldRetry = looksMeta && !hasFence;
 console.log(`\n[probe] looksMeta=${looksMeta}  hasCodeFence=${hasFence}`);
 console.log(`[probe] LEGACY path would retry : ${legacyWouldRetry}`);
 
 // ── 4. Does the V3 short-circuit have ANY equivalent gate? ───────────────────
 const v3Start = SRC.indexOf('CONTEXT INTELLIGENCE V3 — wired manual-chat surface');
-const v3End   = SRC.indexOf('const isCodingChat', v3Start);
+const v3End = SRC.indexOf('const isCodingChat', v3Start);
 const v3Block = SRC.slice(v3Start, v3End > v3Start ? v3End : v3Start + 40000);
 const v3HasGate = /looksMeta|meta_retry|checkCodeCompleteness|validateAnswerStructure/.test(v3Block);
 console.log(`[probe] V3 block spans ${v3Block.length} chars; contains a coding-recovery gate: ${v3HasGate}`);

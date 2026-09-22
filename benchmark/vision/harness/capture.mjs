@@ -2,7 +2,7 @@
 //
 // Two kinds, deliberately:
 //   - REAL pages rendered in the system Chrome at a laptop viewport (1440x900,
-//     DPR 1) — what a Natively user actually screenshots. Ground truth is the
+//     DPR 1) — what a MeetFloo user actually screenshots. Ground truth is the
 //     text that was visible in the viewport at capture time (<id>.txt).
 //   - SYNTHETIC scenes rendered with sharp, used ONLY where the answer has to be
 //     exactly knowable (a chart with no printed values, a planted code bug).
@@ -10,8 +10,8 @@
 // Usage: node capture.mjs <out-dir>
 import fs from 'node:fs'
 import path from 'node:path'
-import { chromium } from '../../../natively-control/node_modules/playwright/index.mjs'
-import sharp from '../../../natively-api/node_modules/sharp/dist/index.cjs'
+import { chromium } from '../../../MeetFloo-control/node_modules/playwright/index.mjs'
+import sharp from '../../../MeetFloo-api/node_modules/sharp/dist/index.cjs'
 
 const OUT = path.resolve(process.argv[2])
 fs.mkdirSync(OUT, { recursive: true })

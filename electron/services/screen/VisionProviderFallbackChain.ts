@@ -8,7 +8,7 @@
 // telemetry. The first provider that returns non-empty output wins.
 //
 // Provider order (vision_first / vision_only):
-//   1. Natively API (if configured)
+//   1. MeetFloo API (if configured)
 //   2. OpenAI vision (if configured)
 //   3. Gemini Flash vision (if configured)
 //   4. Claude vision (if configured)
@@ -84,7 +84,7 @@ export interface VisionFallbackResult {
 // substitute fake providers without bringing up the whole LLM stack.
 export interface VisionProviderConfig {
   id: string;                                     // unique provider id, used in telemetry
-  displayName: string;                            // e.g. "Natively API"
+  displayName: string;                            // e.g. "MeetFloo API"
   modelId?: string;                               // resolved model id for telemetry
   isLocal: boolean;                               // true for ollama / codex local / approved-local-custom
   isConfigured: boolean;                          // API key / runtime available
@@ -109,10 +109,10 @@ export interface VisionInvocationParams {
    * The budget this attempt is being given, in ms — the same value that arms
    * `signal`. Passed explicitly because a provider implementation may hold its
    * OWN inner deadline that would otherwise fire first and make both this
-   * number and `signal` decorative. `generateWithNatively` did exactly that: an
+   * number and `signal` decorative. `generateWithMeetFloo` did exactly that: an
    * 8s default written for cheap text calls governed a non-streaming VISION
    * extraction, so the chain's 12s never applied and every screenshot died at
-   * 8.0s (31/31 non-cached turns in natively_debug (3).log). A provider that
+   * 8.0s (31/31 non-cached turns in MeetFloo_debug (3).log). A provider that
    * reads this can align its inner bound with the chain's.
    */
   timeoutMs: number;
@@ -379,7 +379,7 @@ export async function runVisionFallback(params: RunFallbackParams): Promise<Visi
     // A total budget alone lets the FIRST rung eat all of it, which starves
     // every rung behind it — and the rung behind is usually the provider the
     // user actually selected. Observed immediately after adding the budget: a
-    // dead Natively rung consumed 6000/6000ms and the ledger read
+    // dead MeetFloo rung consumed 6000/6000ms and the ledger read
     // `custom:timeout(0ms)`, so the user's own OpenRouter provider was reached
     // and given nothing. That would have quietly cancelled out 3e29a67f, whose
     // whole point was to let the chain reach that rung at all.
@@ -410,7 +410,7 @@ export async function runVisionFallback(params: RunFallbackParams): Promise<Visi
 
     try {
       // RACED, not merely awaited (2026-09-06). Of the providers behind
-      // runVisionRequest only Natively receives {signal, timeoutMs}; OpenAI,
+      // runVisionRequest only MeetFloo receives {signal, timeoutMs}; OpenAI,
       // Claude, Groq, LiteLLM, NIM, Gemini and custom ignore both, so the timer
       // above aborted a controller nobody was listening to and this await kept
       // waiting on the provider's own timeout, or forever. The budget was

@@ -109,7 +109,7 @@ function emptyCounters(): RolloutCounters {
 // contamination, stage green". A metric that cannot see its own writes is the
 // exact failure this mission exists to end, and it very nearly shipped inside
 // the tool built to detect it.
-const GLOBAL_KEY = '__nativelyCiV3RolloutCounters__';
+const GLOBAL_KEY = '__MeetFlooCiV3RolloutCounters__';
 const store = globalThis as unknown as Record<string, RolloutCounters | undefined>;
 if (!store[GLOBAL_KEY]) store[GLOBAL_KEY] = emptyCounters();
 
@@ -304,19 +304,19 @@ export function evaluateAbortConditions(input: {
   if (m.counters.contaminationTurns > 0) triggered.push('contamination_any');
 
   if (input.baselineContamination != null && m.rates.contamination != null
-      && m.rates.contamination > input.baselineContamination) {
+    && m.rates.contamination > input.baselineContamination) {
     triggered.push('contamination_above_baseline');
   }
 
   if (input.baselineOrchestrationP95Ms != null && m.orchestrationLatency.p95 != null
-      && m.orchestrationLatency.p95 > input.baselineOrchestrationP95Ms * 1.2) {
+    && m.orchestrationLatency.p95 > input.baselineOrchestrationP95Ms * 1.2) {
     triggered.push('orchestration_p95_regression_over_20pct');
   }
 
   // Over-refusal: strict refusals rising while general fallback is flat/low.
   // §27.2 forbids hiding failures behind refusal.
   if ((m.rates.strictRefusal ?? 0) > 0.25
-      && ((m.rates.generalFallback ?? 0) + ((m.rates as Record<string, number | null>).documentFactMiss ?? 0)) < 0.05) {
+    && ((m.rates.generalFallback ?? 0) + ((m.rates as Record<string, number | null>).documentFactMiss ?? 0)) < 0.05) {
     triggered.push('over_refusal_suspected');
   }
 

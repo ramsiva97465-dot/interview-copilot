@@ -31,7 +31,7 @@ const MAX_RETRIEVAL_CACHE_ENTRIES = 256;
 
 class BoundedMap<K, V> {
   private map = new Map<K, V>();
-  constructor(private maxEntries: number) {}
+  constructor(private maxEntries: number) { }
 
   get(key: K): V | undefined {
     return this.map.get(key);
@@ -76,7 +76,7 @@ class BoundedMap<K, V> {
 // writes in one would be invisible to reads in another, silently defeating
 // the cache. Anchoring to `globalThis` makes the singleton shared across
 // every bundle within the same Node/Electron process.
-const GLOBAL_KEY = '__natively_okf_knowledge_cache__';
+const GLOBAL_KEY = '__MeetFloo_okf_knowledge_cache__';
 interface GlobalCacheState {
   packCache: BoundedMap<string, PackCacheEntry>;
   retrievalCache: BoundedMap<string, ScoredCard[]>;

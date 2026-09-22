@@ -251,7 +251,7 @@ export const MODE_POLICIES: Record<ModeId, ModePolicy> = {
     id: 'recruiting', version: '1.0.0', name: 'Recruiting',
     purpose: 'Evaluate candidates with structured interview insights.',
     // CANDIDATE_FILE is a distinct source type from RESUME so a candidate's
-    // documents can never be confused with the Natively user's own resume.
+    // documents can never be confused with the MeetFloo user's own resume.
     allowedSourceTypes: ['CANDIDATE_FILE', 'JOB_DESCRIPTION', 'REFERENCE_FILE', 'MEETING_TRANSCRIPT', 'SCREEN_CONTEXT', 'CONVERSATION_STATE'],
     sourcePriorities: { CANDIDATE_FILE: 1, JOB_DESCRIPTION: 2, REFERENCE_FILE: 3 },
     // The user's OWN profile must never describe a candidate: no hydration.
@@ -376,7 +376,7 @@ export const MODE_POLICIES: Record<ModeId, ModePolicy> = {
 export class UnknownModeError extends Error {
   constructor(modeId: string) {
     super(`Unknown modeId "${modeId}". Mode policy resolution FAILS CLOSED — a mode ` +
-          `absent from the registry has no policy and must not fall back to mode-blind behaviour.`);
+      `absent from the registry has no policy and must not fall back to mode-blind behaviour.`);
     this.name = 'UnknownModeError';
   }
 }

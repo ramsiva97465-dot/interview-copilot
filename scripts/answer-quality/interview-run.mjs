@@ -28,7 +28,7 @@
 // record of how the with/without-intent comparison was produced.
 import { existsSync as __exists } from 'node:fs';
 if (!__exists(new URL('../../dist-electron/electron/llm/IntentClassifier.js', import.meta.url))) {
-  console.error('historical harness: electron/llm/IntentClassifier.ts was removed on 2026-09-05; see docs/natively-router-final-answer-2026-09-05.md');
+  console.error('historical harness: electron/llm/IntentClassifier.ts was removed on 2026-09-05; see docs/MeetFloo-router-final-answer-2026-09-05.md');
   process.exit(2);
 }
 import fs from 'node:fs';
@@ -37,9 +37,9 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '../..');
-const API = process.env.NATIVELY_API_URL || 'http://127.0.0.1:8788';
+const API = process.env.MEETFLOO_API_URL || 'http://127.0.0.1:8788';
 const KEY = fs.readFileSync(path.join(repoRoot, '.env'), 'utf8')
-  .split('\n').find((l) => l.startsWith('NATIVELY_API_KEY=')).split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '');
+  .split('\n').find((l) => l.startsWith('MEETFLOO_API_KEY=')).split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '');
 
 // The REAL classifier, out of the compiled bundle. Not a reimplementation.
 process.resourcesPath ||= path.join(repoRoot, 'resources');
@@ -60,7 +60,7 @@ The interviewer just asked: "${question}"${shapeLine}
 Give the candidate what to say.`;
   const r = await fetch(`${API}/v1/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-natively-key': KEY },
+    headers: { 'Content-Type': 'application/json', 'x-MeetFloo-key': KEY },
     body: JSON.stringify({ messages: [{ role: 'user', content }] }),
   });
   if (!r.ok) throw new Error(`${r.status}`);
@@ -80,8 +80,10 @@ for (const line of lines) {
   const withIntent = await generate(history, text, res.answerShape);
   const withoutIntent = await generate(history, text, null);
 
-  rows.push({ question: text, intent: res.intent, confidence: res.confidence,
-              with_intent: withIntent, without_intent: withoutIntent });
+  rows.push({
+    question: text, intent: res.intent, confidence: res.confidence,
+    with_intent: withIntent, without_intent: withoutIntent
+  });
   console.log(`${String(res.intent).padEnd(16)} conf=${String(res.confidence).padEnd(5)} with=${String(withIntent.length).padStart(5)}ch  without=${String(withoutIntent.length).padStart(5)}ch  "${text.slice(0, 44)}"`);
 
   history.push(`[INTERVIEWER] ${text}`);
@@ -104,9 +106,11 @@ ${Y.slice(0, 2200)}
 
 Which helps the candidate more in that live moment? Consider correctness and whether it can be used while talking. Reply with exactly: 1, 2, or TIE.`;
   try {
-    const res = await fetch(`${API}/v1/chat`, { method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-natively-key': KEY },
-      body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] }) });
+    const res = await fetch(`${API}/v1/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-MeetFloo-key': KEY },
+      body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
+    });
     const v = ((await res.json()).content ?? '').trim().toUpperCase();
     const win = v.startsWith('1') ? (flip ? 'without' : 'with') : v.startsWith('2') ? (flip ? 'with' : 'without') : 'tie';
     if (win === 'with') a++; else if (win === 'without') b++; else tie++;

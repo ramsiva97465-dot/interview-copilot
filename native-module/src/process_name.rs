@@ -69,7 +69,7 @@ unsafe fn global_sym(name: &[u8]) -> *mut c_void {
 
 /// Live-rename the current process's Activity Monitor display name.
 ///
-/// Passing the real product name (e.g. "Natively") restores the original
+/// Passing the real product name (e.g. "MeetFloo") restores the original
 /// identity; passing a disguise (e.g. "System Settings") masks it.
 ///
 /// Returns `Ok(true)` when LaunchServices accepted the change (OSStatus 0),

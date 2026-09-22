@@ -7,15 +7,15 @@ const flags = require('../../../dist-electron/electron/intelligence/intelligence
 const { getSourceOwnerEnforcementStage, isSourceOwnerEnforcementBlocking } = flags;
 
 // The staged source-owner enforcement accessor is the rollout knob promised by
-// plan §6. It resolves from NATIVELY_SOURCE_OWNER_ENFORCEMENT_STAGE first, then
+// plan §6. It resolves from MEETFLOO_SOURCE_OWNER_ENFORCEMENT_STAGE first, then
 // falls back to the legacy customModeSourceEnforcement flag, then defaults to
 // `observe`. The gate sites (manual chat + WTA) treat `off` as a legacy bypass
 // and every other stage as "honor the resolver", so the default posture is
 // leak-safe. These tests pin that contract so the knob cannot silently rot back
 // into dead code.
 
-const STAGE_ENV = 'NATIVELY_SOURCE_OWNER_ENFORCEMENT_STAGE';
-const FLAG_ENV = 'NATIVELY_CUSTOM_MODE_SOURCE_ENFORCEMENT';
+const STAGE_ENV = 'MEETFLOO_SOURCE_OWNER_ENFORCEMENT_STAGE';
+const FLAG_ENV = 'MEETFLOO_CUSTOM_MODE_SOURCE_ENFORCEMENT';
 
 describe('SourceOwnerEnforcement staged accessor', () => {
   let priorStage;

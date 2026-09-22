@@ -30,7 +30,7 @@ const {
   htmlToText,
 } = await import(moduleUrl);
 
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-safe-document-'));
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-safe-document-'));
 const createdPaths = [];
 
 function createFixture(name, content) {

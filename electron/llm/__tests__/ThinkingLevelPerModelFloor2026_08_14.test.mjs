@@ -20,7 +20,7 @@
  * Gemini stream on
  * the direct/BYOK path.
  *
- * Mirrors thinkingConfigForModel() in natively-api/lib/flashModelPicker.js —
+ * Mirrors thinkingConfigForModel() in MeetFloo-api/lib/flashModelPicker.js —
  * if you change the policy on one side, change it on the other.
  *
  * Run: ELECTRON_RUN_AS_NODE=1 electron --test electron/llm/__tests__/ThinkingLevelPerModelFloor2026_08_14.test.mjs

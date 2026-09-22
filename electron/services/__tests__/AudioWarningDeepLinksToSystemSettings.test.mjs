@@ -1,9 +1,9 @@
 // Regression test for UX3 fix (2026-05-28/29) in
-// src/components/NativelyInterface.tsx.
+// src/components/MeetFlooInterface.tsx.
 //
 // Pre-fix: the audio warning banner had a single "Open Settings" button
 // that always called toggleSettingsWindow(), forcing the user to navigate
-// from Natively's internal Settings into the macOS System Settings >
+// from MeetFloo's internal Settings into the macOS System Settings >
 // Privacy & Security > {Microphone|Screen Recording} pane themselves.
 //
 // Post-fix: the banner is channel-aware:
@@ -28,7 +28,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '../../..');
-const tsxPath = path.join(root, 'src/components/NativelyInterface.tsx');
+const tsxPath = path.join(root, 'src/components/MeetFlooInterface.tsx');
 const source = fs.readFileSync(tsxPath, 'utf8');
 
 // Locate the SystemAudioWarning type body. The type is a local alias
@@ -49,7 +49,7 @@ const CAPTURE_HANDLER_RE =
 describe('UX3: audio warning banner deep-links to the correct macOS System Settings pane', () => {
   it('SystemAudioWarning type includes an optional `channel: \'system\' | \'mic\'` field', () => {
     const m = source.match(TYPE_RE);
-    assert.ok(m, 'could not locate `type SystemAudioWarning = { ... };` in NativelyInterface.tsx');
+    assert.ok(m, 'could not locate `type SystemAudioWarning = { ... };` in MeetFlooInterface.tsx');
     const body = m[1];
     // Optional marker `?` is required so existing call sites that don't
     // pass channel still type-check, but the field itself must be there.
@@ -57,7 +57,7 @@ describe('UX3: audio warning banner deep-links to the correct macOS System Setti
       body,
       /channel\?\s*:\s*['"]system['"]\s*\|\s*['"]mic['"]|channel\?\s*:\s*['"]mic['"]\s*\|\s*['"]system['"]/,
       'BUG: SystemAudioWarning must declare `channel?: \'system\' | \'mic\'`. ' +
-        'Without this field on the type, the banner cannot pick the right deep-link pane (UX3 regression).',
+      'Without this field on the type, the banner cannot pick the right deep-link pane (UX3 regression).',
     );
   });
 
@@ -73,8 +73,8 @@ describe('UX3: audio warning banner deep-links to the correct macOS System Setti
       body,
       /setSystemAudioWarning\s*\(\s*\{[\s\S]*?channel\s*:\s*['"]system['"][\s\S]*?\}\s*\)/,
       'BUG: onSystemAudioPermissionDenied must set `channel: \'system\'` on the warning. ' +
-        'screen-recording-permission is implicitly system-channel; stamping it gives the ' +
-        'button-resolution logic a single source of truth (UX3).',
+      'screen-recording-permission is implicitly system-channel; stamping it gives the ' +
+      'button-resolution logic a single source of truth (UX3).',
     );
   });
 
@@ -89,7 +89,7 @@ describe('UX3: audio warning banner deep-links to the correct macOS System Setti
       body,
       /setSystemAudioWarning\s*\(\s*\{[\s\S]*?channel\s*:\s*payload\.channel[\s\S]*?\}\s*\)/,
       'BUG: onAudioCaptureFailed must pass `channel: payload.channel` into the warning. ' +
-        'Dropping this collapses mic vs system distinction and breaks the deep-link UX (UX3).',
+      'Dropping this collapses mic vs system distinction and breaks the deep-link UX (UX3).',
     );
   });
 
@@ -98,8 +98,8 @@ describe('UX3: audio warning banner deep-links to the correct macOS System Setti
       source.includes(
         'x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone',
       ),
-      'BUG: the macOS Microphone deep-link URL is missing from NativelyInterface.tsx. ' +
-        'Without it the mic-channel banner cannot one-click into the right pane (UX3).',
+      'BUG: the macOS Microphone deep-link URL is missing from MeetFlooInterface.tsx. ' +
+      'Without it the mic-channel banner cannot one-click into the right pane (UX3).',
     );
   });
 
@@ -108,8 +108,8 @@ describe('UX3: audio warning banner deep-links to the correct macOS System Setti
       source.includes(
         'x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture',
       ),
-      'BUG: the macOS Screen Recording deep-link URL is missing from NativelyInterface.tsx. ' +
-        'Without it the system-channel banner cannot one-click into the right pane (UX3).',
+      'BUG: the macOS Screen Recording deep-link URL is missing from MeetFlooInterface.tsx. ' +
+      'Without it the system-channel banner cannot one-click into the right pane (UX3).',
     );
   });
 
@@ -153,9 +153,9 @@ describe('UX3: audio warning banner deep-links to the correct macOS System Setti
       offenders.length,
       0,
       'BUG: found an "Open Settings" literal wired directly to toggleSettingsWindow with no ' +
-        'channel/deep-link guard nearby. UX3 requires the banner button to pick a deep-link URL ' +
-        'first and only fall back to toggleSettingsWindow when the channel is unknown / non-macOS.\n' +
-        `First offender at char ${offenders[0]?.index}: ${offenders[0]?.slice?.slice(0, 200)}...`,
+      'channel/deep-link guard nearby. UX3 requires the banner button to pick a deep-link URL ' +
+      'first and only fall back to toggleSettingsWindow when the channel is unknown / non-macOS.\n' +
+      `First offender at char ${offenders[0]?.index}: ${offenders[0]?.slice?.slice(0, 200)}...`,
     );
   });
 });

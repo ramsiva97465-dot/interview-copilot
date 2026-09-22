@@ -146,7 +146,7 @@ describe('panel behaviour', () => {
   });
 
   test('an unavailable provider is listed but inert, and says why', () => {
-    // Omitting it entirely would leave the user unable to tell "Natively does
+    // Omitting it entirely would leave the user unable to tell "MeetFloo does
     // not support this" from "you have not added a key".
     const src = panel();
     assert.match(src, /data-off=\{p\.available \? undefined : 'true'\}/);
@@ -159,7 +159,7 @@ describe('panel behaviour', () => {
   });
 
   test('the managed provider offers no model choice it cannot honour', () => {
-    // Natively pins the model server-side; a selectable list would be a promise
+    // MeetFloo pins the model server-side; a selectable list would be a promise
     // the client cannot keep.
     assert.match(panel(), /p\.managed/);
   });
@@ -192,7 +192,7 @@ describe('panel behaviour', () => {
   });
 
   test('no unverified comparative performance claim is shown', () => {
-    // §18: benchmark numbers only after measuring on Natively's own workload.
+    // §18: benchmark numbers only after measuring on MeetFloo's own workload.
     assert.doesNotMatch(panel(), /\d+\s*%\s*(better|faster|more accurate)/i);
   });
 });
@@ -485,9 +485,9 @@ function panelSrc() {
 describe('cards vs selector', () => {
   const panel = () => read('src/components/settings/EmbeddingSettings.tsx');
 
-  test('Natively and Built-in get NO card — there is nothing to configure', () => {
+  test('MeetFloo and Built-in get NO card — there is nothing to configure', () => {
     // Their cards' only content was a one-item Models list reading
-    // "None selected · 1", which is noise: Natively pins its model server-side
+    // "None selected · 1", which is noise: MeetFloo pins its model server-side
     // and Built-in ships with the app.
     //
     // The redesign expresses this as a positive CARD_ORDER allow-list rather
@@ -496,7 +496,7 @@ describe('cards vs selector', () => {
     const src = panel();
     const m = src.match(/CARD_ORDER = \[([^\]]*)\]/);
     assert.ok(m, 'the card list must be explicit');
-    assert.ok(!m[1].includes("'natively'"), 'Natively must not get a card');
+    assert.ok(!m[1].includes("'MeetFloo'"), 'MeetFloo must not get a card');
     assert.ok(!m[1].includes("'local'"), 'Built-in must not get a card');
   });
 
@@ -509,7 +509,7 @@ describe('cards vs selector', () => {
     const block = src.slice(i, i + 600);
     assert.match(block, /providers\b/, 'options come from the full catalogue');
     assert.doesNotMatch(block, /CARD_ORDER/, 'the selector must not inherit the card allow-list');
-    assert.doesNotMatch(block, /!== 'natively'/);
+    assert.doesNotMatch(block, /!== 'MeetFloo'/);
     assert.doesNotMatch(block, /!== 'local'/);
   });
 

@@ -44,7 +44,7 @@ function faultInjectionAllowed(): boolean {
  * Chars after which a stream should throw, simulating a provider that dies
  * mid-answer AFTER committing output.
  *
- *   NATIVELY_TEST_FAIL_STREAM_AFTER_CHARS=200 npm start
+ *   MEETFLOO_TEST_FAIL_STREAM_AFTER_CHARS=200 npm start
  *
  * Returns null when disabled. A value of 0 or less is rejected: failing before
  * any output is the PRE-commit case, which already fails over normally and is
@@ -52,7 +52,7 @@ function faultInjectionAllowed(): boolean {
  */
 export function failStreamAfterChars(): number | null {
   if (!faultInjectionAllowed()) return null;
-  const raw = process.env.NATIVELY_TEST_FAIL_STREAM_AFTER_CHARS;
+  const raw = process.env.MEETFLOO_TEST_FAIL_STREAM_AFTER_CHARS;
   if (!raw) return null;
   const n = Number(raw);
   if (!Number.isFinite(n) || n <= 0) return null;
@@ -63,7 +63,7 @@ export function failStreamAfterChars(): number | null {
  * Override for the total-output ceiling, so the runaway cap can be provoked
  * without waiting for a model to actually loop.
  *
- *   NATIVELY_TEST_STREAM_OUTPUT_CHARS=400 npm start
+ *   MEETFLOO_TEST_STREAM_OUTPUT_CHARS=400 npm start
  *
  * Returns null when disabled. Only ever LOWERS the ceiling in practice, but the
  * caller applies it directly — it is a test switch, not a tuning knob, and the
@@ -71,7 +71,7 @@ export function failStreamAfterChars(): number | null {
  */
 export function testOutputCharCeiling(): number | null {
   if (!faultInjectionAllowed()) return null;
-  const raw = process.env.NATIVELY_TEST_STREAM_OUTPUT_CHARS;
+  const raw = process.env.MEETFLOO_TEST_STREAM_OUTPUT_CHARS;
   if (!raw) return null;
   const n = Number(raw);
   if (!Number.isFinite(n) || n <= 0) return null;
@@ -81,7 +81,7 @@ export function testOutputCharCeiling(): number | null {
 /** Error thrown by the injected mid-stream fault, so logs name it clearly. */
 export class InjectedStreamFault extends Error {
   constructor(afterChars: number) {
-    super(`injected test fault: provider died after ${afterChars} chars (NATIVELY_TEST_FAIL_STREAM_AFTER_CHARS)`);
+    super(`injected test fault: provider died after ${afterChars} chars (MEETFLOO_TEST_FAIL_STREAM_AFTER_CHARS)`);
     this.name = 'InjectedStreamFault';
   }
 }

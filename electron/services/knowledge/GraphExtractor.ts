@@ -3,7 +3,7 @@
 // OKF Phase 4 — deterministic (no-LLM) relation extraction from OKF cards.
 // Official OKF links are plain Markdown links; OKF itself does not require
 // typed relationships (see docs/investigations/okf-official-spec-notes.md,
-// "Links" section). This module is a Natively EXTENSION on top of that —
+// "Links" section). This module is a MeetFloo EXTENSION on top of that —
 // internal typed (subject, predicate, object) triples derived from card
 // text, used only to expand retrieval (Phase 4 goal), never to override
 // direct card/chunk evidence.
@@ -180,7 +180,7 @@ function extractRelationsFromCard(
       const objectSpan = candidatesAfter.length > 0
         ? candidatesAfter.reduce((closest, s) => (s.index < closest.index ? s : closest))
         : entitySpans.filter(isRealCandidate)
-            .reduce((closest: { name: string; index: number } | null, s) => (closest === null || Math.abs(s.index - patMatch.index) < Math.abs(closest.index - patMatch.index) ? s : closest), null);
+          .reduce((closest: { name: string; index: number } | null, s) => (closest === null || Math.abs(s.index - patMatch.index) < Math.abs(closest.index - patMatch.index) ? s : closest), null);
       if (!objectSpan) continue;
 
       // Negation guard: discard if a negation/contrast cue sits between the

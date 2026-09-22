@@ -1,8 +1,8 @@
-**Natively currently generates post-meeting summaries with DeepSeek V4.1 Flash with thinking explicitly DISABLED.** The request contains `thinking: {"type": "disabled"}`, so DeepSeek's thinking-by-default does not apply. Natively does not use any reasoning today.
+**MeetFloo currently generates post-meeting summaries with DeepSeek V4.1 Flash with thinking explicitly DISABLED.** The request contains `thinking: {"type": "disabled"}`, so DeepSeek's thinking-by-default does not apply. MeetFloo does not use any reasoning today.
 
 | Question | Answer | Evidence |
 |---|---|---|
-| Model | `deepseek-v4-flash`. DeepSeek now serves this legacy id with **DeepSeek-V4.1-Flash** and responds with `"model": "deepseek-flash"` | `natively-api/lib/deepseekProvider.js:43` (`DEEPSEEK_MODEL`); DeepSeek pricing page (checked 2026-09-17): "`deepseek-flash` → DeepSeek-V4.1-Flash; legacy names accepted: `deepseek-v4-flash`". Every benchmark response for this model reported `deepseek-flash`. |
+| Model | `deepseek-v4-flash`. DeepSeek now serves this legacy id with **DeepSeek-V4.1-Flash** and responds with `"model": "deepseek-flash"` | `MeetFloo-api/lib/deepseekProvider.js:43` (`DEEPSEEK_MODEL`); DeepSeek pricing page (checked 2026-09-17): "`deepseek-flash` → DeepSeek-V4.1-Flash; legacy names accepted: `deepseek-v4-flash`". Every benchmark response for this model reported `deepseek-flash`. |
 | Provider / endpoint | DeepSeek, `POST https://api.deepseek.com/chat/completions`, non-streaming | `deepseekProvider.js:48`, `server.js:4460` (`buildDeepSeekBody(..., { stream: false })`) |
 | Reasoning used? | **No.** Thinking is explicitly disabled on every request | `deepseekProvider.js:129` `thinking: { type: 'disabled' }`. The module header explains the choice (parity with Gemini's minimal thinking, and avoiding empty answers). |
 | If not explicit, what's the default? | It *is* explicit. For reference, DeepSeek's API default is thinking **enabled** (`thinking.type` default `enabled`; `reasoning_effort` default `high`) | DeepSeek chat-completion API reference. A live probe that dropped the `thinking` param returned `reasoning_tokens: 106` on a small prompt, while the production body returned 0. |
@@ -27,7 +27,7 @@
 
 **Client routing (Electron, `LLMHelper.generateMeetingSummary`, `electron/LLMHelper.ts:11602`).** The rungs are tried in order:
 1. The user's custom/cURL provider, if one is selected.
-2. **Natively API** (`POST {NATIVELY_API_URL}/v1/chat`, body `{messages:[{role:'user',content:'Context:\n'+context}], system, language:'auto', purpose?}`).
+2. **MeetFloo API** (`POST {MEETFLOO_API_URL}/v1/chat`, body `{messages:[{role:'user',content:'Context:\n'+context}], system, language:'auto', purpose?}`).
 3. Codex CLI.
 4. Antigravity.
 5. Groq.
@@ -36,9 +36,9 @@
 8. Gemini Pro ×5.
 9. Ollama.
 
-For a Natively-API user, rung 2 serves everything.
+For a MeetFloo-API user, rung 2 serves everything.
 
-**Server routing (natively-api `routeChat`, `server.js:4737`).**
+**Server routing (MeetFloo-api `routeChat`, `server.js:4737`).**
 - **Language.** `injectLanguagePrompt` prepends a `[LANGUAGE INSTRUCTION — HIGHEST PRIORITY]` block (language `auto`).
 - **Chunk extraction and chunk-JSON repair** (`purpose:'extraction'`) go **DeepSeek first only if system+messages ≤ 25,000 chars** (`EXTRACTION_DEEPSEEK_MAX_CHARS`, `server.js:2450`), with a 45s cap. Otherwise, or on failure, they go to Gemini `gemini-3.1-flash-lite` → `gemini-3.8-flash`, rotating keys.
 - **Polish, overview, follow-up and title** use the default DeepSeek-primary cascade (`deepseekIsDefaultPrimary`; these prompts are not "live interview" mode), with a **10s cap** (`DEEPSEEK_TTFT_CAP_MS`, applied to the whole non-streaming call). The fallback order is Gemini Flash → MiniMax-M3 → Gemini Pro.

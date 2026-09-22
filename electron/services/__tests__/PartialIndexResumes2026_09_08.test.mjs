@@ -34,7 +34,7 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const SRC = readFileSync(path.join(repoRoot, 'electron/services/modes/ModeHybridRetriever.ts'), 'utf8');
 const PIPELINE = readFileSync(path.join(repoRoot, 'electron/rag/EmbeddingPipeline.ts'), 'utf8');
-const PROVIDER = readFileSync(path.join(repoRoot, 'electron/rag/providers/NativelyEmbeddingProvider.ts'), 'utf8');
+const PROVIDER = readFileSync(path.join(repoRoot, 'electron/rag/providers/MeetFlooEmbeddingProvider.ts'), 'utf8');
 
 describe('GAP-1 — a partial index is detectable and resumable', () => {
   test('the state table records how many chunks actually have vectors', () => {
@@ -224,7 +224,7 @@ describe('GAP-4 / retry — bounded concurrency and a server-directed backoff', 
   });
 
   test('the provider trusts the server\'s explicit retryable flag', () => {
-    const prov = readFileSync(path.join(repoRoot, 'electron/rag/providers/NativelyEmbeddingProvider.ts'), 'utf8');
+    const prov = readFileSync(path.join(repoRoot, 'electron/rag/providers/MeetFlooEmbeddingProvider.ts'), 'utf8');
     assert.match(prov, /typeof detail\?\.retryable === 'boolean'/);
     assert.match(prov, /detail\?\.retry_after/);
   });

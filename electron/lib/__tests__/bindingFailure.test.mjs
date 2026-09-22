@@ -23,16 +23,16 @@ const {
   diagnoseBindingFailure,
 } = require('../bindingFailure.cjs');
 
-const ROOT = '/Users/evin/natively-cluely-ai-assistant/node_modules/better-sqlite3';
+const ROOT = '/Users/evin/MeetFloo-cluely-ai-assistant/node_modules/better-sqlite3';
 const REAL_PATH = `${ROOT}/build/Release/better_sqlite3.node`;
 
 /** Verbatim from the failing launch, trimmed to 3 of the 13 candidates. */
 function bindingsError() {
   const err = new Error(
     'Could not locate the bindings file. Tried:\n' +
-      ` → ${ROOT}/build/better_sqlite3.node\n` +
-      ` → ${ROOT}/build/Debug/better_sqlite3.node\n` +
-      ` → ${REAL_PATH}`
+    ` → ${ROOT}/build/better_sqlite3.node\n` +
+    ` → ${ROOT}/build/Debug/better_sqlite3.node\n` +
+    ` → ${REAL_PATH}`
   );
   err.tries = [`${ROOT}/build/better_sqlite3.node`, `${ROOT}/build/Debug/better_sqlite3.node`, REAL_PATH];
   return err;

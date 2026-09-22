@@ -38,18 +38,18 @@ let dbMgr;
 describe('DatabaseManager.checkpoint() + close() on shutdown (2026-07-08)', () => {
   beforeEach(() => {
     const tmp = freshTmp();
-    process.env.NATIVELY_TEST_USERDATA = tmp;
+    process.env.MEETFLOO_TEST_USERDATA = tmp;
     // Reset module cache so DatabaseManager re-instantiates with the new
     // userData.
-    try { delete require.cache[DB_PATH]; } catch {}
+    try { delete require.cache[DB_PATH]; } catch { }
     DatabaseManager = require(DB_PATH).DatabaseManager;
     dbMgr = DatabaseManager.getInstance();
   });
 
   afterEach(() => {
-    try { dbMgr?.close?.(); } catch {}
-    try { delete require.cache[DB_PATH]; } catch {}
-    delete process.env.NATIVELY_TEST_USERDATA;
+    try { dbMgr?.close?.(); } catch { }
+    try { delete require.cache[DB_PATH]; } catch { }
+    delete process.env.MEETFLOO_TEST_USERDATA;
   });
 
   test('checkpoint() is a safe no-op when the database is unavailable', () => {

@@ -342,7 +342,7 @@ const main = async () => {
   fs.writeFileSync(path.join(fixtureDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
   fs.writeFileSync(path.join(fixtureDir, 'question-bank.json'), JSON.stringify({ ...manifest, cases: publicCases }, null, 2));
 
-  const sealedDestination = process.env.NATIVELY_CONTEXT_OS_SEALED_HOLDOUT;
+  const sealedDestination = process.env.MEETFLOO_CONTEXT_OS_SEALED_HOLDOUT;
   if (sealedDestination) {
     fs.mkdirSync(path.dirname(sealedDestination), { recursive: true });
     fs.writeFileSync(sealedDestination, JSON.stringify({ ...manifest, cases: holdout }, null, 2));

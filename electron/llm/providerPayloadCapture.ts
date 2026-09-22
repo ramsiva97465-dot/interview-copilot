@@ -19,8 +19,8 @@ export interface ProviderPayloadCapture {
 }
 
 function enabled(): boolean {
-  return process.env.NATIVELY_E2E === '1'
-    && process.env.NATIVELY_CONTEXT_OS_PROVIDER_CAPTURE === '1';
+  return process.env.MEETFLOO_E2E === '1'
+    && process.env.MEETFLOO_CONTEXT_OS_PROVIDER_CAPTURE === '1';
 }
 
 /**
@@ -58,7 +58,7 @@ function sanitize(value: unknown, key = ''): unknown {
   if (!value || typeof value !== 'object') return value;
   return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([childKey, child]) => [
     childKey,
-    /^(authorization|x-natively-key|x-trial-token|api[_-]?key)$/i.test(childKey)
+    /^(authorization|x-MeetFloo-key|x-trial-token|api[_-]?key)$/i.test(childKey)
       ? '[credential omitted]'
       : /^(data|images?)$/i.test(childKey) && typeof child === 'string'
         ? '[binary omitted]'

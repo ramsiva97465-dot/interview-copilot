@@ -5,8 +5,8 @@
 // STRUCTURED per-criterion verdict, saved as an artifact. Judge verdicts NEVER
 // override a deterministic hard-fail — they are advisory + recorded.
 
-const API_BASE = process.env.NATIVELY_API_BASE || 'http://localhost:3000';
-const LOCAL_TOKEN = process.env.NATIVELY_LOCAL_TEST_TOKEN || 'local-test';
+const API_BASE = process.env.MEETFLOO_API_BASE || 'http://localhost:3000';
+const LOCAL_TOKEN = process.env.MEETFLOO_LOCAL_TEST_TOKEN || 'local-test';
 
 const JUDGE_SYSTEM =
   'You are a fair but rigorous evaluation judge. You are given an interview question, a candidate ' +
@@ -49,7 +49,7 @@ export async function judge(question, answer, criteria, opts = {}) {
   ].join('\n');
   const res = await fetch(`${API_BASE}/v1/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-natively-local-test': LOCAL_TOKEN },
+    headers: { 'Content-Type': 'application/json', 'x-MeetFloo-local-test': LOCAL_TOKEN },
     body: JSON.stringify({ system: JUDGE_SYSTEM, messages: [{ role: 'user', content: user }] }),
     signal: AbortSignal.timeout(opts.timeoutMs || 60000),
   });

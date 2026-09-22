@@ -24,7 +24,7 @@ import sharp from 'sharp';
 const root = path.resolve(import.meta.dirname, '..');
 const screenDir = path.join(root, 'dist-electron/electron/services/screen');
 const iterations = Number.parseInt(process.env.SCREEN_UNDERSTANDING_BENCH_ITERATIONS || '5', 10);
-process.env.NATIVELY_TEST_USER_DATA = process.env.NATIVELY_TEST_USER_DATA || os.tmpdir();
+process.env.MEETFLOO_TEST_USER_DATA = process.env.MEETFLOO_TEST_USER_DATA || os.tmpdir();
 
 const { ImageOptimizer } = await import(pathToFileURL(path.join(screenDir, 'ImageOptimizer.js')).href);
 const { runVisionFallback } = await import(pathToFileURL(path.join(screenDir, 'VisionProviderFallbackChain.js')).href);
@@ -40,18 +40,18 @@ function round(n, digits = 2) {
   return Number(n.toFixed(digits));
 }
 
-// Build synthetic screenshots representative of the workloads Natively sees.
+// Build synthetic screenshots representative of the workloads MeetFloo sees.
 // We generate them on-disk once and re-use across iterations so the bench is
 // dominated by the optimizer/chain work, not by fixture creation.
 async function buildFixtures() {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'natively-screen-bench-'));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'MeetFloo-screen-bench-'));
   const fixtures = [];
 
   const specs = [
-    { name: '1080p document',  w: 1920, h: 1080, kind: 'text'  },
-    { name: '1440p ui',        w: 2560, h: 1440, kind: 'ui'    },
-    { name: '4K dashboard',    w: 3840, h: 2160, kind: 'mixed' },
-    { name: 'retina coding',   w: 3024, h: 1964, kind: 'code'  },
+    { name: '1080p document', w: 1920, h: 1080, kind: 'text' },
+    { name: '1440p ui', w: 2560, h: 1440, kind: 'ui' },
+    { name: '4K dashboard', w: 3840, h: 2160, kind: 'mixed' },
+    { name: 'retina coding', w: 3024, h: 1964, kind: 'code' },
   ];
 
   for (const spec of specs) {
@@ -61,7 +61,7 @@ async function buildFixtures() {
     const size = spec.w * spec.h * 3;
     const raw = Buffer.allocUnsafe(size);
     for (let i = 0; i < size; i += 3) {
-      raw[i]     = (i * 37) & 0xff;
+      raw[i] = (i * 37) & 0xff;
       raw[i + 1] = (i * 53) & 0xff;
       raw[i + 2] = (i * 71) & 0xff;
     }

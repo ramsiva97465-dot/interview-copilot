@@ -35,7 +35,7 @@ const LAST_GOOD = 'LAST-GOOD-BINARY';
  * exactly the way execSync does on a non-zero exit.
  */
 function runBuildNative({ buildSucceeds, artifactWritten = ARTIFACT }) {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-build-native-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-build-native-'));
   const nativeDir = path.join(tmp, 'native-module');
   fs.mkdirSync(nativeDir, { recursive: true });
   fs.writeFileSync(path.join(nativeDir, ARTIFACT), LAST_GOOD);
@@ -96,7 +96,7 @@ test('a FAILED Windows build leaves the previous .node in place', () => {
   assert.ok(
     fs.existsSync(artifactPath),
     `BUG: the last-good ${ARTIFACT} was destroyed by a failed build. It is gitignored, ` +
-      `so the developer cannot get it back. Files left behind: ${JSON.stringify(remaining)}`
+    `so the developer cannot get it back. Files left behind: ${JSON.stringify(remaining)}`
   );
   assert.equal(
     fs.readFileSync(artifactPath, 'utf8'),
@@ -138,18 +138,18 @@ test('a build that exits 0 with the WRONG artifact still keeps the previous .nod
   assert.ok(
     fs.existsSync(artifactPath),
     `BUG: napi exited 0 without producing ${ARTIFACT}, and the last-good copy was swept before ` +
-      `verifyArtifacts() could reject it. Files left behind: ${JSON.stringify(remaining)}`
+    `verifyArtifacts() could reject it. Files left behind: ${JSON.stringify(remaining)}`
   );
   assert.equal(fs.readFileSync(artifactPath, 'utf8'), LAST_GOOD);
 });
 
 test('a rescue copy survives the next run\'s stale sweep', () => {
-  // When the restore rename fails (the DLL is mapped by a running Natively),
+  // When the restore rename fails (the DLL is mapped by a running MeetFloo),
   // the script prints "the last-good binary is at <path>". The sweep at the top
   // of the NEXT run used to delete every '.node.stale-*' file unconditionally —
   // including that one — so the advice pointed at a file the next build removed
   // before the developer could act on it.
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-rescue-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-rescue-'));
   const nativeDir = path.join(tmp, 'native-module');
   fs.mkdirSync(nativeDir, { recursive: true });
 

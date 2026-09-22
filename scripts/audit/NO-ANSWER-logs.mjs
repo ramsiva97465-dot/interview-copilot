@@ -7,13 +7,15 @@ import { _electron as electron } from '@playwright/test';
 import fs from 'node:fs';
 
 const dotenv = Object.fromEntries(
-  fs.readFileSync('/tmp/natively-land-wt/.env', 'utf8').split('\n')
+  fs.readFileSync('/tmp/MeetFloo-land-wt/.env', 'utf8').split('\n')
     .filter((l) => /^[A-Z0-9_]+=/.test(l))
     .map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1).trim().replace(/^["']|["']$/g, '')]),
 );
-const env = { ...process.env, ...dotenv, NATIVELY_E2E: '1', NODE_ENV: 'development',
-  NATIVELY_DEV_BYPASS_SCREEN_TCC: '1', NATIVELY_E2E_LOCAL_TEST_TOKEN: 'local-test', OLLAMA_URL: 'http://127.0.0.1:1',
-  NATIVELY_INTELLIGENCE_TRACE: '1', NATIVELY_CONTEXT_DEBUG: '1' };
+const env = {
+  ...process.env, ...dotenv, MEETFLOO_E2E: '1', NODE_ENV: 'development',
+  MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1', MEETFLOO_E2E_LOCAL_TEST_TOKEN: 'local-test', OLLAMA_URL: 'http://127.0.0.1:1',
+  MEETFLOO_INTELLIGENCE_TRACE: '1', MEETFLOO_CONTEXT_DEBUG: '1'
+};
 
 const FULL = [
   { speaker: 'interviewer', text: 'Walk me through the Atlas platform migration.' },
@@ -29,14 +31,16 @@ app.process().stdout?.on('data', (d) => logBuf.push(...String(d).split('\n').fil
 app.process().stderr?.on('data', (d) => logBuf.push(...String(d).split('\n').filter(Boolean)));
 
 await app.firstWindow({ timeout: 45000 });
-await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => {});
-const RAW = async (fn, arg) => { for (let a = 0; a < 5; a++) { try { const w = app.windows()[0] || await app.firstWindow(); await w.waitForLoadState('domcontentloaded').catch(() => {}); return await w.evaluate(fn, arg); } catch (e) { if (a === 4) throw e; await new Promise((r) => setTimeout(r, 1800)); } } };
+await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => { });
+const RAW = async (fn, arg) => { for (let a = 0; a < 5; a++) { try { const w = app.windows()[0] || await app.firstWindow(); await w.waitForLoadState('domcontentloaded').catch(() => { }); return await w.evaluate(fn, arg); } catch (e) { if (a === 4) throw e; await new Promise((r) => setTimeout(r, 1800)); } } };
 const R = (ch, ...a) => RAW(async ({ ch, a }) => (window.electronAPI || window.api).e2eInvoke(ch, ...a), { ch, a });
 
-await R('__e2e__:enable-pro').catch(() => {});
-await RAW(async () => { const api = window.electronAPI || window.api;
-  try { const c = await api.modesCreate({ name: 'LogProbe', templateType: 'general' }); const id = c?.mode?.id ?? c?.id; if (id) await api.modesSetActive(id); } catch {}
-  try { await api.setModel('natively'); } catch {} });
+await R('__e2e__:enable-pro').catch(() => { });
+await RAW(async () => {
+  const api = window.electronAPI || window.api;
+  try { const c = await api.modesCreate({ name: 'LogProbe', templateType: 'general' }); const id = c?.mode?.id ?? c?.id; if (id) await api.modesSetActive(id); } catch { }
+  try { await api.setModel('MeetFloo'); } catch { }
+});
 
 // Widened: the first pass MISSED the actual cause because "Speculative stream
 // accepted" matches none of those keywords. Guard names, not guessed symptoms.

@@ -1,6 +1,6 @@
-// electron/rag/__tests__/NativelyEmbeddingProvider.test.mjs
+// electron/rag/__tests__/MeetFlooEmbeddingProvider.test.mjs
 //
-// The Natively-managed embedding provider (POST /v1/embed → voyage-4).
+// The MeetFloo-managed embedding provider (POST /v1/embed → voyage-4).
 // Drives a real local HTTP stub rather than mocking fetch, so the request shape,
 // headers and response parsing are all exercised as they will run in production.
 //
@@ -8,7 +8,7 @@
 //   • embedBatch sends ONE request with `input: [...]` and gets N vectors back,
 //     in order. Sending N separate requests would bill N times.
 //   • Batches larger than the server's cap are split, not rejected.
-//   • Trial users authenticate with x-trial-token, NOT x-natively-key — the
+//   • Trial users authenticate with x-trial-token, NOT x-MeetFloo-key — the
 //     sentinel key is not a real credential.
 //   • A response served by a DIFFERENT model than this provider declares must
 //     throw. /v1/embed serves more than one model, and two models of the same
@@ -27,8 +27,8 @@ import { createServer } from 'node:http';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const modPath = path.resolve(__dirname, '../../../dist-electron/electron/rag/providers/NativelyEmbeddingProvider.js');
-const { NativelyEmbeddingProvider } = await import(pathToFileURL(modPath).href);
+const modPath = path.resolve(__dirname, '../../../dist-electron/electron/rag/providers/MeetFlooEmbeddingProvider.js');
+const { MeetFlooEmbeddingProvider } = await import(pathToFileURL(modPath).href);
 
 const DIMS = 2048;
 const vec = (seed) => Array.from({ length: DIMS }, (_, i) => (i === 0 ? seed : 0.01));
@@ -58,15 +58,15 @@ before(async () => {
 
 after(async () => { await new Promise(r => server.close(r)); });
 
-const make = (key = 'nk_test_key') => new NativelyEmbeddingProvider(key, { baseUrl });
+const make = (key = 'nk_test_key') => new MeetFlooEmbeddingProvider(key, { baseUrl });
 
 describe('identity', () => {
   test('declares the space it actually stores vectors in', () => {
     const p = make();
-    assert.equal(p.name, 'natively');
+    assert.equal(p.name, 'MeetFloo');
     assert.equal(p.model, 'voyage-4');
     assert.equal(p.dimensions, DIMS);
-    assert.equal(p.space, 'natively:voyage-4:2048');
+    assert.equal(p.space, 'MeetFloo:voyage-4:2048');
   });
 
   test('does NOT share a space key with the direct-Voyage provider', () => {
@@ -77,11 +77,11 @@ describe('identity', () => {
   });
 
   test('the space differs from the 2.8.x one, which is what triggers a re-index', () => {
-    // Vectors stored by an older build are in natively:gemini-embedding-2:3072
+    // Vectors stored by an older build are in MeetFloo:gemini-embedding-2:3072
     // and cannot be reproduced at this width. EmbeddingPipeline compares the
     // active space against last_embedding_space at startup and re-embeds what
     // does not match; that only happens because these two strings differ.
-    assert.notEqual(make().space, 'natively:gemini-embedding-2:3072');
+    assert.notEqual(make().space, 'MeetFloo:gemini-embedding-2:3072');
   });
 });
 
@@ -118,19 +118,19 @@ describe('embedding', () => {
 });
 
 describe('authentication', () => {
-  test('a real key is sent as x-natively-key', async () => {
+  test('a real key is sent as x-MeetFloo-key', async () => {
     requests = [];
     await make('nk_live_abc').embed('x');
-    assert.equal(requests[0].headers['x-natively-key'], 'nk_live_abc');
+    assert.equal(requests[0].headers['x-MeetFloo-key'], 'nk_live_abc');
     assert.equal(requests[0].headers['x-trial-token'], undefined);
   });
 
   test('a trial uses x-trial-token, never the sentinel as a key', async () => {
     requests = [];
-    const p = new NativelyEmbeddingProvider('__trial__', { baseUrl, trialToken: 'natively_trial_xyz' });
+    const p = new MeetFlooEmbeddingProvider('__trial__', { baseUrl, trialToken: 'MeetFloo_trial_xyz' });
     await p.embed('x');
-    assert.equal(requests[0].headers['x-trial-token'], 'natively_trial_xyz');
-    assert.equal(requests[0].headers['x-natively-key'], undefined);
+    assert.equal(requests[0].headers['x-trial-token'], 'MeetFloo_trial_xyz');
+    assert.equal(requests[0].headers['x-MeetFloo-key'], undefined);
   });
 });
 
@@ -203,7 +203,7 @@ describe('errors', () => {
 
 describe('availability', () => {
   test('isAvailable() is false without a key rather than throwing', async () => {
-    const p = new NativelyEmbeddingProvider('', { baseUrl });
+    const p = new MeetFlooEmbeddingProvider('', { baseUrl });
     assert.equal(await p.isAvailable(), false);
   });
 

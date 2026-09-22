@@ -8,7 +8,7 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
 
 const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
-const version = (process.env.NATIVELY_RELEASE_VERSION || pkg.version || '').replace(/^v/, '');
+const version = (process.env.MEETFLOO_RELEASE_VERSION || pkg.version || '').replace(/^v/, '');
 const tag = `v${version}`;
 
 const installerName = `MeetFloo-Setup-${version}.exe`;

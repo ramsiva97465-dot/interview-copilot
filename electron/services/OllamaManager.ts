@@ -36,7 +36,7 @@ export class OllamaManager {
   // runs at a time and the second call awaits the first's resolution.
   private ensuringPromise: Promise<ProviderStatus> | null = null;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): OllamaManager {
     // Instance anchored on globalThis (15 dist bundles). `ensuringPromise`
@@ -44,11 +44,11 @@ export class OllamaManager {
     // per-bundle copies could run duplicate ensure/spawn/restart loops, the
     // same racing texture as the logo-stuck incident this state serializes.
     const g = globalThis as unknown as Record<string, OllamaManager | undefined>;
-    if (!g.__nativelyOllamaManagerV1__) {
-      g.__nativelyOllamaManagerV1__ = OllamaManager.instance ?? new OllamaManager();
+    if (!g.__MeetFlooOllamaManagerV1__) {
+      g.__MeetFlooOllamaManagerV1__ = OllamaManager.instance ?? new OllamaManager();
     }
-    OllamaManager.instance = g.__nativelyOllamaManagerV1__;
-    return g.__nativelyOllamaManagerV1__;
+    OllamaManager.instance = g.__MeetFlooOllamaManagerV1__;
+    return g.__MeetFlooOllamaManagerV1__;
   }
 
   /**

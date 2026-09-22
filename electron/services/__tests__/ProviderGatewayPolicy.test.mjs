@@ -69,7 +69,7 @@ test('LLMHelper guards every outbound provider with assertOutboundScopes', () =>
     "this.assertOutboundScopes('openai'",
     "this.assertOutboundScopes('claude'",
     "this.assertOutboundScopes('gemini'",
-    "this.assertOutboundScopes('natively'",
+    "this.assertOutboundScopes('MeetFloo'",
     "this.assertOutboundScopes('custom_curl'",
     "this.assertOutboundScopes('custom_provider'",
   ]) {
@@ -90,10 +90,10 @@ test('Embedding provider resolver fails closed when embeddings scope is denied',
   // The three cloud embedding providers are now scope-gated through ONE helper
   // (pushScoped) instead of three inline assert calls, so the scope name is a
   // parameter. The guarantee is unchanged and additionally asserted
-  // behaviourally in electron/rag/__tests__/EmbeddingResolverNativelyFirst.test.mjs,
+  // behaviourally in electron/rag/__tests__/EmbeddingResolverMeetFlooFirst.test.mjs,
   // which proves a denying policy leaves ONLY the local-capable provider.
   assert.match(src, /assertProviderDataScopes\(scopeName, \['embeddings'\], config\.providerDataScopes\)/);
-  for (const scope of ['openai_embeddings', 'gemini_embeddings', 'natively_embeddings']) {
+  for (const scope of ['openai_embeddings', 'gemini_embeddings', 'MeetFloo_embeddings']) {
     assert.match(src, new RegExp(`pushScoped\\('${scope}'`), `${scope} must be scope-gated`);
   }
 });

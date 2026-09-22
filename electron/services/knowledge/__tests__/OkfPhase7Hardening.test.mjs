@@ -28,12 +28,12 @@ const editorSrc = read('electron/services/knowledge/OkfCardEditor.ts');
 const retrieverSrc = read('electron/services/knowledge/OkfRetriever.ts');
 
 test('KnowledgeCache: anchors the pack/retrieval cache singletons to globalThis (cross-bundle sharing)', () => {
-  assert.match(cacheSrc, /const GLOBAL_KEY = '__natively_okf_knowledge_cache__';/);
+  assert.match(cacheSrc, /const GLOBAL_KEY = '__MeetFloo_okf_knowledge_cache__';/);
   assert.match(cacheSrc, /globalThis as unknown as Record<string, GlobalCacheState/);
 });
 
 test('KnowledgeIndexQueue: anchors the queue singleton to globalThis (cross-bundle sharing)', () => {
-  assert.match(queueSrc, /const GLOBAL_KEY = '__natively_okf_knowledge_index_queue__';/);
+  assert.match(queueSrc, /const GLOBAL_KEY = '__MeetFloo_okf_knowledge_index_queue__';/);
   assert.match(queueSrc, /globalThis as unknown as Record<string, KnowledgeIndexQueueImpl/);
 });
 

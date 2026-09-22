@@ -12,11 +12,11 @@
 // The resolution order matches Context Intelligence V3's, deliberately, so
 // there is one thing to learn rather than two:
 //
-//   1. NATIVELY_INTERACTION_ROUTER      env var, wins over everything
+//   1. MEETFLOO_INTERACTION_ROUTER      env var, wins over everything
 //   2. the persisted user setting        null clears back to the default
 //   3. DEFAULT_ENABLED                   one constant, every environment
 
-export const INTERACTION_ROUTER_ENV_KEY = 'NATIVELY_INTERACTION_ROUTER';
+export const INTERACTION_ROUTER_ENV_KEY = 'MEETFLOO_INTERACTION_ROUTER';
 
 /**
  * OFF. Do not flip this without live evidence.

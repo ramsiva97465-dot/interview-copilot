@@ -1,6 +1,6 @@
 export type MeetingInterfaceTheme = 'default' | 'liquid-glass' | 'modern';
 
-const STORAGE_KEY = 'natively_meeting_interface_theme';
+const STORAGE_KEY = 'MeetFloo_meeting_interface_theme';
 
 const VALID_THEMES: ReadonlySet<MeetingInterfaceTheme> = new Set([
     'default',

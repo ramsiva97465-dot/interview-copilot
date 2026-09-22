@@ -32,11 +32,11 @@ test('--default treats set-but-empty as unset, matching ${VAR:-default}', () => 
 });
 
 test('--default-tmpdir builds a platform-correct path under the given tmpdir', () => {
-  const win = applyEnv(['--default-tmpdir', 'UD=natively-test-userdata'], {}, 'C:\\Temp');
-  assert.equal(win.UD, path.join('C:\\Temp', 'natively-test-userdata'));
+  const win = applyEnv(['--default-tmpdir', 'UD=MeetFloo-test-userdata'], {}, 'C:\\Temp');
+  assert.equal(win.UD, path.join('C:\\Temp', 'MeetFloo-test-userdata'));
 
-  const posix = applyEnv(['--default-tmpdir', 'UD=natively-test-userdata'], {}, '/tmp');
-  assert.equal(posix.UD, path.join('/tmp', 'natively-test-userdata'));
+  const posix = applyEnv(['--default-tmpdir', 'UD=MeetFloo-test-userdata'], {}, '/tmp');
+  assert.equal(posix.UD, path.join('/tmp', 'MeetFloo-test-userdata'));
 });
 
 test('--default-tmpdir splits nested subpaths rather than embedding a raw slash', () => {

@@ -4,7 +4,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  * WHY THIS EXISTS
  *
- * When a customer supplies their own provider key, Natively's backend executes
+ * When a customer supplies their own provider key, MeetFloo's backend executes
  * nothing on their behalf and can therefore meter nothing. There is no
  * server-side observation of BYOK feature use to be had. The only signal that a
  * feature ran is this client saying so — which makes a dropped event not a gap
@@ -160,7 +160,7 @@ export class UsageOutbox {
     }
 
     /**
-     * On by default. `NATIVELY_USAGE_OUTBOX_ENABLED=0` (or `false`/`off`/`no`)
+     * On by default. `MEETFLOO_USAGE_OUTBOX_ENABLED=0` (or `false`/`off`/`no`)
      * turns it off.
      *
      * HONEST LIMIT OF THIS SWITCH. It reads `process.env`, and a packaged app
@@ -181,7 +181,7 @@ export class UsageOutbox {
     }
 
     /**
-     * @param getApiKey resolves the Natively API key at DISPATCH time, not at
+     * @param getApiKey resolves the MeetFloo API key at DISPATCH time, not at
      * start time — a user who pastes their key after launch must not need a
      * restart before their queued events can drain.
      */
@@ -308,7 +308,7 @@ export class UsageOutbox {
             try {
                 res = await fetch(`${MEETFLOO_API_URL}/v1/usage/audit`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'x-natively-key': apiKey },
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'x-MeetFloo-key': apiKey },
                     body: JSON.stringify({ events: live.map((b) => b.payload) }),
                     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
                 });

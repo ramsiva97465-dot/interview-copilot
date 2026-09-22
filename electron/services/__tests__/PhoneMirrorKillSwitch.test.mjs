@@ -1,6 +1,6 @@
 // electron/services/__tests__/PhoneMirrorKillSwitch.test.mjs
 //
-// Behavioral test for the NATIVELY_DISABLE_PHONE_MIRROR boot kill switch.
+// Behavioral test for the MEETFLOO_DISABLE_PHONE_MIRROR boot kill switch.
 // The actual start/no-start decision lives in the exported pure function
 // `shouldStartPhoneMirrorOnBoot` (electron/services/PhoneMirrorService.ts),
 // extracted from main.ts's boot sequence specifically so it can be imported
@@ -26,14 +26,14 @@ const compiledServicePath = path.resolve(
   'dist-electron/electron/services/PhoneMirrorService.js',
 );
 
-const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-pm-killswitch-'));
+const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-pm-killswitch-'));
 
 const electronStub = {
   app: {
     isReady: () => true,
     getPath: () => userDataDir,
     whenReady: () => Promise.resolve(),
-    on: () => {},
+    on: () => { },
   },
   BrowserWindow: class {
     static getFocusedWindow() {
@@ -69,7 +69,7 @@ test.after(() => {
   Module._load = originalLoad;
   try {
     fs.rmSync(userDataDir, { recursive: true, force: true });
-  } catch {}
+  } catch { }
 });
 
 test('kill switch set + setting enabled → does NOT start', () => {

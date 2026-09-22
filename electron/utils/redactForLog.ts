@@ -45,7 +45,7 @@ export type LogRedactionLevel = 'standard' | 'full';
 // IntelligenceEngine.js would otherwise each get their own private copy of the
 // flag, and the one main.ts sets would be invisible to the others. Same
 // inversion SettingsManager and the context-debug modules use.
-const LEVEL_KEY = '__nativelyLogRedactionLevelV1__';
+const LEVEL_KEY = '__MeetFlooLogRedactionLevelV1__';
 
 interface LevelHolder { level: LogRedactionLevel }
 
@@ -74,7 +74,7 @@ export function setLogRedactionLevel(level: LogRedactionLevel): void {
  * consulted against the level. Suffix-matched (no leading anchor), so
  * `xApiKey`, `userToken` and `refreshToken` all match.
  */
-const CREDENTIAL_KEY_RE = /(api[_-]?key|authorization|bearer|token|secret|password|credential|cookie|set[_-]?cookie|signature|x[_-]?api[_-]?key|x[_-]?trial[_-]?token|x[_-]?natively[_-]?key)$/i;
+const CREDENTIAL_KEY_RE = /(api[_-]?key|authorization|bearer|token|secret|password|credential|cookie|set[_-]?cookie|signature|x[_-]?api[_-]?key|x[_-]?trial[_-]?token|x[_-]?MeetFloo[_-]?key)$/i;
 
 /**
  * User-content property keys. Redacted at 'standard', kept at 'full'.
@@ -102,8 +102,8 @@ const ALWAYS_REMOVE_KEY_RE = /(base64|audio[_-]?data)$/i;
  */
 const VALUE_PATTERNS: Array<{ regex: RegExp; replacement: string }> = [
     { regex: /Bearer\s+[A-Za-z0-9._~+\/=:-]{12,}/gi, replacement: 'Bearer [REDACTED]' },
-    { regex: /x-(natively|trial|api)-(key|token)\s*[:=]\s*[A-Za-z0-9._~+\/=:-]{8,}/gi, replacement: '$&[REDACTED]'.replace(/(=|:)\s*[A-Za-z0-9._~+\/=:-]{8,}/, '$1 [REDACTED]') },
-    { regex: /natively_sk_[A-Za-z0-9._-]+/gi, replacement: REDACTED },
+    { regex: /x-(MeetFloo|trial|api)-(key|token)\s*[:=]\s*[A-Za-z0-9._~+\/=:-]{8,}/gi, replacement: '$&[REDACTED]'.replace(/(=|:)\s*[A-Za-z0-9._~+\/=:-]{8,}/, '$1 [REDACTED]') },
+    { regex: /MeetFloo_sk_[A-Za-z0-9._-]+/gi, replacement: REDACTED },
     { regex: /sk-[A-Za-z0-9]{20,}/gi, replacement: REDACTED },
     { regex: /gsk_[A-Za-z0-9]{20,}/gi, replacement: REDACTED },
     { regex: /dg_[A-Za-z0-9]{20,}/gi, replacement: REDACTED },
@@ -227,7 +227,7 @@ function sanitize(
                 output[key] = REDACTED;
             } else if (ALWAYS_REMOVE_KEY_RE.test(key)) {
                 output[key] = REMOVED;
-            // Axis 2 — user content. This is the only level-dependent branch.
+                // Axis 2 — user content. This is the only level-dependent branch.
             } else if (!full && REMOVE_VALUE_KEY_RE.test(key)) {
                 output[key] = REMOVED;
             } else if (!full && CONTENT_KEY_RE.test(key)) {

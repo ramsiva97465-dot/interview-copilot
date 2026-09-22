@@ -17,7 +17,7 @@
 // supervisor can fall back to cloud STT.
 //
 // We force the low-memory refusal deterministically via the onnxThreadConfig
-// env overrides (NATIVELY_ONNX_AVAILABLE_MEM_GB=0.1, NATIVELY_ONNX_MIN_FREE_GB=8),
+// env overrides (MEETFLOO_ONNX_AVAILABLE_MEM_GB=0.1, MEETFLOO_ONNX_MIN_FREE_GB=8),
 // so spawnWorker throws before touching any real ONNX/worker resource.
 //
 // Run under `ELECTRON_RUN_AS_NODE=1 electron --test` or `node --test` after build.
@@ -33,8 +33,8 @@ import { fileURLToPath, pathToFileURL } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Force the ONNX admission gate to refuse: tiny available memory, high floor.
-process.env.NATIVELY_ONNX_AVAILABLE_MEM_GB = '0.1';
-process.env.NATIVELY_ONNX_MIN_FREE_GB = '8';
+process.env.MEETFLOO_ONNX_AVAILABLE_MEM_GB = '0.1';
+process.env.MEETFLOO_ONNX_MIN_FREE_GB = '8';
 
 // modelManager/modelPreloader pull in `electron` for userData. Stub it.
 const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'whisper-spawnfail-'));

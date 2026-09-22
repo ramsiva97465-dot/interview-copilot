@@ -116,7 +116,7 @@ test('win32: the window is NEVER focused — the policy is permanent, not a typi
     typeof mod.setTypingFocus,
     'undefined',
     'BUG: setTypingFocus must not exist — focusing the overlay to type is what stole focus. ' +
-      'Typing without focus is handled by the WH_KEYBOARD_LL hook, not by focusing the window.',
+    'Typing without focus is handled by the WH_KEYBOARD_LL hook, not by focusing the window.',
   );
   const win = fakeWindow();
   attachNoActivate(win, 'win32');
@@ -170,7 +170,7 @@ test('overlay, pill and toggle windows are placed under the no-activate policy a
       windowHelperSource,
       new RegExp(`attachNoActivate\\(${win.replace(/[.$]/g, '\\$&')}\\)`),
       `BUG: ${win} must call attachNoActivate() right after construction — without it, every ` +
-        'click on that window activates Natively on Windows and steals foreground focus.',
+      'click on that window activates MeetFloo on Windows and steals foreground focus.',
     );
   }
 });
@@ -202,7 +202,7 @@ test('the hover-gate interaction policy must not re-arm click-activation on mana
   assert.ok(
     guards.length >= unguarded.length && unguarded.length > 0,
     'BUG: every setFocusable(true) in syncOverlayInteractionPolicy must be guarded by ' +
-      '!isNoActivateManaged(...) — an unguarded call re-arms click-activation on Windows.',
+    '!isNoActivateManaged(...) — an unguarded call re-arms click-activation on Windows.',
   );
 });
 
@@ -230,7 +230,7 @@ test('typing without focus is wired to the native stealth hook on BOTH desktop p
     createTap,
     /process\.platform !== 'darwin' && process\.platform !== 'win32'/,
     "BUG: createTapInstance must allow win32 — the Windows WH_KEYBOARD_LL hook exports the same " +
-      'StealthKeyboardTap; gating on darwin-only leaves Windows with no keystroke capture.',
+    'StealthKeyboardTap; gating on darwin-only leaves Windows with no keystroke capture.',
   );
 
   // WindowHelper must register the overlay as the captured-key sink on win32.
@@ -242,7 +242,7 @@ test('typing without focus is wired to the native stealth hook on BOTH desktop p
     reg,
     /process\.platform === 'darwin' \|\| process\.platform === 'win32'/,
     'BUG: the overlay must be registered with StealthKeyboardManager on Windows too, or captured ' +
-      'keystrokes have no sink (and would fan out to all windows if the guard were dropped).',
+    'keystrokes have no sink (and would fan out to all windows if the guard were dropped).',
   );
 
   // chat:focusInput must drive the native tap on any platform where it is
@@ -274,7 +274,7 @@ test('typing without focus is wired to the native stealth hook on BOTH desktop p
       focusInputBlock,
       /process\.platform !== 'win32'\) overlay\.focus\(\)/,
       'BUG: overlay.focus() in chat:focusInput must be win32-guarded — unconditional focus steals ' +
-        "the meeting app's foreground on Windows, but macOS/Linux need it for the no-tap fallback.",
+      "the meeting app's foreground on Windows, but macOS/Linux need it for the no-tap fallback.",
     );
   }
 });
@@ -287,7 +287,7 @@ test('typing without focus is wired to the native stealth hook on BOTH desktop p
 // input, so it must reproduce all three through the stealth session.
 
 test('Windows: Enter submits WITHOUT ending the session (macOS keeps the caret)', () => {
-  const src = read('src/components/NativelyInterface.tsx');
+  const src = read('src/components/MeetFlooInterface.tsx');
   const enterCase = src.slice(
     src.indexOf('case 36: // Return'),
     src.indexOf('case 51: // Backspace'),
@@ -297,7 +297,7 @@ test('Windows: Enter submits WITHOUT ending the session (macOS keeps the caret)'
     enterCase,
     /if \(!isWindows\) \{\s*window\.electronAPI\.stealthTapStop\(\)/,
     'BUG: on Windows the stealth session must survive Enter — the hook IS the input path, so ' +
-      'stopping would send the next message\'s keystrokes to the meeting app. macOS keeps focus.',
+    'stopping would send the next message\'s keystrokes to the meeting app. macOS keeps focus.',
   );
 });
 
@@ -307,7 +307,7 @@ test('Windows: the idle window is a long backstop, not the 10s macOS tap-mode ti
     mgr,
     /IDLE_TIMEOUT_WIN32_MS = 5 \* 60_000/,
     'BUG: Windows needs a long idle backstop — a 10s window silently redirects typing to the ' +
-      'meeting app mid-thought, which macOS (DOM focus, no timeout) never does.',
+    'meeting app mid-thought, which macOS (DOM focus, no timeout) never does.',
   );
   assert.match(
     mgr,
@@ -322,18 +322,18 @@ test('Windows: the idle window is a long backstop, not the 10s macOS tap-mode ti
 });
 
 test('Windows: the engaged input shows the aurora glow, not the green tap-mode ring', () => {
-  const src = read('src/components/NativelyInterface.tsx');
+  const src = read('src/components/MeetFlooInterface.tsx');
   assert.match(
     src,
     /stealthTapActive && isWindows \? 'aurora-focus-active' : ''/,
     'BUG: Windows must apply aurora-focus-active while engaged — the input can never take real ' +
-      'DOM focus, so without it the box looks permanently unfocused (macOS glows on click).',
+    'DOM focus, so without it the box looks permanently unfocused (macOS glows on click).',
   );
   assert.match(
     src,
     /stealthTapActive && !isWindows \? 'ring-2 ring-emerald/,
     'BUG: the green ring must be macOS-only — on Windows every click engages the hook, so it ' +
-      'would be permanently green, which macOS never shows.',
+    'would be permanently green, which macOS never shows.',
   );
   const css = read('src/index.css');
   assert.match(
@@ -348,7 +348,7 @@ test('Windows: the engaged input shows the aurora glow, not the green tap-mode r
         `\\[data-interface-theme="${theme}"\\] \\.aurora-focus\\.aurora-focus-active`,
       ),
       `BUG: the ${theme} theme override must also pair with .aurora-focus-active, or the glow ` +
-        'silently differs from macOS under that theme.',
+      'silently differs from macOS under that theme.',
     );
   }
 });
@@ -361,7 +361,7 @@ test('main registers the hook-availability provider before creating windows (dea
   assert.ok(
     providerIdx < windowIdx,
     'BUG: the provider must be registered BEFORE WindowHelper is created, or the overlay could be ' +
-      'made no-activate before availability is known — a dead input when the hook is missing.',
+    'made no-activate before availability is known — a dead input when the hook is missing.',
   );
   assert.match(
     mainSource.slice(providerIdx, providerIdx + 400),
@@ -370,7 +370,7 @@ test('main registers the hook-availability provider before creating windows (dea
   );
 });
 
-test('the Windows native hook stops stealth on a click outside Natively (outside-click parity)', () => {
+test('the Windows native hook stops stealth on a click outside MeetFloo (outside-click parity)', () => {
   // Rust-source assertion (the binary is built out-of-band). The manager already
   // stops on isOutsideMouseDown; the Windows hook must PRODUCE that signal via a
   // WH_MOUSE_LL hook using a process check (DPI-free, no bounds needed).
@@ -379,7 +379,7 @@ test('the Windows native hook stops stealth on a click outside Natively (outside
     rust,
     /SetWindowsHookExW\(\s*WH_MOUSE_LL/,
     'BUG: a WH_MOUSE_LL hook must be installed — without it, clicking back into the meeting app ' +
-      'does not stop stealth, so the keyboard hook keeps swallowing keys and the user cannot type there.',
+    'does not stop stealth, so the keyboard hook keeps swallowing keys and the user cannot type there.',
   );
   assert.match(
     rust,
@@ -389,8 +389,8 @@ test('the Windows native hook stops stealth on a click outside Natively (outside
   assert.match(
     rust,
     /GetWindowThreadProcessId[\s\S]{0,200}GetCurrentProcessId\(\)/,
-    'BUG: outside-vs-inside must be decided by the clicked window PROCESS (clicking any Natively ' +
-      'window keeps the session; another process stops it) — DPI-free, no bounds math.',
+    'BUG: outside-vs-inside must be decided by the clicked window PROCESS (clicking any MeetFloo ' +
+    'window keeps the session; another process stops it) — DPI-free, no bounds math.',
   );
   assert.match(
     rust,
@@ -402,7 +402,7 @@ test('the Windows native hook stops stealth on a click outside Natively (outside
 test('the Windows native hook stops stealth on Alt+Tab / any app switch (no click involved)', () => {
   // Alt+Tab is PASSED THROUGH by the keyboard hook's system-modifier filter, so
   // the user can leave without ever clicking. Without a foreground watcher the
-  // hook would keep swallowing keys and their typing would land in Natively's
+  // hook would keep swallowing keys and their typing would land in MeetFloo's
   // chatbox instead of the app they switched to. macOS gets this free (the
   // panel resigns key when another app activates).
   const rust = read('native-module/src/keyboard_hook_windows.rs');
@@ -415,7 +415,7 @@ test('the Windows native hook stops stealth on Alt+Tab / any app switch (no clic
     rust,
     /WINEVENT_OUTOFCONTEXT/,
     'BUG: the WinEvent hook must be out-of-context so its callback is delivered on the worker ' +
-      "thread's existing message pump.",
+    "thread's existing message pump.",
   );
   const fgProc = rust.slice(
     rust.indexOf('unsafe extern "system" fn foreground_event_proc'),
@@ -468,7 +468,7 @@ test('the keyboard hook passes the MODIFIER KEYS THEMSELVES through (or every sh
       fn,
       new RegExp(`${code}`, 'i'),
       `BUG: ${name} must be passed through — swallowing a modifier's own keydown means the OS ` +
-        'never sees it and no shortcut can ever form.',
+      'never sees it and no shortcut can ever form.',
     );
   }
   // And they must actually be wired into the matches! arm, not just declared.
@@ -495,7 +495,7 @@ test('the keyboard hook passes the MODIFIER KEYS THEMSELVES through (or every sh
       fn,
       new RegExp(`${nope}`),
       `BUG: ${nope} (Esc/Enter/Backspace) must NOT be in the pass-through list — the renderer ` +
-        'switch needs it, and Esc is how the user exits stealth typing.',
+      'switch needs it, and Esc is how the user exits stealth typing.',
     );
   }
 });
@@ -511,7 +511,7 @@ test('inside-vs-outside ownership uses a GA_ROOT walk (shared by both stop trigg
     fn,
     /GetAncestor\(hwnd, GA_ROOT\)/,
     'BUG: must walk to the root window — a Chromium child HWND can report a different process, ' +
-      'which would read as "not ours" and stop stealth on the very click that engages typing.',
+    'which would read as "not ours" and stop stealth on the very click that engages typing.',
   );
   assert.match(
     fn,
@@ -526,6 +526,6 @@ test('main registers real stealth-tap handlers on Windows (not the non-desktop n
     mainSource,
     /process\.platform === 'darwin' \|\| process\.platform === 'win32'\) \{[\s\S]{0,1600}stealth-tap:start'/,
     'BUG: stealth-tap:* handlers must be registered for win32 with the real manager, or ' +
-      'stealthTapStart() no-ops and click-to-type never engages the hook.',
+    'stealthTapStart() no-ops and click-to-type never engages the hook.',
   );
 });

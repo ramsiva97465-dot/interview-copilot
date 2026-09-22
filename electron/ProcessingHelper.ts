@@ -120,10 +120,10 @@ export class ProcessingHelper {
       this.llmHelper.setLitellmConfig(credManager.getLitellmApiKey() || '', litellmBaseURL, credManager.getLitellmMaxTokens());
     }
 
-    const nativelyKey = credManager.getNativelyApiKey();
-    if (nativelyKey) {
-      console.log("[ProcessingHelper] Loading stored Natively API Key from CredentialsManager");
-      this.llmHelper.setNativelyKey(nativelyKey);
+    const MeetFlooKey = credManager.getMeetFlooApiKey();
+    if (MeetFlooKey) {
+      console.log("[ProcessingHelper] Loading stored MeetFloo API Key from CredentialsManager");
+      this.llmHelper.setMeetFlooKey(MeetFlooKey);
     }
 
     // CRITICAL: Re-initialize IntelligenceManager now that keys are loaded
@@ -137,9 +137,9 @@ export class ProcessingHelper {
       // buildEmbeddingConfig(), NOT a hand-written object. This used to pass
       // `{ openaiKey, geminiKey, providerDataScopes }` and nothing else, and it
       // runs AFTER the correct startup init — so it clobbered that config and
-      // silently dropped nativelyApiKey, ollamaUrl, every model/dims field and,
+      // silently dropped MeetFlooApiKey, ollamaUrl, every model/dims field and,
       // fatally, the user's embeddingMode/embeddingProvider selection. Settings
-      // could read {mode:'manual', provider:'natively'} while the pipeline
+      // could read {mode:'manual', provider:'MeetFloo'} while the pipeline
       // resolved gemini, which is what made choosing a model appear to do
       // nothing. A hand-maintained field list is the defect; the builder is the
       // single place that knows how to assemble this.

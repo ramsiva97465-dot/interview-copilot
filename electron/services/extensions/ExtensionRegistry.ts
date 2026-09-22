@@ -1,6 +1,6 @@
 /**
  * The installed-extension index, persisted to
- * `~/.natively/extensions/registry.json`.
+ * `~/.MeetFloo/extensions/registry.json`.
  *
  * This file is the record of what the user INSTALLED and what they GRANTED. It
  * is read back on every launch, so it is treated as untrusted on load: an entry
@@ -49,7 +49,7 @@ export interface ExtensionRegistryOptions {
   appVersion: string;
   /**
    * Storage root override, used to locate each entry's payload directory.
-   * Production leaves this unset and the default `~/.natively` root applies;
+   * Production leaves this unset and the default `~/.MeetFloo` root applies;
    * tests point it at a temp directory.
    */
   rootOverride?: string;

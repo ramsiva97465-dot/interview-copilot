@@ -1,7 +1,7 @@
 // scripts/e2e-profile-jd-real-path.js
 //
 // Real-app source-switch repair (2026-07-14, Phase 10) — focused profile/JD
-// benchmark against the REAL Natively backend, driving the REAL profile/JD
+// benchmark against the REAL MeetFloo backend, driving the REAL profile/JD
 // answer path (not the doc-grounded reference-files path the Phase 0 thesis
 // benchmark exercises). Boots a real Electron app, ingests the user's real
 // résumé + JD via the production ModesManager path, creates a profile-aware
@@ -22,7 +22,7 @@
 //
 // Run (same env vars as the thesis E2E — see scripts/e2e-thesis-real-path.js):
 //   npm run build:electron
-//   RUN_NATIVELY_API_E2E=1 NATIVELY_API_KEY=<key> \
+//   RUN_MEETFLOO_API_E2E=1 MEETFLOO_API_KEY=<key> \
 //     [E2E_RESUME=/abs/path/resume.pdf] [E2E_JD=/abs/path/jd.pdf] \
 //     ./node_modules/.bin/electron scripts/e2e-profile-jd-real-path.js
 //
@@ -38,22 +38,22 @@ const { app } = require('electron');
 const repoRoot = path.resolve(__dirname, '..');
 const distRoot = path.join(repoRoot, 'dist-electron', 'electron');
 
-const KEY = process.env.NATIVELY_API_KEY || '';
-const MODEL = process.env.E2E_MODEL || 'natively';
+const KEY = process.env.MEETFLOO_API_KEY || '';
+const MODEL = process.env.E2E_MODEL || 'MeetFloo';
 const SERVER_MODEL = process.env.E2E_JUDGE_MODEL || 'gemini-3.1-flash-lite'; // distinct judge model
 // Probe direct-vendor credentials ahead of the skip gate so the harness can
 // run via either path (the direct-LLM streamer introduced in 2026-07-14
 // adds E2E_MINIMAX_API_KEY / E2E_GEMINI_API_KEY as alternatives when the
-// Natively proxy is unreachable from the sandbox).
+// MeetFloo proxy is unreachable from the sandbox).
 const directMod = require('./lib/direct-llm-stream.js');
 const directProvider = directMod.describeActiveProvider();
 const hasDirectCredentials = !!process.env.E2E_MINIMAX_API_KEY || !!process.env.E2E_GEMINI_API_KEY;
-if (process.env.RUN_NATIVELY_API_E2E !== '1' || (!KEY && !hasDirectCredentials)) {
-    console.log('[profile-jd] SKIP — set RUN_NATIVELY_API_E2E=1 plus one of: NATIVELY_API_KEY (Natively proxy), E2E_MINIMAX_API_KEY (MiniMax international), or E2E_GEMINI_API_KEY (direct Gemini).');
+if (process.env.RUN_MEETFLOO_API_E2E !== '1' || (!KEY && !hasDirectCredentials)) {
+    console.log('[profile-jd] SKIP — set RUN_MEETFLOO_API_E2E=1 plus one of: MEETFLOO_API_KEY (MeetFloo proxy), E2E_MINIMAX_API_KEY (MiniMax international), or E2E_GEMINI_API_KEY (direct Gemini).');
     process.exit(0);
 }
 
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-pjd-e2e-'));
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-pjd-e2e-'));
 app.setPath('userData', tmpUserData);
 
 const RESUME_PDF = process.env.E2E_RESUME || path.join(repoRoot, 'evinresume.pdf');
@@ -83,7 +83,7 @@ const PROFILE_PROMPT = [
 //
 // Target artifacts (overridable via E2E_RESUME / E2E_JD, defaults below):
 //   - résumé = evinresume.pdf = the USER's own résumé (Evin John — software
-//     engineer: AI/Full Stack Intern, Natively, TalentScope, B.Tech CS at CUSAT).
+//     engineer: AI/Full Stack Intern, MeetFloo, TalentScope, B.Tech CS at CUSAT).
 //   - JD = profileresume/Job-Description---Data-Analyst-Sample.pdf = a
 //     Data Analyst sample role. Intentionally NON-matching: a software-engineer
 //     résumé being scored against a data-analyst JD. That's exactly the
@@ -105,16 +105,16 @@ const Q = [
     { cat: 'resume_fact', q: 'What is my portfolio link username?', must: [/evinjohn|evin\.john/i] },
     { cat: 'resume_fact', q: 'What is my TEDx role and dates?', must: [/sponsorship|tedx/i, /jun 2025.*mar 2026|jun.*2025.*mar.*2026/i] },
     { cat: 'resume_fact', q: 'What two tech companies have I interned at?', must: [/estrotech|aetherbot/i] },
-    { cat: 'resume_fact', q: 'How many GitHub stars did Natively get in its first week?', must: [/500\+?\s?stars|500 stars|500/i] },
+    { cat: 'resume_fact', q: 'How many GitHub stars did MeetFloo get in its first week?', must: [/500\+?\s?stars|500 stars|500/i] },
     { cat: 'resume_fact', q: 'What is the start date of my B.Tech program?', must: [/oct 2022|2022/i] },
 
     // ── Résumé project/experience (8) ────────────────────────────────────────
-    { cat: 'resume_proj', q: 'Tell me about the Natively project.', must: [/natively|meeting copilot|privacy/i] },
+    { cat: 'resume_proj', q: 'Tell me about the MeetFloo project.', must: [/MeetFloo|meeting copilot|privacy/i] },
     { cat: 'resume_proj', q: 'What is TalentScope and what tech stack did I use?', must: [/talent scope|talentscope|interview|rbac|next\.js|convex/i] },
     { cat: 'resume_proj', q: 'Tell me about RedisMart.', must: [/redismart|redis|e-?commerce|40\s?%/i] },
     { cat: 'resume_proj', q: 'What was the AI Self-Service Kiosk project at EstroTech?', must: [/kiosk|self-service|estrotech|fastapi|python|100ms/i] },
     { cat: 'resume_proj', q: 'Tell me about my work at Aetherbot AI.', must: [/aetherbot|pixel|streaming|ec2|aws|80ms|react|node/i] },
-    { cat: 'resume_proj', q: 'What tools does Natively integrate with on the AI model side?', must: [/gemini|openai|groq|multi-?vendor/i] },
+    { cat: 'resume_proj', q: 'What tools does MeetFloo integrate with on the AI model side?', must: [/gemini|openai|groq|multi-?vendor/i] },
     { cat: 'resume_proj', q: 'What architecture did TalentScope use for real-time?', must: [/next\.js|convex|stream sdk|clerk|real-?time/i] },
     { cat: 'resume_proj', q: 'How much did RedisMart reduce database reads by?', must: [/40\s?%|forty percent|40 percent/i] },
 
@@ -242,7 +242,7 @@ async function main() {
     // (probes the EXACT pipeline the direct path uses). Removes itself after.
     {
         const probeCtx = mm.buildRetrievedActiveModeContextBlock('What is my name?', undefined, undefined, 'list_answer');
-        console.log(`[profile-jd] DIAG CHAT_MODE_PROMPT.length=${(CHAT_MODE_PROMPT||'').length} retrievedContext.length=${(probeCtx||'').length}`);
+        console.log(`[profile-jd] DIAG CHAT_MODE_PROMPT.length=${(CHAT_MODE_PROMPT || '').length} retrievedContext.length=${(probeCtx || '').length}`);
         if (probeCtx && probeCtx.length > 0) console.log(`[profile-jd] DIAG retrieved first 200: ${JSON.stringify(probeCtx.slice(0, 200))}`);
     }
 
@@ -250,17 +250,17 @@ async function main() {
     const directStream = directMod.createDirectStream();
     // Only configure the production LLMHelper when we'll actually route through
     // it — when E2E_MINIMAX_API_KEY / E2E_GEMINI_API_KEY is set and direct
-    // streaming is active, skip the (unreachable-from-sandbox) Natively key
+    // streaming is active, skip the (unreachable-from-sandbox) MeetFloo key
     // wiring entirely. Direct path doesn't use llm.streamChat at all.
     if (!directStream) {
-        llm.setNativelyKey(KEY);
+        llm.setMeetFlooKey(KEY);
         llm.setModel(MODEL);
     }
 
     // Optional direct-LLM routing (real-app source-switch repair 2026-07-14,
     // post-probe correction): when E2E_MINIMAX_API_KEY or E2E_GEMINI_API_KEY
     // is set, route the answer call directly to that vendor instead of through
-    // Natively's gateway. The Natively proxy is unreachable from some
+    // MeetFloo's gateway. The MeetFloo proxy is unreachable from some
     // sandboxed networks even though the raw vendor endpoint IS reachable
     // (probe-verified). Direct mode does its own retrieval via the SAME
     // ModesManager.buildRetrievedActiveModeContextBlock() the production
@@ -304,7 +304,7 @@ async function main() {
         if (activeModeId) {
             const filesBefore = mm.getReferenceFiles(activeModeId);
             console.log(`[profile-jd] DIAG reference files before prewarm: count=${filesBefore.length}`);
-            for (const f of filesBefore) console.log(`  - ${f.fileName} content.chars=${(f.content||'').length}`);
+            for (const f of filesBefore) console.log(`  - ${f.fileName} content.chars=${(f.content || '').length}`);
             await mm.prewarmModeReferenceIndex(activeModeId).catch((e) => {
                 console.warn('[profile-jd] prewarmModeReferenceIndex failed (will continue; first question may have empty context):', e.message);
             });
@@ -314,7 +314,7 @@ async function main() {
                 console.log(`[profile-jd] DIAG post-prewarm index status for ${f.fileName}: ${JSON.stringify(s)}`);
             }
             const postCtx = mm.buildRetrievedActiveModeContextBlock('warmup probe to confirm retrieval is non-empty', undefined, undefined, 'list_answer');
-            console.log(`[profile-jd] DIAG post-prewarm retrievedContext.length=${(postCtx||'').length}`);
+            console.log(`[profile-jd] DIAG post-prewarm retrievedContext.length=${(postCtx || '').length}`);
             if (postCtx && postCtx.length > 0) console.log(`[profile-jd] DIAG post-prewarm first 300: ${JSON.stringify(postCtx.slice(0, 300))}`);
             // Also probe the structured hybrid retrieve to see if it returns chunks (the sync lexical-only wrapper filters them out for some reason)
             const probeQ = 'Maria Elena Gutierrez CCRN nursing experience';
@@ -329,7 +329,7 @@ async function main() {
             }
         }
     } else {
-        console.log(`[profile-jd] provider: NATIVELY_API_KEY (LLMHelper.streamChat)`);
+        console.log(`[profile-jd] provider: MEETFLOO_API_KEY (LLMHelper.streamChat)`);
     }
 
     // Per-category pass counters (so the report shows where the gaps are).
@@ -414,7 +414,7 @@ async function main() {
         totalQuestions: Q.length,
         totalPass, totalFail,
         byCategory: byCat,
-        latency: { median: latencies.sort((a,b)=>a-b)[Math.floor(latencies.length/2)], p95: latencies[Math.floor(latencies.length*0.95)] || latencies[latencies.length-1] },
+        latency: { median: latencies.sort((a, b) => a - b)[Math.floor(latencies.length / 2)], p95: latencies[Math.floor(latencies.length * 0.95)] || latencies[latencies.length - 1] },
         rows: allRows,
     };
     fs.writeFileSync(OUT_FILE, JSON.stringify(report, null, 2));

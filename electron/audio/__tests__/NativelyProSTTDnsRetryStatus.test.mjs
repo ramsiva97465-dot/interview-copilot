@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
 
 function wireSttErrorStatus(stt, sendSttStatus) {
-  const sttProvider = 'natively-pro';
+  const sttProvider = 'MeetFloo-pro';
   const speaker = 'interviewer';
   let consecutiveErrors = 0;
 
@@ -76,13 +76,13 @@ function wireSttErrorStatus(stt, sendSttStatus) {
   });
 }
 
-test('NativelyProSTT DNS retries must not trip terminal STT failure counter', () => {
+test('MeetFlooProSTT DNS retries must not trip terminal STT failure counter', () => {
   const stt = new EventEmitter();
   const statuses = [];
   wireSttErrorStatus(stt, (status) => statuses.push(status));
 
   for (let i = 0; i < 5; i++) {
-    const err = new Error('getaddrinfo ENOTFOUND api.natively.software');
+    const err = new Error('getaddrinfo ENOTFOUND api.MeetFloo.software');
     err.code = 'ENOTFOUND';
     stt.emit('error', err);
   }
@@ -90,20 +90,20 @@ test('NativelyProSTT DNS retries must not trip terminal STT failure counter', ()
   assert.equal(
     statuses.some((status) => status.state === 'failed'),
     false,
-    'ENOTFOUND must remain retryable and never become a terminal STT failure while NativelyProSTT owns reconnect',
+    'ENOTFOUND must remain retryable and never become a terminal STT failure while MeetFlooProSTT owns reconnect',
   );
   assert.equal(statuses.length, 5);
   assert.deepEqual([...new Set(statuses.map((status) => status.state))], ['reconnecting']);
   assert.deepEqual([...new Set(statuses.map((status) => status.reconnectAttempts))], [0]);
 });
 
-test('NativelyProSTT temporary DNS failures must not trip terminal STT failure counter', () => {
+test('MeetFlooProSTT temporary DNS failures must not trip terminal STT failure counter', () => {
   const stt = new EventEmitter();
   const statuses = [];
   wireSttErrorStatus(stt, (status) => statuses.push(status));
 
   for (let i = 0; i < 5; i++) {
-    const err = new Error('getaddrinfo EAI_AGAIN api.natively.software');
+    const err = new Error('getaddrinfo EAI_AGAIN api.MeetFloo.software');
     err.code = 'EAI_AGAIN';
     stt.emit('error', err);
   }
@@ -111,7 +111,7 @@ test('NativelyProSTT temporary DNS failures must not trip terminal STT failure c
   assert.equal(
     statuses.some((status) => status.state === 'failed'),
     false,
-    'EAI_AGAIN must remain retryable and never become a terminal STT failure while NativelyProSTT owns reconnect',
+    'EAI_AGAIN must remain retryable and never become a terminal STT failure while MeetFlooProSTT owns reconnect',
   );
   assert.equal(statuses.length, 5);
   assert.deepEqual([...new Set(statuses.map((status) => status.state))], ['reconnecting']);

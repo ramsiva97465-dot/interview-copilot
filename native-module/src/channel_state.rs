@@ -1,6 +1,6 @@
 //! Joint dual-channel speech state for Auto Answer (V3 Amendment 1).
 //!
-//! Natively captures the microphone (user) and system loopback (interviewer)
+//! MeetFloo captures the microphone (user) and system loopback (interviewer)
 //! as two independent streams, each with its own `SilenceSuppressor`. This
 //! module folds their per-channel speech edges into ONE joint state —
 //! `neither` / `interviewer_speaking` / `user_speaking` / `both` — with a

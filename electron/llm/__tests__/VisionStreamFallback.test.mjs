@@ -118,7 +118,7 @@ async function collect(gen) {
 
 // Deterministic, instant-retry hooks: fixed clock, zero jitter, no real sleep.
 function fastHooks(extra = {}) {
-  return { now: () => 1_000_000, random: () => 0, sleep: async () => {}, log: () => {}, warn: () => {}, ...extra };
+  return { now: () => 1_000_000, random: () => 0, sleep: async () => { }, log: () => { }, warn: () => { }, ...extra };
 }
 
 const CFG = DEFAULT_VISION_FALLBACK_CONFIG;
@@ -361,11 +361,11 @@ describe('runStreamingVisionFallback — commit point + fallback', () => {
     // Provider takes ~80ms to first token. cfg default is 40ms (would abort),
     // but the provider declares its own 5000ms budget → must commit, not fail over.
     const slowButAllowed = okProvider('gemini_pro', ['pro-answer'], { firstDelayMs: 80, ttftTimeoutMs: 5_000 });
-    const backup = okProvider('natively', ['backup']);
+    const backup = okProvider('MeetFloo', ['backup']);
     const cfg = { ...CFG, maxAttempts: 1, ttftTimeoutMs: 40 };
     // real timers so the 80ms delay actually elapses against the 5000ms budget
     const out = await collect(runStreamingVisionFallback([slowButAllowed, backup], cfg, new Map(),
-      { now: () => Date.now(), random: () => 0, sleep: async () => {}, log: () => {}, warn: () => {} }));
+      { now: () => Date.now(), random: () => 0, sleep: async () => { }, log: () => { }, warn: () => { } }));
     assert.deepEqual(out, ['pro-answer'], 'provider with its own generous ttft budget should commit, not time out');
     assert.equal(backup._calls, 0, 'backup must not be reached');
   });
@@ -457,7 +457,7 @@ describe('runStreamingVisionFallback — commit point + fallback', () => {
 
 // ════════════════════════════════════════════════════════════════════════════
 describe('openHedged (tail-latency vision hedge)', () => {
-  const realHooks = () => ({ now: () => Date.now(), random: () => 0, sleep: async () => {}, log: () => {}, warn: () => {} });
+  const realHooks = () => ({ now: () => Date.now(), random: () => 0, sleep: async () => { }, log: () => { }, warn: () => { } });
   // small hedge delays so tests are fast
   const hedgeCfg = (over = {}) => ({
     ...DEFAULT_VISION_FALLBACK_CONFIG, hedgeEnabled: true,

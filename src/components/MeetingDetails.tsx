@@ -9,7 +9,7 @@ import { registerPrismLanguages } from '../utils/registerPrismLanguages';
 import MeetingChatOverlay from './MeetingChatOverlay';
 import GlassSurface from '../ui-components/GlassSurface';
 import EditableTextBlock from './EditableTextBlock';
-import NativelyLogo from './icon.png';
+import MeetFlooLogo from './icon.png';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import SyntaxHighlighter from 'react-syntax-highlighter/dist/esm/prism-light';
@@ -178,10 +178,10 @@ type DetailKind = 'approach' | 'dry-run' | 'complexity' | 'followup';
 // Ordered labels for the detail pill strip. "Approach" only appears when the full
 // reasoning is longer than the one-line thesis we already show above the code.
 const DETAIL_PILLS: { kind: DetailKind; label: string }[] = [
-    { kind: 'approach',   label: 'Approach'       },
-    { kind: 'dry-run',    label: 'Dry run'        },
-    { kind: 'complexity', label: 'Complexity'     },
-    { kind: 'followup',   label: 'Follow-up tips' },
+    { kind: 'approach', label: 'Approach' },
+    { kind: 'dry-run', label: 'Dry run' },
+    { kind: 'complexity', label: 'Complexity' },
+    { kind: 'followup', label: 'Follow-up tips' },
 ];
 
 // iOS drawer easing (Vaul/Ionic) for the panel height reveal; content crossfade
@@ -196,11 +196,11 @@ const MOUNT_CONTAINER = {
 };
 const MOUNT_CHILD = {
     hidden: { opacity: 0, y: 6, filter: 'blur(4px)' },
-    show:   { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.32, ease: CROSSFADE_EASE } },
+    show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.32, ease: CROSSFADE_EASE } },
 };
 const MOUNT_CHILD_REDUCED = {
     hidden: { opacity: 0 },
-    show:   { opacity: 1, transition: { duration: 0.2 } },
+    show: { opacity: 1, transition: { duration: 0.2 } },
 };
 
 // This section is HISTORY — read-mostly, viewed repeatedly. Animation earns its
@@ -240,7 +240,7 @@ function extractComplexity(body: string): string | null {
     // breaks on the common phrasing "Time complexity: O(n)" (the 'o' in
     // "complexity" blocks the lazy scan). Match Big-O on the SAME line as the
     // time/space keyword instead, so any prose in between is fine.
-    const time  = /time[^\n]*?(O\([^)]*\))/i.exec(body)?.[1];
+    const time = /time[^\n]*?(O\([^)]*\))/i.exec(body)?.[1];
     const space = /space[^\n]*?(O\([^)]*\))/i.exec(body)?.[1];
     if (time || space) {
         return [time && `${time} time`, space && `${space} space`].filter(Boolean).join(' · ');
@@ -306,7 +306,7 @@ const CopyButton: React.FC<{ text: string }> = ({ text }) => {
             setCopied(true);
             if (timer.current) clearTimeout(timer.current);
             timer.current = setTimeout(() => setCopied(false), 2000);
-        }).catch(() => {});
+        }).catch(() => { });
     };
     return (
         <button
@@ -361,7 +361,7 @@ const AnswerCopyButton: React.FC<{ text: string }> = ({ text }) => {
             setCopied(true);
             if (timer.current) clearTimeout(timer.current);
             timer.current = setTimeout(() => setCopied(false), 2000);
-        }).catch(() => {});
+        }).catch(() => { });
     };
     return (
         <button
@@ -378,12 +378,12 @@ const AnswerCopyButton: React.FC<{ text: string }> = ({ text }) => {
 
 function classifySection(title: string): 'approach' | 'technique' | 'code' | DetailKind | 'other' {
     const t = title.toLowerCase().trim();
-    if (/approach/.test(t))                            return 'approach';
+    if (/approach/.test(t)) return 'approach';
     if (/technique|data.?structure|algorithm/.test(t)) return 'technique';
-    if (/^code$/.test(t))                              return 'code';
-    if (/dry.?run|trace/.test(t))                      return 'dry-run';
-    if (/complex/.test(t))                             return 'complexity';
-    if (/follow.?up|interviewer/.test(t))              return 'followup';
+    if (/^code$/.test(t)) return 'code';
+    if (/dry.?run|trace/.test(t)) return 'dry-run';
+    if (/complex/.test(t)) return 'complexity';
+    if (/follow.?up|interviewer/.test(t)) return 'followup';
     return 'other';
 }
 
@@ -408,7 +408,7 @@ function parseCodingTemplate(answer: string): CodingSection[] | null {
     }
     if (current) sections.push(current);
 
-    const KNOWN = new Set(['approach','technique','code','dry-run','complexity','followup']);
+    const KNOWN = new Set(['approach', 'technique', 'code', 'dry-run', 'complexity', 'followup']);
     const knownCount = sections.filter(s => KNOWN.has(classifySection(s.title))).length;
     if (knownCount < 2) return null;
     return sections;
@@ -540,10 +540,10 @@ const CodingAnswerBlock: React.FC<{ sections: CodingSection[]; firstView?: boole
 
     const tagged = sections.map(s => ({ ...s, kind: classifySection(s.title) }));
 
-    const approach  = tagged.find(s => s.kind === 'approach');
+    const approach = tagged.find(s => s.kind === 'approach');
     const technique = tagged.find(s => s.kind === 'technique');
-    const code      = tagged.find(s => s.kind === 'code');
-    const others    = tagged.filter(s => s.kind === 'other');
+    const code = tagged.find(s => s.kind === 'code');
+    const others = tagged.filter(s => s.kind === 'other');
 
     const thesis = approach ? firstSentence(approach.body.trim()) : '';
     // Only surface the full approach as a pill when it says more than the thesis.
@@ -566,7 +566,7 @@ const CodingAnswerBlock: React.FC<{ sections: CodingSection[]; firstView?: boole
     if (followup) detailMap.set('followup', followup);
 
     const availablePills = DETAIL_PILLS.filter(p => detailMap.has(p.kind));
-    const activeSection  = activeDetail != null ? detailMap.get(activeDetail) : undefined;
+    const activeSection = activeDetail != null ? detailMap.get(activeDetail) : undefined;
 
     // Measure active content so the container height animates continuously (no
     // collapse-to-zero flicker) even when switching directly between pills.
@@ -595,10 +595,10 @@ const CodingAnswerBlock: React.FC<{ sections: CodingSection[]; firstView?: boole
         e.preventDefault();
         const currentIdx = btns.findIndex(b => b === document.activeElement);
         let next = currentIdx < 0 ? 0 : currentIdx;
-        if (e.key === 'ArrowLeft')  next = (currentIdx - 1 + btns.length) % btns.length;
+        if (e.key === 'ArrowLeft') next = (currentIdx - 1 + btns.length) % btns.length;
         if (e.key === 'ArrowRight') next = (currentIdx + 1) % btns.length;
-        if (e.key === 'Home')       next = 0;
-        if (e.key === 'End')        next = btns.length - 1;
+        if (e.key === 'Home') next = 0;
+        if (e.key === 'End') next = btns.length - 1;
         btns[next]?.focus();
     };
 
@@ -784,7 +784,7 @@ const UsageInteraction: React.FC<{
             {interaction.answer && (
                 <motion.div {...enter({ y: 8 }, staggerDelay + 0.08)} className="group/a flex items-start gap-4">
                     <div className="mt-1 w-6 h-6 rounded-full bg-bg-input flex items-center justify-center border border-border-subtle shrink-0 select-none opacity-40 group-hover/a:opacity-60 transition-opacity duration-[160ms]">
-                        <img src={NativelyLogo} alt="" aria-hidden="true" className="w-4 h-4 object-contain force-black-icon" />
+                        <img src={MeetFlooLogo} alt="" aria-hidden="true" className="w-4 h-4 object-contain force-black-icon" />
                     </div>
                     <div className="min-w-0 flex-1">
                         <div className="text-text-secondary text-[15px] leading-relaxed max-w-none select-text">
@@ -826,9 +826,9 @@ const ToneDropdown: React.FC<{
     const t = useT();
     const toneOptions: { value: 'professional' | 'warm' | 'concise' | 'friendly'; label: string }[] = [
         { value: 'professional', label: t('Professional') },
-        { value: 'warm',         label: t('Warm')         },
-        { value: 'concise',      label: t('Concise')      },
-        { value: 'friendly',     label: t('Friendly')     },
+        { value: 'warm', label: t('Warm') },
+        { value: 'concise', label: t('Concise') },
+        { value: 'friendly', label: t('Friendly') },
     ];
     const [toneOpen, setToneOpen] = useState(false);
     const toneRef = useRef<HTMLDivElement>(null);
@@ -1135,10 +1135,10 @@ const MeetingNotesSkeleton: React.FC<{
 }> = ({ status, isLight, still, t }) => {
     const statusLabel =
         status === 'chunking' ? t('Reading the transcript')
-        : status === 'summarizing_chunks' ? t('Summarizing')
-        : status === 'reducing' ? t('Pulling it together')
-        : status === 'validating' ? t('Checking it against the transcript')
-        : t('Writing your notes');
+            : status === 'summarizing_chunks' ? t('Summarizing')
+                : status === 'reducing' ? t('Pulling it together')
+                    : status === 'validating' ? t('Checking it against the transcript')
+                        : t('Writing your notes');
 
     const stage = SUMMARY_STAGES.indexOf(status as MeetingSummaryStatus);
     const progress = ((stage < 0 ? 0 : stage) + 1) / (SUMMARY_STAGES.length + 1);
@@ -1849,136 +1849,136 @@ ${meeting.detailedSummary.keyPoints?.map(item => `- ${item}`).join('\n') || 'Non
                         transition={{ delay: 0.1, duration: 0.3 }}
                         className="max-w-4xl mx-auto px-8 pt-8 pb-8"
                     >
-                    {/* Meta Info & Actions Row */}
-                    <div className="flex items-start justify-between mb-6">
-                        <div className="w-full pr-4">
-                            {/* Date formatting could be improved to use meeting.date if it's an ISO string */}
-                            <div className="text-xs text-text-tertiary font-medium mb-1">
-                                {new Date(meeting.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-                            </div>
+                        {/* Meta Info & Actions Row */}
+                        <div className="flex items-start justify-between mb-6">
+                            <div className="w-full pr-4">
+                                {/* Date formatting could be improved to use meeting.date if it's an ISO string */}
+                                <div className="text-xs text-text-tertiary font-medium mb-1">
+                                    {new Date(meeting.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                                </div>
 
-                            {/* Editable Title — a bar while the note is being written. The
+                                {/* Editable Title — a bar while the note is being written. The
                                 placeholder row's title is the literal "Processing...", and
                                 regeneration overwrites the title on completion anyway, so an
                                 editable field here would only invite an edit that gets thrown
                                 away. h-11 is the field's own height (36px line box + py-1),
                                 so the real title lands without moving the tabs. */}
-                            {/* The title rides the same handoff as the body (see
+                                {/* The title rides the same handoff as the body (see
                                 handoffExit/handoffEnter) rather than snapping from bar to
                                 text. Only the OUTGOING layer is taken out of flow, so a
                                 long title still sizes this box for itself — a fixed height
                                 here would clip the two-line case. */}
-                            <div className="relative">
-                                <AnimatePresence initial={false} mode="popLayout">
-                                    {isSummaryGenerating ? (
-                                        <motion.div
-                                            key="title-generating"
-                                            className="h-11 flex items-center"
-                                            aria-hidden="true"
-                                            exit={handoffExit}
-                                        >
-                                            <SkeletonLine w={260} h={22} tone="strong" />
-                                        </motion.div>
-                                    ) : (
-                                        <motion.div key="title" {...(() => { const r = revealLead(); return { className: r.cls.trim() || undefined, style: r.style }; })()}>
-                                            <EditableTextBlock
-                                                initialValue={meeting.title}
-                                                onSave={handleTitleSave}
-                                                tagName="h1"
-                                                className="text-3xl font-bold text-text-primary tracking-tight -ml-2 px-2 py-1 rounded-md transition-colors"
-                                                multiline={false}
-                                            />
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                <div className="relative">
+                                    <AnimatePresence initial={false} mode="popLayout">
+                                        {isSummaryGenerating ? (
+                                            <motion.div
+                                                key="title-generating"
+                                                className="h-11 flex items-center"
+                                                aria-hidden="true"
+                                                exit={handoffExit}
+                                            >
+                                                <SkeletonLine w={260} h={22} tone="strong" />
+                                            </motion.div>
+                                        ) : (
+                                            <motion.div key="title" {...(() => { const r = revealLead(); return { className: r.cls.trim() || undefined, style: r.style }; })()}>
+                                                <EditableTextBlock
+                                                    initialValue={meeting.title}
+                                                    onSave={handleTitleSave}
+                                                    tagName="h1"
+                                                    className="text-3xl font-bold text-text-primary tracking-tight -ml-2 px-2 py-1 rounded-md transition-colors"
+                                                    multiline={false}
+                                                />
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             </div>
+
+                            {/* Moved Actions: Follow-up & Share (REMOVED per user request) */}
+                            {/* <div className="flex items-center gap-2 mt-1"> ... </div> */}
                         </div>
 
-                        {/* Moved Actions: Follow-up & Share (REMOVED per user request) */}
-                        {/* <div className="flex items-center gap-2 mt-1"> ... </div> */}
-                    </div>
-
-                    {/* Audio Recording Banner */}
-                    {meeting.recordingPath && (
-                        <div className={`mb-4 p-3 rounded-xl border flex items-center justify-between gap-3 ${isLight ? 'bg-amber-500/10 border-amber-500/20' : 'bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-transparent border-amber-500/30'}`}>
-                            <div className="flex items-center gap-2.5 min-w-0">
-                                <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-                                    <Play size={15} className="ml-0.5 fill-current" />
-                                </div>
-                                <div className="min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs font-semibold text-text-primary tracking-tight">{t('Meeting Audio Recording')}</span>
-                                        <span className="text-[10px] font-medium px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">16kHz WAV</span>
+                        {/* Audio Recording Banner */}
+                        {meeting.recordingPath && (
+                            <div className={`mb-4 p-3 rounded-xl border flex items-center justify-between gap-3 ${isLight ? 'bg-amber-500/10 border-amber-500/20' : 'bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-transparent border-amber-500/30'}`}>
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                                        <Play size={15} className="ml-0.5 fill-current" />
                                     </div>
-                                    <p className="text-[11px] text-text-tertiary truncate max-w-md">{meeting.recordingPath}</p>
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-semibold text-text-primary tracking-tight">{t('Meeting Audio Recording')}</span>
+                                            <span className="text-[10px] font-medium px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">16kHz WAV</span>
+                                        </div>
+                                        <p className="text-[11px] text-text-tertiary truncate max-w-md">{meeting.recordingPath}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <button
+                                        type="button"
+                                        onClick={() => (window.electronAPI as any)?.playRecording?.(meeting.recordingPath)}
+                                        className="h-7 px-3 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                                    >
+                                        <Play size={12} className="fill-current" />
+                                        <span>{t('Play')}</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => (window.electronAPI as any)?.openRecordingFolder?.(meeting.recordingPath)}
+                                        className="h-7 px-2.5 rounded-md bg-white/[0.06] hover:bg-white/[0.1] text-text-secondary hover:text-text-primary text-xs font-medium transition-colors cursor-pointer"
+                                        title={t('Show in folder')}
+                                    >
+                                        {t('Folder')}
+                                    </button>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                                <button
-                                    type="button"
-                                    onClick={() => (window.electronAPI as any)?.playRecording?.(meeting.recordingPath)}
-                                    className="h-7 px-3 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
-                                >
-                                    <Play size={12} className="fill-current" />
-                                    <span>{t('Play')}</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => (window.electronAPI as any)?.openRecordingFolder?.(meeting.recordingPath)}
-                                    className="h-7 px-2.5 rounded-md bg-white/[0.06] hover:bg-white/[0.1] text-text-secondary hover:text-text-primary text-xs font-medium transition-colors cursor-pointer"
-                                    title={t('Show in folder')}
-                                >
-                                    {t('Folder')}
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* Tabs */}
-                    {/* Designing Tabs to match reference 1:1 (Dark Pill Container) */}
-                    {/* Spacing below the tab row lives on the sticky wrapper's pb-8, not a margin
+                        {/* Tabs */}
+                        {/* Designing Tabs to match reference 1:1 (Dark Pill Container) */}
+                        {/* Spacing below the tab row lives on the sticky wrapper's pb-8, not a margin
                         here — a trailing child margin collapses out of the sticky box and would
                         leave a 32px strip the header background doesn't paint. */}
-                    <div className="flex items-center justify-between">
-                        {/* Dark well deepened from #121214 to #0D0D0F: against the old near-black
+                        <div className="flex items-center justify-between">
+                            {/* Dark well deepened from #121214 to #0D0D0F: against the old near-black
                             surface it read as a raised container, but on the elevated grey it was
                             within ~3 levels of the page and the control lost its shape. */}
-                        <div className={`p-1 rounded-xl inline-flex items-center gap-0.5 ${isLight ? 'bg-[#E5E5EA] border border-black/[0.04]' : 'bg-[#0D0D0F] border border-white/[0.08]'}`}>
-                            {['summary', 'transcript', 'usage'].map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab as any)}
-                                    className={`
+                            <div className={`p-1 rounded-xl inline-flex items-center gap-0.5 ${isLight ? 'bg-[#E5E5EA] border border-black/[0.04]' : 'bg-[#0D0D0F] border border-white/[0.08]'}`}>
+                                {['summary', 'transcript', 'usage'].map((tab) => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setActiveTab(tab as any)}
+                                        className={`
                                         relative px-3 py-1 text-[13px] font-medium rounded-lg transition-all duration-200 z-10
                                         ${activeTab === tab ? (isLight ? 'text-black' : 'text-[#E9E9E9]') : `${isLight ? 'text-text-secondary' : 'text-text-tertiary'} hover:text-text-primary`}
                                     `}
-                                >
-                                    {activeTab === tab && (
-                                        <motion.div
-                                            layoutId="activeTabBackground"
-                                            className={`absolute inset-0 rounded-lg -z-10 shadow-sm ${isLight ? 'bg-white' : 'bg-[#3A3A3C]'}`}
-                                            initial={false}
-                                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                                        />
-                                    )}
-                                    {tab === 'summary' ? t('Summary') : tab === 'transcript' ? t('Transcript') : t('Usage')}
-                                </button>
-                            ))}
-                        </div>
+                                    >
+                                        {activeTab === tab && (
+                                            <motion.div
+                                                layoutId="activeTabBackground"
+                                                className={`absolute inset-0 rounded-lg -z-10 shadow-sm ${isLight ? 'bg-white' : 'bg-[#3A3A3C]'}`}
+                                                initial={false}
+                                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                            />
+                                        )}
+                                        {tab === 'summary' ? t('Summary') : tab === 'transcript' ? t('Transcript') : t('Usage')}
+                                    </button>
+                                ))}
+                            </div>
 
-                        {/* Copy Button - Inline with Tabs (Always visible) */}
-                        {/* handleCopy's summary branch reads detailedSummary, which is a
+                            {/* Copy Button - Inline with Tabs (Always visible) */}
+                            {/* handleCopy's summary branch reads detailedSummary, which is a
                             truthy-but-empty placeholder during generation — copying would
                             silently yield a header and nothing else. */}
-                        <button
-                            onClick={handleCopy}
-                            disabled={activeTab === 'summary' && isSummaryGenerating}
-                            className="flex items-center gap-2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:text-text-secondary"
-                        >
-                            {isCopied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-                            {isCopied ? t('Copied') : activeTab === 'summary' ? t('Copy full summary') : activeTab === 'transcript' ? t('Copy full transcript') : t('Copy usage')}
-                        </button>
-                    </div>
+                            <button
+                                onClick={handleCopy}
+                                disabled={activeTab === 'summary' && isSummaryGenerating}
+                                className="flex items-center gap-2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:text-text-secondary"
+                            >
+                                {isCopied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                {isCopied ? t('Copied') : activeTab === 'summary' ? t('Copy full summary') : activeTab === 'transcript' ? t('Copy full transcript') : t('Copy usage')}
+                            </button>
+                        </div>
                     </motion.div>
                 </div>
 
@@ -1992,57 +1992,57 @@ ${meeting.detailedSummary.keyPoints?.map(item => `- ${item}`).join('\n') || 'Non
                     <div className="space-y-8">
                         {/* Using standard divs for content, framer motion for layout */}
                         {activeTab === 'summary' && (
-                        <div className="relative">
-                        <AnimatePresence initial={false} mode="popLayout">
-                        {isSummaryGenerating ? (
-                            <motion.div
-                                key="generating"
-                                exit={handoffExit}
-                            >
-                                <MeetingNotesSkeleton
-                                    status={v3SummaryStatus}
-                                    isLight={isLight}
-                                    still={Boolean(prefersReducedMotion)}
-                                    t={t}
-                                />
-                            </motion.div>
-                        ) : showSummaryFailure ? (
-                            /* Generation failed with nothing to fall back on. The transcript
-                               is already saved, and regenerateSavedMeeting only needs that —
-                               so the retry is real, not a dead-end message. */
-                            <motion.div
-                                key="failed"
-                                initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
-                                animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                                transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1] }}
-                                className={`px-4 py-5 rounded-[10px] border ${isLight ? 'border-black/[0.08] bg-black/[0.015]' : 'border-white/10 bg-white/[0.02]'}`}
-                            >
-                                <p className="text-sm font-semibold text-text-primary mb-1">{t("Notes couldn't be generated")}</p>
-                                <p className="text-[12.5px] text-text-secondary leading-relaxed mb-4">
-                                    {t('The full transcript is saved — you can generate the notes again.')}
-                                </p>
-                                <motion.button
-                                    type="button"
-                                    onClick={() => handleRegenerate()}
-                                    disabled={isRegenerating}
-                                    whileTap={prefersReducedMotion || isRegenerating ? undefined : { scale: 0.97 }}
-                                    transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
-                                    className={`h-8 inline-flex items-center gap-1.5 text-[12px] font-medium px-3 rounded-md text-text-primary disabled:opacity-50 transition-colors ${isLight ? 'bg-black/[0.05] hover:bg-black/[0.09]' : 'bg-white/[0.06] hover:bg-white/[0.1]'}`}
-                                >
-                                    <RefreshCw
-                                        className={`w-3.5 h-3.5 shrink-0 ${isRegenerating && !prefersReducedMotion ? 'animate-spin' : ''}`}
-                                        strokeWidth={2}
-                                    />
-                                    <span>{isRegenerating ? t('Generating…') : t('Try again')}</span>
-                                </motion.button>
-                            </motion.div>
-                        ) : (
-                            <motion.div
-                                key="notes"
-                                ref={notesRef}
-                                className={revealing && prefersReducedMotion ? 'mn-reveal-reduced' : undefined}
-                            >
-                                {/* Overview — the largest slab of prose in the note, and the one that made
+                            <div className="relative">
+                                <AnimatePresence initial={false} mode="popLayout">
+                                    {isSummaryGenerating ? (
+                                        <motion.div
+                                            key="generating"
+                                            exit={handoffExit}
+                                        >
+                                            <MeetingNotesSkeleton
+                                                status={v3SummaryStatus}
+                                                isLight={isLight}
+                                                still={Boolean(prefersReducedMotion)}
+                                                t={t}
+                                            />
+                                        </motion.div>
+                                    ) : showSummaryFailure ? (
+                                        /* Generation failed with nothing to fall back on. The transcript
+                                           is already saved, and regenerateSavedMeeting only needs that —
+                                           so the retry is real, not a dead-end message. */
+                                        <motion.div
+                                            key="failed"
+                                            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
+                                            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1] }}
+                                            className={`px-4 py-5 rounded-[10px] border ${isLight ? 'border-black/[0.08] bg-black/[0.015]' : 'border-white/10 bg-white/[0.02]'}`}
+                                        >
+                                            <p className="text-sm font-semibold text-text-primary mb-1">{t("Notes couldn't be generated")}</p>
+                                            <p className="text-[12.5px] text-text-secondary leading-relaxed mb-4">
+                                                {t('The full transcript is saved — you can generate the notes again.')}
+                                            </p>
+                                            <motion.button
+                                                type="button"
+                                                onClick={() => handleRegenerate()}
+                                                disabled={isRegenerating}
+                                                whileTap={prefersReducedMotion || isRegenerating ? undefined : { scale: 0.97 }}
+                                                transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                                                className={`h-8 inline-flex items-center gap-1.5 text-[12px] font-medium px-3 rounded-md text-text-primary disabled:opacity-50 transition-colors ${isLight ? 'bg-black/[0.05] hover:bg-black/[0.09]' : 'bg-white/[0.06] hover:bg-white/[0.1]'}`}
+                                            >
+                                                <RefreshCw
+                                                    className={`w-3.5 h-3.5 shrink-0 ${isRegenerating && !prefersReducedMotion ? 'animate-spin' : ''}`}
+                                                    strokeWidth={2}
+                                                />
+                                                <span>{isRegenerating ? t('Generating…') : t('Try again')}</span>
+                                            </motion.button>
+                                        </motion.div>
+                                    ) : (
+                                        <motion.div
+                                            key="notes"
+                                            ref={notesRef}
+                                            className={revealing && prefersReducedMotion ? 'mn-reveal-reduced' : undefined}
+                                        >
+                                            {/* Overview — the largest slab of prose in the note, and the one that made
                                     the old cascade read as "block by block": it renders through ReactMarkdown,
                                     so its text never passed through revealWords and the whole paragraph
                                     arrived on a single delay. The overrides below route every element's string
@@ -2054,608 +2054,615 @@ ${meeting.detailedSummary.keyPoints?.map(item => `- ${item}`).join('\n') || 'Non
                                     full opacity from the very first frame while the prose around it swept in —
                                     which reads worse than the block reveal being replaced. Opacity only, because
                                     a blur here would nest under each word's own blur and compound both. */}
-                                {meeting.detailedSummary?.overview && (() => { const g = revealGuard(); return (
-                                <div className={`pb-5 border-b border-border-subtle prose prose-sm max-w-none${g.cls}`} style={g.style} data-rw={g['data-rw']}>
-                                    <ReactMarkdown
-                                        remarkPlugins={[remarkGfm]}
-                                        components={{
-                                            h1: ({ node, children, ...props }) => <h1 className="text-xl font-bold text-text-primary mt-4 mb-2" {...props}>{revealMarkdownChildren(children)}</h1>,
-                                            h2: ({ node, children, ...props }) => <h2 className="text-lg font-semibold text-text-primary mt-4 mb-2" {...props}>{revealMarkdownChildren(children)}</h2>,
-                                            h3: ({ node, children, ...props }) => <h3 className="text-base font-semibold text-text-primary mt-3 mb-1" {...props}>{revealMarkdownChildren(children)}</h3>,
-                                            p: ({ node, children, ...props }) => <p className="text-sm text-text-secondary leading-relaxed mb-2" {...props}>{revealMarkdownChildren(children)}</p>,
-                                            ul: ({ node, ...props }) => <ul className="list-disc ml-4 mb-2 space-y-1" {...props} />,
-                                            ol: ({ node, ...props }) => <ol className="list-decimal ml-4 mb-2 space-y-1" {...props} />,
-                                            li: ({ node, children, ...props }) => <li className="text-sm text-text-secondary" {...props}>{revealMarkdownChildren(children)}</li>,
-                                            em: ({ node, children, ...props }) => <em {...props}>{revealMarkdownChildren(children)}</em>,
-                                            strong: ({ node, children, ...props }) => <strong className="font-semibold text-text-primary" {...props}>{revealMarkdownChildren(children)}</strong>,
-                                            a: ({ node, children, ...props }) => <a className="text-accent-primary hover:underline" {...props}>{revealMarkdownChildren(children)}</a>,
-                                            ...makeTableComponents('text-sm leading-relaxed'),
-                                        }}
-                                    >
-                                        {meeting.detailedSummary?.overview || ''}
-                                    </ReactMarkdown>
-                                </div>
-                                ); })()}
+                                            {meeting.detailedSummary?.overview && (() => {
+                                                const g = revealGuard(); return (
+                                                    <div className={`pb-5 border-b border-border-subtle prose prose-sm max-w-none${g.cls}`} style={g.style} data-rw={g['data-rw']}>
+                                                        <ReactMarkdown
+                                                            remarkPlugins={[remarkGfm]}
+                                                            components={{
+                                                                h1: ({ node, children, ...props }) => <h1 className="text-xl font-bold text-text-primary mt-4 mb-2" {...props}>{revealMarkdownChildren(children)}</h1>,
+                                                                h2: ({ node, children, ...props }) => <h2 className="text-lg font-semibold text-text-primary mt-4 mb-2" {...props}>{revealMarkdownChildren(children)}</h2>,
+                                                                h3: ({ node, children, ...props }) => <h3 className="text-base font-semibold text-text-primary mt-3 mb-1" {...props}>{revealMarkdownChildren(children)}</h3>,
+                                                                p: ({ node, children, ...props }) => <p className="text-sm text-text-secondary leading-relaxed mb-2" {...props}>{revealMarkdownChildren(children)}</p>,
+                                                                ul: ({ node, ...props }) => <ul className="list-disc ml-4 mb-2 space-y-1" {...props} />,
+                                                                ol: ({ node, ...props }) => <ol className="list-decimal ml-4 mb-2 space-y-1" {...props} />,
+                                                                li: ({ node, children, ...props }) => <li className="text-sm text-text-secondary" {...props}>{revealMarkdownChildren(children)}</li>,
+                                                                em: ({ node, children, ...props }) => <em {...props}>{revealMarkdownChildren(children)}</em>,
+                                                                strong: ({ node, children, ...props }) => <strong className="font-semibold text-text-primary" {...props}>{revealMarkdownChildren(children)}</strong>,
+                                                                a: ({ node, children, ...props }) => <a className="text-accent-primary hover:underline" {...props}>{revealMarkdownChildren(children)}</a>,
+                                                                ...makeTableComponents('text-sm leading-relaxed'),
+                                                            }}
+                                                        >
+                                                            {meeting.detailedSummary?.overview || ''}
+                                                        </ReactMarkdown>
+                                                    </div>
+                                                );
+                                            })()}
 
-                                {/* V3 — product-grade structured notes: fast skim, decisions, actions, open questions, risks, quality.
+                                            {/* V3 — product-grade structured notes: fast skim, decisions, actions, open questions, risks, quality.
                                     The four callout cards below form one coherent family: same radius, padding, icon
                                     treatment and type scale. They fade + lift in with a short ease-out stagger. */}
 
-                                {/* 1. Source quality — severity-aware. Benign cleanup notes (segments removed/cleaned)
+                                            {/* 1. Source quality — severity-aware. Benign cleanup notes (segments removed/cleaned)
                                     read as quiet info; genuine concerns (speaker labels, coverage, "verify") stay amber. */}
-                                {/* 1. Source quality warning */}
-                                {isV3Summary && (() => {
-                                    const sqWarnings = meeting.detailedSummary?.sourceQuality?.warnings ?? [];
-                                    const realIssues = sqWarnings.filter(w => !isBenignQualityNote(w));
-                                    if (realIssues.length === 0) return null;
-                                    return (
-                                        <motion.div
-                                            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
-                                            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.24, ease: [0.25, 0.46, 0.45, 0.94] }}
-                                            className="mb-4 flex items-start gap-2.5 px-4 py-3 rounded-lg bg-white/[0.08]"
-                                        >
-                                            <Info className="w-3.5 h-3.5 text-text-tertiary shrink-0 mt-[1px]" strokeWidth={2} />
-                                            <div className="space-y-0.5">
-                                                {realIssues.map((w, i) => (
-                                                    <p key={i} className="text-[12.5px] text-text-secondary leading-snug">{w}</p>
-                                                ))}
-                                            </div>
-                                        </motion.div>
-                                    );
-                                })()}
-
-                                {/* 2. Toolbar */}
-                                {isV3Summary && (
-                                    <motion.div
-                                        initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
-                                        animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1], delay: prefersReducedMotion ? 0 : 0.05 }}
-                                        className="mb-6 flex flex-wrap items-center gap-2"
-                                    >
-                                        <div className="flex items-center gap-1 p-1 rounded-lg bg-white/[0.03] border border-border-subtle">
-                                            <motion.button
-                                                type="button"
-                                                onClick={() => handleRegenerate()}
-                                                disabled={isRegenerating}
-                                                initial="rest"
-                                                whileHover={prefersReducedMotion || isRegenerating ? undefined : 'hover'}
-                                                whileTap={prefersReducedMotion || isRegenerating ? undefined : { scale: 0.96 }}
-                                                transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
-                                                className="h-7 inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-white/[0.06] disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
-                                            >
-                                                <motion.span
-                                                    className="w-3.5 h-3.5 shrink-0 inline-flex"
-                                                    variants={prefersReducedMotion ? undefined : { rest: { rotate: 0 }, hover: { rotate: -180 } }}
-                                                    transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                                                >
-                                                    <RefreshCw
-                                                        className={`w-3.5 h-3.5 ${isRegenerating && !prefersReducedMotion ? 'animate-spin' : ''}`}
-                                                        strokeWidth={2}
-                                                    />
-                                                </motion.span>
-                                                <span>{isRegenerating ? t('Regenerating…') : t('Regenerate notes')}</span>
-                                            </motion.button>
-
-                                            <div className="w-px h-4 bg-border-subtle shrink-0" aria-hidden="true" />
-
-                                            <motion.button
-                                                type="button"
-                                                onClick={() => setShowEvidence(v => !v)}
-                                                whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
-                                                transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
-                                                aria-pressed={showEvidence}
-                                                className={`h-7 inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 rounded-md transition-colors ${showEvidence ? 'text-accent-primary bg-accent-subtle' : 'text-text-secondary hover:text-text-primary hover:bg-white/[0.06]'}`}
-                                            >
-                                                <span className="relative w-3.5 h-3.5 shrink-0">
-                                                    <AnimatePresence initial={false} mode="wait">
-                                                        <motion.span
-                                                            key={showEvidence ? 'eye' : 'eyeoff'}
-                                                            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.6 }}
-                                                            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
-                                                            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.6 }}
-                                                            transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
-                                                            className="absolute inset-0 flex items-center justify-center"
-                                                        >
-                                                            {showEvidence
-                                                                ? <Eye className="w-3.5 h-3.5" strokeWidth={2} />
-                                                                : <EyeOff className="w-3.5 h-3.5" strokeWidth={2} />}
-                                                        </motion.span>
-                                                    </AnimatePresence>
-                                                </span>
-                                                <span>{showEvidence ? t('Hide evidence') : t('Show evidence')}</span>
-                                            </motion.button>
-                                        </div>
-                                        {v3SummaryStatus && v3SummaryStatus !== 'completed' && (
-                                            <span className="inline-flex items-center gap-1.5 text-[11px] text-amber-400">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                                                {v3SummaryStatus.replace(/_/g, ' ')}
-                                            </span>
-                                        )}
-                                    </motion.div>
-                                )}
-
-                                {/* 3. Mode auto-detect suggestion */}
-                                {isV3Summary && v3Mode?.detectedModeName && v3Mode?.detectedConfidence != null && v3Mode.detectedConfidence >= 0.5 &&
-                                  v3Mode.detectedModeName !== v3Mode.selectedModeName && (
-                                    <motion.button
-                                        type="button"
-                                        onClick={() => handleRegenerate(v3Mode.detectedModeId ? undefined : (v3Mode.detectedModeName || '').toLowerCase())}
-                                        disabled={isRegenerating}
-                                        initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
-                                        animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                                        whileTap={prefersReducedMotion || isRegenerating ? undefined : { scale: 0.99, transition: { duration: 0.1 } }}
-                                        transition={{ duration: 0.24, ease: [0.25, 0.46, 0.45, 0.94], delay: prefersReducedMotion ? 0 : 0.06 }}
-                                        className="mb-5 w-full text-left flex items-center justify-between gap-3 px-4 py-3.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.11] active:bg-white/[0.06] disabled:opacity-40 transition-colors duration-150 group"
-                                    >
-                                        <div className="min-w-0">
-                                            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary mb-1">
-                                                {v3Mode.selectedModeName ? `${t('This looks like a')} ${v3Mode.detectedModeName}` : t('Better template available')}
-                                            </p>
-                                            <p className="text-[14px] font-semibold text-text-primary tracking-[-0.01em] truncate leading-tight">
-                                                {isRegenerating
-                                                    ? t('Regenerating…')
-                                                    : <>{t('Regenerate notes as')} <span className="text-accent-primary">{v3Mode.detectedModeName}</span></>}
-                                            </p>
-                                        </div>
-                                        <ChevronRight className="shrink-0 w-4 h-4 text-text-tertiary group-hover:text-accent-primary group-hover:translate-x-0.5 transition-all duration-150" strokeWidth={2} />
-                                    </motion.button>
-                                )}
-
-                                {/* 4. Cross-meeting recall — still-open carryover from prior meetings (Phase 13). */}
-                                {isV3Summary && meeting.detailedSummary?.crossMeeting?.stillOpen && meeting.detailedSummary.crossMeeting.stillOpen.length > 0 && (
-                                    <motion.section
-                                        initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
-                                        animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.24, ease: [0.25, 0.46, 0.45, 0.94], delay: prefersReducedMotion ? 0 : 0.12 }}
-                                        className="mb-6 px-4 py-3.5 rounded-lg bg-white/[0.08]"
-                                    >
-                                        <div className="flex items-center gap-2 mb-2.5">
-                                            <History className="w-3.5 h-3.5 text-text-tertiary shrink-0" strokeWidth={2} />
-                                            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">{t('From earlier meetings')}</p>
-                                        </div>
-                                        <ul className="space-y-2">
-                                            {meeting.detailedSummary.crossMeeting.stillOpen.map((line, i) => (
-                                                <li key={i} className="flex items-start gap-2.5 text-[12.5px] text-text-secondary leading-snug">
-                                                    <span className="mt-[7px] w-[3px] h-[3px] rounded-full bg-text-tertiary shrink-0" />
-                                                    <span>{line}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </motion.section>
-                                )}
-
-                                {/* Summary on top — outcome-first, grounded. Then the mode's template sections below. */}
-                                {isV3Summary && v3Tldr.length > 0 && (() => { const h = revealBlock(); return (
-                                    <section className="mb-8">
-                                        <h2 className={`text-lg font-semibold text-text-primary mb-4${h.cls}`} style={h.style} data-rw={h['data-rw']}>{t('Summary')}</h2>
-                                        <ul className="space-y-3">
-                                            {v3Tldr.map((item, i) => {
-                                                // The dot rides the first word of its own bullet (see revealWith):
-                                                // its `mt-2` box would otherwise measure as a line of its own.
-                                                const dot = revealWith(revealSlot);
+                                            {/* 1. Source quality warning */}
+                                            {isV3Summary && (() => {
+                                                const sqWarnings = meeting.detailedSummary?.sourceQuality?.warnings ?? [];
+                                                const realIssues = sqWarnings.filter(w => !isBenignQualityNote(w));
+                                                if (realIssues.length === 0) return null;
                                                 return (
-                                                <li key={i} className="flex items-start gap-3 group">
-                                                    <div
-                                                        className={`mt-2 w-1.5 h-1.5 rounded-full bg-blue-400/70 shrink-0${dot.cls}`}
-                                                        style={dot.style}
-                                                    />
-                                                    <p className="text-sm text-text-secondary leading-relaxed">{revealWords(item)}</p>
-                                                </li>
+                                                    <motion.div
+                                                        initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
+                                                        animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                                                        transition={{ duration: 0.24, ease: [0.25, 0.46, 0.45, 0.94] }}
+                                                        className="mb-4 flex items-start gap-2.5 px-4 py-3 rounded-lg bg-white/[0.08]"
+                                                    >
+                                                        <Info className="w-3.5 h-3.5 text-text-tertiary shrink-0 mt-[1px]" strokeWidth={2} />
+                                                        <div className="space-y-0.5">
+                                                            {realIssues.map((w, i) => (
+                                                                <p key={i} className="text-[12.5px] text-text-secondary leading-snug">{w}</p>
+                                                            ))}
+                                                        </div>
+                                                    </motion.div>
                                                 );
-                                            })}
-                                        </ul>
-                                    </section>
-                                ); })()}
+                                            })()}
 
-                                {/* The mode's note-section TEMPLATE — the primary notes layout (e.g. Questions and
+                                            {/* 2. Toolbar */}
+                                            {isV3Summary && (
+                                                <motion.div
+                                                    initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+                                                    animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                                                    transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1], delay: prefersReducedMotion ? 0 : 0.05 }}
+                                                    className="mb-6 flex flex-wrap items-center gap-2"
+                                                >
+                                                    <div className="flex items-center gap-1 p-1 rounded-lg bg-white/[0.03] border border-border-subtle">
+                                                        <motion.button
+                                                            type="button"
+                                                            onClick={() => handleRegenerate()}
+                                                            disabled={isRegenerating}
+                                                            initial="rest"
+                                                            whileHover={prefersReducedMotion || isRegenerating ? undefined : 'hover'}
+                                                            whileTap={prefersReducedMotion || isRegenerating ? undefined : { scale: 0.96 }}
+                                                            transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                                                            className="h-7 inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-white/[0.06] disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+                                                        >
+                                                            <motion.span
+                                                                className="w-3.5 h-3.5 shrink-0 inline-flex"
+                                                                variants={prefersReducedMotion ? undefined : { rest: { rotate: 0 }, hover: { rotate: -180 } }}
+                                                                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                                            >
+                                                                <RefreshCw
+                                                                    className={`w-3.5 h-3.5 ${isRegenerating && !prefersReducedMotion ? 'animate-spin' : ''}`}
+                                                                    strokeWidth={2}
+                                                                />
+                                                            </motion.span>
+                                                            <span>{isRegenerating ? t('Regenerating…') : t('Regenerate notes')}</span>
+                                                        </motion.button>
+
+                                                        <div className="w-px h-4 bg-border-subtle shrink-0" aria-hidden="true" />
+
+                                                        <motion.button
+                                                            type="button"
+                                                            onClick={() => setShowEvidence(v => !v)}
+                                                            whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
+                                                            transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                                                            aria-pressed={showEvidence}
+                                                            className={`h-7 inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 rounded-md transition-colors ${showEvidence ? 'text-accent-primary bg-accent-subtle' : 'text-text-secondary hover:text-text-primary hover:bg-white/[0.06]'}`}
+                                                        >
+                                                            <span className="relative w-3.5 h-3.5 shrink-0">
+                                                                <AnimatePresence initial={false} mode="wait">
+                                                                    <motion.span
+                                                                        key={showEvidence ? 'eye' : 'eyeoff'}
+                                                                        initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.6 }}
+                                                                        animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                                                                        exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.6 }}
+                                                                        transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                                                                        className="absolute inset-0 flex items-center justify-center"
+                                                                    >
+                                                                        {showEvidence
+                                                                            ? <Eye className="w-3.5 h-3.5" strokeWidth={2} />
+                                                                            : <EyeOff className="w-3.5 h-3.5" strokeWidth={2} />}
+                                                                    </motion.span>
+                                                                </AnimatePresence>
+                                                            </span>
+                                                            <span>{showEvidence ? t('Hide evidence') : t('Show evidence')}</span>
+                                                        </motion.button>
+                                                    </div>
+                                                    {v3SummaryStatus && v3SummaryStatus !== 'completed' && (
+                                                        <span className="inline-flex items-center gap-1.5 text-[11px] text-amber-400">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                                                            {v3SummaryStatus.replace(/_/g, ' ')}
+                                                        </span>
+                                                    )}
+                                                </motion.div>
+                                            )}
+
+                                            {/* 3. Mode auto-detect suggestion */}
+                                            {isV3Summary && v3Mode?.detectedModeName && v3Mode?.detectedConfidence != null && v3Mode.detectedConfidence >= 0.5 &&
+                                                v3Mode.detectedModeName !== v3Mode.selectedModeName && (
+                                                    <motion.button
+                                                        type="button"
+                                                        onClick={() => handleRegenerate(v3Mode.detectedModeId ? undefined : (v3Mode.detectedModeName || '').toLowerCase())}
+                                                        disabled={isRegenerating}
+                                                        initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
+                                                        animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                                                        whileTap={prefersReducedMotion || isRegenerating ? undefined : { scale: 0.99, transition: { duration: 0.1 } }}
+                                                        transition={{ duration: 0.24, ease: [0.25, 0.46, 0.45, 0.94], delay: prefersReducedMotion ? 0 : 0.06 }}
+                                                        className="mb-5 w-full text-left flex items-center justify-between gap-3 px-4 py-3.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.11] active:bg-white/[0.06] disabled:opacity-40 transition-colors duration-150 group"
+                                                    >
+                                                        <div className="min-w-0">
+                                                            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary mb-1">
+                                                                {v3Mode.selectedModeName ? `${t('This looks like a')} ${v3Mode.detectedModeName}` : t('Better template available')}
+                                                            </p>
+                                                            <p className="text-[14px] font-semibold text-text-primary tracking-[-0.01em] truncate leading-tight">
+                                                                {isRegenerating
+                                                                    ? t('Regenerating…')
+                                                                    : <>{t('Regenerate notes as')} <span className="text-accent-primary">{v3Mode.detectedModeName}</span></>}
+                                                            </p>
+                                                        </div>
+                                                        <ChevronRight className="shrink-0 w-4 h-4 text-text-tertiary group-hover:text-accent-primary group-hover:translate-x-0.5 transition-all duration-150" strokeWidth={2} />
+                                                    </motion.button>
+                                                )}
+
+                                            {/* 4. Cross-meeting recall — still-open carryover from prior meetings (Phase 13). */}
+                                            {isV3Summary && meeting.detailedSummary?.crossMeeting?.stillOpen && meeting.detailedSummary.crossMeeting.stillOpen.length > 0 && (
+                                                <motion.section
+                                                    initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
+                                                    animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                                                    transition={{ duration: 0.24, ease: [0.25, 0.46, 0.45, 0.94], delay: prefersReducedMotion ? 0 : 0.12 }}
+                                                    className="mb-6 px-4 py-3.5 rounded-lg bg-white/[0.08]"
+                                                >
+                                                    <div className="flex items-center gap-2 mb-2.5">
+                                                        <History className="w-3.5 h-3.5 text-text-tertiary shrink-0" strokeWidth={2} />
+                                                        <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-text-tertiary">{t('From earlier meetings')}</p>
+                                                    </div>
+                                                    <ul className="space-y-2">
+                                                        {meeting.detailedSummary.crossMeeting.stillOpen.map((line, i) => (
+                                                            <li key={i} className="flex items-start gap-2.5 text-[12.5px] text-text-secondary leading-snug">
+                                                                <span className="mt-[7px] w-[3px] h-[3px] rounded-full bg-text-tertiary shrink-0" />
+                                                                <span>{line}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </motion.section>
+                                            )}
+
+                                            {/* Summary on top — outcome-first, grounded. Then the mode's template sections below. */}
+                                            {isV3Summary && v3Tldr.length > 0 && (() => {
+                                                const h = revealBlock(); return (
+                                                    <section className="mb-8">
+                                                        <h2 className={`text-lg font-semibold text-text-primary mb-4${h.cls}`} style={h.style} data-rw={h['data-rw']}>{t('Summary')}</h2>
+                                                        <ul className="space-y-3">
+                                                            {v3Tldr.map((item, i) => {
+                                                                // The dot rides the first word of its own bullet (see revealWith):
+                                                                // its `mt-2` box would otherwise measure as a line of its own.
+                                                                const dot = revealWith(revealSlot);
+                                                                return (
+                                                                    <li key={i} className="flex items-start gap-3 group">
+                                                                        <div
+                                                                            className={`mt-2 w-1.5 h-1.5 rounded-full bg-blue-400/70 shrink-0${dot.cls}`}
+                                                                            style={dot.style}
+                                                                        />
+                                                                        <p className="text-sm text-text-secondary leading-relaxed">{revealWords(item)}</p>
+                                                                    </li>
+                                                                );
+                                                            })}
+                                                        </ul>
+                                                    </section>
+                                                );
+                                            })()}
+
+                                            {/* The mode's note-section TEMPLATE — the primary notes layout (e.g. Questions and
                                     responses, Discovery, Action items). Rendered right under Summary, in template order.
                                     Empty sections are dropped server-side. */}
-                                {isV3Summary && meeting.detailedSummary?.sectionsV3 && meeting.detailedSummary.sectionsV3.length > 0 && (
-                                    <>
-                                        {meeting.detailedSummary.sectionsV3
-                                            .filter(section => SHOW_NEXT_STEPS || !isNextStepsSectionTitle(section.title))
-                                            .map((section) => {
-                                            const h = revealBlock();
-                                            return (
-                                            <section key={section.id} className="mb-8">
-                                                <h2 className={`text-lg font-semibold text-text-primary mb-4${h.cls}`} style={h.style} data-rw={h['data-rw']}>{section.title}</h2>
-                                                <ul className="space-y-3">
-                                                    {section.bullets.map((bullet, i) => {
-                                                        const dot = revealWith(revealSlot);
-                                                        return (
-                                                        <li key={bullet.id || i} className="flex items-start gap-3">
-                                                            {/* The colour rides a style object, not `bg-text-secondary/60`:
+                                            {isV3Summary && meeting.detailedSummary?.sectionsV3 && meeting.detailedSummary.sectionsV3.length > 0 && (
+                                                <>
+                                                    {meeting.detailedSummary.sectionsV3
+                                                        .filter(section => SHOW_NEXT_STEPS || !isNextStepsSectionTitle(section.title))
+                                                        .map((section) => {
+                                                            const h = revealBlock();
+                                                            return (
+                                                                <section key={section.id} className="mb-8">
+                                                                    <h2 className={`text-lg font-semibold text-text-primary mb-4${h.cls}`} style={h.style} data-rw={h['data-rw']}>{section.title}</h2>
+                                                                    <ul className="space-y-3">
+                                                                        {section.bullets.map((bullet, i) => {
+                                                                            const dot = revealWith(revealSlot);
+                                                                            return (
+                                                                                <li key={bullet.id || i} className="flex items-start gap-3">
+                                                                                    {/* The colour rides a style object, not `bg-text-secondary/60`:
                                                                 `text-secondary` is a bare var() reference, so Tailwind cannot
                                                                 recompute its alpha and that utility compiled to NOTHING —
                                                                 every bullet in the mode's note sections rendered with an
                                                                 invisible dot. Same token, alpha applied where it works. */}
-                                                            <div
-                                                                className={`mt-2 w-1.5 h-1.5 rounded-full shrink-0${dot.cls}`}
-                                                                // The alpha rides IN the colour rather than on `opacity`: the
-                                                                // reveal animates opacity 0 → 1 with fill-mode `both`, so an
-                                                                // `opacity: 0.6` here would be overridden to 1 for as long as the
-                                                                // animation is applied and then snap back when the class drops.
-                                                                style={{ background: 'color-mix(in srgb, var(--text-secondary) 60%, transparent)', ...dot.style }}
-                                                            />
-                                                            <div className="min-w-0 flex-1">
-                                                                <p className="text-sm text-text-secondary leading-relaxed">{revealWords(bullet.text)}</p>
-                                                                {showEvidence && evidenceLabel(bullet.evidence) && (
-                                                                    <button type="button" onClick={() => jumpToEvidence(bullet.evidence)} className="text-[11px] text-accent-primary hover:text-accent-hover mt-1 text-left">↳ {evidenceLabel(bullet.evidence)}</button>
-                                                                )}
-                                                            </div>
-                                                        </li>
-                                                        );
-                                                    })}
-                                                </ul>
-                                            </section>
-                                            ); })}
-                                    </>
-                                )}
+                                                                                    <div
+                                                                                        className={`mt-2 w-1.5 h-1.5 rounded-full shrink-0${dot.cls}`}
+                                                                                        // The alpha rides IN the colour rather than on `opacity`: the
+                                                                                        // reveal animates opacity 0 → 1 with fill-mode `both`, so an
+                                                                                        // `opacity: 0.6` here would be overridden to 1 for as long as the
+                                                                                        // animation is applied and then snap back when the class drops.
+                                                                                        style={{ background: 'color-mix(in srgb, var(--text-secondary) 60%, transparent)', ...dot.style }}
+                                                                                    />
+                                                                                    <div className="min-w-0 flex-1">
+                                                                                        <p className="text-sm text-text-secondary leading-relaxed">{revealWords(bullet.text)}</p>
+                                                                                        {showEvidence && evidenceLabel(bullet.evidence) && (
+                                                                                            <button type="button" onClick={() => jumpToEvidence(bullet.evidence)} className="text-[11px] text-accent-primary hover:text-accent-hover mt-1 text-left">↳ {evidenceLabel(bullet.evidence)}</button>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </li>
+                                                                            );
+                                                                        })}
+                                                                    </ul>
+                                                                </section>
+                                                            );
+                                                        })}
+                                                </>
+                                            )}
 
-                                {/* SHOW_STRUCTURED_BLOCKS: the mode's note-section TEMPLATE is the source of truth, so the
+                                            {/* SHOW_STRUCTURED_BLOCKS: the mode's note-section TEMPLATE is the source of truth, so the
                                     imposed What-changed/Decisions/Actions/Questions/Risks blocks are NOT rendered as the
                                     primary layout (they remain in the schema, powering the follow-up draft + cross-meeting
                                     recall). Flip to true to surface them again. */}
-                                {SHOW_STRUCTURED_BLOCKS && isV3Summary && v3WhatChanged.length > 0 && (
-                                    <section className="mb-8">
-                                        <h2 className="text-lg font-semibold text-text-primary mb-4">{t('What changed')}</h2>
-                                        <ul className="space-y-3">
-                                            {v3WhatChanged.map((item, i) => (
-                                                <li key={i} className="flex items-start gap-3 group">
-                                                    <div className="mt-2 w-1.5 h-1.5 rounded-full bg-indigo-500/80 shrink-0" />
-                                                    <p className="text-sm text-text-secondary leading-relaxed">{item}</p>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </section>
-                                )}
+                                            {SHOW_STRUCTURED_BLOCKS && isV3Summary && v3WhatChanged.length > 0 && (
+                                                <section className="mb-8">
+                                                    <h2 className="text-lg font-semibold text-text-primary mb-4">{t('What changed')}</h2>
+                                                    <ul className="space-y-3">
+                                                        {v3WhatChanged.map((item, i) => (
+                                                            <li key={i} className="flex items-start gap-3 group">
+                                                                <div className="mt-2 w-1.5 h-1.5 rounded-full bg-indigo-500/80 shrink-0" />
+                                                                <p className="text-sm text-text-secondary leading-relaxed">{item}</p>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </section>
+                                            )}
 
-                                {SHOW_STRUCTURED_BLOCKS && isV3Summary && v3Decisions.length > 0 && (
-                                    <section className="mb-8">
-                                        <h2 className="text-lg font-semibold text-text-primary mb-4">{t('Decisions')}</h2>
-                                        <ul className="space-y-3">
-                                            {v3Decisions.map((item, i) => (
-                                                <li key={item.id || i} className="p-3 rounded-[10px] border border-white/10 bg-white/[0.02]">
-                                                    <div className="flex items-start gap-3">
-                                                        <div className="mt-2 w-1.5 h-1.5 rounded-full bg-blue-500/80 shrink-0" />
-                                                        <div className="min-w-0 flex-1">
-                                                            <p className="text-sm text-text-secondary leading-relaxed">{item.text}</p>
-                                                            <p className="text-[11px] text-text-tertiary mt-1">
-                                                                {item.owner && <span>{item.owner} · </span>}
-                                                                <span>{item.confidence} {t('confidence')}</span>
-                                                            </p>
-                                                            {showEvidence && evidenceLabel(item.evidence) && (
-                                                                <button type="button" onClick={() => jumpToEvidence(item.evidence)} className="text-[11px] text-accent-primary hover:text-accent-hover mt-1 text-left">↳ {evidenceLabel(item.evidence)}</button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </section>
-                                )}
+                                            {SHOW_STRUCTURED_BLOCKS && isV3Summary && v3Decisions.length > 0 && (
+                                                <section className="mb-8">
+                                                    <h2 className="text-lg font-semibold text-text-primary mb-4">{t('Decisions')}</h2>
+                                                    <ul className="space-y-3">
+                                                        {v3Decisions.map((item, i) => (
+                                                            <li key={item.id || i} className="p-3 rounded-[10px] border border-white/10 bg-white/[0.02]">
+                                                                <div className="flex items-start gap-3">
+                                                                    <div className="mt-2 w-1.5 h-1.5 rounded-full bg-blue-500/80 shrink-0" />
+                                                                    <div className="min-w-0 flex-1">
+                                                                        <p className="text-sm text-text-secondary leading-relaxed">{item.text}</p>
+                                                                        <p className="text-[11px] text-text-tertiary mt-1">
+                                                                            {item.owner && <span>{item.owner} · </span>}
+                                                                            <span>{item.confidence} {t('confidence')}</span>
+                                                                        </p>
+                                                                        {showEvidence && evidenceLabel(item.evidence) && (
+                                                                            <button type="button" onClick={() => jumpToEvidence(item.evidence)} className="text-[11px] text-accent-primary hover:text-accent-hover mt-1 text-left">↳ {evidenceLabel(item.evidence)}</button>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </section>
+                                            )}
 
-                                {SHOW_STRUCTURED_BLOCKS && isV3Summary && v3Actions.length > 0 && (
-                                    <section className="mb-8">
-                                        <h2 className="text-lg font-semibold text-text-primary mb-4">{t('Action Items')}</h2>
-                                        <ul className="space-y-3">
-                                            {v3Actions.map((item, i) => (
-                                                <li key={item.id || i} className="p-3 rounded-[10px] border border-emerald-400/20 bg-emerald-500/[0.03]">
-                                                    <div className="flex items-start gap-3">
-                                                        <div className="mt-2 w-1.5 h-1.5 rounded-full bg-emerald-500/80 shrink-0" />
-                                                        <div className="min-w-0 flex-1">
-                                                            <p className="text-sm text-text-secondary leading-relaxed">{item.text}</p>
-                                                            <p className="text-[11px] text-text-tertiary mt-1 flex flex-wrap gap-x-1">
-                                                                {item.owner && <span className="font-medium">{item.owner}</span>}
-                                                                {item.deadline && <span>{t('by')} {item.deadline}</span>}
-                                                                <span className={`px-1.5 py-0.5 rounded border ${item.explicitness === 'explicit' ? 'border-emerald-400/30 text-emerald-400' : 'border-amber-400/30 text-amber-400'}`}>{item.explicitness}</span>
-                                                                <span>{item.confidence} {t('confidence')}</span>
-                                                            </p>
-                                                            {showEvidence && evidenceLabel(item.evidence) && (
-                                                                <button type="button" onClick={() => jumpToEvidence(item.evidence)} className="text-[11px] text-accent-primary hover:text-accent-hover mt-1 text-left">↳ {evidenceLabel(item.evidence)}</button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </section>
-                                )}
+                                            {SHOW_STRUCTURED_BLOCKS && isV3Summary && v3Actions.length > 0 && (
+                                                <section className="mb-8">
+                                                    <h2 className="text-lg font-semibold text-text-primary mb-4">{t('Action Items')}</h2>
+                                                    <ul className="space-y-3">
+                                                        {v3Actions.map((item, i) => (
+                                                            <li key={item.id || i} className="p-3 rounded-[10px] border border-emerald-400/20 bg-emerald-500/[0.03]">
+                                                                <div className="flex items-start gap-3">
+                                                                    <div className="mt-2 w-1.5 h-1.5 rounded-full bg-emerald-500/80 shrink-0" />
+                                                                    <div className="min-w-0 flex-1">
+                                                                        <p className="text-sm text-text-secondary leading-relaxed">{item.text}</p>
+                                                                        <p className="text-[11px] text-text-tertiary mt-1 flex flex-wrap gap-x-1">
+                                                                            {item.owner && <span className="font-medium">{item.owner}</span>}
+                                                                            {item.deadline && <span>{t('by')} {item.deadline}</span>}
+                                                                            <span className={`px-1.5 py-0.5 rounded border ${item.explicitness === 'explicit' ? 'border-emerald-400/30 text-emerald-400' : 'border-amber-400/30 text-amber-400'}`}>{item.explicitness}</span>
+                                                                            <span>{item.confidence} {t('confidence')}</span>
+                                                                        </p>
+                                                                        {showEvidence && evidenceLabel(item.evidence) && (
+                                                                            <button type="button" onClick={() => jumpToEvidence(item.evidence)} className="text-[11px] text-accent-primary hover:text-accent-hover mt-1 text-left">↳ {evidenceLabel(item.evidence)}</button>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </section>
+                                            )}
 
-                                {SHOW_STRUCTURED_BLOCKS && isV3Summary && v3Questions.length > 0 && (
-                                    <section className="mb-8">
-                                        <h2 className="text-lg font-semibold text-text-primary mb-4">{t('Open Questions')}</h2>
-                                        <ul className="space-y-3">
-                                            {v3Questions.map((item, i) => (
-                                                <li key={item.id || i} className="flex items-start gap-3 group">
-                                                    <div className="mt-2 w-1.5 h-1.5 rounded-full bg-yellow-500/80 shrink-0" />
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-sm text-text-secondary leading-relaxed">{item.text}</p>
-                                                        <p className="text-[11px] text-text-tertiary mt-0.5">{item.status}{item.owner ? ` · ${item.owner}` : ''}{evidenceLabel(item.evidence) ? ` · ${evidenceLabel(item.evidence)}` : ''}</p>
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </section>
-                                )}
+                                            {SHOW_STRUCTURED_BLOCKS && isV3Summary && v3Questions.length > 0 && (
+                                                <section className="mb-8">
+                                                    <h2 className="text-lg font-semibold text-text-primary mb-4">{t('Open Questions')}</h2>
+                                                    <ul className="space-y-3">
+                                                        {v3Questions.map((item, i) => (
+                                                            <li key={item.id || i} className="flex items-start gap-3 group">
+                                                                <div className="mt-2 w-1.5 h-1.5 rounded-full bg-yellow-500/80 shrink-0" />
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-sm text-text-secondary leading-relaxed">{item.text}</p>
+                                                                    <p className="text-[11px] text-text-tertiary mt-0.5">{item.status}{item.owner ? ` · ${item.owner}` : ''}{evidenceLabel(item.evidence) ? ` · ${evidenceLabel(item.evidence)}` : ''}</p>
+                                                                </div>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </section>
+                                            )}
 
-                                {SHOW_STRUCTURED_BLOCKS && isV3Summary && v3Risks.length > 0 && (
-                                    <section className="mb-8">
-                                        <h2 className="text-lg font-semibold text-text-primary mb-4">{t('Risks / Blockers')}</h2>
-                                        <ul className="space-y-3">
-                                            {v3Risks.map((item, i) => (
-                                                <li key={item.id || i} className="p-3 rounded-[10px] border border-red-400/20 bg-red-500/[0.03]">
-                                                    <p className="text-sm text-text-secondary leading-relaxed">{item.text}</p>
-                                                    <p className="text-[11px] text-text-tertiary mt-1">{item.severity} {t('severity')}{evidenceLabel(item.evidence) ? ` · ${evidenceLabel(item.evidence)}` : ''}</p>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </section>
-                                )}
+                                            {SHOW_STRUCTURED_BLOCKS && isV3Summary && v3Risks.length > 0 && (
+                                                <section className="mb-8">
+                                                    <h2 className="text-lg font-semibold text-text-primary mb-4">{t('Risks / Blockers')}</h2>
+                                                    <ul className="space-y-3">
+                                                        {v3Risks.map((item, i) => (
+                                                            <li key={item.id || i} className="p-3 rounded-[10px] border border-red-400/20 bg-red-500/[0.03]">
+                                                                <p className="text-sm text-text-secondary leading-relaxed">{item.text}</p>
+                                                                <p className="text-[11px] text-text-tertiary mt-1">{item.severity} {t('severity')}{evidenceLabel(item.evidence) ? ` · ${evidenceLabel(item.evidence)}` : ''}</p>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </section>
+                                            )}
 
-                                {/* V3 follow-up draft — human prose, copy + regenerate + tone. */}
-                                {isV3Summary && followUpBody.trim() && (() => { const h = revealBlock(); return (
-                                    <section className="mb-8">
-                                        <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
-                                            <h2 className={`text-lg font-semibold text-text-primary${h.cls}`} style={h.style} data-rw={h['data-rw']}>{t('Follow-up draft')}</h2>
-                                            <div className="flex items-center gap-1 p-1 rounded-lg bg-white/[0.03] border border-border-subtle">
-                                                {/* Copy — with a real copied-confirmation state. */}
-                                                <motion.button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        copyRecipe((followUpSubject ? `Subject: ${followUpSubject}\n\n` : '') + followUpBody);
-                                                        setFollowUpCopied(true);
-                                                        setTimeout(() => setFollowUpCopied(false), 1500);
-                                                    }}
-                                                    whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
-                                                    transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
-                                                    aria-label={followUpCopied ? t('Copied') : t('Copy follow-up draft')}
-                                                    className="h-7 inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-white/[0.06] transition-colors"
-                                                >
-                                                    <span className="relative w-3.5 h-3.5 shrink-0">
-                                                        <AnimatePresence initial={false} mode="wait">
-                                                            {followUpCopied ? (
-                                                                <motion.span
-                                                                    key="check"
-                                                                    initial={prefersReducedMotion ? { opacity: 0 } : { scale: 0.6, opacity: 0 }}
-                                                                    animate={prefersReducedMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }}
-                                                                    exit={prefersReducedMotion ? { opacity: 0 } : { scale: 0.6, opacity: 0 }}
-                                                                    transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-                                                                    className="absolute inset-0 flex items-center justify-center text-accent-primary"
+                                            {/* V3 follow-up draft — human prose, copy + regenerate + tone. */}
+                                            {isV3Summary && followUpBody.trim() && (() => {
+                                                const h = revealBlock(); return (
+                                                    <section className="mb-8">
+                                                        <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+                                                            <h2 className={`text-lg font-semibold text-text-primary${h.cls}`} style={h.style} data-rw={h['data-rw']}>{t('Follow-up draft')}</h2>
+                                                            <div className="flex items-center gap-1 p-1 rounded-lg bg-white/[0.03] border border-border-subtle">
+                                                                {/* Copy — with a real copied-confirmation state. */}
+                                                                <motion.button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        copyRecipe((followUpSubject ? `Subject: ${followUpSubject}\n\n` : '') + followUpBody);
+                                                                        setFollowUpCopied(true);
+                                                                        setTimeout(() => setFollowUpCopied(false), 1500);
+                                                                    }}
+                                                                    whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
+                                                                    transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                                                                    aria-label={followUpCopied ? t('Copied') : t('Copy follow-up draft')}
+                                                                    className="h-7 inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-white/[0.06] transition-colors"
                                                                 >
-                                                                    <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
-                                                                </motion.span>
-                                                            ) : (
-                                                                <motion.span
-                                                                    key="copy"
-                                                                    initial={prefersReducedMotion ? { opacity: 0 } : { scale: 0.6, opacity: 0 }}
-                                                                    animate={prefersReducedMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }}
-                                                                    exit={prefersReducedMotion ? { opacity: 0 } : { scale: 0.6, opacity: 0 }}
-                                                                    transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-                                                                    className="absolute inset-0 flex items-center justify-center"
+                                                                    <span className="relative w-3.5 h-3.5 shrink-0">
+                                                                        <AnimatePresence initial={false} mode="wait">
+                                                                            {followUpCopied ? (
+                                                                                <motion.span
+                                                                                    key="check"
+                                                                                    initial={prefersReducedMotion ? { opacity: 0 } : { scale: 0.6, opacity: 0 }}
+                                                                                    animate={prefersReducedMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }}
+                                                                                    exit={prefersReducedMotion ? { opacity: 0 } : { scale: 0.6, opacity: 0 }}
+                                                                                    transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+                                                                                    className="absolute inset-0 flex items-center justify-center text-accent-primary"
+                                                                                >
+                                                                                    <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
+                                                                                </motion.span>
+                                                                            ) : (
+                                                                                <motion.span
+                                                                                    key="copy"
+                                                                                    initial={prefersReducedMotion ? { opacity: 0 } : { scale: 0.6, opacity: 0 }}
+                                                                                    animate={prefersReducedMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }}
+                                                                                    exit={prefersReducedMotion ? { opacity: 0 } : { scale: 0.6, opacity: 0 }}
+                                                                                    transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+                                                                                    className="absolute inset-0 flex items-center justify-center"
+                                                                                >
+                                                                                    <Copy className="w-3.5 h-3.5" strokeWidth={2} />
+                                                                                </motion.span>
+                                                                            )}
+                                                                        </AnimatePresence>
+                                                                    </span>
+                                                                    <span className="min-w-[30px] text-left">{followUpCopied ? t('Copied') : t('Copy')}</span>
+                                                                </motion.button>
+
+                                                                <div className="w-px h-4 bg-border-subtle shrink-0" aria-hidden="true" />
+
+                                                                {/* Regenerate — icon spins while regenerating. */}
+                                                                <motion.button
+                                                                    type="button"
+                                                                    onClick={() => handleRegenerateFollowUp()}
+                                                                    disabled={isRegeneratingFollowUp}
+                                                                    whileTap={prefersReducedMotion || isRegeneratingFollowUp ? undefined : { scale: 0.96 }}
+                                                                    transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                                                                    className="h-7 inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-white/[0.06] disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
                                                                 >
-                                                                    <Copy className="w-3.5 h-3.5" strokeWidth={2} />
-                                                                </motion.span>
-                                                            )}
-                                                        </AnimatePresence>
-                                                    </span>
-                                                    <span className="min-w-[30px] text-left">{followUpCopied ? t('Copied') : t('Copy')}</span>
-                                                </motion.button>
+                                                                    <RefreshCw
+                                                                        className={`w-3.5 h-3.5 shrink-0 ${isRegeneratingFollowUp && !prefersReducedMotion ? 'animate-spin' : ''}`}
+                                                                        strokeWidth={2}
+                                                                    />
+                                                                    <span>{isRegeneratingFollowUp ? t('Regenerating…') : t('Regenerate')}</span>
+                                                                </motion.button>
 
-                                                <div className="w-px h-4 bg-border-subtle shrink-0" aria-hidden="true" />
+                                                                <div className="w-px h-4 bg-border-subtle shrink-0" aria-hidden="true" />
 
-                                                {/* Regenerate — icon spins while regenerating. */}
-                                                <motion.button
-                                                    type="button"
-                                                    onClick={() => handleRegenerateFollowUp()}
-                                                    disabled={isRegeneratingFollowUp}
-                                                    whileTap={prefersReducedMotion || isRegeneratingFollowUp ? undefined : { scale: 0.96 }}
-                                                    transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
-                                                    className="h-7 inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-white/[0.06] disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
-                                                >
-                                                    <RefreshCw
-                                                        className={`w-3.5 h-3.5 shrink-0 ${isRegeneratingFollowUp && !prefersReducedMotion ? 'animate-spin' : ''}`}
-                                                        strokeWidth={2}
-                                                    />
-                                                    <span>{isRegeneratingFollowUp ? t('Regenerating…') : t('Regenerate')}</span>
-                                                </motion.button>
+                                                                {/* Tone — custom dropdown */}
+                                                                <ToneDropdown
+                                                                    followUpTone={followUpTone}
+                                                                    isRegeneratingFollowUp={isRegeneratingFollowUp}
+                                                                    onSelect={(tone) => { setFollowUpTone(tone); handleRegenerateFollowUp(tone); }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        {followUpSubject && <p className="text-[12.5px] text-text-tertiary mb-1">{revealWords(t('Subject:'))} {revealWords(followUpSubject)}</p>}
+                                                        <pre className="text-[12.5px] text-text-secondary leading-relaxed whitespace-pre-wrap font-sans select-text cursor-text p-3 rounded-[10px] border border-white/10 bg-white/[0.02]">{revealWords(followUpBody)}</pre>
+                                                    </section>
+                                                );
+                                            })()}
 
-                                                <div className="w-px h-4 bg-border-subtle shrink-0" aria-hidden="true" />
-
-                                                {/* Tone — custom dropdown */}
-                                                <ToneDropdown
-                                                    followUpTone={followUpTone}
-                                                    isRegeneratingFollowUp={isRegeneratingFollowUp}
-                                                    onSelect={(tone) => { setFollowUpTone(tone); handleRegenerateFollowUp(tone); }}
-                                                />
-                                            </div>
-                                        </div>
-                                        {followUpSubject && <p className="text-[12.5px] text-text-tertiary mb-1">{revealWords(t('Subject:'))} {revealWords(followUpSubject)}</p>}
-                                        <pre className="text-[12.5px] text-text-secondary leading-relaxed whitespace-pre-wrap font-sans select-text cursor-text p-3 rounded-[10px] border border-white/10 bg-white/[0.02]">{revealWords(followUpBody)}</pre>
-                                    </section>
-                                ); })()}
-
-                                {/* Action Items - Only show if there are items */}
-                                {!isV3Summary && meeting.detailedSummary?.actionItems && meeting.detailedSummary.actionItems.length > 0 && (
-                                    <section className="mb-8">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <EditableTextBlock
-                                                initialValue={meeting.detailedSummary?.actionItemsTitle || t('Action Items')}
-                                                onSave={(val) => {
-                                                    setMeeting(prev => ({
-                                                        ...prev,
-                                                        detailedSummary: { ...prev.detailedSummary!, actionItemsTitle: val }
-                                                    }));
-                                                    window.electronAPI?.updateMeetingSummary(meeting.id, { actionItemsTitle: val });
-                                                }}
-                                                tagName="h2"
-                                                className="text-lg font-semibold text-text-primary -ml-2 px-2 py-1 rounded-sm transition-colors"
-                                                multiline={false}
-                                            />
-                                        </div>
-                                        <ul className="space-y-3">
-                                            {meeting.detailedSummary.actionItems.map((item, i) => (
-                                                <li key={actionItemKeys[i] ?? i} className="flex items-start gap-3 group">
-                                                    <div className="mt-2 w-1.5 h-1.5 rounded-full bg-text-secondary group-hover:bg-accent-primary transition-colors shrink-0" />
-                                                    <div className="flex-1">
+                                            {/* Action Items - Only show if there are items */}
+                                            {!isV3Summary && meeting.detailedSummary?.actionItems && meeting.detailedSummary.actionItems.length > 0 && (
+                                                <section className="mb-8">
+                                                    <div className="flex items-center justify-between mb-4">
                                                         <EditableTextBlock
-                                                            initialValue={item}
-                                                            onSave={(val) => handleActionItemSave(i, val)}
-                                                            tagName="p"
-                                                            className="text-sm text-text-secondary leading-relaxed -ml-2 px-2 rounded-sm transition-colors"
-                                                            placeholder={t("Type an action item...")}
-                                                            onEnter={() => {
-                                                                const newItems = [...(meeting.detailedSummary?.actionItems || [])];
-                                                                newItems.splice(i + 1, 0, "");
-                                                                setActionItemKeys(prev => {
-                                                                    const next = [...prev];
-                                                                    next.splice(i + 1, 0, genMessageId());
-                                                                    return next;
-                                                                });
+                                                            initialValue={meeting.detailedSummary?.actionItemsTitle || t('Action Items')}
+                                                            onSave={(val) => {
                                                                 setMeeting(prev => ({
                                                                     ...prev,
-                                                                    detailedSummary: { ...prev.detailedSummary!, actionItems: newItems }
+                                                                    detailedSummary: { ...prev.detailedSummary!, actionItemsTitle: val }
                                                                 }));
+                                                                window.electronAPI?.updateMeetingSummary(meeting.id, { actionItemsTitle: val });
                                                             }}
+                                                            tagName="h2"
+                                                            className="text-lg font-semibold text-text-primary -ml-2 px-2 py-1 rounded-sm transition-colors"
+                                                            multiline={false}
                                                         />
                                                     </div>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </section>
-                                )}
+                                                    <ul className="space-y-3">
+                                                        {meeting.detailedSummary.actionItems.map((item, i) => (
+                                                            <li key={actionItemKeys[i] ?? i} className="flex items-start gap-3 group">
+                                                                <div className="mt-2 w-1.5 h-1.5 rounded-full bg-text-secondary group-hover:bg-accent-primary transition-colors shrink-0" />
+                                                                <div className="flex-1">
+                                                                    <EditableTextBlock
+                                                                        initialValue={item}
+                                                                        onSave={(val) => handleActionItemSave(i, val)}
+                                                                        tagName="p"
+                                                                        className="text-sm text-text-secondary leading-relaxed -ml-2 px-2 rounded-sm transition-colors"
+                                                                        placeholder={t("Type an action item...")}
+                                                                        onEnter={() => {
+                                                                            const newItems = [...(meeting.detailedSummary?.actionItems || [])];
+                                                                            newItems.splice(i + 1, 0, "");
+                                                                            setActionItemKeys(prev => {
+                                                                                const next = [...prev];
+                                                                                next.splice(i + 1, 0, genMessageId());
+                                                                                return next;
+                                                                            });
+                                                                            setMeeting(prev => ({
+                                                                                ...prev,
+                                                                                detailedSummary: { ...prev.detailedSummary!, actionItems: newItems }
+                                                                            }));
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </section>
+                                            )}
 
-                                {/* Key Points - Only show if there are items */}
-                                {!isV3Summary && meeting.detailedSummary?.keyPoints && meeting.detailedSummary.keyPoints.length > 0 && (
-                                    <section>
-                                        <div className="flex items-center justify-between mb-4">
-                                            <EditableTextBlock
-                                                initialValue={meeting.detailedSummary?.keyPointsTitle || t('Key Points')}
-                                                onSave={(val) => {
-                                                    setMeeting(prev => ({
-                                                        ...prev,
-                                                        detailedSummary: { ...prev.detailedSummary!, keyPointsTitle: val }
-                                                    }));
-                                                    window.electronAPI?.updateMeetingSummary(meeting.id, { keyPointsTitle: val });
-                                                }}
-                                                tagName="h2"
-                                                className="text-lg font-semibold text-text-primary -ml-2 px-2 py-1 rounded-sm transition-colors"
-                                                multiline={false}
-                                            />
-                                        </div>
-                                        <ul className="space-y-3">
-                                            {meeting.detailedSummary.keyPoints.map((item, i) => (
-                                                <li key={keyPointKeys[i] ?? i} className="flex items-start gap-3 group">
-                                                    <div className="mt-2 w-1.5 h-1.5 rounded-full bg-text-secondary group-hover:bg-purple-500 transition-colors shrink-0" />
-                                                    <div className="flex-1">
+                                            {/* Key Points - Only show if there are items */}
+                                            {!isV3Summary && meeting.detailedSummary?.keyPoints && meeting.detailedSummary.keyPoints.length > 0 && (
+                                                <section>
+                                                    <div className="flex items-center justify-between mb-4">
                                                         <EditableTextBlock
-                                                            initialValue={item}
-                                                            onSave={(val) => handleKeyPointSave(i, val)}
-                                                            tagName="p"
-                                                            className="text-sm text-text-secondary leading-relaxed -ml-2 px-2 rounded-sm transition-colors"
-                                                            placeholder={t("Type a key point...")}
-                                                            onEnter={() => {
-                                                                const newItems = [...(meeting.detailedSummary?.keyPoints || [])];
-                                                                newItems.splice(i + 1, 0, "");
-                                                                setKeyPointKeys(prev => {
-                                                                    const next = [...prev];
-                                                                    next.splice(i + 1, 0, genMessageId());
-                                                                    return next;
-                                                                });
+                                                            initialValue={meeting.detailedSummary?.keyPointsTitle || t('Key Points')}
+                                                            onSave={(val) => {
                                                                 setMeeting(prev => ({
                                                                     ...prev,
-                                                                    detailedSummary: { ...prev.detailedSummary!, keyPoints: newItems }
+                                                                    detailedSummary: { ...prev.detailedSummary!, keyPointsTitle: val }
                                                                 }));
+                                                                window.electronAPI?.updateMeetingSummary(meeting.id, { keyPointsTitle: val });
                                                             }}
+                                                            tagName="h2"
+                                                            className="text-lg font-semibold text-text-primary -ml-2 px-2 py-1 rounded-sm transition-colors"
+                                                            multiline={false}
                                                         />
                                                     </div>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </section>
-                                )}
+                                                    <ul className="space-y-3">
+                                                        {meeting.detailedSummary.keyPoints.map((item, i) => (
+                                                            <li key={keyPointKeys[i] ?? i} className="flex items-start gap-3 group">
+                                                                <div className="mt-2 w-1.5 h-1.5 rounded-full bg-text-secondary group-hover:bg-purple-500 transition-colors shrink-0" />
+                                                                <div className="flex-1">
+                                                                    <EditableTextBlock
+                                                                        initialValue={item}
+                                                                        onSave={(val) => handleKeyPointSave(i, val)}
+                                                                        tagName="p"
+                                                                        className="text-sm text-text-secondary leading-relaxed -ml-2 px-2 rounded-sm transition-colors"
+                                                                        placeholder={t("Type a key point...")}
+                                                                        onEnter={() => {
+                                                                            const newItems = [...(meeting.detailedSummary?.keyPoints || [])];
+                                                                            newItems.splice(i + 1, 0, "");
+                                                                            setKeyPointKeys(prev => {
+                                                                                const next = [...prev];
+                                                                                next.splice(i + 1, 0, genMessageId());
+                                                                                return next;
+                                                                            });
+                                                                            setMeeting(prev => ({
+                                                                                ...prev,
+                                                                                detailedSummary: { ...prev.detailedSummary!, keyPoints: newItems }
+                                                                            }));
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </section>
+                                            )}
 
-                                {/* Phase 7 — Structured action items (with owner / deadline).
+                                            {/* Phase 7 — Structured action items (with owner / deadline).
                                     Rendered ONLY when PostCallWorkflow has produced them
                                     (schemaVersion === 2). Falls through silently otherwise so
                                     pre-Phase-7 meetings still look the same. */}
-                                {SHOW_NEXT_STEPS && !isV3Summary && meeting.detailedSummary?.actionItemsStructured && meeting.detailedSummary.actionItemsStructured.length > 0 && (
-                                    <section className="mb-8">
-                                        <h2 className="text-lg font-semibold text-text-primary mb-4">{t('Next Steps')}</h2>
-                                        <ul className="space-y-2">
-                                            {meeting.detailedSummary.actionItemsStructured.map(item => (
-                                                <li key={item.id} className="flex items-start gap-3 group">
-                                                    <div className="mt-2 w-1.5 h-1.5 rounded-full bg-emerald-500/70 group-hover:bg-emerald-400 shrink-0" />
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-sm text-text-secondary leading-relaxed">{item.text}</p>
-                                                        {(item.owner || item.deadline) && (
-                                                            <p className="text-[11px] text-text-tertiary mt-0.5">
-                                                                {item.owner && <span className="font-medium">{item.owner}</span>}
-                                                                {item.owner && item.deadline && <span> · </span>}
-                                                                {item.deadline && <span>{t('by')} {item.deadline}</span>}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </section>
-                                )}
+                                            {SHOW_NEXT_STEPS && !isV3Summary && meeting.detailedSummary?.actionItemsStructured && meeting.detailedSummary.actionItemsStructured.length > 0 && (
+                                                <section className="mb-8">
+                                                    <h2 className="text-lg font-semibold text-text-primary mb-4">{t('Next Steps')}</h2>
+                                                    <ul className="space-y-2">
+                                                        {meeting.detailedSummary.actionItemsStructured.map(item => (
+                                                            <li key={item.id} className="flex items-start gap-3 group">
+                                                                <div className="mt-2 w-1.5 h-1.5 rounded-full bg-emerald-500/70 group-hover:bg-emerald-400 shrink-0" />
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-sm text-text-secondary leading-relaxed">{item.text}</p>
+                                                                    {(item.owner || item.deadline) && (
+                                                                        <p className="text-[11px] text-text-tertiary mt-0.5">
+                                                                            {item.owner && <span className="font-medium">{item.owner}</span>}
+                                                                            {item.owner && item.deadline && <span> · </span>}
+                                                                            {item.deadline && <span>{t('by')} {item.deadline}</span>}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </section>
+                                            )}
 
-                                {/* The "Coaching" section was removed on 2026-08-26 (product decision);
+                                            {/* The "Coaching" section was removed on 2026-08-26 (product decision);
                                     generation is switched off at INCLUDE_COACHING_INSIGHTS in
                                     electron/services/post-call/PostCallWorkflow.ts. The
                                     `coachingInsights` type above is kept so already-saved notes
                                     still parse; restore this <section> from git history if the
                                     flag is ever flipped back on. */}
 
-                                {/* Phase 7 — Follow-up email draft (legacy V2: string). V3 renders its own above. */}
-                                {!isV3Summary && typeof meeting.detailedSummary?.followUpDraft === 'string' && meeting.detailedSummary.followUpDraft.trim() && (
-                                    <section className="mb-8">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <h2 className="text-lg font-semibold text-text-primary">{t('Follow-up Draft')}</h2>
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const fu = meeting.detailedSummary?.followUpDraft;
-                                                    navigator.clipboard?.writeText(typeof fu === 'string' ? fu : '').catch(() => { /* swallow */ });
-                                                }}
-                                                className="text-[11px] px-2 py-1 rounded-md bg-white/5 hover:bg-white/10 text-text-secondary border border-white/10 transition-colors"
-                                            >
-                                                {t('Copy')}
-                                            </button>
-                                        </div>
-                                        <pre className="text-[12.5px] text-text-secondary leading-relaxed whitespace-pre-wrap font-sans select-text cursor-text p-3 rounded-[10px] border border-white/10 bg-white/[0.02]">{meeting.detailedSummary.followUpDraft}</pre>
-                                    </section>
-                                )}
-
-                                {/* Mode-specific sections (when active mode has a notes template) */}
-                                {!isV3Summary && meeting.detailedSummary?.sections && meeting.detailedSummary.sections.length > 0 && (
-                                    <div className="space-y-8">
-                                        {meeting.detailedSummary.sections.map((section, si) => (
-                                            section.bullets.length > 0 && (
-                                                <section key={`${section.title}-${si}`}>
-                                                    <div className="flex items-center justify-between mb-4">
-                                                        <h2 className="text-lg font-semibold text-text-primary">{section.title}</h2>
+                                            {/* Phase 7 — Follow-up email draft (legacy V2: string). V3 renders its own above. */}
+                                            {!isV3Summary && typeof meeting.detailedSummary?.followUpDraft === 'string' && meeting.detailedSummary.followUpDraft.trim() && (
+                                                <section className="mb-8">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <h2 className="text-lg font-semibold text-text-primary">{t('Follow-up Draft')}</h2>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const fu = meeting.detailedSummary?.followUpDraft;
+                                                                navigator.clipboard?.writeText(typeof fu === 'string' ? fu : '').catch(() => { /* swallow */ });
+                                                            }}
+                                                            className="text-[11px] px-2 py-1 rounded-md bg-white/5 hover:bg-white/10 text-text-secondary border border-white/10 transition-colors"
+                                                        >
+                                                            {t('Copy')}
+                                                        </button>
                                                     </div>
-                                                    <ul className="space-y-3">
-                                                        {section.bullets.map((bullet, bi) => (
-                                                            <li key={bi} className="flex items-start gap-3 group">
-                                                                <div className="mt-2 w-1.5 h-1.5 rounded-full bg-text-secondary shrink-0" />
-                                                                <p className="text-sm text-text-secondary leading-relaxed">{bullet}</p>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
+                                                    <pre className="text-[12.5px] text-text-secondary leading-relaxed whitespace-pre-wrap font-sans select-text cursor-text p-3 rounded-[10px] border border-white/10 bg-white/[0.02]">{meeting.detailedSummary.followUpDraft}</pre>
                                                 </section>
-                                            )
-                                        ))}
-                                    </div>
-                                )}
-                            </motion.div>
-                        )}
-                        </AnimatePresence>
-                        </div>
+                                            )}
+
+                                            {/* Mode-specific sections (when active mode has a notes template) */}
+                                            {!isV3Summary && meeting.detailedSummary?.sections && meeting.detailedSummary.sections.length > 0 && (
+                                                <div className="space-y-8">
+                                                    {meeting.detailedSummary.sections.map((section, si) => (
+                                                        section.bullets.length > 0 && (
+                                                            <section key={`${section.title}-${si}`}>
+                                                                <div className="flex items-center justify-between mb-4">
+                                                                    <h2 className="text-lg font-semibold text-text-primary">{section.title}</h2>
+                                                                </div>
+                                                                <ul className="space-y-3">
+                                                                    {section.bullets.map((bullet, bi) => (
+                                                                        <li key={bi} className="flex items-start gap-3 group">
+                                                                            <div className="mt-2 w-1.5 h-1.5 rounded-full bg-text-secondary shrink-0" />
+                                                                            <p className="text-sm text-text-secondary leading-relaxed">{bullet}</p>
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </section>
+                                                        )
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         )}
 
                         {activeTab === 'transcript' && (
@@ -2670,66 +2677,66 @@ ${meeting.detailedSummary.keyPoints?.map(item => `- ${item}`).join('\n') || 'Non
                                         <div className="mb-5 flex flex-wrap items-center gap-2">
                                             <span className="text-[11px] font-medium text-text-tertiary uppercase tracking-wide mr-0.5">{t('Speakers')}</span>
                                             <AnimatePresence initial={false} mode="popLayout">
-                                            {speakers.map((sp) => {
-                                                const display = resolveSpeakerName(sp);
-                                                const id = (sp || '').toLowerCase().replace(/^(user|me)$/, 'me').replace(/^(interviewer|them|other|system)$/, 'speaker_1').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'unknown';
-                                                if (editingSpeaker === id) {
+                                                {speakers.map((sp) => {
+                                                    const display = resolveSpeakerName(sp);
+                                                    const id = (sp || '').toLowerCase().replace(/^(user|me)$/, 'me').replace(/^(interviewer|them|other|system)$/, 'speaker_1').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'unknown';
+                                                    if (editingSpeaker === id) {
+                                                        return (
+                                                            <motion.span
+                                                                key={id}
+                                                                layout
+                                                                initial={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.96 }}
+                                                                animate={prefersReducedMotion ? undefined : { opacity: 1, scale: 1 }}
+                                                                transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                                                                className="inline-flex items-center gap-1 h-7 pl-2 pr-1 rounded-full bg-bg-secondary border border-accent-focus ring-1 ring-accent-border"
+                                                            >
+                                                                <input
+                                                                    autoFocus
+                                                                    value={speakerDraft}
+                                                                    onChange={e => setSpeakerDraft(e.target.value)}
+                                                                    onKeyDown={e => { if (e.key === 'Enter') handleSaveSpeakerLabel(id, speakerDraft); if (e.key === 'Escape') setEditingSpeaker(null); }}
+                                                                    placeholder={display}
+                                                                    className="text-[11px] bg-transparent text-text-primary placeholder:text-text-tertiary outline-none w-28"
+                                                                />
+                                                                <motion.button
+                                                                    type="button"
+                                                                    onMouseDown={e => e.preventDefault()}
+                                                                    onClick={() => handleSaveSpeakerLabel(id, speakerDraft)}
+                                                                    whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
+                                                                    className="inline-flex items-center justify-center w-5 h-5 rounded-full text-accent-primary hover:bg-accent-muted transition-colors"
+                                                                    title={t("Save")}
+                                                                >
+                                                                    <Check className="w-3 h-3" strokeWidth={2.5} />
+                                                                </motion.button>
+                                                                <motion.button
+                                                                    type="button"
+                                                                    onMouseDown={e => e.preventDefault()}
+                                                                    onClick={() => setEditingSpeaker(null)}
+                                                                    whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
+                                                                    className="inline-flex items-center justify-center w-5 h-5 rounded-full text-text-tertiary hover:text-text-primary hover:bg-white/[0.08] transition-colors"
+                                                                    title={t("Cancel")}
+                                                                >
+                                                                    <X className="w-3 h-3" strokeWidth={2.5} />
+                                                                </motion.button>
+                                                            </motion.span>
+                                                        );
+                                                    }
                                                     return (
-                                                        <motion.span
+                                                        <motion.button
                                                             key={id}
                                                             layout
-                                                            initial={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.96 }}
-                                                            animate={prefersReducedMotion ? undefined : { opacity: 1, scale: 1 }}
+                                                            type="button"
+                                                            onClick={() => { setEditingSpeaker(id); setSpeakerDraft(display); }}
+                                                            whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
                                                             transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
-                                                            className="inline-flex items-center gap-1 h-7 pl-2 pr-1 rounded-full bg-bg-secondary border border-accent-focus ring-1 ring-accent-border"
+                                                            className="group inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] text-text-secondary hover:text-text-primary border border-border-subtle transition-colors"
+                                                            title={t("Rename speaker")}
                                                         >
-                                                            <input
-                                                                autoFocus
-                                                                value={speakerDraft}
-                                                                onChange={e => setSpeakerDraft(e.target.value)}
-                                                                onKeyDown={e => { if (e.key === 'Enter') handleSaveSpeakerLabel(id, speakerDraft); if (e.key === 'Escape') setEditingSpeaker(null); }}
-                                                                placeholder={display}
-                                                                className="text-[11px] bg-transparent text-text-primary placeholder:text-text-tertiary outline-none w-28"
-                                                            />
-                                                            <motion.button
-                                                                type="button"
-                                                                onMouseDown={e => e.preventDefault()}
-                                                                onClick={() => handleSaveSpeakerLabel(id, speakerDraft)}
-                                                                whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
-                                                                className="inline-flex items-center justify-center w-5 h-5 rounded-full text-accent-primary hover:bg-accent-muted transition-colors"
-                                                                title={t("Save")}
-                                                            >
-                                                                <Check className="w-3 h-3" strokeWidth={2.5} />
-                                                            </motion.button>
-                                                            <motion.button
-                                                                type="button"
-                                                                onMouseDown={e => e.preventDefault()}
-                                                                onClick={() => setEditingSpeaker(null)}
-                                                                whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
-                                                                className="inline-flex items-center justify-center w-5 h-5 rounded-full text-text-tertiary hover:text-text-primary hover:bg-white/[0.08] transition-colors"
-                                                                title={t("Cancel")}
-                                                            >
-                                                                <X className="w-3 h-3" strokeWidth={2.5} />
-                                                            </motion.button>
-                                                        </motion.span>
+                                                            <span className="text-[11px] font-medium">{display}</span>
+                                                            <Pencil className="w-2.5 h-2.5 text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity shrink-0" strokeWidth={2} />
+                                                        </motion.button>
                                                     );
-                                                }
-                                                return (
-                                                    <motion.button
-                                                        key={id}
-                                                        layout
-                                                        type="button"
-                                                        onClick={() => { setEditingSpeaker(id); setSpeakerDraft(display); }}
-                                                        whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
-                                                        transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
-                                                        className="group inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] text-text-secondary hover:text-text-primary border border-border-subtle transition-colors"
-                                                        title={t("Rename speaker")}
-                                                    >
-                                                        <span className="text-[11px] font-medium">{display}</span>
-                                                        <Pencil className="w-2.5 h-2.5 text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity shrink-0" strokeWidth={2} />
-                                                    </motion.button>
-                                                );
-                                            })}
+                                                })}
                                             </AnimatePresence>
                                         </div>
                                     );

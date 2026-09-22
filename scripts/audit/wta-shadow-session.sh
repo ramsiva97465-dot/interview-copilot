@@ -2,7 +2,7 @@
 # scripts/audit/wta-shadow-session.sh — WTA shadow-telemetry session driver.
 #
 # Plays a REALISTIC interviewer through SYSTEM AUDIO via macOS `say` (which
-# Natively ingests as the interviewer channel); you answer through the MIC.
+# MeetFloo ingests as the interviewer channel); you answer through the MIC.
 # The dialogue is grounded in the actual profileresume/ documents:
 #   - resume: evin-SoftwareEngineer2025 (EstroTech, Aetherbot, TalentScope,
 #     PriceX, RedisMart, GenAI Scholar, CUSAT)
@@ -12,7 +12,7 @@
 # hedges, misremembered names, interruptions, evaluative backchannels.
 #
 # Each scenario still targets one piece of shadow telemetry (see the
-# playbook). Setup: upload BOTH profileresume/ PDFs in Natively (resume + JD),
+# playbook). Setup: upload BOTH profileresume/ PDFs in MeetFloo (resume + JD),
 # start a meeting, then run this in a second terminal.
 #
 #   ./scripts/audit/wta-shadow-session.sh            # all scenarios (~25 min)
@@ -51,7 +51,7 @@ scenario() {
 run() { [ "$SKIP" -eq 0 ] && "$@"; }
 
 echo "WTA shadow-session driver (resume-grounded). Voice=$VOICE rate=$RATE."
-echo "Checklist: meeting RUNNING, resume + Data Analyst JD uploaded in Natively."
+echo "Checklist: meeting RUNNING, resume + Data Analyst JD uploaded in MeetFloo."
 read -r -p "Press Enter to begin… "
 
 scenario 1 "Opening — small talk that must NOT fire, then the real opener (ledger_parity)"

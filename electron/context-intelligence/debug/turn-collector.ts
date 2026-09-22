@@ -368,7 +368,7 @@ export class ContextDebugTurnCollector {
 // runs co-load bundles — a collector begun by the bridge's copy must be
 // findable by the transport's copy.
 
-const REGISTRY_KEY = '__nativelyContextDebugCollectorsV1__';
+const REGISTRY_KEY = '__MeetFlooContextDebugCollectorsV1__';
 function collectorsMap(): Map<string, ContextDebugTurnCollector> {
   const g = globalThis as unknown as Record<string, unknown>;
   let m = g[REGISTRY_KEY] as Map<string, ContextDebugTurnCollector> | undefined;

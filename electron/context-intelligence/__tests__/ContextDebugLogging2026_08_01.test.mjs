@@ -84,15 +84,15 @@ describe('debug level resolution', () => {
   test('live binding: packaged build ignores the content env flag entirely', async () => {
     const { getContentInclusionEnabled } = await load('debug/debug-config.js');
     bindContextDebugConfig({ readStoredLevel: () => 'verbose', isProductionBuild: true });
-    const prev = process.env.NATIVELY_CONTEXT_DEBUG_INCLUDE_CONTENT;
-    process.env.NATIVELY_CONTEXT_DEBUG_INCLUDE_CONTENT = '1';
+    const prev = process.env.MEETFLOO_CONTEXT_DEBUG_INCLUDE_CONTENT;
+    process.env.MEETFLOO_CONTEXT_DEBUG_INCLUDE_CONTENT = '1';
     try {
       assert.equal(getContentInclusionEnabled('verbose'), false);
       bindContextDebugConfig({ readStoredLevel: () => 'verbose', isProductionBuild: false });
       assert.equal(getContentInclusionEnabled('verbose'), true);
     } finally {
-      if (prev === undefined) delete process.env.NATIVELY_CONTEXT_DEBUG_INCLUDE_CONTENT;
-      else process.env.NATIVELY_CONTEXT_DEBUG_INCLUDE_CONTENT = prev;
+      if (prev === undefined) delete process.env.MEETFLOO_CONTEXT_DEBUG_INCLUDE_CONTENT;
+      else process.env.MEETFLOO_CONTEXT_DEBUG_INCLUDE_CONTENT = prev;
       bindContextDebugConfig({ readStoredLevel: () => 'off', isProductionBuild: true });
     }
   });
@@ -393,14 +393,14 @@ describe('bridge integration', () => {
   const dir = path.join(tmpRoot, 'bridge');
   let envBefore;
   before(() => {
-    envBefore = process.env.NATIVELY_CONTEXT_DEBUG;
-    process.env.NATIVELY_CONTEXT_DEBUG = 'verbose';
+    envBefore = process.env.MEETFLOO_CONTEXT_DEBUG;
+    process.env.MEETFLOO_CONTEXT_DEBUG = 'verbose';
     bindContextDebugConfig({ readStoredLevel: () => 'off', isProductionBuild: true });
     bindContextDebugLogDirectory(dir);
   });
   after(() => {
-    if (envBefore === undefined) delete process.env.NATIVELY_CONTEXT_DEBUG;
-    else process.env.NATIVELY_CONTEXT_DEBUG = envBefore;
+    if (envBefore === undefined) delete process.env.MEETFLOO_CONTEXT_DEBUG;
+    else process.env.MEETFLOO_CONTEXT_DEBUG = envBefore;
   });
 
   const port = (evidence = []) => ({ retrieve: async () => ({ evidence, attempts: [] }) });
@@ -489,7 +489,7 @@ describe('bridge integration', () => {
   });
 
   test('OFF mode: no collector, no record', async () => {
-    process.env.NATIVELY_CONTEXT_DEBUG = 'off';
+    process.env.MEETFLOO_CONTEXT_DEBUG = 'off';
     try {
       const requestId = `off_${Math.random().toString(36).slice(2)}`;
       const r = await buildV3Prompt({
@@ -503,7 +503,7 @@ describe('bridge integration', () => {
       await flushContextDebugWriter();
       assert.ok(!readJsonl(dir).some((x) => x.identity?.requestId === requestId));
     } finally {
-      process.env.NATIVELY_CONTEXT_DEBUG = 'verbose';
+      process.env.MEETFLOO_CONTEXT_DEBUG = 'verbose';
     }
   });
 
@@ -530,11 +530,11 @@ describe('bridge integration', () => {
 describe('ingest events', () => {
   const dir = path.join(tmpRoot, 'ingest');
   before(() => {
-    process.env.NATIVELY_CONTEXT_DEBUG = 'standard';
+    process.env.MEETFLOO_CONTEXT_DEBUG = 'standard';
     bindContextDebugConfig({ readStoredLevel: () => 'off', isProductionBuild: true });
     bindContextDebugLogDirectory(dir);
   });
-  after(() => { delete process.env.NATIVELY_CONTEXT_DEBUG; });
+  after(() => { delete process.env.MEETFLOO_CONTEXT_DEBUG; });
 
   test('complete ingest → READY with page and chunk accounting', async () => {
     emitModeFileIngestDebug({
@@ -595,11 +595,11 @@ describe('ingest events', () => {
   });
 
   test('off level emits nothing', async () => {
-    process.env.NATIVELY_CONTEXT_DEBUG = 'off';
+    process.env.MEETFLOO_CONTEXT_DEBUG = 'off';
     emitModeFileIngestDebug({
       fileId: 'ref_off', fileName: 'x.md', chunkCount: 1, embeddedChunkCount: 1, indexState: 'ready',
     });
-    process.env.NATIVELY_CONTEXT_DEBUG = 'standard';
+    process.env.MEETFLOO_CONTEXT_DEBUG = 'standard';
     await flushContextDebugWriter();
     assert.ok(!readJsonl(dir).some((x) => x.document?.id === 'ref_off'));
   });

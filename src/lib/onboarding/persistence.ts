@@ -2,9 +2,9 @@
  * Persistence layer for the OnboardingOrchestrator.
  *
  * Owns localStorage keys for the orchestrated onboarding flow. Hydrates from
- * legacy keys (natively_perms_shown_v1, natively_seen_modes_onboarding_v5,
- * natively_seen_profile_onboarding_v1, natively_launch_count_v2.7,
- * natively_trial_promo_ts) so users upgrading from pre-orchestrator builds
+ * legacy keys (MeetFloo_perms_shown_v1, MeetFloo_seen_modes_onboarding_v5,
+ * MeetFloo_seen_profile_onboarding_v1, MeetFloo_launch_count_v2.7,
+ * MeetFloo_trial_promo_ts) so users upgrading from pre-orchestrator builds
  * don't see stale toasters replay.
  *
  * Pure functions — no React, no DOM mutations beyond localStorage. Safe to
@@ -16,20 +16,20 @@ import type { OrchestratorState } from './orchestrator';
 const VERSION = '1.0';
 
 const KEYS = {
-  state:        'natively_onboarding_state_v1',
-  version:      'natively_onboarding_version',
-  legacySweepAt:'natively_onboarding_legacy_sweep_at',
+  state: 'MeetFloo_onboarding_state_v1',
+  version: 'MeetFloo_onboarding_version',
+  legacySweepAt: 'MeetFloo_onboarding_legacy_sweep_at',
 } as const;
 
 // Legacy keys from the pre-orchestrator app.
 const LEGACY = {
-  permsShown:           'natively_perms_shown_v1',
-  seenModesOnboarding:  'natively_seen_modes_onboarding_v5',
-  seenProfileOnboarding:'natively_seen_profile_onboarding_v1',
-  launchCount:          'natively_launch_count_v2.7',
-  appOpensCount:        'natively_app_opens_count',
-  trialPromoTs:         'natively_trial_promo_ts', // read but never written (legacy bug)
-  adsHistory:           'natively_ads_shown_history',
+  permsShown: 'MeetFloo_perms_shown_v1',
+  seenModesOnboarding: 'MeetFloo_seen_modes_onboarding_v5',
+  seenProfileOnboarding: 'MeetFloo_seen_profile_onboarding_v1',
+  launchCount: 'MeetFloo_launch_count_v2.7',
+  appOpensCount: 'MeetFloo_app_opens_count',
+  trialPromoTs: 'MeetFloo_trial_promo_ts', // read but never written (legacy bug)
+  adsHistory: 'MeetFloo_ads_shown_history',
 } as const;
 
 const LEGACY_SWEEP_INTERVAL_MS = 60 * 24 * 60 * 60 * 1000; // 60 days

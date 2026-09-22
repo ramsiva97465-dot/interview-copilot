@@ -1,6 +1,6 @@
 // electron/llm/__tests__/OllamaGenerationModels2026_09_08.test.mjs
 //
-// An embedding model is not a chat model. Natively pulls `nomic-embed-text`
+// An embedding model is not a chat model. MeetFloo pulls `nomic-embed-text`
 // itself on first launch for retrieval, and /api/tags lists it beside the chat
 // models — so before this filter existed it appeared in every model picker and
 // could be auto-selected as THE local model, failing only later at generation
@@ -60,7 +60,7 @@ describe('isGenerationCapable', () => {
 });
 
 describe('filterOllamaGenerationModels', () => {
-  test('drops the embedder Natively pulled and keeps the chat models', async () => {
+  test('drops the embedder MeetFloo pulled and keeps the chat models', async () => {
     __resetOllamaCapabilityCache();
     const { doFetch } = fakeDaemon({
       'nomic-embed-text:latest': EMBED,
@@ -120,7 +120,7 @@ describe('filterOllamaGenerationModels', () => {
 
   test('a daemon with ONLY the bootstrapped embedder reports no generation models', async () => {
     // The state a fresh install lands in: Ollama is running and has exactly the
-    // model Natively pulled for embeddings. "No models you can chat with" is the
+    // model MeetFloo pulled for embeddings. "No models you can chat with" is the
     // honest answer; offering nomic-embed-text is not.
     __resetOllamaCapabilityCache();
     const { doFetch } = fakeDaemon({ 'nomic-embed-text:latest': EMBED });

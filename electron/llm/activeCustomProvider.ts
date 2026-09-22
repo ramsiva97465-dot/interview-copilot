@@ -53,8 +53,8 @@ export interface ActiveCustomProvider {
 export function readActiveCustomProvider(): ActiveCustomProvider | null {
   try {
     const g = globalThis as any;
-    if (typeof g.__nativelyGetLLMHelper !== 'function') return null;
-    const helper = g.__nativelyGetLLMHelper();
+    if (typeof g.__MeetFlooGetLLMHelper !== 'function') return null;
+    const helper = g.__MeetFlooGetLLMHelper();
     if (!helper || typeof helper.getActiveCustomProvider !== 'function') return null;
     return helper.getActiveCustomProvider() || null;
   } catch {
@@ -79,8 +79,8 @@ export function readActiveCustomProvider(): ActiveCustomProvider | null {
 export function readActiveModelId(): string {
   try {
     const g = globalThis as any;
-    if (typeof g.__nativelyGetLLMHelper !== 'function') return '';
-    const helper = g.__nativelyGetLLMHelper();
+    if (typeof g.__MeetFlooGetLLMHelper !== 'function') return '';
+    const helper = g.__MeetFlooGetLLMHelper();
     if (!helper || typeof helper.getCurrentModelId !== 'function') return '';
     return helper.getCurrentModelId() || '';
   } catch {

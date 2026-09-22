@@ -14,11 +14,11 @@ const { resolveLiveSessionMemoryConfig, isLiveSessionMemoryEnabled, sessionBucke
 
 // NOTE: deliberately does NOT mutate NODE_ENV or BENCHMARK_MODEL — those are read by
 // other test files running concurrently (node:test parallelizes across files), so
-// mutating them here would cause cross-file flakes. We use NATIVELY_INTERNAL/_DEV
+// mutating them here would cause cross-file flakes. We use MEETFLOO_INTERNAL/_DEV
 // (read by nothing else) to exercise the internal-context tier.
 const ENV_KEYS = [
-  'NATIVELY_ENABLE_LIVE_SESSION_MEMORY', 'NATIVELY_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT',
-  'NATIVELY_LIVE_SESSION_MEMORY_KILL_SWITCH', 'NATIVELY_INTERNAL', 'NATIVELY_DEV',
+  'MEETFLOO_ENABLE_LIVE_SESSION_MEMORY', 'MEETFLOO_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT',
+  'MEETFLOO_LIVE_SESSION_MEMORY_KILL_SWITCH', 'MEETFLOO_INTERNAL', 'MEETFLOO_DEV',
 ];
 let saved = {};
 beforeEach(() => { saved = {}; for (const k of ENV_KEYS) saved[k] = process.env[k]; for (const k of ENV_KEYS) delete process.env[k]; __resetLiveSessionMemoryCache(); });
@@ -33,30 +33,30 @@ describe('Rollout — production default ON (PI v3 W6d), overrides still win', (
     assert.equal(c.enabled, true);
     assert.equal(c.reason, 'default_on');
   });
-  // Use NATIVELY_INTERNAL (a flag no other concurrent test file reads) to exercise the
+  // Use MEETFLOO_INTERNAL (a flag no other concurrent test file reads) to exercise the
   // internal-context tier — mutating NODE_ENV/BENCHMARK_MODEL here would race with
   // other test files that read them (node:test parallelizes across files).
-  test('NATIVELY_INTERNAL=1 → ON (internal_context)', () => {
-    process.env.NATIVELY_INTERNAL = '1'; __resetLiveSessionMemoryCache();
+  test('MEETFLOO_INTERNAL=1 → ON (internal_context)', () => {
+    process.env.MEETFLOO_INTERNAL = '1'; __resetLiveSessionMemoryCache();
     const c = resolveLiveSessionMemoryConfig('s');
     assert.equal(c.enabled, true);
     assert.equal(c.reason, 'internal_context');
   });
-  test('NATIVELY_DEV=1 → ON', () => {
-    process.env.NATIVELY_DEV = '1'; __resetLiveSessionMemoryCache();
+  test('MEETFLOO_DEV=1 → ON', () => {
+    process.env.MEETFLOO_DEV = '1'; __resetLiveSessionMemoryCache();
     assert.equal(resolveLiveSessionMemoryConfig('s').enabled, true);
   });
 });
 
 describe('Rollout — env overrides', () => {
   test('env ON forces enabled', () => {
-    process.env.NATIVELY_ENABLE_LIVE_SESSION_MEMORY = 'on'; __resetLiveSessionMemoryCache();
+    process.env.MEETFLOO_ENABLE_LIVE_SESSION_MEMORY = 'on'; __resetLiveSessionMemoryCache();
     const c = resolveLiveSessionMemoryConfig('s');
     assert.equal(c.enabled, true); assert.equal(c.reason, 'env_on');
   });
   test('env OFF forces disabled even in an internal context', () => {
-    process.env.NATIVELY_INTERNAL = '1';
-    process.env.NATIVELY_ENABLE_LIVE_SESSION_MEMORY = 'off'; __resetLiveSessionMemoryCache();
+    process.env.MEETFLOO_INTERNAL = '1';
+    process.env.MEETFLOO_ENABLE_LIVE_SESSION_MEMORY = 'off'; __resetLiveSessionMemoryCache();
     const c = resolveLiveSessionMemoryConfig('s');
     assert.equal(c.enabled, false); assert.equal(c.reason, 'env_off');
   });
@@ -64,43 +64,43 @@ describe('Rollout — env overrides', () => {
 
 describe('Rollout — KILL SWITCH overrides everything', () => {
   test('kill switch disables even when env ON', () => {
-    process.env.NATIVELY_ENABLE_LIVE_SESSION_MEMORY = 'on';
-    process.env.NATIVELY_LIVE_SESSION_MEMORY_KILL_SWITCH = 'true'; __resetLiveSessionMemoryCache();
+    process.env.MEETFLOO_ENABLE_LIVE_SESSION_MEMORY = 'on';
+    process.env.MEETFLOO_LIVE_SESSION_MEMORY_KILL_SWITCH = 'true'; __resetLiveSessionMemoryCache();
     const c = resolveLiveSessionMemoryConfig('s');
     assert.equal(c.enabled, false); assert.equal(c.reason, 'kill_switch'); assert.equal(c.killSwitch, true);
   });
   test('kill switch disables even in an internal context', () => {
-    process.env.NATIVELY_INTERNAL = '1';
-    process.env.NATIVELY_LIVE_SESSION_MEMORY_KILL_SWITCH = '1'; __resetLiveSessionMemoryCache();
+    process.env.MEETFLOO_INTERNAL = '1';
+    process.env.MEETFLOO_LIVE_SESSION_MEMORY_KILL_SWITCH = '1'; __resetLiveSessionMemoryCache();
     assert.equal(resolveLiveSessionMemoryConfig('s').enabled, false);
   });
 });
 
 describe('Rollout — percentage gate (production gradual rollout)', () => {
   test('percent 0 → OFF', () => {
-    process.env.NATIVELY_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT = '0'; __resetLiveSessionMemoryCache();
+    process.env.MEETFLOO_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT = '0'; __resetLiveSessionMemoryCache();
     const c = resolveLiveSessionMemoryConfig('s'); assert.equal(c.enabled, false); assert.equal(c.reason, 'rollout_out');
   });
   test('percent 100 → ON', () => {
-    process.env.NATIVELY_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT = '100'; __resetLiveSessionMemoryCache();
+    process.env.MEETFLOO_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT = '100'; __resetLiveSessionMemoryCache();
     const c = resolveLiveSessionMemoryConfig('s'); assert.equal(c.enabled, true); assert.equal(c.reason, 'rollout_in');
   });
   test('percent 50 → roughly half of sessions in, deterministically', () => {
-    process.env.NATIVELY_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT = '50'; __resetLiveSessionMemoryCache();
+    process.env.MEETFLOO_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT = '50'; __resetLiveSessionMemoryCache();
     let inCount = 0; const N = 1000;
     for (let i = 0; i < N; i++) if (resolveLiveSessionMemoryConfig('user-' + i).enabled) inCount++;
     // FNV bucketing should land near 50% (allow a wide band).
     assert.ok(inCount > N * 0.40 && inCount < N * 0.60, `got ${inCount}/${N} in rollout`);
   });
   test('deterministic bucketing: same session id is stable across calls', () => {
-    process.env.NATIVELY_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT = '37'; __resetLiveSessionMemoryCache();
+    process.env.MEETFLOO_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT = '37'; __resetLiveSessionMemoryCache();
     const a = resolveLiveSessionMemoryConfig('stable-session-xyz').enabled;
     const b = resolveLiveSessionMemoryConfig('stable-session-xyz').enabled;
     const c = resolveLiveSessionMemoryConfig('stable-session-xyz').enabled;
     assert.equal(a, b); assert.equal(b, c);
   });
   test('partial percent with NO sessionId → OFF (test-engineer gap: id-less sessions not lumped in)', () => {
-    process.env.NATIVELY_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT = '90'; __resetLiveSessionMemoryCache();
+    process.env.MEETFLOO_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT = '90'; __resetLiveSessionMemoryCache();
     assert.equal(resolveLiveSessionMemoryConfig(undefined).enabled, false);
     assert.equal(resolveLiveSessionMemoryConfig('').enabled, false);
     assert.equal(resolveLiveSessionMemoryConfig('').reason, 'rollout_out');
@@ -113,7 +113,7 @@ describe('Rollout — percentage gate (production gradual rollout)', () => {
 
 describe('Rollout — flag OFF/ON helper parity', () => {
   test('isLiveSessionMemoryEnabled mirrors resolveLiveSessionMemoryConfig.enabled', () => {
-    process.env.NATIVELY_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT = '63'; __resetLiveSessionMemoryCache();
+    process.env.MEETFLOO_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT = '63'; __resetLiveSessionMemoryCache();
     for (const id of ['a', 'b', 'c', 'd', 'e']) {
       assert.equal(isLiveSessionMemoryEnabled(id), resolveLiveSessionMemoryConfig(id).enabled);
     }
@@ -127,7 +127,7 @@ describe('Telemetry — marker only, no sensitive content', () => {
       answerType: 'project_answer', mode: 'technical-interview',
       resume: 'John Doe, 10 years...', transcript: 'long convo', salary: '250k',
       answerText: 'the full answer body', apiKey: 'AQ.secret', prompt: 'system prompt',
-      recalledValue: 'Natively', entityValue: 'Natively',
+      recalledValue: 'MeetFloo', entityValue: 'MeetFloo',
     });
     assert.equal(out.answerType, 'project_answer');
     assert.equal(out.mode, 'technical-interview');
@@ -148,7 +148,7 @@ describe('Telemetry — marker only, no sensitive content', () => {
     }
   });
   test('an allowed key with a free-text / number value is still dropped (value backstop)', () => {
-    const out = scrubTelemetry({ reason: 'recalled the Natively project from minute 1 of the conversation', mode: 'sales' });
+    const out = scrubTelemetry({ reason: 'recalled the MeetFloo project from minute 1 of the conversation', mode: 'sales' });
     assert.ok(!('reason' in out), 'long free-text value rejected even under an allowed key');
     assert.equal(out.mode, 'sales');
   });
@@ -163,7 +163,7 @@ describe('Telemetry — marker only, no sensitive content', () => {
     assert.equal(out.mode, 'sales');
   });
   test('emit stores a scrubbed record', () => {
-    piTelemetry.emit('session_memory_recall_succeeded', { recalledKind: 'project', ageBucket: '60min+', recalledValue: 'Natively' });
+    piTelemetry.emit('session_memory_recall_succeeded', { recalledKind: 'project', ageBucket: '60min+', recalledValue: 'MeetFloo' });
     const recent = piTelemetry.recent(5);
     const rec = recent[recent.length - 1];
     assert.equal(rec.event, 'session_memory_recall_succeeded');

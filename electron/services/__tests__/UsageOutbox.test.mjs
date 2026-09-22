@@ -6,7 +6,7 @@
 // it would test the mock's memory rather than the durability being claimed.
 //
 // Run: npm test   (the ELECTRON runner; this file needs better-sqlite3 built
-// against Electron's ABI, and NATIVELY_TEST_USERDATA to redirect the DB path)
+// against Electron's ABI, and MEETFLOO_TEST_USERDATA to redirect the DB path)
 
 import { test, describe, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
@@ -28,8 +28,8 @@ describe('usage outbox (v27)', { skip: HAVE_BUILD ? false : 'run `npm run build:
   let db;
 
   before(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-outbox-test-'));
-    process.env.NATIVELY_TEST_USERDATA = tmpDir;
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-outbox-test-'));
+    process.env.MEETFLOO_TEST_USERDATA = tmpDir;
     const { DatabaseManager } = require(DBM_PATH);
     db = DatabaseManager.getInstance();
   });
@@ -118,7 +118,7 @@ describe('usage outbox (v27)', { skip: HAVE_BUILD ? false : 'run `npm run build:
     assert.equal(batch[0].event_id, 'e-1');
     assert.deepEqual(batch[0].payload.event_type, 'feature_completed');
     // The file itself, not just the handle — this is the durability claim.
-    assert.ok(fs.existsSync(path.join(tmpDir, 'natively.db')));
+    assert.ok(fs.existsSync(path.join(tmpDir, 'MeetFloo.db')));
   });
 
   test('enqueuing the same event twice is a no-op', () => {
@@ -263,7 +263,7 @@ describe('feature instrumentation', () => {
 
     // An uncategorised error blames US, not the provider. A dispute report must
     // never imply a provider was at fault when the truth is we could not tell.
-    assert.deepEqual(classifyFailure(new Error('something odd')), { failure_origin: 'natively', failure_code: 'RUNTIME_ERROR' });
+    assert.deepEqual(classifyFailure(new Error('something odd')), { failure_origin: 'MeetFloo', failure_code: 'RUNTIME_ERROR' });
 
     // And it never leaks the message itself.
     const secret = classifyFailure(new Error('failed for user alice@example.com asking about salary'));
@@ -291,16 +291,16 @@ describe('runTracked outcome classification', () => {
 
   before(() => {
     if (!have) return;
-    tdir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-tracked-test-'));
-    process.env.NATIVELY_TEST_USERDATA = tdir;
-    process.env.NATIVELY_USAGE_OUTBOX_ENABLED = '1';
+    tdir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-tracked-test-'));
+    process.env.MEETFLOO_TEST_USERDATA = tdir;
+    process.env.MEETFLOO_USAGE_OUTBOX_ENABLED = '1';
     const { DatabaseManager } = require(DBM_PATH);
     DatabaseManager.instance = null;
     tdb = DatabaseManager.getInstance();
   });
 
   after(() => {
-    delete process.env.NATIVELY_USAGE_OUTBOX_ENABLED;
+    delete process.env.MEETFLOO_USAGE_OUTBOX_ENABLED;
     try { tdb?.close?.(); } catch { /* ignore */ }
     try { fs.rmSync(tdir, { recursive: true, force: true }); } catch { /* ignore */ }
   });
@@ -403,84 +403,84 @@ describe('runTracked outcome classification', () => {
 
 // ── Flag polarity (2026-08-27) ───────────────────────────────────────────────
 //
-// The outbox shipped on 2026-08-14 gated behind NATIVELY_USAGE_OUTBOX_ENABLED,
+// The outbox shipped on 2026-08-14 gated behind MEETFLOO_USAGE_OUTBOX_ENABLED,
 // a variable a packaged Electron app can never see — it is not set by the app,
 // and a launch from the Dock or the Start menu inherits no environment. The
 // result was a subsystem that looked shipped and recorded nothing at all in
 // production. These tests pin the inverted default so that cannot recur.
 describe('outbox flag polarity', { skip: HAVE_BUILD ? false : 'run `npm run build:electron` first' }, () => {
-    const OUTBOX_PATH = path.join(REPO, 'dist-electron/electron/services/UsageOutbox.js');
-    const ORIGINAL = process.env.NATIVELY_USAGE_OUTBOX_ENABLED;
+  const OUTBOX_PATH = path.join(REPO, 'dist-electron/electron/services/UsageOutbox.js');
+  const ORIGINAL = process.env.MEETFLOO_USAGE_OUTBOX_ENABLED;
 
-    after(() => {
-        if (ORIGINAL === undefined) delete process.env.NATIVELY_USAGE_OUTBOX_ENABLED;
-        else process.env.NATIVELY_USAGE_OUTBOX_ENABLED = ORIGINAL;
-    });
+  after(() => {
+    if (ORIGINAL === undefined) delete process.env.MEETFLOO_USAGE_OUTBOX_ENABLED;
+    else process.env.MEETFLOO_USAGE_OUTBOX_ENABLED = ORIGINAL;
+  });
 
-    test('an absent flag enables the outbox', () => {
-        const { usageOutbox } = require(OUTBOX_PATH);
-        delete process.env.NATIVELY_USAGE_OUTBOX_ENABLED;
-        assert.equal(usageOutbox.isEnabled(), true, 'absent must mean on');
-    });
+  test('an absent flag enables the outbox', () => {
+    const { usageOutbox } = require(OUTBOX_PATH);
+    delete process.env.MEETFLOO_USAGE_OUTBOX_ENABLED;
+    assert.equal(usageOutbox.isEnabled(), true, 'absent must mean on');
+  });
 
-    test('only an explicit off-value disables it', () => {
-        const { usageOutbox } = require(OUTBOX_PATH);
-        for (const off of ['0', 'false', 'FALSE', 'off', 'no', ' 0 ']) {
-            process.env.NATIVELY_USAGE_OUTBOX_ENABLED = off;
-            assert.equal(usageOutbox.isEnabled(), false, `${JSON.stringify(off)} must disable`);
-        }
-        for (const on of ['1', 'true', 'yes', 'anything-else']) {
-            process.env.NATIVELY_USAGE_OUTBOX_ENABLED = on;
-            assert.equal(usageOutbox.isEnabled(), true, `${JSON.stringify(on)} must not disable`);
-        }
-    });
+  test('only an explicit off-value disables it', () => {
+    const { usageOutbox } = require(OUTBOX_PATH);
+    for (const off of ['0', 'false', 'FALSE', 'off', 'no', ' 0 ']) {
+      process.env.MEETFLOO_USAGE_OUTBOX_ENABLED = off;
+      assert.equal(usageOutbox.isEnabled(), false, `${JSON.stringify(off)} must disable`);
+    }
+    for (const on of ['1', 'true', 'yes', 'anything-else']) {
+      process.env.MEETFLOO_USAGE_OUTBOX_ENABLED = on;
+      assert.equal(usageOutbox.isEnabled(), true, `${JSON.stringify(on)} must not disable`);
+    }
+  });
 
-    test('an empty value reads as absent, not as off', () => {
-        // `FOO=$UNSET_VAR` exports an empty string. A mis-templated launcher or
-        // CI config must not be able to silently take the outbox dark.
-        const { usageOutbox } = require(OUTBOX_PATH);
-        process.env.NATIVELY_USAGE_OUTBOX_ENABLED = '';
-        assert.equal(usageOutbox.isEnabled(), true, 'empty must mean absent');
-    });
+  test('an empty value reads as absent, not as off', () => {
+    // `FOO=$UNSET_VAR` exports an empty string. A mis-templated launcher or
+    // CI config must not be able to silently take the outbox dark.
+    const { usageOutbox } = require(OUTBOX_PATH);
+    process.env.MEETFLOO_USAGE_OUTBOX_ENABLED = '';
+    assert.equal(usageOutbox.isEnabled(), true, 'empty must mean absent');
+  });
 
-    // The three tests above only prove a boolean. This one proves the thing the
-    // boolean is FOR: that with no flag set, a recorded event actually lands in
-    // the local table. That is the exact failure that went unnoticed for two
-    // weeks — record() returned 'disabled' and wrote nothing, so the events were
-    // gone rather than merely undelivered, and no amount of fixing the server
-    // could get them back.
-    test('with no flag set, record() actually persists a row to the outbox table', () => {
-        const tdir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-polarity-test-'));
-        const prevUserData = process.env.NATIVELY_TEST_USERDATA;
-        process.env.NATIVELY_TEST_USERDATA = tdir;
-        delete process.env.NATIVELY_USAGE_OUTBOX_ENABLED;
+  // The three tests above only prove a boolean. This one proves the thing the
+  // boolean is FOR: that with no flag set, a recorded event actually lands in
+  // the local table. That is the exact failure that went unnoticed for two
+  // weeks — record() returned 'disabled' and wrote nothing, so the events were
+  // gone rather than merely undelivered, and no amount of fixing the server
+  // could get them back.
+  test('with no flag set, record() actually persists a row to the outbox table', () => {
+    const tdir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-polarity-test-'));
+    const prevUserData = process.env.MEETFLOO_TEST_USERDATA;
+    process.env.MEETFLOO_TEST_USERDATA = tdir;
+    delete process.env.MEETFLOO_USAGE_OUTBOX_ENABLED;
 
-        const { DatabaseManager } = require(DBM_PATH);
-        DatabaseManager.instance = null;
-        const pdb = DatabaseManager.getInstance();
-        try {
-            const { usageOutbox } = require(OUTBOX_PATH);
-            const result = usageOutbox.record({
-                event_type: 'feature_completed',
-                event_status: 'completed',
-                feature: 'mode_execution',
-                reported_duration_ms: 1234,
-            });
-            assert.notEqual(result, 'disabled', 'an absent flag must not disable recording');
+    const { DatabaseManager } = require(DBM_PATH);
+    DatabaseManager.instance = null;
+    const pdb = DatabaseManager.getInstance();
+    try {
+      const { usageOutbox } = require(OUTBOX_PATH);
+      const result = usageOutbox.record({
+        event_type: 'feature_completed',
+        event_status: 'completed',
+        feature: 'mode_execution',
+        reported_duration_ms: 1234,
+      });
+      assert.notEqual(result, 'disabled', 'an absent flag must not disable recording');
 
-            const rows = pdb.claimUsageOutboxBatch(100, Date.now() + 10 ** 12);
-            assert.equal(rows.length, 1, 'exactly one row must be queued for delivery');
-            const payload = rows[0].payload;
-            assert.equal(payload.layer, 'ledger');
-            assert.equal(payload.event_type, 'feature_completed');
-            assert.equal(payload.feature, 'mode_execution');
-            assert.equal(payload.reported_duration_ms, 1234);
-        } finally {
-            try { pdb?.close?.(); } catch { /* ignore */ }
-            DatabaseManager.instance = null;
-            if (prevUserData === undefined) delete process.env.NATIVELY_TEST_USERDATA;
-            else process.env.NATIVELY_TEST_USERDATA = prevUserData;
-            try { fs.rmSync(tdir, { recursive: true, force: true }); } catch { /* ignore */ }
-        }
-    });
+      const rows = pdb.claimUsageOutboxBatch(100, Date.now() + 10 ** 12);
+      assert.equal(rows.length, 1, 'exactly one row must be queued for delivery');
+      const payload = rows[0].payload;
+      assert.equal(payload.layer, 'ledger');
+      assert.equal(payload.event_type, 'feature_completed');
+      assert.equal(payload.feature, 'mode_execution');
+      assert.equal(payload.reported_duration_ms, 1234);
+    } finally {
+      try { pdb?.close?.(); } catch { /* ignore */ }
+      DatabaseManager.instance = null;
+      if (prevUserData === undefined) delete process.env.MEETFLOO_TEST_USERDATA;
+      else process.env.MEETFLOO_TEST_USERDATA = prevUserData;
+      try { fs.rmSync(tdir, { recursive: true, force: true }); } catch { /* ignore */ }
+    }
+  });
 });

@@ -1,5 +1,5 @@
 // scripts/e2e/run-server.mjs
-// Resilient launcher for the E2E natively-api backend: forces MiniMax-M3 primary,
+// Resilient launcher for the E2E MeetFloo-api backend: forces MiniMax-M3 primary,
 // enables local-test auth, binds an isolated port, and AUTO-RESTARTS if the
 // server exits (the server has a graceful-shutdown-on-signal path that can be
 // tripped during a multi-profile round when Electron instances come and go).
@@ -9,7 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const apiDir = path.resolve(__dirname, '../../natively-api');
+const apiDir = path.resolve(__dirname, '../../MeetFloo-api');
 const PORT = process.env.E2E_SERVER_PORT || '3111';
 
 let restarts = 0;
@@ -18,9 +18,9 @@ function start() {
     cwd: apiDir,
     env: {
       ...process.env,
-      NATIVELY_FORCE_PRIMARY_GEN: 'minimax',
-      NATIVELY_LOCAL_TEST_AUTH: '1',
-      NATIVELY_LOCAL_TEST_TOKEN: 'local-test-e2e-token',
+      MEETFLOO_FORCE_PRIMARY_GEN: 'minimax',
+      MEETFLOO_LOCAL_TEST_AUTH: '1',
+      MEETFLOO_LOCAL_TEST_TOKEN: 'local-test-e2e-token',
       NODE_ENV: 'development',
       LOG_LEVEL: 'warn',
       PORT,
@@ -37,6 +37,6 @@ function start() {
 }
 // Ignore the signals that would otherwise be delivered by shell job control when
 // sibling processes exit, so the supervisor itself survives the whole round.
-process.on('SIGHUP', () => {});
+process.on('SIGHUP', () => { });
 start();
-console.log(`[run-server] supervising natively-api on :${PORT} (MiniMax forced, local-test auth)`);
+console.log(`[run-server] supervising MeetFloo-api on :${PORT} (MiniMax forced, local-test auth)`);

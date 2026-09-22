@@ -1,8 +1,8 @@
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 
-if (process.env.NATIVELY_RUN_LIVE_BENCHMARKS !== 'true') {
-  process.stderr.write('Live vision benchmarks are disabled. Set NATIVELY_RUN_LIVE_BENCHMARKS=true to opt in.\n');
+if (process.env.MEETFLOO_RUN_LIVE_BENCHMARKS !== 'true') {
+  process.stderr.write('Live vision benchmarks are disabled. Set MEETFLOO_RUN_LIVE_BENCHMARKS=true to opt in.\n');
   process.exit(1);
 }
 

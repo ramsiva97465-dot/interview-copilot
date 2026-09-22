@@ -22,7 +22,7 @@ const read = (rel) => fs.readFileSync(path.join(repoRoot, rel), 'utf8');
 // ── 1. Packaged Windows builds failed their own asset preflight ──────────────
 // sharp / sqlite-vec ship as per-OS packages. The four darwin paths used to run
 // unconditionally, so every packaged Windows build failed them, flipped
-// `nativeOk` false, and told the user "Please reinstall Natively" on a good
+// `nativeOk` false, and told the user "Please reinstall MeetFloo" on a good
 // install. Dev mode short-circuits the check, hiding it locally.
 
 test('preflight: the darwin-only native asset checks are gated to darwin', () => {
@@ -36,7 +36,7 @@ test('preflight: the darwin-only native asset checks are gated to darwin', () =>
     block,
     /if \(process\.platform === 'darwin'\) \{[\s\S]*?sharp darwin-arm64 native/,
     'BUG: the darwin sharp/sqlite-vec checks must sit behind a darwin gate — running them on ' +
-      'Windows fails four checks for binaries that are never installed there.',
+    'Windows fails four checks for binaries that are never installed there.',
   );
   // Every darwin check must still be present and unchanged (no macOS regression).
   for (const id of [
@@ -95,7 +95,7 @@ test('screenshot: BOTH desktop platforms forward preferredDisplay', () => {
       call,
       /preferredDisplay/,
       'BUG: a full-screen capture dropped preferredDisplay — it will fall through to ' +
-        'screen.getPrimaryDisplay() and capture the wrong monitor on multi-display setups.',
+      'screen.getPrimaryDisplay() and capture the wrong monitor on multi-display setups.',
     );
   }
   // And there must be no win32 branch that calls it without the display.
@@ -124,7 +124,7 @@ test('undetectable: Windows drives the tray on toggle (macOS does it via _enforc
     win32Branch,
     /if \(state\) this\.hideTray\(\);\s*\n\s*else this\.showTray\(\);/,
     'BUG: the Windows toggle must drive the tray — otherwise the tray menu (show window / quit) ' +
-      'never appears for a session that started undetectable, and never returns after toggling off.',
+    'never appears for a session that started undetectable, and never returns after toggling off.',
   );
   // macOS must keep driving it from the enforcement loop (no regression).
   //
@@ -168,7 +168,7 @@ test('undetectable: the launcher leaves the Windows taskbar, at creation AND on 
     fn,
     /process\.platform !== 'win32'\) return/,
     'BUG: must no-op off win32 — macOS stealth is the Dock/activation-policy path and does not ' +
-      'use skipTaskbar; forcing it there would be an unrequested behaviour change.',
+    'use skipTaskbar; forcing it there would be an unrequested behaviour change.',
   );
   assert.match(
     fn,
@@ -228,7 +228,7 @@ test('ime: Windows reports stealth typing unavailable while a CJK IME is active'
     isAvail,
     /process\.platform === 'win32' && this\.isImeActive\(\)\) return false/,
     'BUG: an active CJK IME must make stealth typing report unavailable, which routes the user ' +
-      'through the focusable-overlay fallback where composition actually works.',
+    'through the focusable-overlay fallback where composition actually works.',
   );
   // The probe must fail OPEN (no IME) when the export is missing, so a stale
   // binary keeps working instead of disabling stealth typing for everyone.
@@ -286,7 +286,7 @@ test('security: stealth typing is stopped when the overlay hides or we leave it'
     toLauncher,
     /this\.stopStealthTyping\(\)/,
     'BUG: switchToLauncher (end-meeting) must stop stealth typing, or the hook keeps swallowing ' +
-      'keystrokes system-wide with the overlay hidden and no visible indicator.',
+    'keystrokes system-wide with the overlay hidden and no visible indicator.',
   );
   // And the manager stops when the overlay window is destroyed.
   const mgr = read('electron/services/StealthKeyboardManager.ts');
@@ -312,7 +312,7 @@ test('security: stealth-tap:start is authorized to the overlay sender only', () 
     block,
     /registerStealthHandler\('stealth-tap:start', \(event: any\) =>\s*isFromOverlay\(event\) \? stealth\.start\(\) : false/,
     'BUG: stealth-tap:start must reject senders that are not the overlay — any renderer could ' +
-      'otherwise engage the system-wide keyboard hook.',
+    'otherwise engage the system-wide keyboard hook.',
   );
 });
 
@@ -322,7 +322,7 @@ test('security: shutdown stops the tap on Windows too (napi teardown race)', () 
     main,
     /if \(process\.platform === 'darwin' \|\| process\.platform === 'win32'\) \{[\s\S]{0,800}Failed to stop StealthKeyboardManager during shutdown/,
     'BUG: the shutdown stop() was darwin-only; the Windows worker holds an Arc<ThreadsafeFunction> ' +
-      'and can crash on quit if a keystroke fires during V8 teardown.',
+    'and can crash on quit if a keystroke fires during V8 teardown.',
   );
 });
 
@@ -335,7 +335,7 @@ test('security(round2): hideMainWindow (Ctrl+B / screenshot hide) also stops ste
     fn,
     /this\.stopStealthTyping\(\)/,
     'BUG: hideMainWindow hides the overlay directly — it must stop stealth too, or Ctrl+B leaves the ' +
-      'hook engaged with the overlay hidden (the F1 residual).',
+    'hook engaged with the overlay hidden (the F1 residual).',
   );
 });
 
@@ -349,7 +349,7 @@ test('security(round2): chat:focusInput branches on pre-show state, not toggle()
     block,
     /const wasStealthActive = mgr\.isAvailable\(\) && mgr\.isActive\(\);\s*\n\s*this\.showMainWindow/,
     'BUG: wasActive must be captured BEFORE showMainWindow (which can stop stealth via ' +
-      'switchToLauncher), or the toggle always starts and can never disengage in launcher mode.',
+    'switchToLauncher), or the toggle always starts and can never disengage in launcher mode.',
   );
   assert.match(
     block,
@@ -366,7 +366,7 @@ test('security(round2): start() refuses on win32 when the overlay is not visible
     start,
     /process\.platform === 'win32' &&\s*\([\s\S]{0,160}!this\.overlayWindow\.isVisible\(\)[\s\S]{0,40}\)\s*\)\s*\{\s*return false/,
     'BUG: start() must refuse on win32 when the overlay is hidden/destroyed — enforces ' +
-      'hook-engaged⟹overlay-visible so the hook can never swallow keystrokes with no visible UI.',
+    'hook-engaged⟹overlay-visible so the hook can never swallow keystrokes with no visible UI.',
   );
   // macOS must NOT gain a visibility gate (no regression).
   assert.match(start, /process\.platform === 'win32' &&/, 'the gate must be win32-scoped');
@@ -379,7 +379,7 @@ test('rust(round2): the catch_unwind Err arms do NOT log (eprintln can panic →
     rust,
     /Err\(_\) => \{\s*\n\s*eprintln!/,
     'BUG: an eprintln! in the catch_unwind Err arm can itself panic across the FFI boundary and ' +
-      'abort the process — the exact failure the guard prevents.',
+    'abort the process — the exact failure the guard prevents.',
   );
   assert.doesNotMatch(rust, /proc panicked/, 'BUG: the panic-arm log lines must be gone.');
 });
@@ -390,7 +390,7 @@ test('rust(round2): AltGr is Ctrl+Alt only — the VK_RMENU disjunct is removed'
     rust,
     /let altgr = ctrl && alt;/,
     'BUG: altgr must be `ctrl && alt` — the VK_RMENU disjunct fabricated a Ctrl on US/UK layouts ' +
-      'and split left/right-Alt shortcut handling.',
+    'and split left/right-Alt shortcut handling.',
   );
   assert.doesNotMatch(
     rust,
@@ -409,7 +409,7 @@ test('rust(round2): the message queue is forced BEFORE the hooks install (timeou
     worker,
     /PeekMessageW\(&mut msg, HWND::default\(\), WM_USER, WM_USER, PM_NOREMOVE\)/,
     'BUG: PeekMessageW must run before SetWindowsHookExW so a WM_QUIT on the start() timeout path ' +
-      'is never lost (which would leak the worker thread and both global hooks).',
+    'is never lost (which would leak the worker thread and both global hooks).',
   );
   // And there must be exactly ONE PeekMessageW CALL (the old later one was
   // removed). Match the call form with its args so a comment mention doesn't count.
@@ -429,14 +429,14 @@ test('rust: all three hook procs are panic-contained (catch_unwind) and cleanup 
       rust,
       new RegExp(`catch_unwind\\(AssertUnwindSafe\\(\\|\\| unsafe \\{\\s*${proc}`),
       `BUG: ${proc} must run under catch_unwind — a panic across the extern "system" boundary ` +
-        'aborts the whole app from the OS input thread.',
+      'aborts the whole app from the OS input thread.',
     );
   }
   assert.match(
     rust,
     /impl Drop for HookGuard \{[\s\S]{0,400}UnhookWindowsHookEx\(self\.kb\)/,
     'BUG: hook cleanup must be a Drop guard so a panic in the worker still unhooks — otherwise a ' +
-      'global keyboard hook is left installed swallowing every keystroke system-wide.',
+    'global keyboard hook is left installed swallowing every keystroke system-wide.',
   );
 });
 
@@ -450,7 +450,7 @@ test('rust: the message-queue race and session-id cleanup are fixed', () => {
   assert.ok(
     peekIdx < readyIdx,
     "BUG: the queue must be forced (PeekMessageW) before signalling ready, or a fast stop()'s " +
-      'WM_QUIT is dropped and the main thread hangs on join().',
+    'WM_QUIT is dropped and the main thread hangs on join().',
   );
   // Cleanup keyed on session id, not the always-true Arc::ptr_eq.
   assert.match(
@@ -472,7 +472,7 @@ test('rust: char translation uses the foreground layout, captures AltGr, honours
     rust,
     /let altgr = ctrl && alt;/,
     'BUG: AltGr must be detected as Ctrl+Alt so its characters are captured, not leaked. (The ' +
-      'VK_RMENU disjunct was removed — it fabricated a Ctrl on US/UK layouts.)',
+    'VK_RMENU disjunct was removed — it fabricated a Ctrl on US/UK layouts.)',
   );
   assert.match(
     rust,
@@ -519,7 +519,7 @@ test('preflight: the new Windows check ids are still selected by nativeOk', () =
     assert.ok(
       selects(id),
       `BUG: "${id}" is not matched by the nativeOk selector — the check would run but never ` +
-        'count, so a genuinely missing binary would report healthy.',
+      'count, so a genuinely missing binary would report healthy.',
     );
   }
   // And the selector itself must still use those prefixes.

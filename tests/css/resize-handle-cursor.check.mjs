@@ -1,7 +1,7 @@
 // Regression check: the overlay resize handles must show a resize cursor.
 //
 // Background: the overlay's drag strips are invisible 16px regions at the
-// panel's east and south edges (see NativelyInterface's `data-resize-handle`
+// panel's east and south edges (see MeetFlooInterface's `data-resize-handle`
 // elements). The cursor IS the entire affordance — nothing else marks them —
 // so a handle that renders `cursor: default` is a handle no user can find.
 //
@@ -43,7 +43,7 @@ const OVERRIDE_START = '/* @cursor-lock-exception:start */';
 const OVERRIDE_END = '/* @cursor-lock-exception:end */';
 
 // The real class lists, copied from the three handle elements in
-// src/components/NativelyInterface.tsx. `no-drag` matters: it is itself one of
+// src/components/MeetFlooInterface.tsx. `no-drag` matters: it is itself one of
 // the lock's selectors, so a fixture that omitted it would under-test.
 const HANDLES = [
   { id: 'e', className: 'resize-handle resize-handle-e no-drag touch-none', expected: 'ew-resize' },
@@ -57,8 +57,8 @@ function loadCss(withOverride) {
   if (!existsSync(INDEX_CSS)) {
     throw new Error(
       `stylesheet not found at ${INDEX_CSS} — run this from the repo root ` +
-        `(npm run test:css:resize-handle), not from a subdirectory. This is a ` +
-        `harness problem, not a CSS regression.`,
+      `(npm run test:css:resize-handle), not from a subdirectory. This is a ` +
+      `harness problem, not a CSS regression.`,
     );
   }
   const css = readFileSync(INDEX_CSS, 'utf8');
@@ -67,8 +67,8 @@ function loadCss(withOverride) {
   if (start === -1 || end === -1) {
     throw new Error(
       `cursor-lock exception fences not found in index.css ` +
-        `(${OVERRIDE_START} … ${OVERRIDE_END}). The override block was renamed or ` +
-        `removed — update this check rather than deleting it.`,
+      `(${OVERRIDE_START} … ${OVERRIDE_END}). The override block was renamed or ` +
+      `removed — update this check rather than deleting it.`,
     );
   }
   if (withOverride) return css;
@@ -90,7 +90,7 @@ async function measureBoth() {
   const win = new BrowserWindow({ width: 320, height: 240, show: false });
   const written = [];
   const load = async (withOverride) => {
-    const fixture = join(tmpdir(), `natively-resize-cursor-${withOverride}.html`);
+    const fixture = join(tmpdir(), `MeetFloo-resize-cursor-${withOverride}.html`);
     writeFileSync(fixture, page(loadCss(withOverride)));
     written.push(fixture);
     await win.loadFile(fixture);
@@ -161,25 +161,25 @@ app.whenReady().then(async () => {
       check(
         fixed.rest[h.id] === h.expected,
         `.${h.className.split(' ')[1]} resolved cursor "${fixed.rest[h.id]}" at rest, expected "${h.expected}" ` +
-          `— the global cursor lock is winning and the handle is undiscoverable`,
+        `— the global cursor lock is winning and the handle is undiscoverable`,
       );
       check(
         fixed.hovered[h.id] === h.expected,
         `.${h.className.split(' ')[1]} resolved cursor "${fixed.hovered[h.id]}" while HOVERED, ` +
-          `expected "${h.expected}" — \`*:hover\` in the cursor lock is winning`,
+        `expected "${h.expected}" — \`*:hover\` in the cursor lock is winning`,
       );
       check(
         fixed.undetectable[h.id] === 'default',
         `.${h.className.split(' ')[1]} resolved "${fixed.undetectable[h.id]}" in UNDETECTABLE mode, ` +
-          `expected "default" — the cursor would betray the overlay in a screen capture`,
+        `expected "default" — the cursor would betray the overlay in a screen capture`,
       );
       // Without the override the lock must reclaim the handle. If it does not,
       // the lock changed shape and the passing case above proves nothing.
       check(
         baseline.rest[h.id] === 'default',
         `baseline (override block cut) resolved "${baseline.rest[h.id]}" for ` +
-          `.${h.className.split(' ')[1]}, expected "default" — the cursor lock no longer ` +
-          `claims this element, so the passing case is vacuous`,
+        `.${h.className.split(' ')[1]}, expected "default" — the cursor lock no longer ` +
+        `claims this element, so the passing case is vacuous`,
       );
     }
 
@@ -192,7 +192,7 @@ app.whenReady().then(async () => {
     }
     console.log(
       `✓ resize-handle-cursor check passed (e/s/se resolve ew-/ns-/nwse-resize at rest and hovered, ` +
-        `arrow in undetectable mode, baseline falls back to default, Electron ${process.versions.electron} / Chrome ${process.versions.chrome})`,
+      `arrow in undetectable mode, baseline falls back to default, Electron ${process.versions.electron} / Chrome ${process.versions.chrome})`,
     );
     app.exit(0);
   } catch (err) {

@@ -26,7 +26,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '../../..');
 
-const tsxPath = path.join(root, 'src/components/NativelyInterface.tsx');
+const tsxPath = path.join(root, 'src/components/MeetFlooInterface.tsx');
 const mainPath = path.join(root, 'electron/main.ts');
 const preloadPath = path.join(root, 'electron/preload.ts');
 const electronDtsPath = path.join(root, 'src/types/electron.d.ts');
@@ -58,25 +58,25 @@ function windowAround(source, re, linesBefore = 1, linesAfter = 5) {
 }
 
 describe('B2: STT user/interviewer status must initialize to \'awaiting-audio\'', () => {
-  it('NativelyInterface.tsx initializes sttUserStatus to \'awaiting-audio\' (not \'connected\')', () => {
+  it('MeetFlooInterface.tsx initializes sttUserStatus to \'awaiting-audio\' (not \'connected\')', () => {
     const win = windowAround(tsx, /setSttUserStatus\s*\]\s*=\s*useState/, 0, 6) ||
       windowAround(tsx, /const\s*\[\s*sttUserStatus\s*,\s*setSttUserStatus/, 0, 6);
     assert.ok(win, 'could not locate sttUserStatus useState declaration');
     assert.ok(
       /['"]awaiting-audio['"]/.test(win),
       'BUG: sttUserStatus useState initializer no longer contains \'awaiting-audio\'. ' +
-        'B2 fix requires defaulting to \'awaiting-audio\' so the UI shows "Listening for audio…" ' +
-        'until the first isFinal transcript proves the mic stream is alive.',
+      'B2 fix requires defaulting to \'awaiting-audio\' so the UI shows "Listening for audio…" ' +
+      'until the first isFinal transcript proves the mic stream is alive.',
     );
     // Negative-assertion: direct revert to 'connected'.
     assert.ok(
       !/useState<[^>]*>\s*\(\s*['"]connected['"]/.test(win),
       'BUG: sttUserStatus useState is initialized to \'connected\'. ' +
-        'See B2 fix (2026-05-28) — green-active is misleading before audio arrives.',
+      'See B2 fix (2026-05-28) — green-active is misleading before audio arrives.',
     );
   });
 
-  it('NativelyInterface.tsx initializes sttInterviewerStatus to \'awaiting-audio\' (not \'connected\')', () => {
+  it('MeetFlooInterface.tsx initializes sttInterviewerStatus to \'awaiting-audio\' (not \'connected\')', () => {
     const win = windowAround(tsx, /setSttInterviewerStatus\s*\]\s*=\s*useState/, 0, 6) ||
       windowAround(tsx, /const\s*\[\s*sttInterviewerStatus\s*,\s*setSttInterviewerStatus/, 0, 6);
     assert.ok(win, 'could not locate sttInterviewerStatus useState declaration');
@@ -100,7 +100,7 @@ describe('B2: STT user/interviewer status must initialize to \'awaiting-audio\''
     assert.ok(
       /['"]awaiting-audio['"]/.test(stateLine[1]),
       'BUG: SttStatusPayload.state union in main.ts does not include \'awaiting-audio\'. ' +
-        'The renderer cannot receive a state the main-process type does not allow.',
+      'The renderer cannot receive a state the main-process type does not allow.',
     );
   });
 
@@ -114,7 +114,7 @@ describe('B2: STT user/interviewer status must initialize to \'awaiting-audio\''
     assert.ok(
       /state\s*:\s*[^;,]*['"]awaiting-audio['"]/.test(sig),
       'BUG: preload.ts onSttStatusChanged state union missing \'awaiting-audio\'. ' +
-        'Preload type-check will reject the new state at the IPC boundary.',
+      'Preload type-check will reject the new state at the IPC boundary.',
     );
   });
 
@@ -125,7 +125,7 @@ describe('B2: STT user/interviewer status must initialize to \'awaiting-audio\''
     assert.ok(
       /state\s*:\s*[^;,]*['"]awaiting-audio['"]/.test(sig),
       'BUG: electron.d.ts onSttStatusChanged state union missing \'awaiting-audio\'. ' +
-        'Renderer-side callers will not be able to discriminate on the new state.',
+      'Renderer-side callers will not be able to discriminate on the new state.',
     );
   });
 
@@ -137,16 +137,16 @@ describe('B2: STT user/interviewer status must initialize to \'awaiting-audio\''
     assert.ok(
       awaitingCalls.length >= 1,
       'BUG: no sendSttStatus({ state: \'awaiting-audio\', ... }) call found in main.ts. ' +
-        'The renderer needs an explicit broadcast at provider creation — without it the UI ' +
-        'sits in the default state with no proof that wire-up actually completed.',
+      'The renderer needs an explicit broadcast at provider creation — without it the UI ' +
+      'sits in the default state with no proof that wire-up actually completed.',
     );
   });
 
-  it('NativelyInterface.tsx calls setSttUserStatus(\'awaiting-audio\') and setSttInterviewerStatus(\'awaiting-audio\') (meeting-end reset)', () => {
+  it('MeetFlooInterface.tsx calls setSttUserStatus(\'awaiting-audio\') and setSttInterviewerStatus(\'awaiting-audio\') (meeting-end reset)', () => {
     assert.ok(
       /setSttUserStatus\s*\(\s*['"]awaiting-audio['"]\s*\)/.test(tsx),
       'BUG: meeting-end reset path no longer calls setSttUserStatus(\'awaiting-audio\'). ' +
-        'After a session reset the UI must return to the same neutral state as initial mount.',
+      'After a session reset the UI must return to the same neutral state as initial mount.',
     );
     assert.ok(
       /setSttInterviewerStatus\s*\(\s*['"]awaiting-audio['"]\s*\)/.test(tsx),
@@ -163,7 +163,7 @@ describe('B2: STT user/interviewer status must initialize to \'awaiting-audio\''
       { name: 'electron/main.ts SttStatusPayload', source: main, anchor: /interface\s+SttStatusPayload\s*\{[\s\S]*?state\s*:\s*([^;]+);/ },
       { name: 'electron/preload.ts onSttStatusChanged', source: preload, anchor: /onSttStatusChanged[\s\S]{0,400}?state\s*:\s*([^;,\n]+)/ },
       { name: 'src/types/electron.d.ts onSttStatusChanged', source: electronDts, anchor: /onSttStatusChanged[\s\S]{0,400}?state\s*:\s*([^;,\n]+)/ },
-      { name: 'NativelyInterface.tsx sttUserStatus useState type', source: tsx, anchor: /useState<\s*([^>]+?)>\s*\(\s*['"]awaiting-audio['"]/ },
+      { name: 'MeetFlooInterface.tsx sttUserStatus useState type', source: tsx, anchor: /useState<\s*([^>]+?)>\s*\(\s*['"]awaiting-audio['"]/ },
     ];
     const missing = [];
     for (const c of checks) {
@@ -176,7 +176,7 @@ describe('B2: STT user/interviewer status must initialize to \'awaiting-audio\''
       missing.length,
       0,
       `BUG: the following declarations no longer contain 'awaiting-audio' in their state union: ${missing.join(', ')}. ` +
-        'All four must stay in sync — they describe the same IPC payload shape.',
+      'All four must stay in sync — they describe the same IPC payload shape.',
     );
   });
 });

@@ -107,9 +107,9 @@ export const QUESTIONS = [
   { id: 'fu-10', mode: 'looking-for-work', q: 'Make that shorter and more confident.', expect: { spoken: true }, followupOf: 'fu-09' },
 
   // ── identity boundary (5) ──
-  { id: 'id-01', mode: 'general', q: 'What is Natively?', expect: { assistantIdentity: true } },
+  { id: 'id-01', mode: 'general', q: 'What is MeetFloo?', expect: { assistantIdentity: true } },
   { id: 'id-02', mode: 'general', q: 'Who developed you?', expect: { assistantIdentity: true } },
   { id: 'id-03', mode: 'general', q: 'Are you an AI?', expect: { assistantIdentity: true } },
   { id: 'id-04', mode: 'looking-for-work', q: 'Who are you?', expect: { spoken: true } },
-  { id: 'id-05', mode: 'general', q: 'How is Natively different from Cluely?', expect: {} },
+  { id: 'id-05', mode: 'general', q: 'How is MeetFloo different from Cluely?', expect: {} },
 ];

@@ -37,7 +37,7 @@ export function followUpTypeForMode(mode?: string | null): FollowUpDraftType {
 // The draft type (email / project_update / …) controls the SHAPE. This controls the
 // VOICE: who it's addressed to, how it opens and signs off, and its register. A sales
 // follow-up to a prospect must not read like an internal standup recap or a candidate's
-// thank-you note — each of Natively's 7 modes has a distinct sender→recipient relationship.
+// thank-you note — each of MeetFloo's 7 modes has a distinct sender→recipient relationship.
 interface ModeMailProfile {
   recipient: string;      // who the message is addressed to (steers salutation + framing)
   salutation: string;     // how it opens
@@ -188,7 +188,7 @@ export interface FollowUpGenerateParams {
 }
 
 export class FollowUpDraftGenerator {
-  constructor(private readonly llmHelper: LLMHelper) {}
+  constructor(private readonly llmHelper: LLMHelper) { }
 
   // Build the summary-safe inputs block (note content only, never raw transcript).
   // This is the model's entire understanding of the meeting, so it must be COMPLETE:

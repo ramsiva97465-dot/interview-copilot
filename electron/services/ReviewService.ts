@@ -12,7 +12,7 @@
 //     debug). The backend is the source of truth for cross-install dedupe;
 //     this file just keeps the renderer cheap (no extra round trip on every
 //     launch).
-//   * API keys are NOT stored here — review submissions use x-natively-key
+//   * API keys are NOT stored here — review submissions use x-MeetFloo-key
 //     transparently via the request handler.
 
 import { app } from "electron"
@@ -300,14 +300,14 @@ export async function getReviewHardwareId(): Promise<string | null> {
     return null
 }
 
-/** Get the natively API key for outbound calls (paid users). Free/trial
+/** Get the MeetFloo API key for outbound calls (paid users). Free/trial
  *  users fall back to anonymous HWID-only submission. */
 export function getReviewApiKey(): string | null {
     try {
         const { CredentialsManager } = require("./CredentialsManager")
         const cm = CredentialsManager.getInstance()
-        const key = cm.getNativelyApiKey?.()
-        if (key && key.startsWith("natively_sk_")) return key
+        const key = cm.getMeetFlooApiKey?.()
+        if (key && key.startsWith("MeetFloo_sk_")) return key
         const trial = cm.getTrialToken?.()
         if (trial) return null  // trial tokens are sent as x-trial-token; we don't mix them in here
         return null

@@ -57,7 +57,7 @@ function pack(items, answerPolicy = 'answer') {
 }
 
 const resume = item('resume:cedar-falcon', 'profile_resume', 'cedar-falcon');
-const projects = item('projects:natively', 'profile_project', 'natively');
+const projects = item('projects:MeetFloo', 'profile_project', 'MeetFloo');
 const jd = item('jd:session-recovery-pipeline', 'profile_jd', 'session-recovery-pipeline');
 const reference = item('reference:mercury-x1', 'mode_reference_chunk', 'mercury-x1');
 
@@ -103,7 +103,7 @@ test('resume + JD comparison requires both families in the final prompt', () => 
   // Pack includes projects because the 'profile' request grants both
   // profile_resume AND projects (turnSourceDecision.ts: profileKinds()).
   const p = pack([resume, projects, jd]);
-  const rendered = '<evidence id="resume:cedar-falcon" /><evidence id="projects:natively" /><evidence id="jd:session-recovery-pipeline" />';
+  const rendered = '<evidence id="resume:cedar-falcon" /><evidence id="projects:MeetFloo" /><evidence id="jd:session-recovery-pipeline" />';
   const result = finalValidate({ decision, pack: p, finalUserPrompt: rendered });
   assert.equal(result.ok, true);
   assert.equal(result.countsByFamily.resume, 1);
@@ -128,7 +128,7 @@ test('a retrieved but prompt-dropped JD fails before dispatch', () => {
   const p = pack([resume, projects, jd]);
   const result = finalValidate({
     decision, pack: p,
-    finalUserPrompt: '<evidence id="resume:cedar-falcon" /><evidence id="projects:natively" />',
+    finalUserPrompt: '<evidence id="resume:cedar-falcon" /><evidence id="projects:MeetFloo" />',
   });
   assert.equal(result.ok, false);
   assert.equal(result.reason, 'serialized_evidence_marker_missing');

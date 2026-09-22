@@ -44,7 +44,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'v3-answer-policy-'));
-process.env.NATIVELY_TEST_USERDATA = USERDATA;
+process.env.MEETFLOO_TEST_USERDATA = USERDATA;
 
 const base = path.resolve(process.cwd(), 'dist-electron/electron/context-intelligence');
 const { buildV3Prompt } = await import(pathToFileURL(path.join(base, 'orchestration/engine-bridge.js')).href);

@@ -346,7 +346,7 @@ describe('the protocol selector is load-bearing (measured on a 2nd group, 2026-0
 
 describe('protocol auto-detection', () => {
   const fn = fetcher.slice(fetcher.indexOf('export async function detectFluxionProtocol'),
-                           fetcher.indexOf('async function fetchNvidiaNimModels'));
+    fetcher.indexOf('async function fetchNvidiaNimModels'));
 
   test('the OpenAI endpoint is probed FIRST, because it is the universal one', () => {
     // Measured: /v1/chat/completions answered 200 on BOTH a Claude-group and a
@@ -402,7 +402,7 @@ describe('protocol auto-detection', () => {
 
   test('the detection probe also avoids the hanging endpoint', () => {
     const fn = fetcher.slice(fetcher.indexOf('export async function detectFluxionProtocol'),
-                             fetcher.indexOf('async function fetchNvidiaNimModels'));
+      fetcher.indexOf('async function fetchNvidiaNimModels'));
     assert.match(fn, /stream: true/, 'the probe must use the streaming endpoint');
   });
 });
@@ -578,10 +578,10 @@ describe('the provider is reachable from the UI', () => {
 
   test('a full-colour mark is NOT flattened to black in the light theme', () => {
     // `.brand-mark-raster` applies `filter: brightness(0)`, which exists for
-    // white-on-transparent art (Natively's icon). It was applied to EVERY raster
+    // white-on-transparent art (MeetFloo's icon). It was applied to EVERY raster
     // mark, so it repainted Fluxion's blue monogram solid black on a light tile —
     // and was quietly doing the same to LiteLLM's. Opt-in, not opt-out.
-    assert.match(marks, /WHITE_ON_TRANSPARENT_MARKS = new Set\(\['natively'\]\)/,
+    assert.match(marks, /WHITE_ON_TRANSPARENT_MARKS = new Set\(\['MeetFloo'\]\)/,
       'only genuinely white artwork may take the light-theme flatten');
     for (const f of ['src/components/settings/AIProvidersSettings.tsx', 'src/components/ui/BrandMark.tsx']) {
       assert.match(read(f), /WHITE_ON_TRANSPARENT_MARKS\.has\(key\)/,

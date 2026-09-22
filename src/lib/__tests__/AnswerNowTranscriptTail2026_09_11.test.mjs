@@ -8,7 +8,7 @@
 // list", 21 chars) landing one line AFTER "[Main] Finalizing STT". Pressing
 // Stop 4s after the speech captured and answered the same question.
 //
-// Root cause (src/components/NativelyInterface.tsx, handleAnswerNow):
+// Root cause (src/components/MeetFlooInterface.tsx, handleAnswerNow):
 //   1. `isRecordingRef.current = false` ran BEFORE the finalize wait, and the
 //      onNativeAudioTranscript handler drops every user chunk while that ref is
 //      false — so any transcript that arrived during the wait was discarded.
@@ -29,7 +29,7 @@ import { createTranscriptTailWaiter, TAIL_WAIT_MS, TAIL_GRACE_MS } from '../answ
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const interfaceSource = fs.readFileSync(
-  path.resolve(dirname, '../../components/NativelyInterface.tsx'),
+  path.resolve(dirname, '../../components/MeetFlooInterface.tsx'),
   'utf8',
 );
 

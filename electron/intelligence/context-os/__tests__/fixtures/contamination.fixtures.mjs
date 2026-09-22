@@ -2,16 +2,16 @@
 //
 // One shared file (profile, modes, documents, transcript, prior assistant) so
 // every contamination test drives the SAME synthetic world. All content is
-// synthetic; sentinel strings (NATIVELY_SENTINEL_*) let tests assert absence
+// synthetic; sentinel strings (MEETFLOO_SENTINEL_*) let tests assert absence
 // with zero false positives.
 
 export const SENTINELS = {
-  PROFILE: 'NATIVELY_SENTINEL_PROFILE_FACT',
-  DOCUMENT: 'NATIVELY_SENTINEL_DOC_FACT',
-  TRANSCRIPT: 'NATIVELY_SENTINEL_TRANSCRIPT_FACT',
-  HINDSIGHT: 'NATIVELY_SENTINEL_HINDSIGHT_FACT',
-  PRIOR_ASSISTANT: 'NATIVELY_SENTINEL_PRIOR_CLAIM',
-  JD: 'NATIVELY_SENTINEL_JD_REQUIREMENT',
+  PROFILE: 'MEETFLOO_SENTINEL_PROFILE_FACT',
+  DOCUMENT: 'MEETFLOO_SENTINEL_DOC_FACT',
+  TRANSCRIPT: 'MEETFLOO_SENTINEL_TRANSCRIPT_FACT',
+  HINDSIGHT: 'MEETFLOO_SENTINEL_HINDSIGHT_FACT',
+  PRIOR_ASSISTANT: 'MEETFLOO_SENTINEL_PRIOR_CLAIM',
+  JD: 'MEETFLOO_SENTINEL_JD_REQUIREMENT',
 };
 
 // ── Profile fixture (candidate: Rina Patel) ────────────────────────────────

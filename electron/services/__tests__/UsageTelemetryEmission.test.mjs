@@ -32,9 +32,9 @@ const INSTR = path.join(REPO, 'dist-electron/electron/services/usageInstrumentat
 let TDIR; let TDB;
 before(() => {
     if (!HAVE_BUILD) return;
-    TDIR = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-turntel-test-'));
-    process.env.NATIVELY_TEST_USERDATA = TDIR;
-    delete process.env.NATIVELY_USAGE_OUTBOX_ENABLED;
+    TDIR = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-turntel-test-'));
+    process.env.MEETFLOO_TEST_USERDATA = TDIR;
+    delete process.env.MEETFLOO_USAGE_OUTBOX_ENABLED;
     const { DatabaseManager } = require(DBM_PATH);
     DatabaseManager.instance = null;
     TDB = DatabaseManager.getInstance();
@@ -215,7 +215,7 @@ describe('turn telemetry emission', { skip: HAVE_BUILD ? false : 'run `npm run b
 // "the server accepts" have to be asserted together, against the real schema
 // module — not a copy of what it was believed to do.
 describe('emitted telemetry survives the real server allowlist', { skip: HAVE_BUILD ? false : 'run `npm run build:electron` first' }, () => {
-    const SCHEMA = path.join(REPO, 'natively-api/lib/usageAuditSchema.js');
+    const SCHEMA = path.join(REPO, 'MeetFloo-api/lib/usageAuditSchema.js');
     let validateAuditBatch;
 
     before(async () => {
@@ -223,28 +223,34 @@ describe('emitted telemetry survives the real server allowlist', { skip: HAVE_BU
     });
 
     test('every event the emitter produces is ACCEPTED, never rejected', (t) => {
-        if (!validateAuditBatch) return t.skip('natively-api not checked out beside this repo');
+        if (!validateAuditBatch) return t.skip('MeetFloo-api not checked out beside this repo');
         const { recordTurnTelemetry } = require(INSTR);
 
         // One trace per shape the pipeline actually produces, including the
         // hostile one — a rejection on any of them is a silent data loss.
         const traces = [
-            { status: 'COMPLETED', requestId: 'v3-what-to-answer-1756300000000',
-              retrievalAttempts: [{ candidateCount: 12 }, { candidateCount: 3 }],
-              acceptedEvidence: [{ sourceType: 'RESUME' }, { sourceType: 'MEETING_TRANSCRIPT' }],
-              providerAttempts: [{ provider: 'gemini', model: 'gemini-3.1-flash-lite' }],
-              latency: { rerankingMs: 48, promptCompositionMs: 33, providerTtfbMs: 640, totalMs: 1180 } },
+            {
+                status: 'COMPLETED', requestId: 'v3-what-to-answer-1756300000000',
+                retrievalAttempts: [{ candidateCount: 12 }, { candidateCount: 3 }],
+                acceptedEvidence: [{ sourceType: 'RESUME' }, { sourceType: 'MEETING_TRANSCRIPT' }],
+                providerAttempts: [{ provider: 'gemini', model: 'gemini-3.1-flash-lite' }],
+                latency: { rerankingMs: 48, promptCompositionMs: 33, providerTtfbMs: 640, totalMs: 1180 }
+            },
             { status: 'SUPERSEDED', retrievalAttempts: [], acceptedEvidence: [], latency: { totalMs: 12 } },
-            { status: 'FAILED', requestId: 'turn_v3-assist-9',
-              acceptedEvidence: [{ sourceType: 'SCREEN_CONTEXT' }],
-              providerAttempts: [{ provider: 'minimax', model: 'MiniMax-M3' }],
-              latency: { totalMs: 5000 } },
+            {
+                status: 'FAILED', requestId: 'turn_v3-assist-9',
+                acceptedEvidence: [{ sourceType: 'SCREEN_CONTEXT' }],
+                providerAttempts: [{ provider: 'minimax', model: 'MiniMax-M3' }],
+                latency: { totalMs: 5000 }
+            },
             { status: 'CANCELLED', latency: {} },
             // Hostile: prose everywhere an identifier is expected.
-            { status: 'COMPLETED', requestId: 'tell me about the candidate salary',
-              acceptedEvidence: [{ sourceType: 'a type with spaces' }],
-              providerAttempts: [{ provider: 'a whole sentence', model: 'm'.repeat(300) }],
-              latency: { totalMs: 1 } },
+            {
+                status: 'COMPLETED', requestId: 'tell me about the candidate salary',
+                acceptedEvidence: [{ sourceType: 'a type with spaces' }],
+                providerAttempts: [{ provider: 'a whole sentence', model: 'm'.repeat(300) }],
+                latency: { totalMs: 1 }
+            },
             {},
         ];
         for (const tr of traces) recordTurnTelemetry(tr);
@@ -290,10 +296,10 @@ describe('application lifecycle events', { skip: HAVE_BUILD ? false : 'run `npm 
     });
 
     test('the lifecycle pair is accepted by the server allowlist too', async (t) => {
-        const SCHEMA = path.join(REPO, 'natively-api/lib/usageAuditSchema.js');
+        const SCHEMA = path.join(REPO, 'MeetFloo-api/lib/usageAuditSchema.js');
         // t.skip, not a bare return: a bare return leaves a PASSING test that
         // asserted nothing, which is indistinguishable from a real pass in CI.
-        if (!fs.existsSync(SCHEMA)) return t.skip('natively-api not checked out beside this repo');
+        if (!fs.existsSync(SCHEMA)) return t.skip('MeetFloo-api not checked out beside this repo');
         const { validateAuditBatch } = await import(`file://${SCHEMA}`);
         emitted();
         const { recordAppStarted, recordAppShutdown } = require(INSTR);

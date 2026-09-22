@@ -5,7 +5,7 @@
 // 102-case selection dataset: stripping punctuation changes NO turn
 // selection (84.3% all conditions) but drops mean confidence 0.777 → 0.63
 // and pushes 18 → 30 cases below the live 0.6 grounding gate (+12% of the
-// dataset) — i.e. on Soniox/OpenAI/ElevenLabs/NativelyPro/REST providers,
+// dataset) — i.e. on Soniox/OpenAI/ElevenLabs/MeetFlooPro/REST providers,
 // ~12% more turns silently skip profile grounding purely because the
 // provider never emits '?'.
 //

@@ -328,7 +328,7 @@ export function applyAdaptiveTtft(
  * "This workload is likely to be too slow for what the user is doing."
  *
  * Phase 18's ask, and the shape it asks for: the profile RAISES a signal and
- * the mechanisms Natively already has respond. It does not itself reduce
+ * the mechanisms MeetFloo already has respond. It does not itself reduce
  * context, compress an image or summarise anything — inventing a new context
  * manager beside the existing one is exactly what Phase 18 rules out.
  *
@@ -370,7 +370,7 @@ export function slowWorkloadAdvice(opts: {
   llmHelper: PerformanceIdentitySource | null | undefined;
   hasImages: boolean;
   inputTokens: number;
-  /** Natively's own `streamRoute` value — 'wta_live' | 'manual_chat_stream' | … */
+  /** MeetFloo's own `streamRoute` value — 'wta_live' | 'manual_chat_stream' | … */
   streamRoute?: string | null;
   /** How long an answer of this shape usually is. Callers pass their own norm. */
   expectedOutputTokens?: number;

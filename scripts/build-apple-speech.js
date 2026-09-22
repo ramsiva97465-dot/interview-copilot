@@ -18,7 +18,7 @@ const path = require('node:path');
 
 const MINIMUM_SDK_MAJOR = 26;
 const MINIMUM_MACOS_VERSION = '26.0';
-const HELPER_NAME = 'natively-apple-speech';
+const HELPER_NAME = 'MeetFloo-apple-speech';
 
 function archToName(arch) {
   if (arch === 1 || arch === 'x64' || arch === 'x86_64') return 'x64';
@@ -91,7 +91,7 @@ function compileThin({ arch, source, output, sdkPath, run }) {
 }
 
 function compileUniversal({ source, output, sdkPath, run }) {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-apple-speech-'));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-apple-speech-'));
   const arm64 = path.join(tempDir, `${HELPER_NAME}-arm64`);
   const x64 = path.join(tempDir, `${HELPER_NAME}-x64`);
   const merged = path.join(tempDir, HELPER_NAME);

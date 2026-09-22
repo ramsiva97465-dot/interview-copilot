@@ -12,7 +12,7 @@ const compiled = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 test('Antigravity credentials survive encrypted save/restart and checked failures preserve other providers', () => {
   const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'antigravity-credentials-'));
   const originalLoad = Module._load;
-  const previousSingleton = globalThis.__nativelyCredentialsManagerV1__;
+  const previousSingleton = globalThis.__MeetFlooCredentialsManagerV1__;
   Module._load = function (request, ...args) {
     if (request === 'electron') return {
       app: { getPath: () => userData, isPackaged: false, getVersion: () => 'test' },
@@ -22,7 +22,7 @@ test('Antigravity credentials survive encrypted save/restart and checked failure
   };
   const fresh = () => {
     delete require.cache[require.resolve(compiled)];
-    delete globalThis.__nativelyCredentialsManagerV1__;
+    delete globalThis.__MeetFlooCredentialsManagerV1__;
     const cm = require(compiled).CredentialsManager.getInstance();
     cm.init();
     return cm;
@@ -54,7 +54,7 @@ test('Antigravity credentials survive encrypted save/restart and checked failure
     assert.equal(cm.getGeminiApiKey(), 'unrelated-gemini-key');
   } finally {
     Module._load = originalLoad;
-    globalThis.__nativelyCredentialsManagerV1__ = previousSingleton;
+    globalThis.__MeetFlooCredentialsManagerV1__ = previousSingleton;
     assert.equal(path.dirname(path.resolve(userData)), path.resolve(os.tmpdir()));
     assert.ok(path.basename(userData).startsWith('antigravity-credentials-'));
     fs.rmSync(userData, { recursive: true, force: true });

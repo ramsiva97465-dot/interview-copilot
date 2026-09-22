@@ -21,7 +21,7 @@
 //
 // Usage:
 //   node scripts/release-gate.mjs           # default
-//   NATIVELY_ALLOW_UNTAGGED_RELEASE=1 node scripts/release-gate.mjs
+//   MEETFLOO_ALLOW_UNTAGGED_RELEASE=1 node scripts/release-gate.mjs
 //                                       # for hotfixes that intentionally
 //                                       # bypass the tag-driven workflow
 //
@@ -71,8 +71,8 @@ check('package.json#version is set and well-formed semver', () => {
 });
 
 check('latest git tag (if any) is <= current version', () => {
-  if (process.env.NATIVELY_ALLOW_UNTAGGED_RELEASE === '1') {
-    console.log('    skipped (NATIVELY_ALLOW_UNTAGGED_RELEASE=1)');
+  if (process.env.MEETFLOO_ALLOW_UNTAGGED_RELEASE === '1') {
+    console.log('    skipped (MEETFLOO_ALLOW_UNTAGGED_RELEASE=1)');
     return;
   }
   const tags = shell('git tag --list "v*" --sort=-v:refname').split('\n').filter(Boolean);
@@ -151,12 +151,12 @@ check('update-available handler is gated by isRealUpgrade', () => {
   }
 });
 
-// 7. release manifest pre-flight: release/ dir shouldn't contain a Natively.app
+// 7. release manifest pre-flight: release/ dir shouldn't contain a MeetFloo.app
 //    whose app-update.yml points at a channel other than "latest".
 check('packaged app-update.yml has provider=github + releaseType=release', () => {
   const candidates = [
-    path.join(repoRoot, 'release', 'mac', 'Natively.app', 'Contents', 'Resources', 'app-update.yml'),
-    path.join(repoRoot, 'release', 'mac-arm64', 'Natively.app', 'Contents', 'Resources', 'app-update.yml'),
+    path.join(repoRoot, 'release', 'mac', 'MeetFloo.app', 'Contents', 'Resources', 'app-update.yml'),
+    path.join(repoRoot, 'release', 'mac-arm64', 'MeetFloo.app', 'Contents', 'Resources', 'app-update.yml'),
   ];
   let found = false;
   for (const f of candidates) {
@@ -166,18 +166,18 @@ check('packaged app-update.yml has provider=github + releaseType=release', () =>
     if (!/provider:\s*github/.test(text)) {
       throw new Error(`${f}: provider is not github:\n${text}`);
     }
-    if (!/owner:\s*Natively-AI-assistant/.test(text)) {
-      throw new Error(`${f}: owner is not Natively-AI-assistant:\n${text}`);
+    if (!/owner:\s*MeetFloo-AI-assistant/.test(text)) {
+      throw new Error(`${f}: owner is not MeetFloo-AI-assistant:\n${text}`);
     }
-    if (!/repo:\s*natively-cluely-ai-assistant/.test(text)) {
-      throw new Error(`${f}: repo is not natively-cluely-ai-assistant:\n${text}`);
+    if (!/repo:\s*MeetFloo-cluely-ai-assistant/.test(text)) {
+      throw new Error(`${f}: repo is not MeetFloo-cluely-ai-assistant:\n${text}`);
     }
     if (!/releaseType:\s*release/.test(text)) {
       throw new Error(`${f}: releaseType is not "release":\n${text}`);
     }
   }
   if (!found) {
-    console.log('    skipped (no packaged Natively.app found in release/)');
+    console.log('    skipped (no packaged MeetFloo.app found in release/)');
   }
 });
 

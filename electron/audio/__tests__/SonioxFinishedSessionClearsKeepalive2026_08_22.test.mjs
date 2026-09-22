@@ -4,7 +4,7 @@
 // returns early — BEFORE the close handler's clearKeepAlive(). One 5s interval
 // leaked per finished session, for the life of the process.
 //
-// Same strategy the repo already uses for NativelyProSTTCloseUpstreamTimers:
+// Same strategy the repo already uses for MeetFlooProSTTCloseUpstreamTimers:
 // load the compiled class, force a REAL timer handle onto the instance, invoke
 // the REAL teardown, and assert the field is cleared.
 import { test, describe } from 'node:test';
@@ -19,7 +19,7 @@ const distRoot = path.resolve(__dirname, '../../../dist-electron/electron/audio'
 const origLoad = Module._load;
 Module._load = function patchedLoad(request) {
   if (request === 'electron') {
-    return { app: { getAppPath: () => '/tmp/fake-natively-app', isPackaged: false, isReady: () => false } };
+    return { app: { getAppPath: () => '/tmp/fake-MeetFloo-app', isPackaged: false, isReady: () => false } };
   }
   return origLoad.apply(this, arguments);
 };

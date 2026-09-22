@@ -33,7 +33,7 @@ console.log(
 // Force production mode if running as packaged app or inside app bundle
 const isDev = isEnvDev && !isPackaged;
 
-const overlayResizeTracePath = '/tmp/natively-overlay-resize-trace.log';
+const overlayResizeTracePath = '/tmp/MeetFloo-overlay-resize-trace.log';
 
 function traceOverlayResize(event: string, data: Record<string, unknown>): void {
   if (!isDev) return;
@@ -108,7 +108,7 @@ export class WindowHelper {
   // overlay (setParentWindow). AppKit then moves them with the parent inside
   // the SAME window-server transaction, so the group physically cannot come
   // apart — which the event-mirroring fallback can never achieve, because the
-  // follower is always one compositor transaction behind the natively-dragged
+  // follower is always one compositor transaction behind the MeetFloo-dragged
   // window.
   //
   // Measured on Electron 43 / macOS (see the probes in the session that added
@@ -127,14 +127,14 @@ export class WindowHelper {
   // not move with the owner — so Windows keeps the event-mirroring path
   // untouched.
   //
-  // Kill switch: NATIVELY_OVERLAY_WINDOW_GROUP=0 falls back to mirroring.
+  // Kill switch: MEETFLOO_OVERLAY_WINDOW_GROUP=0 falls back to mirroring.
   private overlayGroupWelded = false;
   // ── Managed group drag (macOS AND Windows) ──────────────────────────────
   // Distinct from welding, which is the macOS-only AppKit mechanism above.
   // "Drag-managed" means the PILL no longer uses an OS drag region: it streams
   // pointer deltas to main, which moves the group. Both platforms need this,
   // for different reasons:
-  //   • macOS: the pill is an AppKit CHILD, and a natively-dragged child moves
+  //   • macOS: the pill is an AppKit CHILD, and a MeetFloo-dragged child moves
   //     alone (propagation is parent→child only), so it must drag its parent.
   //   • Windows: there is no weld to break, but `-webkit-app-region: drag`
   //     enters the modal move loop (WM_SYSCOMMAND/SC_MOVE), which occupies the
@@ -142,7 +142,7 @@ export class WindowHelper {
   //     moves get serviced around that loop instead of at refresh rate. Moving
   //     every window ourselves, from one tick, bypasses the modal loop
   //     entirely and puts all the moves in the same DWM composition frame.
-  // Kill switch: NATIVELY_OVERLAY_GROUP_DRAG=0 restores the OS drag region.
+  // Kill switch: MEETFLOO_OVERLAY_GROUP_DRAG=0 restores the OS drag region.
   private overlayGroupDragManaged = false;
   // True between a pill drag's first delta and its release. Suppresses the
   // settle-clamp so it cannot fire mid-drag (the 'moved' event is emitted for
@@ -172,13 +172,13 @@ export class WindowHelper {
   private overlayHoverInteractive = true;
   // ── Overlay popover (settings / model-selector dropdown) coordination ───
   // Which overlay-anchored popovers are currently open. Non-empty → the
-  // click-catcher window is shown so a click ANYWHERE outside Natively's
+  // click-catcher window is shown so a click ANYWHERE outside MeetFloo's
   // windows dismisses them (the app's did-resign-active close path is dead in
   // overlay mode: the nonactivating NSPanel never makes the app active, so it
   // can never resign it).
   private overlayPopoversOpen = new Set<'settings' | 'model'>();
-  // Full-display transparent window shown just BELOW the Natively windows
-  // while a popover is open. Any mousedown on it (i.e. outside Natively's
+  // Full-display transparent window shown just BELOW the MeetFloo windows
+  // while a popover is open. Any mousedown on it (i.e. outside MeetFloo's
   // painted windows) dismisses the popovers — standard menu semantics (the
   // dismissing click is consumed). Lazily created.
   private popoverCatcher: BrowserWindow | null = null;
@@ -200,7 +200,7 @@ export class WindowHelper {
   // Constants
   // FIXED OVERLAY WINDOW WIDTH — the OS window is BORN at this width, SHOWN at
   // this width, and NEVER width-resized for the lifetime of the overlay. It
-  // MUST equal the renderer's SHELL_WIDTH_EXPANDED (NativelyInterface.tsx):
+  // MUST equal the renderer's SHELL_WIDTH_EXPANDED (MeetFlooInterface.tsx):
   // the panel animates 600↔732 purely in CSS, CENTERED (mx-auto) inside this
   // fixed window. (It used to be 780 — wider than the expanded panel — purely
   // to leave a gutter for the floating resize toggle; the toggle now lives in
@@ -328,7 +328,7 @@ export class WindowHelper {
    * is the sole exception, because in NORMAL mode it is the main app window and
    * belongs in the taskbar. That left undetectable mode only half-applied on
    * Windows: macOS removes the app from the Dock entirely, while Windows still
-   * showed a "Natively" taskbar button whenever the launcher was up (before and
+   * showed a "MeetFloo" taskbar button whenever the launcher was up (before and
    * after a meeting — during one the overlay is already skipTaskbar).
    *
    * Called at launcher creation and on every undetectable toggle. No-op off
@@ -532,7 +532,7 @@ export class WindowHelper {
   // the renderer (the panel tweens collapsed↔expanded centered inside the
   // window). So every report arriving here DURING an animation is still
   // height-only (width delta 0): top-anchored, X never moves, no width
-  // setBounds. See NativelyInterface.startTransition for the renderer side and
+  // setBounds. See MeetFlooInterface.startTransition for the renderer side and
   // src/lib/overlayCustomSize.mjs for why the invariant is per-animation
   // rather than per-lifetime.
 
@@ -627,8 +627,8 @@ export class WindowHelper {
         if (mode === 'none') {
           if (isMac) {
             return app.isPackaged
-              ? path.join(process.resourcesPath, 'natively.icns')
-              : path.resolve(__dirname, '../../assets/natively.icns');
+              ? path.join(process.resourcesPath, 'MeetFloo.icns')
+              : path.resolve(__dirname, '../../assets/MeetFloo.icns');
           } else if (isWin) {
             return app.isPackaged
               ? path.join(process.resourcesPath, 'assets/icons/win/icon.ico')
@@ -651,8 +651,8 @@ export class WindowHelper {
           // Defensive: unknown mode — use the real app icon, matching 'none'.
           if (isMac) {
             return app.isPackaged
-              ? path.join(process.resourcesPath, 'natively.icns')
-              : path.resolve(__dirname, '../../assets/natively.icns');
+              ? path.join(process.resourcesPath, 'MeetFloo.icns')
+              : path.resolve(__dirname, '../../assets/MeetFloo.icns');
           } else if (isWin) {
             return app.isPackaged
               ? path.join(process.resourcesPath, 'assets/icons/win/icon.ico')
@@ -708,21 +708,21 @@ export class WindowHelper {
     this.launcherAspectLockArmed = false;
     this.setLauncherAspectLock(true);
 
-    // A/B KILL-SWITCH (2026-07-10): NATIVELY_DISABLE_ONBOARDING_ORCH=1 appends
+    // A/B KILL-SWITCH (2026-07-10): MEETFLOO_DISABLE_ONBOARDING_ORCH=1 appends
     // ?noorch=1, which makes App.tsx skip orch.start() entirely (no drain loop,
     // no onboarding toasters). The onboarding orchestrator's drain loop was
     // bisected to the 2026-07-04 native-memory-leak regression; this switch lets
     // the same build be run with the orchestrator ON vs OFF to confirm the leak
     // source in the field. The loop is now setTimeout-based (fixed), so this is
     // a confirmation/rollback lever, not the fix itself.
-    const noOrchSuffix = process.env.NATIVELY_DISABLE_ONBOARDING_ORCH === '1' ? '&noorch=1' : '';
-    if (noOrchSuffix) console.warn('[LeakTest] NATIVELY_DISABLE_ONBOARDING_ORCH=1 → launcher with ?noorch=1 (onboarding orchestrator OFF)');
+    const noOrchSuffix = process.env.MEETFLOO_DISABLE_ONBOARDING_ORCH === '1' ? '&noorch=1' : '';
+    if (noOrchSuffix) console.warn('[LeakTest] MEETFLOO_DISABLE_ONBOARDING_ORCH=1 → launcher with ?noorch=1 (onboarding orchestrator OFF)');
 
     // DEV-ONLY launcher mount isolation for native-OOM bisection. This preserves
     // the launcher shell and normal production behavior while allowing a valid
     // Vite run to exclude either onboarding alone, all root-level surfaces, or
     // (via 'shell') skip the React root entirely (src/main.tsx).
-    const requestedIsolation = process.env.NATIVELY_LAUNCHER_ISOLATION;
+    const requestedIsolation = process.env.MEETFLOO_LAUNCHER_ISOLATION;
     const launcherIsolation = isDev && (
       requestedIsolation === 'shell' ||
       requestedIsolation === 'onboarding' ||
@@ -736,14 +736,14 @@ export class WindowHelper {
         window: 'launcher',
         isolation: launcherIsolation,
       });
-      console.warn(`[LeakTest] NATIVELY_LAUNCHER_ISOLATION=${launcherIsolation} → launcher isolation enabled`);
+      console.warn(`[LeakTest] MEETFLOO_LAUNCHER_ISOLATION=${launcherIsolation} → launcher isolation enabled`);
     }
 
     // The review modal deliberately force-opens in development for UI iteration.
     // This switch keeps every other launcher surface unchanged while excluding
     // only that dev convenience mount during a native-memory A/B run.
-    const reviewOffSuffix = isDev && process.env.NATIVELY_DISABLE_DEV_REVIEW === '1' ? '&review=off' : '';
-    if (reviewOffSuffix) console.warn('[LeakTest] NATIVELY_DISABLE_DEV_REVIEW=1 → dev review modal disabled');
+    const reviewOffSuffix = isDev && process.env.MEETFLOO_DISABLE_DEV_REVIEW === '1' ? '&review=off' : '';
+    if (reviewOffSuffix) console.warn('[LeakTest] MEETFLOO_DISABLE_DEV_REVIEW=1 → dev review modal disabled');
 
     const launcherUrl = `${startUrl}?window=launcher${noOrchSuffix}${isolationSuffix}${reviewOffSuffix}`;
 
@@ -816,23 +816,23 @@ export class WindowHelper {
 
     // Pipe renderer-side diagnostics into the main-process log file. Without
     // this, a "stuck at logo" hang or a renderer crash leaves NO trace in
-    // ~/Documents/natively_debug.log — the renderer's console, uncaught JS
+    // ~/Documents/MeetFloo_debug.log — the renderer's console, uncaught JS
     // errors, crashes, and hangs are otherwise invisible to us. This is the
     // difference between "the app is stuck and we can't tell why" and a log
     // line naming the exact failing module/line on the user's machine.
     this.attachRendererDiagnostics(this.launcherWindow, 'launcher');
 
-    // DIAGNOSTIC (2026-07-11): NATIVELY_OPEN_DEVTOOLS=1 force-opens the launcher
+    // DIAGNOSTIC (2026-07-11): MEETFLOO_OPEN_DEVTOOLS=1 force-opens the launcher
     // DevTools DETACHED (survives a renderer hang, unlike an in-window panel).
     // For debugging the "window appears then freezes / renderer not responsive"
     // report: open the Performance tab and record during the freeze — a single
     // long yellow Scripting block = a JS main-thread loop; a flat gap with no JS
     // = a compositor/GPU stall (the software-compositing blur path). Detached so
     // it stays usable even when the launcher renderer stops pumping its loop.
-    if (process.env.NATIVELY_OPEN_DEVTOOLS === '1') {
+    if (process.env.MEETFLOO_OPEN_DEVTOOLS === '1') {
       try {
         this.launcherWindow.webContents.openDevTools({ mode: 'detach' });
-        console.warn('[Diag] NATIVELY_OPEN_DEVTOOLS=1 → launcher DevTools opened (detached)');
+        console.warn('[Diag] MEETFLOO_OPEN_DEVTOOLS=1 → launcher DevTools opened (detached)');
       } catch (e: any) {
         console.warn('[Diag] openDevTools failed:', e?.message || e);
       }
@@ -852,8 +852,8 @@ export class WindowHelper {
     // then lands where the old single window's top edge used to be.
     const overlayDefaultY = Math.floor(
       workArea.y +
-        workArea.height * WindowHelper.OVERLAY_DEFAULT_TOP_RATIO +
-        WindowHelper.PILL_STACK_OFFSET,
+      workArea.height * WindowHelper.OVERLAY_DEFAULT_TOP_RATIO +
+      WindowHelper.PILL_STACK_OFFSET,
     );
 
     const overlaySettings: Electron.BrowserWindowConstructorOptions = {
@@ -880,7 +880,7 @@ export class WindowHelper {
       skipTaskbar: true, // Don't show separately in dock/taskbar
       hasShadow: false, // Prevent shadow from adding perceived size/artifacts
       // macOS NSPanel + nonactivating: lets the overlay become the key window
-      // (and receive keystrokes for the chat input) without activating Natively
+      // (and receive keystrokes for the chat input) without activating MeetFloo
       // in the dock / menu bar / screen-share, so the user's foreground app
       // stays "in front." Required for the chat:focusInput stealth-typing path.
       // Windows/Linux fall back to a regular focusable window.
@@ -890,7 +890,7 @@ export class WindowHelper {
     this.overlayWindow = new BrowserWindow(overlaySettings);
     // Windows counterpart of the mac panel treatment above: WS_EX_NOACTIVATE
     // (setFocusable(false)) so clicking the overlay/buttons never activates
-    // Natively — the user's meeting app keeps foreground focus, exactly like
+    // MeetFloo — the user's meeting app keeps foreground focus, exactly like
     // becomesKeyOnlyIfNeeded on macOS. The window is NEVER focused; typing goes
     // through the WH_KEYBOARD_LL stealth hook (StealthKeyboardManager), same as
     // the macOS CGEventTap. No-op on macOS/Linux.
@@ -936,7 +936,7 @@ export class WindowHelper {
       // promote the panel to key window → user's foreground app keeps key
       // state in the dock, menu bar, screen-share, focus-followers),
       // hidesOnDeactivate=NO, and the right collectionBehavior. Without this,
-      // ANY click on the overlay (button, input, anywhere) activates Natively
+      // ANY click on the overlay (button, input, anywhere) activates MeetFloo
       // and dims the user's foreground app — even with type:'panel' set.
       //
       // DEFERRED to `ready-to-show`: getNativeWindowHandle() returns the
@@ -999,7 +999,7 @@ export class WindowHelper {
   /**
    * Route a window's renderer-side diagnostics into the main-process log so a
    * "stuck at logo" hang or a renderer crash is diagnosable from
-   * ~/Documents/natively_debug.log alone — no DevTools, no remote debugging.
+   * ~/Documents/MeetFloo_debug.log alone — no DevTools, no remote debugging.
    *
    * Captures, per window:
    *   - console-message      → renderer console output (React errors, warnings,
@@ -1193,7 +1193,7 @@ export class WindowHelper {
     // electron process alive after you close the window. When you then Ctrl+C
     // the `npm start` terminal, Windows does not reliably deliver SIGINT/SIGTERM
     // to that GUI process, so it survives as a ZOMBIE holding the single-instance
-    // lock, port 5180, and open natively.db-wal/-shm handles. The NEXT `npm start`
+    // lock, port 5180, and open MeetFloo.db-wal/-shm handles. The NEXT `npm start`
     // then either self-exits on the lost lock or loads a dead dev server →
     // "loads once, then stuck at logo/black forever." In dev we therefore let a
     // window close actually quit the app, so no zombie survives between runs.
@@ -1618,7 +1618,7 @@ export class WindowHelper {
     const display = screen.getDisplayMatching(overlay!.getBounds());
     catcher.setBounds(display.bounds);
     if (!catcher.isVisible()) catcher.showInactive();
-    // Same-level windows stack by recency — re-assert the Natively windows
+    // Same-level windows stack by recency — re-assert the MeetFloo windows
     // above the catcher (macOS already orders it below via relativeLevel -1;
     // this covers Windows and any level fallback).
     for (const w of [
@@ -1666,8 +1666,8 @@ export class WindowHelper {
     if (isMac) {
       this.popoverCatcher.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
       this.popoverCatcher.setHiddenInMissionControl(true);
-      // relativeLevel -1: below the other 'floating' Natively windows, above
-      // normal app windows — clicks on Natively still hit Natively; clicks
+      // relativeLevel -1: below the other 'floating' MeetFloo windows, above
+      // normal app windows — clicks on MeetFloo still hit MeetFloo; clicks
       // anywhere else hit the catcher.
       this.popoverCatcher.setAlwaysOnTop(true, 'floating', -1);
     }
@@ -1724,7 +1724,7 @@ export class WindowHelper {
         preload: path.join(__dirname, 'preload.js'),
       },
       // Same nonactivating-panel treatment as the overlay: clicking the pill's
-      // buttons must not activate Natively over the user's foreground app.
+      // buttons must not activate MeetFloo over the user's foreground app.
       ...(isMac ? { type: 'panel' as const } : {}),
     });
 
@@ -1741,7 +1741,7 @@ export class WindowHelper {
     // overlayGroupWelded field comment for the measured semantics. Applied
     // here, at creation, while all three are still hidden: verified to take
     // effect on first show and to survive later hide/show cycles.
-    this.overlayGroupWelded = isMac && process.env.NATIVELY_OVERLAY_WINDOW_GROUP !== '0';
+    this.overlayGroupWelded = isMac && process.env.MEETFLOO_OVERLAY_WINDOW_GROUP !== '0';
     if (this.overlayGroupWelded) {
       this.pillWindow.setParentWindow(this.overlayWindow);
       this.toggleWindow.setParentWindow(this.overlayWindow);
@@ -1753,7 +1753,7 @@ export class WindowHelper {
     // group apart on the first drag.
     this.overlayGroupDragManaged =
       this.overlayGroupWelded ||
-      (process.platform === 'win32' && process.env.NATIVELY_OVERLAY_GROUP_DRAG !== '0');
+      (process.platform === 'win32' && process.env.MEETFLOO_OVERLAY_GROUP_DRAG !== '0');
     console.log(
       `[WindowHelper] Overlay group drag: managed=${this.overlayGroupDragManaged} welded=${this.overlayGroupWelded}`,
     );
@@ -2079,7 +2079,7 @@ export class WindowHelper {
   // Pill renderer → main: drag the GROUP by a pointer delta.
   //
   // In welded mode the pill's `-webkit-app-region: drag` is disabled: a child
-  // window dragged natively moves ALONE (AppKit propagates parent→child, never
+  // window dragged MeetFloo moves ALONE (AppKit propagates parent→child, never
   // child→parent), which would tear the group apart — the exact bug this mode
   // fixes. So the pill drags its PARENT instead, and the children ride along
   // for free. The trade is that a pill drag now costs a renderer→main hop, so
@@ -2398,7 +2398,7 @@ export class WindowHelper {
     if (this.isWindowVisible) {
       this.hideMainWindow();
     } else {
-      // Always show without stealing focus — Natively is a ghost overlay.
+      // Always show without stealing focus — MeetFloo is a ghost overlay.
       // The user is in another app; show the window on top but leave OS focus alone.
       // They can click the window to focus it if they need to type.
       this.showMainWindow(true);
@@ -2445,42 +2445,42 @@ export class WindowHelper {
       // its birth height; that one still gets the floor.
       const savedBounds = this.overlayBounds
         ? {
-            ...this.overlayBounds,
-            height:
-              this.overlayBounds.height > WindowHelper.OVERLAY_BIRTH_HEIGHT
-                ? this.overlayBounds.height
-                : WindowHelper.OVERLAY_MIN_HEIGHT,
-          }
+          ...this.overlayBounds,
+          height:
+            this.overlayBounds.height > WindowHelper.OVERLAY_BIRTH_HEIGHT
+              ? this.overlayBounds.height
+              : WindowHelper.OVERLAY_MIN_HEIGHT,
+        }
         : null;
       const workArea = this.getDisplayWorkArea(savedBounds ?? currentBounds);
       const maxAllowedWidth = Math.floor(workArea.width * 0.9);
       const maxAllowedHeight = Math.floor(workArea.height * 0.9);
       const targetBounds = savedBounds
         ? {
-            x: Math.min(
-              Math.max(savedBounds.x, workArea.x),
-              workArea.x + workArea.width - Math.min(savedBounds.width, maxAllowedWidth),
-            ),
-            y: Math.min(
-              Math.max(savedBounds.y, workArea.y),
-              workArea.y + workArea.height - Math.min(savedBounds.height, maxAllowedHeight),
-            ),
-            width: Math.min(savedBounds.width, maxAllowedWidth),
-            height: Math.min(savedBounds.height, maxAllowedHeight),
-          }
+          x: Math.min(
+            Math.max(savedBounds.x, workArea.x),
+            workArea.x + workArea.width - Math.min(savedBounds.width, maxAllowedWidth),
+          ),
+          y: Math.min(
+            Math.max(savedBounds.y, workArea.y),
+            workArea.y + workArea.height - Math.min(savedBounds.height, maxAllowedHeight),
+          ),
+          width: Math.min(savedBounds.width, maxAllowedWidth),
+          height: Math.min(savedBounds.height, maxAllowedHeight),
+        }
         : {
-            x: Math.floor(workArea.x + (workArea.width - WindowHelper.OVERLAY_DEFAULT_WIDTH) / 2),
-            y: Math.floor(
-              workArea.y +
-                workArea.height * WindowHelper.OVERLAY_DEFAULT_TOP_RATIO +
-                WindowHelper.PILL_STACK_OFFSET,
-            ),
-            width: WindowHelper.OVERLAY_DEFAULT_WIDTH,
-            height: Math.max(
-              Math.min(currentBounds.height, maxAllowedHeight),
-              WindowHelper.OVERLAY_MIN_HEIGHT,
-            ),
-          };
+          x: Math.floor(workArea.x + (workArea.width - WindowHelper.OVERLAY_DEFAULT_WIDTH) / 2),
+          y: Math.floor(
+            workArea.y +
+            workArea.height * WindowHelper.OVERLAY_DEFAULT_TOP_RATIO +
+            WindowHelper.PILL_STACK_OFFSET,
+          ),
+          width: WindowHelper.OVERLAY_DEFAULT_WIDTH,
+          height: Math.max(
+            Math.min(currentBounds.height, maxAllowedHeight),
+            WindowHelper.OVERLAY_MIN_HEIGHT,
+          ),
+        };
 
       this.overlayWindow.setBounds(targetBounds);
       this.overlayBounds = this.overlayWindow.getBounds();
@@ -2674,7 +2674,7 @@ export class WindowHelper {
     }
 
     // ─── EXPLICITLY ACTIVATE THE APP ON OVERLAY→LAUNCHER SWAPS ─────────────
-    // During a meeting Natively is NOT the active macOS app: the overlay is a
+    // During a meeting MeetFloo is NOT the active macOS app: the overlay is a
     // non-activating panel (type:'panel' + becomesKeyOnlyIfNeeded) so the
     // user's meeting app stays foreground. show()+focus() above cannot
     // reliably foreground us from that state — Focus() uses
@@ -2705,7 +2705,7 @@ export class WindowHelper {
     // skipTaskbar). show()+focus() above re-activates the app as a foreground
     // app, which on macOS re-registers it and REVEALS the dock tile that
     // app.dock.hide() had suppressed — silently breaking undetectable mode.
-    // This is the root cause of "the Natively icon appears in the dock after
+    // This is the root cause of "the MeetFloo icon appears in the dock after
     // Stop meeting" (endMeeting swaps overlay→launcher via this method). It is
     // intermittent because macOS coalesces/drops activation-policy changes.
     //
@@ -2890,7 +2890,7 @@ export class WindowHelper {
       );
     } else {
       // A genuine OS maximize (Win+Up, snap) may be in effect — unwind it so the
-      // window is never both natively maximized and filled.
+      // window is never both MeetFloo maximized and filled.
       if (win.isMaximized()) win.unmaximize();
 
       if (this.launcherZoomed) {

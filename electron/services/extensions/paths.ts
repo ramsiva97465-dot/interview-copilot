@@ -1,10 +1,10 @@
 /**
  * Every filesystem location the extension system uses, derived in ONE place.
  *
- * The root is `~/.natively/` (chosen deliberately over `app.getPath('userData')`
+ * The root is `~/.MeetFloo/` (chosen deliberately over `app.getPath('userData')`
  * so the tree is user-visible and inspectable outside the app sandbox). It is
  * built with `os.homedir()` + `path.join`, so it resolves correctly on both
- * macOS (`/Users/x/.natively`) and Windows (`C:\Users\x\.natively`) including
+ * macOS (`/Users/x/.MeetFloo`) and Windows (`C:\Users\x\.MeetFloo`) including
  * drive letters, spaces and unicode. No path in this subsystem is ever built by
  * string concatenation, and no platform-specific literal appears anywhere else.
  *
@@ -16,40 +16,40 @@ import * as os from 'os';
 import * as path from 'path';
 
 /** Environment variable that relocates the entire tree (tests, power users). */
-export const EXTENSIONS_ROOT_ENV = 'NATIVELY_EXTENSIONS_ROOT';
+export const EXTENSIONS_ROOT_ENV = 'MEETFLOO_EXTENSIONS_ROOT';
 
-const ROOT_DIR_NAME = '.natively';
+const ROOT_DIR_NAME = '.MeetFloo';
 
-/** `~/.natively` — or the env override, if set to a non-empty value. */
-export function nativelyHome(overrideRoot?: string): string {
+/** `~/.MeetFloo` — or the env override, if set to a non-empty value. */
+export function MeetFlooHome(overrideRoot?: string): string {
   const override = overrideRoot ?? process.env[EXTENSIONS_ROOT_ENV];
   if (override && override.trim()) return path.resolve(override.trim());
   return path.join(os.homedir(), ROOT_DIR_NAME);
 }
 
-/** `~/.natively/extensions` — installed extension payloads. */
+/** `~/.MeetFloo/extensions` — installed extension payloads. */
 export function extensionsRoot(overrideRoot?: string): string {
-  return path.join(nativelyHome(overrideRoot), 'extensions');
+  return path.join(MeetFlooHome(overrideRoot), 'extensions');
 }
 
-/** `~/.natively/extensions/registry.json` — the installed-extension index. */
+/** `~/.MeetFloo/extensions/registry.json` — the installed-extension index. */
 export function registryFile(overrideRoot?: string): string {
   return path.join(extensionsRoot(overrideRoot), 'registry.json');
 }
 
-/** `~/.natively/extensions/<id>` — one extension's unpacked payload. */
+/** `~/.MeetFloo/extensions/<id>` — one extension's unpacked payload. */
 export function extensionDir(extensionId: string, overrideRoot?: string): string {
   return path.join(extensionsRoot(overrideRoot), safeSegment(extensionId));
 }
 
-/** `~/.natively/models/<id>` — one extension's private model directory. */
+/** `~/.MeetFloo/models/<id>` — one extension's private model directory. */
 export function extensionModelDir(extensionId: string, overrideRoot?: string): string {
-  return path.join(nativelyHome(overrideRoot), 'models', safeSegment(extensionId));
+  return path.join(MeetFlooHome(overrideRoot), 'models', safeSegment(extensionId));
 }
 
-/** `~/.natively/licenses.json` — the acknowledgement ledger. */
+/** `~/.MeetFloo/licenses.json` — the acknowledgement ledger. */
 export function licenseLedgerFile(overrideRoot?: string): string {
-  return path.join(nativelyHome(overrideRoot), 'licenses.json');
+  return path.join(MeetFlooHome(overrideRoot), 'licenses.json');
 }
 
 /**

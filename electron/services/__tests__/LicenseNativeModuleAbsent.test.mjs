@@ -1,7 +1,7 @@
 // LicenseManager: entitlement resolution when the Rust native module is ABSENT.
 //
 // Regression for a silent Pro revocation. storeLicense() deliberately exempts
-// 'natively_api' from the HWID requirement (those licenses are server-validated
+// 'MeetFloo_api' from the HWID requirement (those licenses are server-validated
 // per-request, not device-bound), but the three READ paths did not agree with
 // it: readStoredLicense(), isPremium() and getLicenseDetails() each bailed out
 // on `!getHardwareId` before ever looking at the provider.
@@ -30,8 +30,8 @@ import path from 'node:path';
 import Module from 'node:module';
 import { fileURLToPath } from 'node:url';
 
-const USER_DATA = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-license-'));
-process.env.NATIVELY_TEST_USERDATA = USER_DATA;
+const USER_DATA = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-license-'));
+process.env.MEETFLOO_TEST_USERDATA = USER_DATA;
 
 const LICENSE_PATH = path.join(USER_DATA, 'license.enc');
 
@@ -57,10 +57,10 @@ after(() => {
 /** Write a license.enc exactly as storeLicense() would, for a given provider. */
 function writeLicense(provider, extra = {}) {
   const payload = {
-    key: 'natively_sk_test_key',
-    // natively_api stores the empty-string HWID sentinel; HWID-bound providers
+    key: 'MeetFloo_sk_test_key',
+    // MeetFloo_api stores the empty-string HWID sentinel; HWID-bound providers
     // store a real fingerprint that can never match here (no native module).
-    hwid: provider === 'natively_api' ? '' : 'a'.repeat(64),
+    hwid: provider === 'MeetFloo_api' ? '' : 'a'.repeat(64),
     activatedAt: new Date().toISOString(),
     provider,
     ...extra,
@@ -78,7 +78,7 @@ function writeLicense(provider, extra = {}) {
  * only the anchor hands back the same warm object.
  */
 function freshManager() {
-  delete globalThis.__nativelyLicenseManagerV1__;
+  delete globalThis.__MeetFlooLicenseManagerV1__;
   LicenseManager.instance = undefined;
   return LicenseManager.getInstance();
 }
@@ -89,7 +89,7 @@ const PRO_VERIFY_OK = { status: 200, body: { ok: true, has_pro: true, plan: 'ult
 /**
  * Run `fn` with globalThis.fetch answering /v1/pro/verify locally.
  *
- * A unit test must never call api.natively.software. Outside this helper fetch
+ * A unit test must never call api.MeetFloo.software. Outside this helper fetch
  * is replaced by a throwing stub, so any path that reaches the network fails
  * loudly here instead of depending on a live server (and on the tester being
  * online) to reach its verdict.
@@ -130,20 +130,20 @@ before(() => {
   );
 });
 
-describe('native module absent: natively_api (server-validated, not HWID-bound)', () => {
+describe('native module absent: MeetFloo_api (server-validated, not HWID-bound)', () => {
   test('isPremium() resolves true from a stored license', () => {
-    writeLicense('natively_api', { plan: 'ultra' });
+    writeLicense('MeetFloo_api', { plan: 'ultra' });
     assert.equal(freshManager().isPremium(), true);
   });
 
   test('getLicenseDetails() reports Pro AND carries the server plan through', () => {
     // The plan label is not cosmetic: PI's header CTA and the ad-campaign
     // targeting in useAdCampaigns.ts branch on plan === 'pro' / 'standard'.
-    writeLicense('natively_api', { plan: 'ultra' });
+    writeLicense('MeetFloo_api', { plan: 'ultra' });
     const details = freshManager().getLicenseDetails();
     assert.equal(details.isPremium, true);
     assert.equal(details.plan, 'ultra');
-    assert.equal(details.provider, 'natively_api');
+    assert.equal(details.provider, 'MeetFloo_api');
   });
 
   test('isPremium() and getLicenseDetails() agree — the two must never diverge', () => {
@@ -154,7 +154,7 @@ describe('native module absent: natively_api (server-validated, not HWID-bound)'
     // Both read the same unmodified file from a cold instance, so this pins the
     // agreement that the original bug broke — licenseCheckPremium and
     // licenseGetDetails answering differently for one stored license.
-    writeLicense('natively_api', { plan: 'pro' });
+    writeLicense('MeetFloo_api', { plan: 'pro' });
     const mgr = freshManager();
     assert.equal(mgr.isPremium(), true);
     assert.equal(mgr.getLicenseDetails().isPremium, true);
@@ -163,7 +163,7 @@ describe('native module absent: natively_api (server-validated, not HWID-bound)'
   test('survives a restart — verdict comes from disk, not the activation cache', () => {
     // storeLicense() sets cachedPremium=true in memory. A fresh instance has no
     // cache, which is what the next app launch sees.
-    writeLicense('natively_api', { plan: 'ultra' });
+    writeLicense('MeetFloo_api', { plan: 'ultra' });
     const mgr = freshManager();
     assert.equal(mgr.cachedPremium ?? null, null, 'expected a cold instance');
     assert.equal(mgr.isPremium(), true);
@@ -182,7 +182,7 @@ describe('native module absent: HWID-bound providers stay locked', () => {
 
   test('a license with no provider field is treated as HWID-bound (fails closed)', () => {
     // Legacy files predate the provider field. Absent an explicit
-    // 'natively_api' marker they must take the strict path, not the exempt one.
+    // 'MeetFloo_api' marker they must take the strict path, not the exempt one.
     writeLicense(undefined);
     assert.equal(freshManager().isPremium(), false);
   });
@@ -200,7 +200,7 @@ describe('native module absent: activateWithApiKey must not clobber a perpetual 
       writeLicense(provider);
       const before = fs.readFileSync(LICENSE_PATH);
 
-      const result = await freshManager().activateWithApiKey('natively_sk_some_other_key');
+      const result = await freshManager().activateWithApiKey('MeetFloo_sk_some_other_key');
 
       assert.equal(result.success, false);
       assert.equal(result.skipped, true, `${provider} license must be preserved, not overwritten`);
@@ -211,7 +211,7 @@ describe('native module absent: activateWithApiKey must not clobber a perpetual 
       // API key leaves the user with Pro from neither credential. A bare
       // `skipped` made activateLicense() render the empty error as "Failed to
       // activate with API key" — blaming the one credential that is fine — and
-      // made the set-natively-api-key handler show nothing at all.
+      // made the set-MeetFloo-api-key handler show nothing at all.
       assert.ok(
         result.error,
         `${provider}: an unverifiable license must explain why Pro is inactive`,
@@ -227,7 +227,7 @@ describe('native module absent: activateWithApiKey must not clobber a perpetual 
   test('legacy license with no provider field is also protected', async () => {
     writeLicense(undefined);
     const before = fs.readFileSync(LICENSE_PATH);
-    const result = await freshManager().activateWithApiKey('natively_sk_some_other_key');
+    const result = await freshManager().activateWithApiKey('MeetFloo_sk_some_other_key');
     assert.equal(result.skipped, true);
     assert.deepEqual(fs.readFileSync(LICENSE_PATH), before);
   });
@@ -238,13 +238,13 @@ describe('native module absent: activateWithApiKey must not clobber a perpetual 
   // approximated here by regex-matching LicenseManager.ts; that assertion could
   // not fail for the right reason and is gone.)
 
-  test('an existing natively_api license is NOT protected — reactivation must work', async () => {
+  test('an existing MeetFloo_api license is NOT protected — reactivation must work', async () => {
     // Overwriting one API license with another is the supported reinstall /
     // key-rotation path; only perpetual licenses are sacred. This must reach the
     // network call rather than short-circuiting to skipped.
-    writeLicense('natively_api', { plan: 'ultra' });
+    writeLicense('MeetFloo_api', { plan: 'ultra' });
     const result = await withStubbedFetch(PRO_VERIFY_OK, () =>
-      freshManager().activateWithApiKey('natively_sk_some_other_key'),
+      freshManager().activateWithApiKey('MeetFloo_sk_some_other_key'),
     );
     assert.notEqual(result.skipped, true, 'API-plan reactivation must not be skipped');
     assert.equal(result.success, true);
@@ -272,7 +272,7 @@ describe('native module absent: a license.enc that cannot be decrypted', () => {
   test('activation proceeds — an unreadable file must not lock the user out', async () => {
     fs.writeFileSync(LICENSE_PATH, UNDECRYPTABLE);
     const result = await withStubbedFetch(PRO_VERIFY_OK, () =>
-      freshManager().activateWithApiKey('natively_sk_my_key'),
+      freshManager().activateWithApiKey('MeetFloo_sk_my_key'),
     );
     assert.equal(result.success, true, 'a file nobody can read must not block activation');
     assert.notEqual(result.skipped, true);
@@ -285,7 +285,7 @@ describe('native module absent: a license.enc that cannot be decrypted', () => {
     fs.writeFileSync(LICENSE_PATH, UNDECRYPTABLE);
 
     await withStubbedFetch(PRO_VERIFY_OK, () =>
-      freshManager().activateWithApiKey('natively_sk_my_key'),
+      freshManager().activateWithApiKey('MeetFloo_sk_my_key'),
     );
 
     assert.deepEqual(
@@ -314,7 +314,7 @@ describe('native module absent: a license.enc that cannot be decrypted', () => {
 
     let result;
     try {
-      result = await freshManager().activateWithApiKey('natively_sk_my_key');
+      result = await freshManager().activateWithApiKey('MeetFloo_sk_my_key');
     } finally {
       globalThis.fetch = previousFetch;
     }

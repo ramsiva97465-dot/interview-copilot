@@ -3,20 +3,20 @@
  *
  * `codex login` stores a ChatGPT OAuth session in `$CODEX_HOME/auth.json`
  * (`~/.codex` on macOS, `%USERPROFILE%\.codex` on Windows — see
- * resolveCodexHome). When the user has not signed in inside Natively, that
- * session's access token lets Natively call the same ChatGPT Codex backend the
+ * resolveCodexHome). When the user has not signed in inside MeetFloo, that
+ * session's access token lets MeetFloo call the same ChatGPT Codex backend the
  * CLI calls (issue #558: a successful `codex login` used to count for nothing).
  *
  * READ-ONLY, deliberately. ChatGPT OAuth rotates the refresh token on every
- * refresh, so if Natively refreshed this session the CLI's stored refresh token
- * would be dead and the CLI would be signed out. Natively therefore never
+ * refresh, so if MeetFloo refreshed this session the CLI's stored refresh token
+ * would be dead and the CLI would be signed out. MeetFloo therefore never
  * refreshes it and never writes the file: once the access token expires
  * (roughly ten days), the user runs any `codex` command — the CLI refreshes its
- * own session — or signs in inside Natively.
+ * own session — or signs in inside MeetFloo.
  *
  * Only `auth_mode: "chatgpt"` sessions are usable. An API-key login
  * (`auth_mode: "apikey"`) authenticates against api.openai.com, not the ChatGPT
- * backend Natively posts to.
+ * backend MeetFloo posts to.
  *
  * The token never leaves the main process: CodexCliAuthState carries it only
  * for CodexCliService's request headers, and getCodexAuthStatus() (the shape

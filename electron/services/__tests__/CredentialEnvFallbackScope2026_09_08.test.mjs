@@ -7,7 +7,7 @@
 // returning process.env.GEMINI_API_KEY — invisible in the UI and unremovable,
 // with anyVisionProviderConfigured() still reporting true. On Windows,
 // user-level env vars reach GUI-launched apps, so another tool's OPENAI_API_KEY
-// would silently become an active Natively credential.
+// would silently become an active MeetFloo credential.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -34,7 +34,7 @@ test('every env-backed getter goes through the gated helper', () => {
   // A getter that reads process.env directly would reopen the hole for that one
   // provider, which is exactly the shape of the original two-key-sources bug.
   for (const g of ['getGeminiApiKey', 'getGroqApiKey', 'getOpenaiApiKey',
-                   'getClaudeApiKey', 'getDeepseekApiKey', 'getNvidiaNimApiKey']) {
+    'getClaudeApiKey', 'getDeepseekApiKey', 'getNvidiaNimApiKey']) {
     const body = src.slice(src.indexOf(`public ${g}(`), src.indexOf('}', src.indexOf(`public ${g}(`)));
     assert.match(body, /this\.storedOrEnv\(/, `${g} must use the gated helper`);
     assert.doesNotMatch(body, /process\.env/, `${g} must not read process.env directly`);

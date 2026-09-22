@@ -44,9 +44,9 @@ Module._load = function (request, parent, isMain) {
         isPackaged: false,
         isReady: () => true,
         whenReady: () => Promise.resolve(),
-        on: () => {},
+        on: () => { },
       },
-      ipcMain: { on: () => {}, handle: () => {} },
+      ipcMain: { on: () => { }, handle: () => { } },
     };
   }
   return realLoad.apply(this, arguments);
@@ -56,7 +56,7 @@ function relaunch() {
   // Fresh module instance + drop the global singleton, as a real restart would.
   delete require.cache[require.resolve(SM_PATH)];
   for (const k of Object.keys(globalThis)) {
-    if (k.startsWith('__nativelySettingsManager')) delete globalThis[k];
+    if (k.startsWith('__MeetFlooSettingsManager')) delete globalThis[k];
   }
   const { SettingsManager } = require(SM_PATH);
   return SettingsManager.getInstance();

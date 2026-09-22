@@ -36,10 +36,10 @@ import nvidiaMark from '../../assets/provider-logos/nvidia.svg?raw';
 // this registry stays a plain id→asset map with no platform logic in it.
 import appleMark from '../../assets/provider-logos/apple.svg?raw';
 import microsoftMark from '../../assets/provider-logos/microsoft.svg?raw';
-// Our own app icon, for the Natively API row. Raster and full-colour, so it is a
+// Our own app icon, for the MeetFloo API row. Raster and full-colour, so it is a
 // URL rendered with <img> rather than inlined markup — there is no currentColor
 // in a PNG, so an <img> loses nothing.
-import nativelyIcon from '../../../assets/icon-512.png';
+import MeetFlooIcon from '../../../assets/icon-512.png';
 
 /**
  * Provider id → inlined brand mark, keyed by the ids used in the speech provider
@@ -65,7 +65,7 @@ export const BRAND_MARKS: Record<string, string> = {
  * a PNG has no currentColor to resolve, so it needs no inlining.
  */
 export const BRAND_MARK_IMAGES: Record<string, string> = {
-    natively: nativelyIcon,
+    MeetFloo: MeetFlooIcon,
 };
 
 /**
@@ -142,7 +142,7 @@ export const BrandMark: React.FC<BrandMarkProps> = ({ provider, size = 16, class
                 width={size}
                 height={size}
                 // `.brand-mark-raster` (index.css) flattens a white-on-transparent
-                // mark to black in the light theme. Natively's own icon is drawn for
+                // mark to black in the light theme. MeetFloo's own icon is drawn for
                 // the dark theme, so without it the speech-provider tile reads empty.
                 className={`object-contain ${WHITE_ON_TRANSPARENT_MARKS.has(key) ? 'brand-mark-raster' : ''} ${className}`}
             />

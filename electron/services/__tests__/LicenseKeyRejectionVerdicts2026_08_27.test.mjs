@@ -2,8 +2,8 @@
 //
 // From a 2026-08-27 win32 user report: the log read
 //   [LicenseManager] activateWithApiKey: plan has no Pro — undefined
-//   [IPC] set-natively-api-key: Pro not activated — Your plan does not include Natively Pro.
-// The user was NOT on a free plan. natively-api's /v1/pro/verify (server.js:5716)
+//   [IPC] set-MeetFloo-api-key: Pro not activated — Your plan does not include MeetFloo Pro.
+// The user was NOT on a free plan. MeetFloo-api's /v1/pro/verify (server.js:5716)
 // always emits `plan` on its success path (`auth.user.plan || 'standard'`), so a
 // genuine standard-plan user logs "— standard". `undefined` can only come from
 // the !auth.ok branch, which returns {ok:false, error} with NO plan field. The
@@ -26,8 +26,8 @@ import path from 'node:path';
 import Module, { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
-const USER_DATA = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-license-verdict-'));
-process.env.NATIVELY_TEST_USERDATA = USER_DATA;
+const USER_DATA = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-license-verdict-'));
+process.env.MEETFLOO_TEST_USERDATA = USER_DATA;
 const LICENSE_PATH = path.join(USER_DATA, 'license.enc');
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -53,7 +53,7 @@ after(() => {
 });
 
 function freshManager() {
-  delete globalThis.__nativelyLicenseManagerV1__;
+  delete globalThis.__MeetFlooLicenseManagerV1__;
   LicenseManager.instance = undefined;
   return LicenseManager.getInstance();
 }
@@ -87,9 +87,9 @@ before(() => {
 
 describe('4xx — the server refused the key', () => {
   test('an inactive subscription surfaces the SERVER\'s own next step', async () => {
-    reply(403, { ok: false, error: 'subscription_inactive', message: 'Renew at natively.software/api' });
+    reply(403, { ok: false, error: 'subscription_inactive', message: 'Renew at MeetFloo.software/api' });
 
-    const r = await freshManager().activateWithApiKey('natively_sk_lapsed');
+    const r = await freshManager().activateWithApiKey('MeetFloo_sk_lapsed');
 
     assert.equal(r.success, false);
     assert.equal(r.keyRejected, true, 'a 4xx refusal must be distinguishable from a plan verdict');
@@ -97,12 +97,12 @@ describe('4xx — the server refused the key', () => {
     assert.equal(r.status, 403);
     assert.equal(
       r.error,
-      'Renew at natively.software/api',
+      'Renew at MeetFloo.software/api',
       "the server's account-specific message is the only source that knows the next step — it must not be replaced",
     );
     assert.notEqual(
       r.error,
-      'Your plan does not include Natively Pro.',
+      'Your plan does not include MeetFloo Pro.',
       'this is the exact misreport from the 2026-08-27 user log',
     );
   });
@@ -110,7 +110,7 @@ describe('4xx — the server refused the key', () => {
   test('a refusal with no server message still names an actionable cause', async () => {
     reply(401, { ok: false, error: 'key_not_found' });
 
-    const r = await freshManager().activateWithApiKey('natively_sk_ghost');
+    const r = await freshManager().activateWithApiKey('MeetFloo_sk_ghost');
 
     assert.equal(r.keyRejected, true);
     assert.equal(r.code, 'key_not_found');
@@ -120,7 +120,7 @@ describe('4xx — the server refused the key', () => {
   test('a rate-limited refusal reports the retry window', async () => {
     reply(429, { ok: false, error: 'identity_blocked', retry_after: 42 });
 
-    const r = await freshManager().activateWithApiKey('natively_sk_blocked');
+    const r = await freshManager().activateWithApiKey('MeetFloo_sk_blocked');
 
     assert.equal(r.keyRejected, true);
     assert.match(r.error, /42/, 'retry_after is the only actionable detail on a 429');
@@ -131,14 +131,14 @@ describe('200 — the key authenticates, the plan simply has no Pro', () => {
   test('a standard plan is NOT a rejected key', async () => {
     reply(200, { ok: true, has_pro: false, plan: 'standard' });
 
-    const r = await freshManager().activateWithApiKey('natively_sk_standard');
+    const r = await freshManager().activateWithApiKey('MeetFloo_sk_standard');
 
     assert.equal(r.success, false);
     assert.ok(
       !r.keyRejected,
       'CRITICAL: a standard-plan key authenticates against /v1/chat (the server gates only /v1/pro/verify on PRO_PLANS). Marking it rejected would tear down a WORKING configuration.',
     );
-    assert.equal(r.error, 'Your plan does not include Natively Pro.');
+    assert.equal(r.error, 'Your plan does not include MeetFloo Pro.');
   });
 });
 
@@ -146,7 +146,7 @@ describe('no verdict — nothing may be torn down', () => {
   test('a 5xx is transient, not a statement about the key', async () => {
     reply(503, { error: 'upstream_unavailable' });
 
-    const r = await freshManager().activateWithApiKey('natively_sk_valid');
+    const r = await freshManager().activateWithApiKey('MeetFloo_sk_valid');
 
     assert.equal(r.success, false);
     assert.ok(!r.keyRejected, 'an outage must never be reported as a bad key');
@@ -159,7 +159,7 @@ describe('no verdict — nothing may be torn down', () => {
     // answered, and it hid the status.
     reply(502, null, { jsonThrows: true });
 
-    const r = await freshManager().activateWithApiKey('natively_sk_valid');
+    const r = await freshManager().activateWithApiKey('MeetFloo_sk_valid');
 
     assert.ok(!r.keyRejected);
     assert.equal(r.status, 502, 'the status must survive a body that will not parse');
@@ -168,11 +168,11 @@ describe('no verdict — nothing may be torn down', () => {
   test('a 2xx with an unexpected body is not read as a plan verdict', async () => {
     reply(200, { unexpected: true });
 
-    const r = await freshManager().activateWithApiKey('natively_sk_valid');
+    const r = await freshManager().activateWithApiKey('MeetFloo_sk_valid');
 
     assert.equal(r.success, false);
     assert.ok(!r.keyRejected, 'refuse to guess in either direction on a malformed body');
-    assert.notEqual(r.error, 'Your plan does not include Natively Pro.');
+    assert.notEqual(r.error, 'Your plan does not include MeetFloo Pro.');
   });
 });
 
@@ -189,7 +189,7 @@ describe('robustness of the success test itself', () => {
       json: async () => ({ ok: true, has_pro: true, plan: 'ultra' }),
     });
 
-    const r = await freshManager().activateWithApiKey('natively_sk_pro');
+    const r = await freshManager().activateWithApiKey('MeetFloo_sk_pro');
 
     assert.ok(!r.keyRejected, 'a 200 with no `ok` field on the Response must never read as a refused key');
     assert.equal(r.success, true);
@@ -200,7 +200,7 @@ describe('positive control', () => {
   test('a pro plan still activates (the happy path is not collateral damage)', async () => {
     reply(200, { ok: true, has_pro: true, plan: 'pro' });
 
-    const r = await freshManager().activateWithApiKey('natively_sk_pro');
+    const r = await freshManager().activateWithApiKey('MeetFloo_sk_pro');
 
     assert.equal(r.success, true, 'a genuine pro key must still activate');
     assert.ok(!r.keyRejected);

@@ -93,7 +93,7 @@ const CONTROL_TOKENS = [
     { regex: /(?:<<\/SYS>>|&(?:amp;)?lt;&(?:amp;)?lt;\/SYS&(?:amp;)?gt;&(?:amp;)?gt;)/gi, replacement: '|/SYS_REDACTED|' },
     // Note: <s> and </s> entries only apply to the reference-file path (which is not HTML entity-encoded).
     // The DOM context block is fully entity-encoded before injection checks, meaning any literal "<s>" 
-    // inside DOM becomes "&lt;s&gt;", which natively neutralizes the token without requiring an entity-encoded regex.
+    // inside DOM becomes "&lt;s&gt;", which MeetFloo neutralizes the token without requiring an entity-encoded regex.
     { regex: /<s>/gi, replacement: '|s_redacted|' },
     { regex: /<\/s>/gi, replacement: '|/s_redacted|' },
 ];
@@ -424,7 +424,7 @@ ${JSON.stringify({ content: this.escapePromptInjection(pinned) })}
         }));
 
         return localInjectionPatterns.some(({ regex }) => regex.test(tagStripped)) ||
-               localControlTokens.some(({ regex }) => regex.test(result));
+            localControlTokens.some(({ regex }) => regex.test(result));
     }
 
     /**

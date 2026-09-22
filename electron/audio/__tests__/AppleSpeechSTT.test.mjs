@@ -97,7 +97,7 @@ test('starts the helper, waits for ready, drains buffered audio with backpressur
   // init succeeds, the first audio write backpressures, and the second audio
   // write is released only after the fake stream emits drain.
   const { child, spawnCalls, runtime } = createHarness({ writeResults: [true, false, true] });
-  const stt = new AppleSpeechSTT('/fake/natively-apple-speech', runtime);
+  const stt = new AppleSpeechSTT('/fake/MeetFloo-apple-speech', runtime);
   const ready = [];
   const statuses = [];
   const transcripts = [];
@@ -112,7 +112,7 @@ test('starts the helper, waits for ready, drains buffered audio with backpressur
   stt.start();
 
   assert.deepEqual(spawnCalls, [{
-    executable: '/fake/natively-apple-speech',
+    executable: '/fake/MeetFloo-apple-speech',
     args: [],
     options: { stdio: ['pipe', 'pipe', 'pipe'] },
   }]);
@@ -163,7 +163,7 @@ test('preserves finalize behind backpressured audio and flushes exactly once in 
   // second chunk and the deferred flush in protocol order.
   const { child, runtime } = createHarness({ writeResults: [true, false, true, true] });
   const stt = new AppleSpeechSTT('/fake/helper', runtime);
-  stt.on('error', () => {});
+  stt.on('error', () => { });
   stt.start();
   child.stdout.emit('data', '{"type":"ready"}\n');
 
@@ -193,7 +193,7 @@ test('preserves finalize behind backpressured audio and flushes exactly once in 
 test('uses the injected app locale for automatic language selection', () => {
   const { child, runtime } = createHarness({ locale: 'fr-FR' });
   const stt = new AppleSpeechSTT('/fake/helper', runtime);
-  stt.on('error', () => {});
+  stt.on('error', () => { });
 
   assert.doesNotThrow(() => stt.setCredentials('/ignored/google-credentials.json'));
   stt.start();
@@ -243,7 +243,7 @@ test('restarts an active helper when the recognition language changes', () => {
   let spawnCount = 0;
   runtime.spawn = () => children[spawnCount++];
   const stt = new AppleSpeechSTT('/fake/helper', runtime);
-  stt.on('error', () => {});
+  stt.on('error', () => { });
 
   stt.setRecognitionLanguage('english-us');
   stt.start();
@@ -423,7 +423,7 @@ test('a legacy "english" setting resolves to a real English locale, not the lite
   // EXCEPT English, which exists only as english-us/uk/in/au/ca.
   const { child, runtime } = createHarness({ locale: 'fr-FR' });
   const stt = new AppleSpeechSTT('/fake/helper', runtime);
-  stt.on('error', () => {});
+  stt.on('error', () => { });
   stt.setRecognitionLanguage('english');
   stt.start();
   assert.equal(localeSentTo(child), 'en-US', 'a non-English app locale must not drag English to fr-FR');
@@ -432,7 +432,7 @@ test('a legacy "english" setting resolves to a real English locale, not the lite
 test('"english" prefers the regional variant the machine already runs', () => {
   const { child, runtime } = createHarness({ locale: 'en-GB' });
   const stt = new AppleSpeechSTT('/fake/helper', runtime);
-  stt.on('error', () => {});
+  stt.on('error', () => { });
   stt.setRecognitionLanguage('english');
   stt.start();
   assert.equal(localeSentTo(child), 'en-GB');
@@ -442,7 +442,7 @@ test('explicit region keys and plain language keys both still resolve', () => {
   for (const [key, expected] of [['english-au', 'en-AU'], ['spanish', 'es-ES'], ['japanese', 'ja-JP']]) {
     const { child, runtime } = createHarness({ locale: 'en-US' });
     const stt = new AppleSpeechSTT('/fake/helper', runtime);
-    stt.on('error', () => {});
+    stt.on('error', () => { });
     stt.setRecognitionLanguage(key);
     stt.start();
     assert.equal(localeSentTo(child), expected, `${key} must map to ${expected}`);
@@ -452,7 +452,7 @@ test('explicit region keys and plain language keys both still resolve', () => {
 test('an unknown key falls back to the app locale instead of being forwarded', () => {
   const { child, runtime } = createHarness({ locale: 'de-DE' });
   const stt = new AppleSpeechSTT('/fake/helper', runtime);
-  stt.on('error', () => {});
+  stt.on('error', () => { });
   stt.setRecognitionLanguage('klingon');
   stt.start();
   const sent = localeSentTo(child);
@@ -566,7 +566,7 @@ test('a fraction outside 0..1 is clamped before it reaches a progress bar', asyn
 });
 
 test('an exit without install-done is a failure, not a silent success', async () => {
-  const result = await installAppleSpeechLocale('ko-KR', () => {}, '/fake/helper', {
+  const result = await installAppleSpeechLocale('ko-KR', () => { }, '/fake/helper', {
     platform: 'darwin',
     spawn: stubSpawn((c) => {
       c.stdout.emit('data', '{"type":"error","message":"network unreachable"}\n');
@@ -579,7 +579,7 @@ test('an exit without install-done is a failure, not a silent success', async ()
 
 test('install never spawns a Mach-O helper off macOS', async () => {
   let spawned = false;
-  const result = await installAppleSpeechLocale('ko-KR', () => {}, '/fake/helper', {
+  const result = await installAppleSpeechLocale('ko-KR', () => { }, '/fake/helper', {
     platform: 'win32',
     spawn: () => { spawned = true; throw new Error('must not spawn'); },
   });

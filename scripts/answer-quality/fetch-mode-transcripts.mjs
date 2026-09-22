@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // scripts/answer-quality/fetch-mode-transcripts.mjs
 //
-// Real speech per Natively mode, for testing the router on what it will
+// Real speech per MeetFloo mode, for testing the router on what it will
 // actually see.
 //
 // WHY REAL RECORDINGS AND NOT WRITTEN ONES.
@@ -15,7 +15,7 @@
 // Auto-captions of real conversations carry the disfluencies for free. The
 // hesitations, the restarts, the half-finished clauses and the transcription
 // errors are all there because a person actually said it that way and a model
-// actually mis-heard it. That is the input Natively gets.
+// actually mis-heard it. That is the input MeetFloo gets.
 //
 // The captions are used as a local benchmark fixture only. Nothing is
 // redistributed and no transcript is reproduced in any report.

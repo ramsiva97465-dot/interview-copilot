@@ -54,7 +54,7 @@ test('the flag is anchored on globalThis, not a module-local let', () => {
   const { setVerboseLoggingFlag } = verboseLog;
   try {
     setVerboseLoggingFlag(true);
-    assert.equal(globalThis.__nativelyVerboseLoggingV1__?.on, true,
+    assert.equal(globalThis.__MeetFlooVerboseLoggingV1__?.on, true,
       'flag not on globalThis — per-bundle copies will diverge again');
   } finally {
     setVerboseLoggingFlag(true);
@@ -89,13 +89,13 @@ test('ON opens redactForLog content axis; OFF falls back to standard, not nothin
 
 test('CONTENT CAPTURE IS OPT-IN: a fresh install does not log user content', () => {
   // Regression guard for the review's critical finding. ON now means "record
-  // my conversations verbatim to ~/Documents/natively_debug.log". When the
+  // my conversations verbatim to ~/Documents/MeetFloo_debug.log". When the
   // flag defaulted ON, every fresh install did that with no user action, while
   // redactForLog's own docblock claimed 'full' was opt-in from Settings.
-  const prevEnv = process.env.NATIVELY_VERBOSE_LOGGING;
-  delete process.env.NATIVELY_VERBOSE_LOGGING;
-  delete globalThis.__nativelyVerboseLoggingV1__;
-  delete globalThis.__nativelyLogRedactionLevelV1__;
+  const prevEnv = process.env.MEETFLOO_VERBOSE_LOGGING;
+  delete process.env.MEETFLOO_VERBOSE_LOGGING;
+  delete globalThis.__MeetFlooVerboseLoggingV1__;
+  delete globalThis.__MeetFlooLogRedactionLevelV1__;
   try {
     assert.equal(verboseLog.isVerboseLogging(), false,
       'the flag must default OFF — ON means full content capture');
@@ -104,8 +104,8 @@ test('CONTENT CAPTURE IS OPT-IN: a fresh install does not log user content', () 
     assert.ok(!redactor.redactForLog([{ transcript: 'PRIVATE_MEETING' }]).includes('PRIVATE_MEETING'),
       'a fresh install must not write user content to the log');
   } finally {
-    if (prevEnv === undefined) delete process.env.NATIVELY_VERBOSE_LOGGING;
-    else process.env.NATIVELY_VERBOSE_LOGGING = prevEnv;
+    if (prevEnv === undefined) delete process.env.MEETFLOO_VERBOSE_LOGGING;
+    else process.env.MEETFLOO_VERBOSE_LOGGING = prevEnv;
     verboseLog.setVerboseLoggingFlag(true);
   }
 });
@@ -117,7 +117,7 @@ test('AppState reads the setting with an OFF default, not ON', () => {
   assert.doesNotMatch(src, /get\('verboseLogging'\) \?\? true/);
 });
 
-test('NATIVELY_VERBOSE_LOGGING=1 opts in from a terminal', () => {
+test('MEETFLOO_VERBOSE_LOGGING=1 opts in from a terminal', () => {
   const src = read('electron/verboseLog.ts');
   assert.match(src, /v === '1' \|\| v === 'true'/);
 });
@@ -174,7 +174,7 @@ test('redactForLog keeps its own caps — uncapping is redactSecretsOnly only', 
 test('ON opens the answer-text gate in IntelligenceEngine', () => {
   const src = read('electron/IntelligenceEngine.ts');
   assert.match(src, /require\('\.\/verboseLog'\)\.isVerboseLogging\(\)/);
-  assert.match(src, /NATIVELY_TRACE_ANSWERS === '1' \|\| fullDebug/);
+  assert.match(src, /MEETFLOO_TRACE_ANSWERS === '1' \|\| fullDebug/);
 });
 
 test('ON opens the PI telemetry gate', () => {
@@ -216,7 +216,7 @@ test('the settings UI is a single toggle, with no leftover level control', () =>
 test('the export handler collects all four artifact kinds', () => {
   const src = read('electron/ipcHandlers.ts');
   assert.match(src, /safeHandle\('export-debug-logs'/);
-  assert.match(src, /natively_debug\.log\.prev/, 'the prior session is where a crash lives');
+  assert.match(src, /MeetFloo_debug\.log\.prev/, 'the prior session is where a crash lives');
   assert.match(src, /system-info\.json/);
   assert.match(src, /shell\.showItemInFolder/);
   // Cross-platform: no hardcoded platform paths in the export path.
@@ -229,8 +229,8 @@ test('the export handler collects all four artifact kinds', () => {
 
 test('no leftover debugLogLevel plumbing anywhere', () => {
   for (const rel of ['electron/services/SettingsManager.ts', 'electron/main.ts',
-                     'electron/ipcHandlers.ts', 'electron/preload.ts',
-                     'electron/verboseLog.ts', 'src/types/electron.d.ts']) {
+    'electron/ipcHandlers.ts', 'electron/preload.ts',
+    'electron/verboseLog.ts', 'src/types/electron.d.ts']) {
     assert.ok(!read(rel).includes('debugLogLevel'), `leftover debugLogLevel in ${rel}`);
   }
 });

@@ -14,7 +14,7 @@
 
 const PROBE_TIMEOUT_MS = 20_000;
 const DEFAULT_BASE_URL = 'https://api.voyageai.com/v1';
-const DIMENSION_PROBE_TEXT = 'natively embedding dimension probe';
+const DIMENSION_PROBE_TEXT = 'MeetFloo embedding dimension probe';
 
 async function embedOnce(
   base: string, apiKey: string, model: string, outputDimension?: number,

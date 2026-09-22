@@ -1,7 +1,7 @@
 {
   "id": "TECH-DISC-L",
   "category": "technical_discussion",
-  "natively_mode": "general",
+  "MeetFloo_mode": "general",
   "length_bucket": "long",
   "speakers": [
     {

@@ -238,7 +238,7 @@ ${fence(a)}`;
 
 const NO_LEAK_RULES = `Additional rules:
 - Do not include resume, JD, salary, negotiation, or unrelated profile context.
-- NEVER mention "Natively", the assistant, the product, or the candidate's profile/projects. This is a pure technical answer about the algorithm only.`;
+- NEVER mention "MeetFloo", the assistant, the product, or the candidate's profile/projects. This is a pure technical answer about the algorithm only.`;
 
 /**
  * Build the prompt-ready coding answer contract for a manual coding answer, honoring

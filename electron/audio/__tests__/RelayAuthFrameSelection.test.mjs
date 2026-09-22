@@ -5,7 +5,7 @@
 // raw key; the Railway url (and the entire flag-off path) must send the exact
 // legacy { key | trial_token, ... } frame.
 //
-// Strategy: load compiled NativelyProSTT, build an instance, install a fake
+// Strategy: load compiled MeetFlooProSTT, build an instance, install a fake
 // `target` (chain + config) directly, and call the (runtime-accessible private)
 // buildAuthFrame() for each url-kind. Also a structural guard so the relay
 // frame can never accidentally include `key`.
@@ -29,11 +29,11 @@ Module._load = function patched(request, _p, _m) {
   return origLoad.apply(this, arguments);
 };
 
-const { NativelyProSTT } = await import(pathToFileURL(path.join(distRoot, 'NativelyProSTT.js')).href);
+const { MeetFlooProSTT } = await import(pathToFileURL(path.join(distRoot, 'MeetFlooProSTT.js')).href);
 
-const RELAY_URL = 'wss://us-relay.natively.software/ws';
-const ALT_URL = 'wss://asia-relay.natively.software/ws';
-const RAILWAY_URL = 'wss://api.natively.software/v1/transcribe';
+const RELAY_URL = 'wss://us-relay.MeetFloo.software/ws';
+const ALT_URL = 'wss://asia-relay.MeetFloo.software/ws';
+const RAILWAY_URL = 'wss://api.MeetFloo.software/v1/transcribe';
 
 function makeConfig() {
   return {
@@ -51,7 +51,7 @@ function makeConfig() {
 }
 
 function instanceWithTarget(apiKey, config) {
-  const stt = new NativelyProSTT(apiKey, 'system', { appVersion: '2.7.0', platform: 'mac', flags: stubFlags() });
+  const stt = new MeetFlooProSTT(apiKey, 'system', { appVersion: '2.7.0', platform: 'mac', flags: stubFlags() });
   stt.target = { chain: [RELAY_URL, ALT_URL, RAILWAY_URL], index: 0, config, sameUrlFailures: 0, onRailway: false };
   return stt;
 }
@@ -68,7 +68,7 @@ function stubFlags() {
 }
 
 test('relay url → RELAY frame (session_token present, key absent)', () => {
-  const stt = instanceWithTarget('natively_sk_paid', makeConfig());
+  const stt = instanceWithTarget('MeetFloo_sk_paid', makeConfig());
   const frame = stt.buildAuthFrame(RELAY_URL);
   assert.equal(frame.session_token, 'v1.PAYLOAD.SIG');
   assert.equal(frame.key, undefined, 'relay frame must NOT carry the raw key');
@@ -81,7 +81,7 @@ test('relay url → RELAY frame (session_token present, key absent)', () => {
 });
 
 test('alternate relay url → RELAY frame too', () => {
-  const stt = instanceWithTarget('natively_sk_paid', makeConfig());
+  const stt = instanceWithTarget('MeetFloo_sk_paid', makeConfig());
   stt.target.index = 1; // dialing the alternate
   const frame = stt.buildAuthFrame(ALT_URL);
   assert.equal(frame.session_token, 'v1.PAYLOAD.SIG');
@@ -90,9 +90,9 @@ test('alternate relay url → RELAY frame too', () => {
 });
 
 test('railway url → LEGACY frame (key present, session_token absent)', () => {
-  const stt = instanceWithTarget('natively_sk_paid', makeConfig());
+  const stt = instanceWithTarget('MeetFloo_sk_paid', makeConfig());
   const frame = stt.buildAuthFrame(RAILWAY_URL);
-  assert.equal(frame.key, 'natively_sk_paid', 'railway frame must carry the raw key (legacy auth)');
+  assert.equal(frame.key, 'MeetFloo_sk_paid', 'railway frame must carry the raw key (legacy auth)');
   assert.equal(frame.session_token, undefined, 'railway/legacy frame must NOT carry a session token');
   assert.equal(frame.app_version, undefined, 'legacy frame is the exact unchanged shape — no app_version');
   assert.equal(frame.channel, 'system');
@@ -100,10 +100,10 @@ test('railway url → LEGACY frame (key present, session_token absent)', () => {
 });
 
 test('no target (flag off) → LEGACY frame for any url', () => {
-  const stt = new NativelyProSTT('natively_sk_paid', 'system', { flags: stubFlags() });
+  const stt = new MeetFlooProSTT('MeetFloo_sk_paid', 'system', { flags: stubFlags() });
   // No target installed → buildAuthFrame must default to legacy regardless of url.
   const frame = stt.buildAuthFrame(RELAY_URL);
-  assert.equal(frame.key, 'natively_sk_paid');
+  assert.equal(frame.key, 'MeetFloo_sk_paid');
   assert.equal(frame.session_token, undefined);
   stt.removeAllListeners();
 });
@@ -111,15 +111,15 @@ test('no target (flag off) → LEGACY frame for any url', () => {
 test('config without a token → LEGACY frame even on a relay url', () => {
   const cfg = makeConfig();
   cfg.sessionToken = ''; // server returned no usable token
-  const stt = instanceWithTarget('natively_sk_paid', cfg);
+  const stt = instanceWithTarget('MeetFloo_sk_paid', cfg);
   const frame = stt.buildAuthFrame(RELAY_URL);
   assert.equal(frame.session_token, undefined, 'a relay target without a token must fall back to legacy');
-  assert.equal(frame.key, 'natively_sk_paid');
+  assert.equal(frame.key, 'MeetFloo_sk_paid');
   stt.removeAllListeners();
 });
 
 test('structural guard: buildAuthFrame relay branch never sets baseFrame.key', () => {
-  const src = readFileSync(path.resolve(__dirname, '../NativelyProSTT.ts'), 'utf8');
+  const src = readFileSync(path.resolve(__dirname, '../MeetFlooProSTT.ts'), 'utf8');
   // The relay branch returns an object literal with session_token. Pin that the
   // relay frame literal does NOT include a `key:` field.
   const m = /buildAuthFrame\(url: string\)[\s\S]*?if \(this\.isOnRelayTarget\(url\)\) \{([\s\S]*?)\n {8}\}/.exec(src);

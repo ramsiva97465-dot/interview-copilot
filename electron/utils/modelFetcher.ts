@@ -54,7 +54,7 @@ export async function fetchProviderModels(
  * `:batch` ids are dropped. They are not distinct models: every one is a
  * duplicate of the base id exposed on OpenRouter's asynchronous batch endpoint
  * (`anthropic/claude-sonnet-5:batch` carries the same description as
- * `anthropic/claude-sonnet-5`), and Natively only ever issues streaming or
+ * `anthropic/claude-sonnet-5`), and MeetFloo only ever issues streaming or
  * blocking chat calls. Keeping them would have put 74 look-alike rows in the
  * picker, each one a way to pick a model that cannot answer this app.
  * `:free` variants are NOT dropped — those are real, callable routes.
@@ -69,7 +69,7 @@ async function fetchOpenRouterModels(apiKey: string): Promise<ProviderModel[]> {
     });
     return (response.data?.data || [])
         .filter((m: any) => m?.id && !String(m.id).endsWith(':batch'))
-        // `openrouter/` is Natively's own routing prefix and is NOT optional:
+        // `openrouter/` is MeetFloo's own routing prefix and is NOT optional:
         // OpenRouter ids are vendor-namespaced (`openai/gpt-oss-120b`), which
         // collides head-on with Groq's catalogue and with providerFamily()'s
         // `includes('openai')` catch-all in ipcHandlers.ts. Without the prefix
@@ -98,7 +98,7 @@ async function fetchOpenRouterModels(apiKey: string): Promise<ProviderModel[]> {
  * `codex-auto-review` is an internal review route, not a chat model.
  *
  * The `fluxion/` prefix is NOT optional and NOT cosmetic. Fluxion resells the
- * real vendors, so its ids are byte-identical to Natively's own defaults —
+ * real vendors, so its ids are byte-identical to MeetFloo's own defaults —
  * `claude-sonnet-4-6` and `gpt-5.4` are literally this app's fallback-ladder
  * entries. Unprefixed, providerFamily() would classify a Fluxion model as
  * Anthropic/OpenAI/Gemini and the request would be billed to the user's own

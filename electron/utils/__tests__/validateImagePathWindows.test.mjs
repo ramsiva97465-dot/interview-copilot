@@ -4,7 +4,7 @@
 // screenshot paths.
 //
 // On Windows, app.getPath('userData') resolves to a drive path like
-//   C:\Users\Sai\AppData\Roaming\natively
+//   C:\Users\Sai\AppData\Roaming\MeetFloo
 // and ScreenshotHelper writes screenshots to <userData>\screenshots\.
 //
 // validateImagePath() had an UNCONDITIONAL early-return that rejected every
@@ -30,7 +30,7 @@ const modPath = path.resolve(
 const { validateImagePath } = await import(pathToFileURL(modPath).href);
 
 // Exactly the shape Windows produces (roaming "All Users" install, user "Sai").
-const WIN_USER_DATA = 'C:\\Users\\Sai\\AppData\\Roaming\\natively';
+const WIN_USER_DATA = 'C:\\Users\\Sai\\AppData\\Roaming\\MeetFloo';
 
 describe('validateImagePath — Windows userData ordering (issue #304)', () => {
   test('allows screenshot path inside Windows userData', () => {
@@ -46,7 +46,7 @@ describe('validateImagePath — Windows userData ordering (issue #304)', () => {
   });
 
   test('allows screenshot path with forward-slash userData (normalized) too', () => {
-    const ud = 'C:/Users/Sai/AppData/Roaming/natively';
+    const ud = 'C:/Users/Sai/AppData/Roaming/MeetFloo';
     const p = `${ud}/screenshots/abc-123.png`;
     const r = validateImagePath(p, ud);
     assert.equal(r.isValid, true, `should allow ${p}, got: ${r.reason}`);
@@ -64,7 +64,7 @@ describe('validateImagePath — Windows userData ordering (issue #304)', () => {
 
   test('blocks another user profile on the same drive', () => {
     const r = validateImagePath(
-      'C:\\Users\\Administrator\\AppData\\Roaming\\natively\\screenshots\\x.png',
+      'C:\\Users\\Administrator\\AppData\\Roaming\\MeetFloo\\screenshots\\x.png',
       WIN_USER_DATA,
     );
     assert.equal(r.isValid, false, 'a different user’s userData must remain blocked');

@@ -90,7 +90,7 @@ export type AnswerType =
   // refuses with "I can't share that" and NEVER invents a URL.
   | 'project_link_answer'
   // A request for the ACTUAL source code of a loaded project ("a snippet you used
-  // to build Natively", "repo-verifiable code"). Must retrieve real source if
+  // to build MeetFloo", "repo-verifiable code"). Must retrieve real source if
   // loaded + cite it, else say exact source isn't loaded and label any demo
   // conceptual — NEVER present generic code as the real implementation.
   | 'source_code_evidence_answer'
@@ -98,7 +98,7 @@ export type AnswerType =
   // decline to help hide the tool from an interviewer or bypass detection, and
   // redirect to privacy-first / consent / transparency / low-distraction themes.
   | 'ethical_usage_answer'
-  // A question ABOUT the product/project itself ("what kind of app is Natively?",
+  // A question ABOUT the product/project itself ("what kind of app is MeetFloo?",
   // "how's its backend?") — grounded in loaded project metadata, no overclaim.
   | 'project_about_answer';
 
@@ -150,7 +150,7 @@ export interface AnswerPlan {
   profileContextPolicy: ProfileContextPolicy;
   /**
    * Phase 5: the project/entity a follow-up resolves to ("how is IT developed?"
-   * → "Natively"). Set for project_followup_answer; undefined otherwise. Used to
+   * → "MeetFloo"). Set for project_followup_answer; undefined otherwise. Used to
    * scope grounding to the right project node without re-asking the model.
    */
   resolvedEntity?: string;
@@ -236,7 +236,7 @@ export interface PlanAnswerInput {
 // Derives from the single canonical CODING_CONTRACT (codingContract.ts) so the
 // planner's template can never drift from the prompts/validator. Adds the two
 // answer-contract rules that are planner-specific (no context leakage, no
-// Natively mention) on top of the shared section spec.
+// MeetFloo mention) on top of the shared section spec.
 // NOTE: the hidden <verification_spec> instruction is appended at PROMPT-BUILD
 // time (formatAnswerPlanForPrompt) only when code verification is enabled, so a
 // disabled kill-switch also stops the model wasting tokens emitting the spec.
@@ -247,7 +247,7 @@ ${CODING_CONTRACT}
 
 Additional rules:
 - Do not include resume, JD, salary, negotiation, or unrelated profile context unless explicitly asked.
-- NEVER mention "Natively", the assistant, the product, or the candidate's profile/projects anywhere in the answer — not in the explanation, not in a closing remark, not in an example. This is a pure technical answer about the algorithm only.`;
+- NEVER mention "MeetFloo", the assistant, the product, or the candidate's profile/projects anywhere in the answer — not in the explanation, not in a closing remark, not in an example. This is a pure technical answer about the algorithm only.`;
 
 // General implementation tasks (React components, scripts, utilities) get the
 // IMPL contract: code-first with the correct fence tag, short explanation, NO
@@ -259,7 +259,7 @@ ${CODING_CONTRACT_IMPL}
 
 Additional rules:
 - Do not include resume, JD, salary, negotiation, or unrelated profile context.
-- NEVER mention "Natively", the assistant, the product, or the candidate's profile anywhere in the answer.`;
+- NEVER mention "MeetFloo", the assistant, the product, or the candidate's profile anywhere in the answer.`;
 
 const BEHAVIORAL_TEMPLATE = `You are the candidate speaking aloud in a behavioral interview. Provide a single, fluent, first-person answer (approx. 4-6 sentences) using the STAR approach (Situation, Task, Action, Result) grounded in your real experiences.
 
@@ -509,7 +509,7 @@ Example of the RIGHT shape (for "what is Redis?"):
 Sound like a competent engineer answering quickly in conversation — calm, specific, done in about 20 seconds.`;
 
 // SALES voice (manual regression 2026-06-12): real sales-mode sessions answered
-// "why is your product expensive?" with "I'm Natively, an AI assistant. I don't
+// "why is your product expensive?" with "I'm MeetFloo, an AI assistant. I don't
 // have a product or pricing model" — the model fell back to its system identity
 // because sales_answer had no template telling it WHO it is in this turn. The
 // seller speaks as the PRODUCT/TEAM REP, grounded in the active mode's product
@@ -517,7 +517,7 @@ Sound like a competent engineer answering quickly in conversation — calm, spec
 const SALES_TEMPLATE = `You are the SELLER'S spoken voice in a live sales/commercial conversation. The user is selling a product; the question comes from a customer or prospect.
 
 Rules:
-- Speak in FIRST PERSON as the product's representative ("our product", "we", "our pricing"). You are NOT an AI assistant in this answer and must NEVER say "I'm Natively", "as an AI", or "I don't have a product" — the user's product context defines the product.
+- Speak in FIRST PERSON as the product's representative ("our product", "we", "our pricing"). You are NOT an AI assistant in this answer and must NEVER say "I'm MeetFloo", "as an AI", or "I don't have a product" — the user's product context defines the product.
 - Ground product claims in the provided mode/custom/reference context. If pricing or a specific fact isn't in the context, handle it like a real seller: acknowledge, reframe around value, and offer to follow up with specifics — never claim the product doesn't exist.
 - Handle objections (price, speed, competitors) with empathy + value reframe + one concrete differentiator from the context when available.
 - 2-5 sentences, confident, speakable, no headings or bullet markers unless asked.
@@ -550,7 +550,7 @@ const SOURCE_CODE_EVIDENCE_TEMPLATE = `The user is asking for the ACTUAL source 
 
 Rules:
 - If the exact source code for the project is present in the provided context (reference files / loaded source), quote the relevant real snippet, name the file it came from, and add a one-line explanation. Do not modify it unless asked.
-- If the exact source code is NOT loaded, say clearly: "I don't have Natively's exact source code loaded in my current context, so I can't give you a repo-verifiable snippet." Then, ONLY IF it helps, offer a clearly-labeled CONCEPTUAL example: prefix it with "Here's a conceptual illustration (NOT the actual repo code):".
+- If the exact source code is NOT loaded, say clearly: "I don't have MeetFloo's exact source code loaded in my current context, so I can't give you a repo-verifiable snippet." Then, ONLY IF it helps, offer a clearly-labeled CONCEPTUAL example: prefix it with "Here's a conceptual illustration (NOT the actual repo code):".
 - NEVER present a generic/conceptual snippet as if it were the real implementation.
 - NEVER invent file names, function names, or claim a snippet is "from the repo" when it is not loaded.
 Be honest about what is and isn't available.`;
@@ -630,7 +630,7 @@ const isLikelyTechnicalConcept = (text: string): boolean =>
 // contract, so over-coverage (a few false safety-redirects) is far safer than
 // under-coverage (code-review 2026-06-06b CRITICAL). Soft verbs (notice / see /
 // realize / nobody / discreet / secret) are included.
-const STEALTH_INTENT_RE = /\b(undetect\w*|undetectible|undectable|invisible|invisibility|conceal\w*|covert\w*|stealth\w*|sneak\w*|discree\w*|secret\w*|surreptitious\w*|cheat\w*|hide\b|hidden\b|hiding\b|off[- ]?screen|keep (?:this|it|natively|the (?:app|tool|overlay)) off|under the radar|on the (?:dl|down[- ]?low)|(?:avoid|evade|bypass|beat|get around|defeat|fool|trick|dodge|escape)\s+(?:being\s+|getting\s+|the\s+)?(?:caught|seen|noticed|detected|detection|proctor\w*|monitor\w*|virtual (?:mic|microphone|camera)|network|webcam|camera)|without (?:them|the interviewer|anyone|him|her|people) (?:know|notic|see|find)\w*|so (?:nobody|no one|they|the interviewer|he|she) (?:can'?t|won'?t|doesn'?t|don'?t) (?:see|notice|detect|catch|find|know)|(?:not|don'?t|won'?t|can'?t) (?:get|getting|be) caught|avoid (?:being |getting )?(?:caught|seen|noticed|detected)|nobody (?:sees|notices|knows)|no one (?:sees|notices|knows))\b/i;
+const STEALTH_INTENT_RE = /\b(undetect\w*|undetectible|undectable|invisible|invisibility|conceal\w*|covert\w*|stealth\w*|sneak\w*|discree\w*|secret\w*|surreptitious\w*|cheat\w*|hide\b|hidden\b|hiding\b|off[- ]?screen|keep (?:this|it|MeetFloo|the (?:app|tool|overlay)) off|under the radar|on the (?:dl|down[- ]?low)|(?:avoid|evade|bypass|beat|get around|defeat|fool|trick|dodge|escape)\s+(?:being\s+|getting\s+|the\s+)?(?:caught|seen|noticed|detected|detection|proctor\w*|monitor\w*|virtual (?:mic|microphone|camera)|network|webcam|camera)|without (?:them|the interviewer|anyone|him|her|people) (?:know|notic|see|find)\w*|so (?:nobody|no one|they|the interviewer|he|she) (?:can'?t|won'?t|doesn'?t|don'?t) (?:see|notice|detect|catch|find|know)|(?:not|don'?t|won'?t|can'?t) (?:get|getting|be) caught|avoid (?:being |getting )?(?:caught|seen|noticed|detected)|nobody (?:sees|notices|knows)|no one (?:sees|notices|knows))\b/i;
 // An INTERVIEW / detection OBJECT — the thing the user wants to evade.
 const STEALTH_OBJECT_RE = /\b(interview\w*|proctor\w*|invigilat\w*|recruiter|examiner|screen[- ]?shar\w*|screenshar\w*|share my screen|sharing my screen|webcam|web cam|camera|monitor\w*|detection|second(?:ary)? (?:screen|monitor|display)|virtual (?:mic|microphone|camera)|network monitor\w*|the (?:call|meeting|assessment|exam|test)|video call|video[- ]?conferenc\w*|zoom|google meet|ms teams|teams call)\b/i;
 // SOFT visibility verbs paired with an interview object even WITHOUT an explicit
@@ -656,8 +656,8 @@ export const isStealthEvasionQuestion = (question: string): boolean => {
   // (a) explicit evasion intent + an interview/detection object.
   if (hasIntent && hasObject) return true;
   // (a') explicit evasion intent aimed at the TOOL/overlay (no object needed):
-  // "make it invisible", "keep natively undetectable", "hide the overlay".
-  if (hasIntent && /\b(it|natively|nativley|the (?:app|tool|overlay|window|ui)|this)\b/.test(t)
+  // "make it invisible", "keep MeetFloo undetectable", "hide the overlay".
+  if (hasIntent && /\b(it|MeetFloo|nativley|the (?:app|tool|overlay|window|ui)|this)\b/.test(t)
     && /\b(invisible|undetect\w*|hidden|hide|conceal|stealth|disappear|off[- ]?screen)\b/.test(t)) return true;
   // (a'') a bare CHEAT / covert intent with no object — "how do I cheat without
   // being caught", "help me cheat", "cheat on the interview". Cheating in an
@@ -667,7 +667,7 @@ export const isStealthEvasionQuestion = (question: string): boolean => {
   // covertly using the tool to deceive, even with no explicit interview object
   // (release 2026-06-07: "how do I use it without them knowing"). The covert-use
   // intent + a reference to the tool is the evasion.
-  if (/\b(use|using|run|running)\s+(it|this|natively|nativley|the (?:app|tool|overlay))\b/.test(t)
+  if (/\b(use|using|run|running)\s+(it|this|MeetFloo|nativley|the (?:app|tool|overlay))\b/.test(t)
     && /\b(without (?:them|the interviewer|anyone|him|her|people|him\/her) (?:know|notic|see|find|realiz|realis)\w*|secretly|covertly|on the (?:sly|dl|down[- ]?low)|so (?:nobody|no one|they) (?:know|notic|see)\w*|undetect\w*|without being (?:caught|seen|noticed))\b/.test(t)) return true;
   // (b) soft visibility verb aimed at an interview/proctor/screen-share object.
   // SENTENCE-SCOPED (RC-1a, live session C 2026-08-21): the verb and the object
@@ -701,7 +701,7 @@ export const isStealthEvasionQuestion = (question: string): boolean => {
     // refusing a benign question. An explicit tool noun is required; a
     // genuine "will they detect it?" with a possessive nearby is the
     // benign shape, and without one, branch (b)'s object test still fires.
-    const toolVisibility = /\b(see|sees|notice\w*|detect\w*|spot|catch\w*|find)\b[^.?!]{0,40}\b(the (?:tool|app|overlay|window|ui)|natively|nativley)\b/.test(sentence);
+    const toolVisibility = /\b(see|sees|notice\w*|detect\w*|spot|catch\w*|find)\b[^.?!]{0,40}\b(the (?:tool|app|overlay|window|ui)|MeetFloo|nativley)\b/.test(sentence);
     if (candidatePossessiveVisibility && !toolVisibility) continue;
     return true;
   }
@@ -892,7 +892,7 @@ const classifyStandaloneFragment = (text: string): AnswerType | null => {
   //    Pick the nearest concrete bucket by embedded cue; default to experience.
   if (VOICE_CONTROL_RE.test(t) || EVIDENCE_CONTROL_RE.test(t)) {
     if (/\b(fit|hire|role|job|position|confident|sell|right for)\b/i.test(t)) return 'jd_fit_answer';
-    if (/\b(project|built|natively|metric|impact|result)\b/i.test(t)) return 'project_answer';
+    if (/\b(project|built|MeetFloo|metric|impact|result)\b/i.test(t)) return 'project_answer';
     if (/\b(rate|skill|python|sql|level|proficien)\b/i.test(t)) return 'skill_experience_answer';
     return 'experience_answer';
   }
@@ -1291,7 +1291,7 @@ export const profileContextPolicyFor = (answerType: AnswerType): ProfileContextP
 };
 
 // Phase 5: pull a likely project/entity NAME out of a follow-up question
-// ("how is Natively developed?" → "Natively", "what was your role in SQL-Copilot?"
+// ("how is MeetFloo developed?" → "MeetFloo", "what was your role in SQL-Copilot?"
 // → "SQL-Copilot"). Deterministic, conservative: prefers a capitalized /
 // hyphenated token after a project preposition; never invents. Returns '' when
 // the question only uses a pronoun ("it"/"that") — the orchestrator then resolves
@@ -1381,7 +1381,7 @@ const classifyUnmatchedFallback = (text: string, input: PlanAnswerInput): Answer
   // light keyword lean; default to profile_fact_answer (resume-grounded, concise,
   // first-person, NO jd/negotiation) — the safest "about me" answer.
   if (/\b(job|role|position|fit|hire|company|this (one|role|job)|qualified|suitable)\b/i.test(text)) return 'jd_fit_answer';
-  if (/\b(project|built|build|developed|natively|app|system|architecture|stack|backend|database)\b/i.test(text)) return 'project_answer';
+  if (/\b(project|built|build|developed|MeetFloo|app|system|architecture|stack|backend|database)\b/i.test(text)) return 'project_answer';
   if (/\b(rate|out of (10|ten)|level|scale|score)\b/i.test(text)) return 'skill_experience_answer';
   if (/\b(strength|weakness|example|story|time|teamwork|leadership|conflict|failure|pressure|ownership)\b/i.test(text)) return 'behavioral_interview_answer';
   if (/\b(experience|background|intern|internship|worked|company|role|did you do)\b/i.test(text)) return 'experience_answer';
@@ -1400,7 +1400,7 @@ const SMS_NORMALIZATIONS: Array<[RegExp, string]> = [
   [/\bdis\b/gi, 'this'], [/\bpls\b/gi, 'please'], [/\bplz\b/gi, 'please'], [/\bthx\b/gi, 'thanks'],
   [/\br\b/gi, 'are'], [/\bcuz\b/gi, 'because'], [/\bkinda\b/gi, 'kind of'], [/\byoself\b/gi, 'yourself'],
   [/\byoursef\b/gi, 'yourself'], [/\bprojcet\b/gi, 'project'], [/\bprojects?et\b/gi, 'project'],
-  [/\bexperince\b/gi, 'experience'], [/\bnativley\b/gi, 'natively'], [/\bnativly\b/gi, 'natively'],
+  [/\bexperince\b/gi, 'experience'], [/\bnativley\b/gi, 'MeetFloo'], [/\bnativly\b/gi, 'MeetFloo'],
 ];
 const normalizeSms = (s: string): string => {
   let out = s;
@@ -1655,7 +1655,7 @@ export const planAnswer = (input: PlanAnswerInput): AnswerPlan => {
 
   // "solve" alone is a false-positive coding signal for a PRODUCT/PROJECT
   // question ("What's RedisMart and what problem does it SOLVE?", "What
-  // problem does Natively solve?") — a bare project-description ask that
+  // problem does MeetFloo solve?") — a bare project-description ask that
   // shares the word "solve" with a genuine coding task ("solve two sum",
   // "can you solve this problem"), but is never asking for code. Without
   // this guard the bare `\bsolve\b` in CODING_PATTERNS (and the
@@ -1682,7 +1682,7 @@ export const planAnswer = (input: PlanAnswerInput): AnswerPlan => {
   // `write`/`implement`/DSA signal ELSEWHERE in the same message still fires
   // normally — the guard now suppresses just its own clause, not the whole
   // message.
-  const productProblemSolveMatch = text.match(/\bwhat\s+(problem|issue|pain\s?point)s?\s+(does|do|did)\s+(it|this|that|he|she|they|natively|redismart|talentscope|your|my|the|his|her)\b[\w '-]{0,20}\bsolves?\b/i);
+  const productProblemSolveMatch = text.match(/\bwhat\s+(problem|issue|pain\s?point)s?\s+(does|do|did)\s+(it|this|that|he|she|they|MeetFloo|redismart|talentscope|your|my|the|his|her)\b[\w '-]{0,20}\bsolves?\b/i);
   const textWithoutProductSolveClause = productProblemSolveMatch
     ? (text.slice(0, productProblemSolveMatch.index) + text.slice((productProblemSolveMatch.index || 0) + productProblemSolveMatch[0].length))
     : text;
@@ -1712,9 +1712,9 @@ export const planAnswer = (input: PlanAnswerInput): AnswerPlan => {
   // "caching", "logging"). Without this, "have you implemented a rate limiter
   // before" mis-routed to system_design (release 2026-06-07: residual pattern #2).
   // A write-code verb still vetoes (that's a coding task, not an experience ask).
-  // EXCLUDE when the object is the named product Natively ("how did you build
-  // Natively" is a product-about/architecture question, not a generic skill probe).
-  const asksAboutNatively = /\bnativel?y\b|\bnativly\b/i.test(text);
+  // EXCLUDE when the object is the named product MeetFloo ("how did you build
+  // MeetFloo" is a product-about/architecture question, not a generic skill probe).
+  const asksAboutMeetFloo = /\bnativel?y\b|\bnativly\b/i.test(text);
   // "what PROJECTS have you built" is a project-LIST ask, not a skill probe — the
   // experience probe must not steal it (release 2026-06-07 regression guard).
   const asksAboutProjectsList = /\b(what|which|any)\s+projects?\b/i.test(text);
@@ -1731,7 +1731,7 @@ export const planAnswer = (input: PlanAnswerInput): AnswerPlan => {
   // skill probe — exclude it so it falls through to BEHAVIORAL_PATTERNS (code-review caveat
   // 2026-06-16). "have you managed a database/cluster" (a tech object) stays a skill probe.
   const hasPeopleObject = new RegExp(`\\b(?:manage[d]?|handle[d]?|led|lead|mentor(?:ed)?|coach(?:ed)?|supervis(?:e|ed)|resolv(?:e|ed)|navigat(?:e|ed)|deal[t]?\\s+with)\\s+(?:a\\s+|an\\s+|the\\s+|your\\s+|some\\s+|any\\s+)?${PEOPLE_OR_CONFLICT_OBJECT}\\b`, 'i').test(text);
-  const isExplicitExperienceProbe = !hasWriteCodeVerb && !asksAboutNatively && !asksAboutProjectsList && !isProjectDrillIn && !hasPeopleObject && (
+  const isExplicitExperienceProbe = !hasWriteCodeVerb && !asksAboutMeetFloo && !asksAboutProjectsList && !isProjectDrillIn && !hasPeopleObject && (
     /\bhave (you|u) (ever )?(used|worked with|worked on|built|implemented|written|coded|deployed|designed|done|handled|managed)\b/i.test(text)
     || /\bdid (you|u) (actually |really |ever )?(use|work with|build|implement|write|deploy|design|do|handle)\b/i.test(text)
     || /\bwhere have (you|i) (used|worked|applied|built|implemented)\b/i.test(text)
@@ -1829,35 +1829,35 @@ export const planAnswer = (input: PlanAnswerInput): AnswerPlan => {
     // in first person. Wins over coding/DSA/technical-concept routing below.
     answerType = 'skill_experience_answer';
   } else if (includesAny(text, PROJECT_FOLLOWUP_PATTERNS)
-             // An EXPLICIT project entity ("...in SQL-Copilot?", "...role in
-             // Natively?") OR a resolved prior-turn target makes this an
-             // unambiguous project follow-up — even if the project NAME contains a
-             // technology token (SQL-Copilot has "sql"). In that case we skip the
-             // technical-subject guards. Otherwise (a bare drill-in verb on a
-             // generic subject — "how did you optimize binary search?"), the
-             // guards below keep it OUT of project_followup so coding/DSA answers
-             // never use the profile (code-review 2026-06-05, HIGH).
-             // HARD precondition (code-review 2026-06-05, HIGH, invariant #1): a
-             // write-code verb or a named DSA problem ALWAYS keeps a question out
-             // of project_followup, even if a project entity was extracted — so
-             // "how did you optimize binary search in Postgres?" can never inject
-             // the resume into a coding answer. Real project drill-ins ("what was
-             // your role in SQL-Copilot?") carry neither a write verb nor a DSA
-             // term, so they're unaffected.
-             && !hasWriteCodeVerb
-             && (followUpHasProjectContext(input, question)
-                 || (!includesAny(textNoTechStack, DSA_PATTERNS)
-                     && !includesAny(text, CODING_PATTERNS)
-                     // Scoped to the exact TECHNICAL_SUBJECT_PATTERNS check only
-                     // (NOT the typo-tolerant isLikelyTechnicalConcept) — code-review
-                     // finding (2026-07-27): the broadened typo-tolerant matcher added
-                     // for RC-2 (see isLikelyTechnicalConcept above) includes exact
-                     // trigger words like "framework"/"api" that weren't guarded
-                     // before, and this negation would then wrongly exclude a genuine
-                     // project follow-up like "what frameworks did you use in your
-                     // project?" from project_followup routing (recreating the same
-                     // unknown_answer-leak bug class for a different question shape).
-                     && !includesAny(textNoTechStack, TECHNICAL_SUBJECT_PATTERNS)))) {
+    // An EXPLICIT project entity ("...in SQL-Copilot?", "...role in
+    // MeetFloo?") OR a resolved prior-turn target makes this an
+    // unambiguous project follow-up — even if the project NAME contains a
+    // technology token (SQL-Copilot has "sql"). In that case we skip the
+    // technical-subject guards. Otherwise (a bare drill-in verb on a
+    // generic subject — "how did you optimize binary search?"), the
+    // guards below keep it OUT of project_followup so coding/DSA answers
+    // never use the profile (code-review 2026-06-05, HIGH).
+    // HARD precondition (code-review 2026-06-05, HIGH, invariant #1): a
+    // write-code verb or a named DSA problem ALWAYS keeps a question out
+    // of project_followup, even if a project entity was extracted — so
+    // "how did you optimize binary search in Postgres?" can never inject
+    // the resume into a coding answer. Real project drill-ins ("what was
+    // your role in SQL-Copilot?") carry neither a write verb nor a DSA
+    // term, so they're unaffected.
+    && !hasWriteCodeVerb
+    && (followUpHasProjectContext(input, question)
+      || (!includesAny(textNoTechStack, DSA_PATTERNS)
+        && !includesAny(text, CODING_PATTERNS)
+        // Scoped to the exact TECHNICAL_SUBJECT_PATTERNS check only
+        // (NOT the typo-tolerant isLikelyTechnicalConcept) — code-review
+        // finding (2026-07-27): the broadened typo-tolerant matcher added
+        // for RC-2 (see isLikelyTechnicalConcept above) includes exact
+        // trigger words like "framework"/"api" that weren't guarded
+        // before, and this negation would then wrongly exclude a genuine
+        // project follow-up like "what frameworks did you use in your
+        // project?" from project_followup routing (recreating the same
+        // unknown_answer-leak bug class for a different question shape).
+        && !includesAny(textNoTechStack, TECHNICAL_SUBJECT_PATTERNS)))) {
     // Phase 5: a drill-in on a project already on the table ("how is it built?",
     // "what was your role?", "what tech stack did you use?", "hardest part?",
     // "why did you build it?", "what did you learn?"). These are PROFILE questions
@@ -1906,36 +1906,36 @@ export const planAnswer = (input: PlanAnswerInput): AnswerPlan => {
     answerType = 'sales_answer';
   } else if (includesAny(text, LECTURE_PATTERNS)) {
     answerType = 'lecture_answer';
-  } else if (asksAboutNatively && includesAny(text, PRODUCT_ABOUT_PATTERNS)) {
-    // A question that NAMES Natively and is about its build/architecture/stack is a
+  } else if (asksAboutMeetFloo && includesAny(text, PRODUCT_ABOUT_PATTERNS)) {
+    // A question that NAMES MeetFloo and is about its build/architecture/stack is a
     // product-about answer (grounded in loaded metadata), NOT a generic system-
     // design task — checked before system_design so "what is the architecture of
-    // Natively" / "how did you build Natively" route to product-about
+    // MeetFloo" / "how did you build MeetFloo" route to product-about
     // (release 2026-06-07: residual pattern #1).
     answerType = 'project_about_answer';
   } else if (includesAny(text, SYSTEM_DESIGN_PATTERNS)
-             // A WRITE-CODE verb makes it a coding task, not a design discussion
-             // ("write code for a rate limiter" → coding, not system_design).
-             && !hasWriteCodeVerb
-             // "EXPLAIN/WHAT IS rate limiting/caching" is a CONCEPT question, not a
-             // design task — defer to technical_concept (release 2026-06-07:
-             // "explain rate limiting" must be technical_concept, while "how would
-             // you DESIGN a rate limiter" stays system_design). Only defer when
-             // there's an explain/what-is frame AND no explicit "design" verb.
-             && !(/\b(explain|what(?:'s| is| are)?|describe|how does|tell me about)\b/i.test(text)
-                  && !/\bdesign\b|\bscalable\b|\barchitect/i.test(text))) {
+    // A WRITE-CODE verb makes it a coding task, not a design discussion
+    // ("write code for a rate limiter" → coding, not system_design).
+    && !hasWriteCodeVerb
+    // "EXPLAIN/WHAT IS rate limiting/caching" is a CONCEPT question, not a
+    // design task — defer to technical_concept (release 2026-06-07:
+    // "explain rate limiting" must be technical_concept, while "how would
+    // you DESIGN a rate limiter" stays system_design). Only defer when
+    // there's an explain/what-is frame AND no explicit "design" verb.
+    && !(/\b(explain|what(?:'s| is| are)?|describe|how does|tell me about)\b/i.test(text)
+      && !/\bdesign\b|\bscalable\b|\barchitect/i.test(text))) {
     answerType = 'system_design_answer';
   } else if (includesAny(text, DEBUGGING_PATTERNS) && !includesAny(textNoTechStack, DSA_PATTERNS)
-             // BEHAVIORAL-PAST-EXPERIENCE GUARD (manual regression 2026-06-12,
-             // stress seq_056): "tell me about a difficult BUG you solved" is a
-             // STAR story about the candidate's past, not a live debugging task —
-             // the bare \bbug\b pattern captured it into the technical lane
-             // (profile forbidden, neutral voice) where the model answered
-             // "I'm Natively, an AI assistant. I don't have personal
-             // experiences." A past-tense candidate frame defers to BEHAVIORAL.
-             // Now shared with the technical_concept branch below — see
-             // isPastTensePersonalExperienceFrame's definition above.
-             && !isPastTensePersonalExperienceFrame(text)) {
+    // BEHAVIORAL-PAST-EXPERIENCE GUARD (manual regression 2026-06-12,
+    // stress seq_056): "tell me about a difficult BUG you solved" is a
+    // STAR story about the candidate's past, not a live debugging task —
+    // the bare \bbug\b pattern captured it into the technical lane
+    // (profile forbidden, neutral voice) where the model answered
+    // "I'm MeetFloo, an AI assistant. I don't have personal
+    // experiences." A past-tense candidate frame defers to BEHAVIORAL.
+    // Now shared with the technical_concept branch below — see
+    // isPastTensePersonalExperienceFrame's definition above.
+    && !isPastTensePersonalExperienceFrame(text)) {
     answerType = 'debugging_question_answer';
   } else if (isHypotheticalTech(text) && !hasWriteCodeVerb) {
     // HYPOTHETICAL application — "how would you use GraphQL?", "how would you
@@ -1964,21 +1964,21 @@ export const planAnswer = (input: PlanAnswerInput): AnswerPlan => {
     && !hasWriteCodeVerb) {
     answerType = 'technical_concept_answer';
   } else if (includesAny(text, TECHNICAL_CONCEPT_PATTERNS) &&
-             !includesAny(text, CODING_PATTERNS) &&
-             (includesAny(textNoTechStack, DSA_PATTERNS) || isLikelyTechnicalConcept(textNoTechStack)) &&
-             // BEHAVIORAL-PAST-EXPERIENCE GUARD (RC-9 code review, 2026-07-27):
-             // same guard as the debugging branch above. "describe a time you
-             // set up load balancing under pressure" / "describe how you
-             // improved test coverage with unit testing at your last job" are
-             // STAR stories about the candidate's own past, not neutral concept
-             // asks — live-confirmed to wrongly lose profile access (was
-             // behavioral_interview_answer/skill_experience/jd_fit before the
-             // SOFTWARE_ENGINEERING_CONCEPT_PATTERNS vocabulary expansion widened
-             // this branch's surface, technical_concept_answer/forbidden after,
-             // with no guard). Without this, the wider vocabulary above
-             // regresses exactly the class of question this guard was invented
-             // to protect, just via new terms instead of "bug".
-             !isPastTensePersonalExperienceFrame(text)) {
+    !includesAny(text, CODING_PATTERNS) &&
+    (includesAny(textNoTechStack, DSA_PATTERNS) || isLikelyTechnicalConcept(textNoTechStack)) &&
+    // BEHAVIORAL-PAST-EXPERIENCE GUARD (RC-9 code review, 2026-07-27):
+    // same guard as the debugging branch above. "describe a time you
+    // set up load balancing under pressure" / "describe how you
+    // improved test coverage with unit testing at your last job" are
+    // STAR stories about the candidate's own past, not neutral concept
+    // asks — live-confirmed to wrongly lose profile access (was
+    // behavioral_interview_answer/skill_experience/jd_fit before the
+    // SOFTWARE_ENGINEERING_CONCEPT_PATTERNS vocabulary expansion widened
+    // this branch's surface, technical_concept_answer/forbidden after,
+    // with no guard). Without this, the wider vocabulary above
+    // regresses exactly the class of question this guard was invented
+    // to protect, just via new terms instead of "bug".
+    !isPastTensePersonalExperienceFrame(text)) {
     // "Explain BFS", "what is a deadlock", "difference between TCP and UDP" —
     // generic technical CONCEPT, NO profile (spec Case F). Checked before
     // DSA/coding: a DSA noun with explain/what-is framing and NO coding verb is a
@@ -1996,7 +1996,7 @@ export const planAnswer = (input: PlanAnswerInput): AnswerPlan => {
     // Kept BEFORE generic CODING so the specific DSA label/template wins.
     answerType = 'dsa_question_answer';
   } else if (
-    // "What problem does RedisMart/Natively/it solve?" trips the bare
+    // "What problem does RedisMart/MeetFloo/it solve?" trips the bare
     // `\bsolve\b` inside CODING_PATTERNS — that's a project-description ask,
     // never a coding task. CODING_PATTERNS is tested against the
     // clause-stripped text (textWithoutProductSolveClause) so a genuine
@@ -2042,8 +2042,8 @@ export const planAnswer = (input: PlanAnswerInput): AnswerPlan => {
     // 2026-06-05. Profile required, concise direct answer.
     answerType = 'profile_fact_answer';
   } else if (includesAny(text, PRODUCT_ABOUT_PATTERNS)) {
-    // "what kind of app is Natively?", "how's its backend?", "what do you think
-    // about Natively?" — a drill-in ABOUT the product, grounded in loaded project
+    // "what kind of app is MeetFloo?", "how's its backend?", "what do you think
+    // about MeetFloo?" — a drill-in ABOUT the product, grounded in loaded project
     // metadata (no overclaim). Checked before the generic project-list branch so a
     // product question isn't answered with the candidate's whole project list.
     answerType = 'project_about_answer';
@@ -2328,7 +2328,7 @@ export const formatAnswerPlanForPrompt = (plan: AnswerPlan, includeVerificationS
       ? 'Address the user about themselves in the second person ("Your …").'
       : (plan.answerType === 'sales_answer' || plan.answerType === 'product_candidate_mix_answer')
         // Sales turns speak as the seller/product rep — the neutral-assistant
-        // voice line caused "I'm Natively… I don't have a product" in real
+        // voice line caused "I'm MeetFloo… I don't have a product" in real
         // sales sessions (manual regression 2026-06-12).
         ? 'Speak in the FIRST PERSON as the product\'s seller/representative ("our product", "we"). Never identify as an AI assistant.'
         : 'Answer in a neutral, explanatory voice. Do not roleplay as the candidate.';

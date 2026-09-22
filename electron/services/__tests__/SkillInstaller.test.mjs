@@ -98,16 +98,16 @@ afterEach(async () => {
   fsp.writeFile = origWriteFile;
   // Clean up both roots. Use force:true so a leaked partial tree doesn't
   // fail the next test setup.
-  try { fs.rmSync(roots.skillsRoot, { recursive: true, force: true }); } catch {}
-  try { fs.rmSync(roots.stagingRoot, { recursive: true, force: true }); } catch {}
-  // Also remove any natively-skill-upload-* dirs we may have leaked (paranoid).
+  try { fs.rmSync(roots.skillsRoot, { recursive: true, force: true }); } catch { }
+  try { fs.rmSync(roots.stagingRoot, { recursive: true, force: true }); } catch { }
+  // Also remove any MeetFloo-skill-upload-* dirs we may have leaked (paranoid).
   try {
     for (const e of fs.readdirSync(os.tmpdir(), { withFileTypes: true })) {
       if (e.isDirectory() && e.name.startsWith(STAGING_DIR_PREFIX)) {
         fs.rmSync(path.join(os.tmpdir(), e.name), { recursive: true, force: true });
       }
     }
-  } catch {}
+  } catch { }
 });
 
 // ---------------------------------------------------------------------------
@@ -249,7 +249,7 @@ describe('installUploadedSkill — happy path', () => {
       // And the install landed in skillsRoot.
       assert.ok(fs.existsSync(path.join(roots.skillsRoot, 'alt-stage-skill', 'SKILL.md')));
     } finally {
-      try { fs.rmSync(altStaging, { recursive: true, force: true }); } catch {}
+      try { fs.rmSync(altStaging, { recursive: true, force: true }); } catch { }
     }
   });
 });
@@ -514,7 +514,7 @@ describe('reapStaleUploadStages', () => {
     assert.deepEqual(result.errors, []);
   });
 
-  test('leaves non-natively-skill-upload-* dirs alone', () => {
+  test('leaves non-MeetFloo-skill-upload-* dirs alone', () => {
     const unrelated = path.join(roots.stagingRoot, 'unrelated-temp-dir');
     fs.mkdirSync(unrelated);
     // Backdate so age threshold is met.
@@ -530,7 +530,7 @@ describe('reapStaleUploadStages', () => {
     assert.deepEqual(result.removed, []);
   });
 
-  test('mix of fresh + stale + unrelated: only stale natively-* are removed', () => {
+  test('mix of fresh + stale + unrelated: only stale MeetFloo-* are removed', () => {
     const stale = path.join(roots.stagingRoot, STAGING_DIR_PREFIX + 'stale');
     const fresh = path.join(roots.stagingRoot, STAGING_DIR_PREFIX + 'fresh');
     const unrelated = path.join(roots.stagingRoot, 'unrelated');

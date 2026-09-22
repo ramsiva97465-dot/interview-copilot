@@ -27,7 +27,7 @@ let DatabaseManager;
 describe('Context OS v24 migration — REAL sqlite', () => {
   before(() => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ctxos-mig-'));
-    process.env.NATIVELY_TEST_USERDATA = tmp;
+    process.env.MEETFLOO_TEST_USERDATA = tmp;
     DatabaseManager = require(DB_MODULE).DatabaseManager;
   });
 

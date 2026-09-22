@@ -25,10 +25,10 @@ const MODULE_URL = pathToFileURL(
 ).href;
 const { acquireOnnxSlot, acquireOnnxSlotWithin, describeOnnxGate, __resetOnnxGateForTests } = await import(MODULE_URL);
 
-process.env.NATIVELY_ONNX_MAX_CONCURRENT_SESSIONS = '1';
+process.env.MEETFLOO_ONNX_MAX_CONCURRENT_SESSIONS = '1';
 // STT channels draw on their own budget; make it 1 so ONE high-priority holder
 // fills it and the next high-priority request has to wait.
-process.env.NATIVELY_ONNX_HIGH_PRIORITY_SESSIONS = '1';
+process.env.MEETFLOO_ONNX_HIGH_PRIORITY_SESSIONS = '1';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 describe('bounded ONNX slot acquisition', () => {

@@ -78,7 +78,7 @@ async function measureBoth() {
   const win = new BrowserWindow({ width: 520, height: 240, show: false });
   const written = [];
   const load = async (withScrollbarRules) => {
-    const fixture = join(tmpdir(), `natively-table-scrollbar-${withScrollbarRules}.html`);
+    const fixture = join(tmpdir(), `MeetFloo-table-scrollbar-${withScrollbarRules}.html`);
     writeFileSync(fixture, page(sliceCss(withScrollbarRules)));
     written.push(fixture);
     await win.loadFile(fixture);

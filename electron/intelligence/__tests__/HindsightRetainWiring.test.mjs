@@ -34,7 +34,7 @@ import { HindsightTagBuilder } from '../../../dist-electron/electron/intelligenc
 // (esbuild bundle:true), and that module reads env FRESH on every call (no cache to reset
 // across bundle boundaries). So an env override is the reliable, bundle-agnostic way to
 // flip the hindsightMemory flag for the compiled service under test.
-const HINDSIGHT_MEMORY_ENV = 'NATIVELY_HINDSIGHT_MEMORY';
+const HINDSIGHT_MEMORY_ENV = 'MEETFLOO_HINDSIGHT_MEMORY';
 function clearFlag() { delete process.env[HINDSIGHT_MEMORY_ENV]; }
 
 describe('Phase 13 — fromFlags is Noop unless flag ON + baseUrl + client installed', () => {
@@ -103,7 +103,7 @@ describe('Phase 13 — wiring calls the RIGHT retain method with the RIGHT scope
         name: 'mock', enabled: true,
         retain: (item) => { calls.retain.push(item); },
         recall: async (query, scope, options) => { calls.recall.push({ query, scope, options }); return [{ text: 'hit' }]; },
-        flush: async () => {},
+        flush: async () => { },
       },
       calls,
     };
@@ -134,7 +134,7 @@ describe('Phase 13 — wiring calls the RIGHT retain method with the RIGHT scope
       name: 'angry', enabled: true,
       retain: () => { throw new Error('provider blew up'); },
       recall: async () => [],
-      flush: async () => {},
+      flush: async () => { },
     });
     assert.doesNotThrow(() => {
       ltm.retainMeetingSummary('m', 'text', { userId: 'local', meetingId: 'm' }, 'meeting');

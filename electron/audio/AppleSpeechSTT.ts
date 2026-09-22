@@ -47,8 +47,8 @@ export interface AppleSpeechLocales {
 /** Path to the compiled helper (packaged vs development). */
 export function appleSpeechExecutablePath(): string {
   return app.isPackaged
-    ? path.join(process.resourcesPath, 'apple-speech', 'natively-apple-speech')
-    : path.join(app.getAppPath(), 'resources', 'apple-speech', 'natively-apple-speech');
+    ? path.join(process.resourcesPath, 'apple-speech', 'MeetFloo-apple-speech')
+    : path.join(app.getAppPath(), 'resources', 'apple-speech', 'MeetFloo-apple-speech');
 }
 
 const UNAVAILABLE: AppleSpeechLocales = { available: false, supported: [], installed: [], reserved: [], maxReserved: 0 };
@@ -340,7 +340,7 @@ export class AppleSpeechSTT extends EventEmitter {
       }
     });
     // Never log audio or credentials. stderr is drained to prevent child blocking.
-    child.stderr.on('data', () => {});
+    child.stderr.on('data', () => { });
     child.stdin.on('error', (err) => { if (current() && this.active) this.fail(err.message); });
     child.on('error', (err) => { if (current()) this.fail(`Cannot start Apple Speech: ${err.message}`); });
     child.on('exit', (code, signal) => {

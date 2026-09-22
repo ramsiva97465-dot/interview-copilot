@@ -8,7 +8,7 @@ export class ProviderStatusRegistry {
   private statuses = new Map<string, ProviderStatus>();
   private broadcaster: Broadcaster | null = null;
 
-  private constructor() {}
+  private constructor() { }
 
   static getInstance(): ProviderStatusRegistry {
     // Instance anchored on globalThis (25 dist bundles). Writers live in the
@@ -17,11 +17,11 @@ export class ProviderStatusRegistry {
     // window created after a status change hydrated EMPTY and stayed wrong
     // until the next push.
     const g = globalThis as unknown as Record<string, ProviderStatusRegistry | undefined>;
-    if (!g.__nativelyProviderStatusRegistryV1__) {
-      g.__nativelyProviderStatusRegistryV1__ = ProviderStatusRegistry.instance ?? new ProviderStatusRegistry();
+    if (!g.__MeetFlooProviderStatusRegistryV1__) {
+      g.__MeetFlooProviderStatusRegistryV1__ = ProviderStatusRegistry.instance ?? new ProviderStatusRegistry();
     }
-    ProviderStatusRegistry.instance = g.__nativelyProviderStatusRegistryV1__;
-    return g.__nativelyProviderStatusRegistryV1__;
+    ProviderStatusRegistry.instance = g.__MeetFlooProviderStatusRegistryV1__;
+    return g.__MeetFlooProviderStatusRegistryV1__;
   }
 
   setBroadcaster(broadcaster: Broadcaster | null): void {

@@ -15,26 +15,26 @@ const { resolveLiveFollowup, isContextFreeBareFollowup, toMemoryMode, toSurface,
 const MIN = 60;
 
 describe('Feature flag — env override wins both directions', () => {
-  test('NATIVELY_ENABLE_LIVE_SESSION_MEMORY=off forces OFF even in a test/benchmark context', () => {
-    const prev = process.env.NATIVELY_ENABLE_LIVE_SESSION_MEMORY;
-    process.env.NATIVELY_ENABLE_LIVE_SESSION_MEMORY = 'off'; __resetLiveSessionMemoryCache();
+  test('MEETFLOO_ENABLE_LIVE_SESSION_MEMORY=off forces OFF even in a test/benchmark context', () => {
+    const prev = process.env.MEETFLOO_ENABLE_LIVE_SESSION_MEMORY;
+    process.env.MEETFLOO_ENABLE_LIVE_SESSION_MEMORY = 'off'; __resetLiveSessionMemoryCache();
     assert.equal(isLiveSessionMemoryEnabled(), false);
-    process.env.NATIVELY_ENABLE_LIVE_SESSION_MEMORY = prev ?? ''; __resetLiveSessionMemoryCache();
+    process.env.MEETFLOO_ENABLE_LIVE_SESSION_MEMORY = prev ?? ''; __resetLiveSessionMemoryCache();
   });
-  test('NATIVELY_ENABLE_LIVE_SESSION_MEMORY=on forces ON', () => {
-    const prev = process.env.NATIVELY_ENABLE_LIVE_SESSION_MEMORY;
-    process.env.NATIVELY_ENABLE_LIVE_SESSION_MEMORY = 'on'; __resetLiveSessionMemoryCache();
+  test('MEETFLOO_ENABLE_LIVE_SESSION_MEMORY=on forces ON', () => {
+    const prev = process.env.MEETFLOO_ENABLE_LIVE_SESSION_MEMORY;
+    process.env.MEETFLOO_ENABLE_LIVE_SESSION_MEMORY = 'on'; __resetLiveSessionMemoryCache();
     assert.equal(isLiveSessionMemoryEnabled(), true);
-    process.env.NATIVELY_ENABLE_LIVE_SESSION_MEMORY = prev ?? ''; __resetLiveSessionMemoryCache();
+    process.env.MEETFLOO_ENABLE_LIVE_SESSION_MEMORY = prev ?? ''; __resetLiveSessionMemoryCache();
   });
 });
 
 describe('transcript entity extraction (independent — not from any answer key)', () => {
-  test('"Tell me about Natively." → project Natively', () => {
-    assert.ok(extractTranscriptEntities('Tell me about Natively.', 'interviewer').some(e => e.kind === 'project' && e.value === 'Natively'));
+  test('"Tell me about MeetFloo." → project MeetFloo', () => {
+    assert.ok(extractTranscriptEntities('Tell me about MeetFloo.', 'interviewer').some(e => e.kind === 'project' && e.value === 'MeetFloo'));
   });
-  test('short candidate answer "Natively." → project', () => {
-    assert.ok(extractTranscriptEntities('Natively.', 'user').some(e => e.kind === 'project' && e.value === 'Natively'));
+  test('short candidate answer "MeetFloo." → project', () => {
+    assert.ok(extractTranscriptEntities('MeetFloo.', 'user').some(e => e.kind === 'project' && e.value === 'MeetFloo'));
   });
   test('filler "Alright." → no entity', () => {
     assert.equal(extractTranscriptEntities('Alright.', 'user').length, 0);
@@ -48,31 +48,31 @@ describe('transcript entity extraction (independent — not from any answer key)
   });
   test('correction cue detected', () => {
     assert.equal(isCorrectionTurn('Actually, use TalentScope.'), true);
-    assert.equal(isCorrectionTurn('My best project is Natively.'), false);
+    assert.equal(isCorrectionTurn('My best project is MeetFloo.'), false);
   });
   test('explicit cross-mode invite detected', () => {
-    assert.equal(isExplicitCrossModeInvite('have you used this in Natively?'), true);
+    assert.equal(isExplicitCrossModeInvite('have you used this in MeetFloo?'), true);
     assert.equal(isExplicitCrossModeInvite('solve two sum'), false);
   });
 });
 
 describe('resolveLiveFollowup — the 12 live edge cases (Phase 3)', () => {
-  test('1. immediate project follow-up → project_followup, Natively', () => {
-    const r = resolveLiveFollowup({ turns: [{ role: 'interviewer', text: 'Tell me about Natively.', t: 0 }, { role: 'user', text: 'An AI copilot.', t: 5 }, { role: 'interviewer', text: 'How did you build it?', t: 8 }], latestQuestion: 'How did you build it?', mode: 'technical-interview', surface: 'what_to_answer' });
-    assert.equal(r.recalledEntity, 'Natively');
+  test('1. immediate project follow-up → project_followup, MeetFloo', () => {
+    const r = resolveLiveFollowup({ turns: [{ role: 'interviewer', text: 'Tell me about MeetFloo.', t: 0 }, { role: 'user', text: 'An AI copilot.', t: 5 }, { role: 'interviewer', text: 'How did you build it?', t: 8 }], latestQuestion: 'How did you build it?', mode: 'technical-interview', surface: 'what_to_answer' });
+    assert.equal(r.recalledEntity, 'MeetFloo');
     assert.equal(r.resolvedAnswerType, 'project_followup_answer');
   });
-  test('2. delayed (8 filler turns) → "tech stack there?" resolves Natively', () => {
-    const turns = [{ role: 'interviewer', text: 'Tell me about Natively.', t: 0 }, { role: 'user', text: 'An AI copilot.', t: 5 }];
+  test('2. delayed (8 filler turns) → "tech stack there?" resolves MeetFloo', () => {
+    const turns = [{ role: 'interviewer', text: 'Tell me about MeetFloo.', t: 0 }, { role: 'user', text: 'An AI copilot.', t: 5 }];
     for (let i = 1; i <= 8; i++) turns.push({ role: i % 2 ? 'interviewer' : 'user', text: i % 2 ? `Filler ${i}?` : `Reply ${i}.`, t: 60 + i * 30 });
     turns.push({ role: 'interviewer', text: 'What was the tech stack there?', t: 400 });
     const r = resolveLiveFollowup({ turns, latestQuestion: 'What was the tech stack there?', mode: 'technical-interview', surface: 'what_to_answer' });
-    assert.equal(r.recalledEntity, 'Natively');
+    assert.equal(r.recalledEntity, 'MeetFloo');
   });
-  test('3. one-hour project follow-up → Natively', () => {
-    const r = resolveLiveFollowup({ turns: [{ role: 'interviewer', text: 'Tell me about Natively.', t: 1 * MIN }, { role: 'user', text: 'An AI copilot.', t: 2 * MIN }, { role: 'interviewer', text: 'filler', t: 30 * MIN }, { role: 'interviewer', text: 'What was the hardest part of that project?', t: 62 * MIN }], latestQuestion: 'What was the hardest part of that project?', mode: 'technical-interview', surface: 'what_to_answer' });
-    assert.equal(r.recalledEntity, 'Natively');
-    assert.match(r.resolvedQuestion, /Natively/);
+  test('3. one-hour project follow-up → MeetFloo', () => {
+    const r = resolveLiveFollowup({ turns: [{ role: 'interviewer', text: 'Tell me about MeetFloo.', t: 1 * MIN }, { role: 'user', text: 'An AI copilot.', t: 2 * MIN }, { role: 'interviewer', text: 'filler', t: 30 * MIN }, { role: 'interviewer', text: 'What was the hardest part of that project?', t: 62 * MIN }], latestQuestion: 'What was the hardest part of that project?', mode: 'technical-interview', surface: 'what_to_answer' });
+    assert.equal(r.recalledEntity, 'MeetFloo');
+    assert.match(r.resolvedQuestion, /MeetFloo/);
   });
   test('4. skill follow-up "And SQL?" → SQL', () => {
     const r = resolveLiveFollowup({ turns: [{ role: 'interviewer', text: 'Rate your Python skills.', t: 0 }, { role: 'user', text: 'An 8.', t: 5 }, { role: 'interviewer', text: 'And SQL?', t: 8 }], latestQuestion: 'And SQL?', previousAnswerType: 'skill_experience_answer', mode: 'technical-interview', surface: 'what_to_answer' });
@@ -80,15 +80,15 @@ describe('resolveLiveFollowup — the 12 live edge cases (Phase 3)', () => {
     assert.match(r.resolvedQuestion, /SQL/i);
   });
   test('6. correction → TalentScope wins', () => {
-    const r = resolveLiveFollowup({ turns: [{ role: 'interviewer', text: 'What is your best project?', t: 0 }, { role: 'user', text: 'Natively.', t: 5 }, { role: 'user', text: 'Actually use TalentScope.', t: 60 }, { role: 'interviewer', text: 'Why is it your best?', t: 120 }], latestQuestion: 'Why is it your best?', mode: 'looking-for-work', surface: 'manual' });
+    const r = resolveLiveFollowup({ turns: [{ role: 'interviewer', text: 'What is your best project?', t: 0 }, { role: 'user', text: 'MeetFloo.', t: 5 }, { role: 'user', text: 'Actually use TalentScope.', t: 60 }, { role: 'interviewer', text: 'Why is it your best?', t: 120 }], latestQuestion: 'Why is it your best?', mode: 'looking-for-work', surface: 'manual' });
     assert.equal(r.recalledEntity, 'TalentScope');
   });
-  test('7. double correction A→B→A → Natively', () => {
-    const r = resolveLiveFollowup({ turns: [{ role: 'interviewer', text: 'Best project?', t: 0 }, { role: 'user', text: 'Natively.', t: 5 }, { role: 'user', text: 'Actually use TalentScope.', t: 60 }, { role: 'user', text: 'Actually back to Natively.', t: 120 }, { role: 'interviewer', text: 'Why is that your best?', t: 180 }], latestQuestion: 'Why is that your best?', mode: 'looking-for-work', surface: 'manual' });
-    assert.equal(r.recalledEntity, 'Natively');
+  test('7. double correction A→B→A → MeetFloo', () => {
+    const r = resolveLiveFollowup({ turns: [{ role: 'interviewer', text: 'Best project?', t: 0 }, { role: 'user', text: 'MeetFloo.', t: 5 }, { role: 'user', text: 'Actually use TalentScope.', t: 60 }, { role: 'user', text: 'Actually back to MeetFloo.', t: 120 }, { role: 'interviewer', text: 'Why is that your best?', t: 180 }], latestQuestion: 'Why is that your best?', mode: 'looking-for-work', surface: 'manual' });
+    assert.equal(r.recalledEntity, 'MeetFloo');
   });
-  test('8. cross-mode coding boundary → NO Natively recall', () => {
-    const r = resolveLiveFollowup({ turns: [{ role: 'interviewer', text: 'Tell me about Natively.', t: 0 }, { role: 'interviewer', text: 'Solve Two Sum.', t: 60 }], latestQuestion: 'Solve Two Sum.', mode: 'coding', surface: 'coding' });
+  test('8. cross-mode coding boundary → NO MeetFloo recall', () => {
+    const r = resolveLiveFollowup({ turns: [{ role: 'interviewer', text: 'Tell me about MeetFloo.', t: 0 }, { role: 'interviewer', text: 'Solve Two Sum.', t: 60 }], latestQuestion: 'Solve Two Sum.', mode: 'coding', surface: 'coding' });
     assert.equal(r.recalledEntity, undefined);
   });
   test('9. cross-mode salary boundary → NO comp recall in coding', () => {
@@ -108,7 +108,7 @@ describe('resolveLiveFollowup — the 12 live edge cases (Phase 3)', () => {
   test('12. no-context bare "why?" → clarification (no identity leak)', () => {
     const r = resolveLiveFollowup({ turns: [{ role: 'interviewer', text: 'why?', t: 0 }], latestQuestion: 'why?', mode: 'technical-interview', surface: 'what_to_answer' });
     assert.equal(r.isClarification, true);
-    assert.doesNotMatch(r.clarificationText, /Natively|AI assistant/i);
+    assert.doesNotMatch(r.clarificationText, /MeetFloo|AI assistant/i);
   });
 });
 
@@ -128,19 +128,19 @@ describe('ENGINE ADAPTER — ms timestamps converted to seconds (code-review uni
 
   test('62-minute project recall SURVIVES with ms→s conversion', () => {
     const turns = msTurns([
-      ['interviewer', 'Tell me about Natively.', 1],
+      ['interviewer', 'Tell me about MeetFloo.', 1],
       ['user', 'An AI copilot.', 2],
       ['interviewer', 'filler', 30],
       ['interviewer', 'What was the hardest part of that project?', 62],
     ]);
     const r = asEngine(turns, 'What was the hardest part of that project?');
-    assert.equal(r.recalledEntity, 'Natively', 'long-range recall must survive realistic ms timestamps');
+    assert.equal(r.recalledEntity, 'MeetFloo', 'long-range recall must survive realistic ms timestamps');
     assert.ok(r.recalledAgeSeconds >= 3500 && r.recalledAgeSeconds <= 3700, `age should be ~61 min in seconds, got ${r.recalledAgeSeconds}`);
   });
 
   test('WITHOUT conversion (raw ms) the same recall would decay to nothing — proving the bug the conversion fixes', () => {
     const turns = msTurns([
-      ['interviewer', 'Tell me about Natively.', 1],
+      ['interviewer', 'Tell me about MeetFloo.', 1],
       ['user', 'An AI copilot.', 2],
       ['interviewer', 'What was the hardest part of that project?', 62],
     ]);
@@ -159,12 +159,12 @@ describe('ENGINE ADAPTER — ms timestamps converted to seconds (code-review uni
 
   test('5-second-ago project recall works under ms conversion (short range)', () => {
     const turns = msTurns([
-      ['interviewer', 'Tell me about Natively.', 0],
+      ['interviewer', 'Tell me about MeetFloo.', 0],
       ['user', 'An AI copilot.', 0.05],
       ['interviewer', 'How did you build it?', 0.1],
     ]);
     const r = asEngine(turns, 'How did you build it?');
-    assert.equal(r.recalledEntity, 'Natively');
+    assert.equal(r.recalledEntity, 'MeetFloo');
   });
 });
 
@@ -173,7 +173,7 @@ describe('isContextFreeBareFollowup', () => {
     assert.equal(isContextFreeBareFollowup('continue', [{ role: 'interviewer', text: 'why?', t: 0 }, { role: 'interviewer', text: 'continue', t: 60 }]), true);
   });
   test('"why?" after an answerable question is NOT context-free', () => {
-    assert.equal(isContextFreeBareFollowup('why?', [{ role: 'interviewer', text: 'Tell me about Natively.', t: 0 }, { role: 'interviewer', text: 'why?', t: 60 }]), false);
+    assert.equal(isContextFreeBareFollowup('why?', [{ role: 'interviewer', text: 'Tell me about MeetFloo.', t: 0 }, { role: 'interviewer', text: 'why?', t: 60 }]), false);
   });
 });
 
@@ -194,7 +194,7 @@ describe('effectiveMemoryMode — coding/comp intent overrides ambient mode (cod
   test('REAL coding-in-interview: project NOT recalled (the production gate, not a synthetic coding mode)', () => {
     // Session is a technical-interview; a coding question must use the coding boundary
     // so the interview project is blocked — this is what production actually does.
-    const turns = [{ role: 'interviewer', text: 'Tell me about Natively.', t: 0 }, { role: 'interviewer', text: 'Solve two sum.', t: 60 }];
+    const turns = [{ role: 'interviewer', text: 'Tell me about MeetFloo.', t: 0 }, { role: 'interviewer', text: 'Solve two sum.', t: 60 }];
     const intentType = 'dsa_question_answer';
     const r = resolveLiveFollowup({ turns, latestQuestion: 'Solve two sum.', mode: effectiveMemoryMode('technical-interview', intentType), surface: 'coding' });
     assert.equal(r.recalledEntity, undefined, 'coding-in-interview must NOT recall the project');

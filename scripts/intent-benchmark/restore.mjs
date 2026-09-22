@@ -37,7 +37,7 @@ const { restoreFromLabels, isFaithfulRestoration } = await import(
 const worker = new Worker(path.join(__dirname, 'lib/restoreWorker.mjs'), {
   workerData: {
     modelPath: path.join(repoRoot, 'resources/models'),
-    modelId: 'natively/punctuation-restore',
+    modelId: 'MeetFloo/punctuation-restore',
   },
 });
 

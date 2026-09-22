@@ -19,7 +19,7 @@
  * Jina's own API is the only way to actually use it.
  */
 
-export type HostedRerankProviderId = 'natively' | 'openrouter' | 'jina';
+export type HostedRerankProviderId = 'MeetFloo' | 'openrouter' | 'jina';
 
 export interface HostedRerankModel {
   id: string;
@@ -48,32 +48,32 @@ export interface HostedRerankProvider {
 }
 
 /**
- * Where the managed reranker lives. Same resolution NativelyEmbeddingProvider
+ * Where the managed reranker lives. Same resolution MeetFlooEmbeddingProvider
  * uses, so pointing the app at a local server moves BOTH managed routes together
  * — a split base is how you end up testing embeddings locally while reranking
  * silently bills production.
  */
-const NATIVELY_RERANK_BASE_URL =
+const MEETFLOO_RERANK_BASE_URL =
   `${(process.env.APP_API_URL || 'https://api.MeetFloo.com').replace(/\/+$/, '')}/v1`;
 
 export const HOSTED_RERANK_PROVIDERS: Record<HostedRerankProviderId, HostedRerankProvider> = {
   /**
-   * The one entry here that is NOT bring-your-own-key: it runs on the Natively
+   * The one entry here that is NOT bring-your-own-key: it runs on the MeetFloo
    * API key the user already has, is billed against their plan's Knowledge
    * allowance, and needs no second signup. That is the whole reason it exists —
-   * before it, a Natively customer who wanted hosted reranking had to go get an
+   * before it, a MeetFloo customer who wanted hosted reranking had to go get an
    * OpenRouter account.
    *
-   * `POST /v1/rerank` on natively-api speaks the same Cohere-shaped contract as
+   * `POST /v1/rerank` on MeetFloo-api speaks the same Cohere-shaped contract as
    * the other two, which is why this is a table entry rather than a second
    * client.
    */
-  natively: {
-    id: 'natively',
-    name: 'Natively',
-    baseUrl: NATIVELY_RERANK_BASE_URL,
+  MeetFloo: {
+    id: 'MeetFloo',
+    name: 'MeetFloo',
+    baseUrl: MEETFLOO_RERANK_BASE_URL,
     keyUrl: '',
-    keyPlaceholder: 'natively_sk_…',
+    keyPlaceholder: 'MeetFloo_sk_…',
     // One managed model, chosen and served by the API. Nothing to discover and
     // nothing to pick, so the card shows no model list.
     models: [
@@ -114,7 +114,7 @@ export const HOSTED_RERANK_PROVIDERS: Record<HostedRerankProviderId, HostedReran
 };
 
 export function hostedRerankProvider(id: string | undefined): HostedRerankProvider | null {
-  if (id !== 'natively' && id !== 'openrouter' && id !== 'jina') return null;
+  if (id !== 'MeetFloo' && id !== 'openrouter' && id !== 'jina') return null;
   return HOSTED_RERANK_PROVIDERS[id];
 }
 

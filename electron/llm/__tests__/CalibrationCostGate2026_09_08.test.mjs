@@ -57,7 +57,7 @@ describe('THE COST GATE — nothing may be spent without an explicit opt-in', ()
     // `capabilityProbe` default OFF — unlike the four adaptive flags, which
     // default ON precisely because they cannot spend anything.
     __resetCalibrationCooldowns();
-    for (const v of ['NATIVELY_PROVIDER_CALIBRATION', 'NATIVELY_CAPABILITY_PROBE']) delete process.env[v];
+    for (const v of ['MEETFLOO_PROVIDER_CALIBRATION', 'MEETFLOO_CAPABILITY_PROBE']) delete process.env[v];
     const h = spyHelper();
     const res = await runCalibration(h, { store: store(), networkProfileId: 'n' });
     assert.equal(h.calls.length, 0, 'a default install must issue NO billable request');
@@ -67,13 +67,13 @@ describe('THE COST GATE — nothing may be spent without an explicit opt-in', ()
 
   test('a missing or malformed helper spends nothing and does not throw', async () => {
     __resetCalibrationCooldowns();
-    process.env.NATIVELY_PROVIDER_CALIBRATION = '1';
+    process.env.MEETFLOO_PROVIDER_CALIBRATION = '1';
     for (const bad of [null, undefined, {}, { performanceIdentity: () => ({}) }]) {
       const res = await runCalibration(bad, { store: store(), networkProfileId: 'n' });
       assert.equal(res.requestsIssued, 0);
       assert.equal(res.skippedReason, 'no_helper');
     }
-    delete process.env.NATIVELY_PROVIDER_CALIBRATION;
+    delete process.env.MEETFLOO_PROVIDER_CALIBRATION;
   });
 
   test('one invocation is hard-capped at 3 text + 1 image request', async () => {
@@ -351,10 +351,10 @@ describe('defects found by running against a live provider', () => {
       reason: 'done', firstUsefulBudgetMs: 60000, interTokenStallMs: 8000, speculative: false, ...over,
     });
     for (const text of ['Error streaming from custom provider.',
-                        'No vision-capable provider configured.',
-                        'I cannot see any image.']) {
+      'No vision-capable provider configured.',
+      'I cannot see any image.']) {
       const v = verdictFromProbe(obs(), text);
-      assert.equal(v.verdict, 'FAILED_TEMPORARILY', `"${text.slice(0,30)}" must not be a capability verdict`);
+      assert.equal(v.verdict, 'FAILED_TEMPORARILY', `"${text.slice(0, 30)}" must not be a capability verdict`);
       assert.notEqual(v.verdict, 'UNSUPPORTED');
     }
     assert.equal(verdictFromProbe(obs(), 'SEEN').verdict, 'SUPPORTED');
@@ -379,10 +379,14 @@ describe('defects found by running against a live provider', () => {
   test('the store never sees an implausible remote sample', () => {
     const s = new (M.ProviderPerformanceStore)({ ephemeral: true });
     const written = recordStreamObservation(
-      { ttftMs: 1, totalMs: 2, interChunkGapsMs: [], chunkCount: 1, outputChars: 38,
-        reason: 'done', firstUsefulBudgetMs: 15000, interTokenStallMs: 8000, speculative: false },
-      { providerId: 'custom', modelId: 'gw/m', route: 'user_endpoint', inputTokens: 40,
-        outputTokens: 0, hasImages: false, startedAt: 0, coldStart: false, userCancelled: false },
+      {
+        ttftMs: 1, totalMs: 2, interChunkGapsMs: [], chunkCount: 1, outputChars: 38,
+        reason: 'done', firstUsefulBudgetMs: 15000, interTokenStallMs: 8000, speculative: false
+      },
+      {
+        providerId: 'custom', modelId: 'gw/m', route: 'user_endpoint', inputTokens: 40,
+        outputTokens: 0, hasImages: false, startedAt: 0, coldStart: false, userCancelled: false
+      },
       { store: s, signals: { contaminatedSince: () => null }, networkProfileId: 'n' },
     );
     assert.equal(written, null, 'dropped');
@@ -416,9 +420,11 @@ describe('defects found by a SUCCESSFUL live run', () => {
     // TTFT_ADAPTIVE_ROUTES — a profile that had been adapting its text ceiling
     // silently reverted to the shipped prior on the very run meant to improve it.
     const s = new ProviderPerformanceStore({ ephemeral: true });
-    const base = { providerId: 'custom', modelId: 'm', networkProfileId: 'n',
+    const base = {
+      providerId: 'custom', modelId: 'm', networkProfileId: 'n',
       sampleClass: 'normal', totalMs: 2000, maxGapMs: 40, p50GapMs: 20,
-      inputTokens: 100, outputTokens: 50, generationRateTps: 20, retryCount: 0 };
+      inputTokens: 100, outputTokens: 50, generationRateTps: 20, retryCount: 0
+    };
     s.record({ ...base, route: 'user_endpoint', workload: 'small', ttftMs: 900 });
     assert.equal(s.getExact('custom', 'm', 'n').route, 'user_endpoint');
     s.record({ ...base, route: 'vision', workload: 'vision', ttftMs: 3000 });
@@ -429,9 +435,11 @@ describe('defects found by a SUCCESSFUL live run', () => {
 
   test('a row first seen on vision is still allowed to adopt a text route', () => {
     const s = new ProviderPerformanceStore({ ephemeral: true });
-    const base = { providerId: 'custom', modelId: 'm', networkProfileId: 'n',
+    const base = {
+      providerId: 'custom', modelId: 'm', networkProfileId: 'n',
       sampleClass: 'normal', totalMs: 2000, maxGapMs: 40, p50GapMs: 20,
-      inputTokens: 100, outputTokens: 50, generationRateTps: 20, retryCount: 0 };
+      inputTokens: 100, outputTokens: 50, generationRateTps: 20, retryCount: 0
+    };
     s.record({ ...base, route: 'vision', workload: 'vision', ttftMs: 3000 });
     assert.equal(s.getExact('custom', 'm', 'n').route, 'vision');
     s.record({ ...base, route: 'user_endpoint', workload: 'small', ttftMs: 900 });

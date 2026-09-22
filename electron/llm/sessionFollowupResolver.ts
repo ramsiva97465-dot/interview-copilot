@@ -50,7 +50,7 @@ export interface SessionFollowupInput {
   /** The kind of entity the follow-up is most likely about (caller hint). When
    *  omitted we infer from the prior answer type / question demonstratives. */
   expectedKind?: MemoryItemKind;
-  /** The user EXPLICITLY crossed a mode boundary ("have you used this in Natively?"). */
+  /** The user EXPLICITLY crossed a mode boundary ("have you used this in MeetFloo?"). */
   explicitCrossMode?: boolean;
 }
 
@@ -143,20 +143,20 @@ export function resolveSessionFollowup(input: SessionFollowupInput): SessionFoll
   if (recalledEntity && kind && questionWordCount <= referentialWordCap) {
     const refRe = kind === 'project' ? PROJECT_REF_RE
       : kind === 'company' ? COMPANY_REF_RE
-      : kind === 'skill' ? SKILL_REF_RE
-      : kind === 'topic' ? TOPIC_REF_RE
-      : kind === 'person' ? PERSON_REF_RE
-      // a decision/owner follow-up ("who owns that?", "who owns the follow-up?") —
-      // any of these reference the meeting decision on the table.
-      : kind === 'decision' ? /\bwho (owns|is|has|will)\b|\bthat\b|\bthe (follow[- ]?up|migration|task|action item)\b/i
-      : null;
+        : kind === 'skill' ? SKILL_REF_RE
+          : kind === 'topic' ? TOPIC_REF_RE
+            : kind === 'person' ? PERSON_REF_RE
+              // a decision/owner follow-up ("who owns that?", "who owns the follow-up?") —
+              // any of these reference the meeting decision on the table.
+              : kind === 'decision' ? /\bwho (owns|is|has|will)\b|\bthat\b|\bthe (follow[- ]?up|migration|task|action item)\b/i
+                : null;
     if (refRe && refRe.test(input.latestQuestion)) {
       const at: AnswerType =
         kind === 'project' ? 'project_followup_answer'
-        : kind === 'skill' ? 'skill_experience_answer'
-        : kind === 'topic' ? 'technical_concept_answer'
-        : kind === 'company' || kind === 'person' || kind === 'decision' ? 'general_meeting_answer'
-        : 'project_followup_answer';
+          : kind === 'skill' ? 'skill_experience_answer'
+            : kind === 'topic' ? 'technical_concept_answer'
+              : kind === 'company' || kind === 'person' || kind === 'decision' ? 'general_meeting_answer'
+                : 'project_followup_answer';
       // Replace ONLY THE FIRST demonstrative phrase with the entity, exactly once, so
       // we never double-substitute or mangle grammar (code-review 2026-06-07c). Ordered
       // most-specific-first; the first pattern that matches wins and we stop.

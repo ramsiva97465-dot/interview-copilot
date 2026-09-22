@@ -2,7 +2,7 @@
 //
 // A persisted "load in progress" sentinel is written to disk BEFORE a Whisper
 // worker is spawned, and cleared on `ready` / clean exit. If the previous app
-// process died while loading a model natively (before JS error handlers could
+// process died while loading a model MeetFloo (before JS error handlers could
 // persist a recent-failure cooldown), the leftover sentinel survives. On the
 // next launch, modelPreloader.consumePoisonedLoadSentinel() reads it, records
 // a recent-failure cooldown, and returns the offending model id so main.ts

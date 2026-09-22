@@ -50,7 +50,7 @@ installElectronStub();
 import * as HMModule from '../../../dist-electron/electron/services/HindsightManager.js';
 let { HindsightManager } = HMModule;
 
-const ENV_KEYS = ['HINDSIGHT_BASE_URL', 'HINDSIGHT_API_KEY', 'HINDSIGHT_TIMEOUT_MS', 'NATIVELY_HINDSIGHT_MEMORY', 'HINDSIGHT_SERVER_COMMAND_ALLOW_SHELL'];
+const ENV_KEYS = ['HINDSIGHT_BASE_URL', 'HINDSIGHT_API_KEY', 'HINDSIGHT_TIMEOUT_MS', 'MEETFLOO_HINDSIGHT_MEMORY', 'HINDSIGHT_SERVER_COMMAND_ALLOW_SHELL'];
 function clearEnv() { for (const k of ENV_KEYS) delete process.env[k]; }
 
 describe('HindsightManager.getHindsightConfig', () => {
@@ -112,16 +112,16 @@ describe('HindsightManager.getHindsightConfig', () => {
       if (k === hmPath || k.includes('HindsightManager')) delete require.cache[k];
     }
     // Dropping the module cache is NOT sufficient on its own. Both singletons are
-    // anchored on globalThis (`__nativelyHindsightManagerV1__`,
-    // `__nativelySettingsManagerV1__`) because ~22 esbuild bundles each inline a
+    // anchored on globalThis (`__MeetFlooHindsightManagerV1__`,
+    // `__MeetFlooSettingsManagerV1__`) because ~22 esbuild bundles each inline a
     // copy of these classes and per-bundle instances caused real divergence bugs.
     // getInstance() therefore hands back the ALREADY-CONSTRUCTED manager whose
     // SettingsManager read settings.json before the sentinel was written — so the
     // re-import re-ran the module body and still observed the old settings. The
     // anchors have to be cleared in lockstep with the cache for a "fresh
     // construction" to actually be fresh.
-    delete globalThis.__nativelyHindsightManagerV1__;
-    delete globalThis.__nativelySettingsManagerV1__;
+    delete globalThis.__MeetFlooHindsightManagerV1__;
+    delete globalThis.__MeetFlooSettingsManagerV1__;
     // Re-import. This returns the SAME exports object as before but re-executes the
     // module body once (the static `var init_*` fns run again, lazy __esm() returns
     // fresh bindings). HindsightManager.getInstance() now returns a fresh singleton
@@ -137,8 +137,8 @@ describe('HindsightManager.getHindsightConfig', () => {
       fs.writeFileSync(settingsPath, JSON.stringify({}, null, 2));
       // Drop again so the next test re-reads the clean file.
       delete require.cache[hmPath];
-      delete globalThis.__nativelyHindsightManagerV1__;
-      delete globalThis.__nativelySettingsManagerV1__;
+      delete globalThis.__MeetFlooHindsightManagerV1__;
+      delete globalThis.__MeetFlooSettingsManagerV1__;
       for (const k of Object.keys(require.cache)) {
         if (k === hmPath || k.includes('HindsightManager')) delete require.cache[k];
       }
@@ -225,7 +225,7 @@ describe('HindsightManager.healthCheck + isAvailable', () => {
 
   test('start() with a baseUrl but memory flag OFF does not spawn (stays Noop)', async () => {
     process.env.HINDSIGHT_BASE_URL = 'http://127.0.0.1:59999'; // unreachable
-    delete process.env.NATIVELY_HINDSIGHT_MEMORY; // flag off
+    delete process.env.MEETFLOO_HINDSIGHT_MEMORY; // flag off
     // Must return quickly without spawning anything; isAvailable stays false.
     await assert.doesNotReject(() => HindsightManager.getInstance().start());
     assert.equal(HindsightManager.getInstance().isAvailable(), false);
@@ -251,7 +251,7 @@ describe('HindsightManager.autoStartCommand (zero-config default)', () => {
   const COMMAND_ENV = 'HINDSIGHT_SERVER_COMMAND';
   let savedCwd;
   beforeEach(() => { savedCwd = process.cwd(); delete process.env[COMMAND_ENV]; });
-  afterEach(() => { try { process.chdir(savedCwd); } catch {} delete process.env[COMMAND_ENV]; });
+  afterEach(() => { try { process.chdir(savedCwd); } catch { } delete process.env[COMMAND_ENV]; });
 
   test('explicit HINDSIGHT_SERVER_COMMAND env wins (verbatim)', () => {
     process.env[COMMAND_ENV] = 'my-custom-launcher --foo';
@@ -332,7 +332,7 @@ describe('HindsightManager.start() self-healing auto-flip (unit)', () => {
 
   test('start() with baseUrl but UNREACHABLE server and flag already ON stays Noop unless autoStart is explicit', async () => {
     process.env.HINDSIGHT_BASE_URL = 'http://127.0.0.1:59999';
-    process.env.NATIVELY_HINDSIGHT_MEMORY = '1'; // flag ON
+    process.env.MEETFLOO_HINDSIGHT_MEMORY = '1'; // flag ON
     const logs = [];
     const orig = console.log;
     console.log = (...a) => logs.push(a.join(' '));
@@ -345,7 +345,7 @@ describe('HindsightManager.start() self-healing auto-flip (unit)', () => {
         'flag ON alone is not enough — autoStart must be explicitly enabled');
     } finally {
       console.log = orig;
-      delete process.env.NATIVELY_HINDSIGHT_MEMORY;
+      delete process.env.MEETFLOO_HINDSIGHT_MEMORY;
     }
   });
 });
@@ -488,15 +488,15 @@ describe('HindsightManager — round-6 regression suite', () => {
   afterEach(clearEnv);
 
   // HIGH #1 — auto-flip must SKIP when env forces the flag (either direction). Before the
-  // fix, NATIVELY_HINDSIGHT_MEMORY=0 left no SettingsManager trace, so the auto-flip wrote
+  // fix, MEETFLOO_HINDSIGHT_MEMORY=0 left no SettingsManager trace, so the auto-flip wrote
   // hindsightMemoryEnabled=true to settings → silently re-enabled the moment env was unset.
-  test('memoryFlagEnvForced detects NATIVELY_HINDSIGHT_MEMORY in both directions', () => {
+  test('memoryFlagEnvForced detects MEETFLOO_HINDSIGHT_MEMORY in both directions', () => {
     const hm = HindsightManager.getInstance();
-    process.env.NATIVELY_HINDSIGHT_MEMORY = '0';
+    process.env.MEETFLOO_HINDSIGHT_MEMORY = '0';
     assert.equal(hm.memoryFlagEnvForced(), true, 'env=0 should be detected as forced');
-    process.env.NATIVELY_HINDSIGHT_MEMORY = '1';
+    process.env.MEETFLOO_HINDSIGHT_MEMORY = '1';
     assert.equal(hm.memoryFlagEnvForced(), true, 'env=1 should be detected as forced');
-    delete process.env.NATIVELY_HINDSIGHT_MEMORY;
+    delete process.env.MEETFLOO_HINDSIGHT_MEMORY;
     assert.equal(hm.memoryFlagEnvForced(), false, 'no env should not be forced');
   });
 
@@ -636,7 +636,7 @@ describe('HindsightManager — round-7 regression suite', () => {
   // round-7 allowlist + -c rejection must not break the default `bash "<path>"` case).
   test('parseCommandToArgv accepts the bundled launcher path with spaces', () => {
     const hm = HindsightManager.getInstance();
-    const argv = hm.parseCommandToArgv('bash "/Users/me/Application Support/natively/scripts/hindsight-start.sh"');
-    assert.deepEqual(argv, ['bash', '/Users/me/Application Support/natively/scripts/hindsight-start.sh']);
+    const argv = hm.parseCommandToArgv('bash "/Users/me/Application Support/MeetFloo/scripts/hindsight-start.sh"');
+    assert.deepEqual(argv, ['bash', '/Users/me/Application Support/MeetFloo/scripts/hindsight-start.sh']);
   });
 });

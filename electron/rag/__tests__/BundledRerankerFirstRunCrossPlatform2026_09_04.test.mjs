@@ -80,12 +80,12 @@ test('the model id composes correctly under win32 AND posix', () => {
   const segments = MODEL_ID.split('/');
   assert.ok(segments.length >= 2, `${MODEL_ID} has no org/name split to get wrong`);
 
-  const win = path.win32.join('C:\\Program Files\\Natively\\resources\\models', ...segments, 'tokenizer.json');
+  const win = path.win32.join('C:\\Program Files\\MeetFloo\\resources\\models', ...segments, 'tokenizer.json');
   assert.ok(win.includes('\\' + segments.join('\\') + '\\tokenizer.json'),
     `win32 path did not use backslashes throughout: ${win}`);
   assert.ok(!win.includes('/'), `a forward slash survived into a win32 path: ${win}`);
 
-  const posix = path.posix.join('/Applications/Natively.app/Contents/Resources/models', ...segments, 'tokenizer.json');
+  const posix = path.posix.join('/Applications/MeetFloo.app/Contents/Resources/models', ...segments, 'tokenizer.json');
   assert.ok(posix.endsWith(`/${segments.join('/')}/tokenizer.json`), posix);
 });
 

@@ -5,7 +5,7 @@
 // its ceiling. Gemini runs the same tasks at every level visited, so each level
 // is a like-for-like comparison.
 //
-// Both providers are called with Natively's PRODUCTION request shape:
+// Both providers are called with MeetFloo's PRODUCTION request shape:
 //   - images normalized by lib/imageNormalizer.js (what /v1/chat does), identical bytes to both;
 //   - DeepSeek: buildDeepSeekBody(..., { images }) → thinking disabled;
 //   - Gemini: v1beta generateContent, system_instruction, inlineData parts,
@@ -20,7 +20,7 @@ import { checkOne } from './scoring.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(HERE, '../../..')
-const API = path.join(ROOT, 'natively-api')
+const API = path.join(ROOT, 'MeetFloo-api')
 const { buildDeepSeekBody, DEEPSEEK_CHAT_URL } = await import(path.join(API, 'lib/deepseekProvider.js'))
 const { thinkingConfigForModel, GEMINI_FLASH_MODEL } = await import(path.join(API, 'lib/flashModelPicker.js'))
 const { normalizeImages } = await import(path.join(API, 'lib/imageNormalizer.js'))
@@ -41,11 +41,11 @@ const readEnv = (p) => Object.fromEntries(fs.readFileSync(p, 'utf8').split('\n')
 const apiEnv = readEnv(path.join(API, '.env'))
 const rootEnv = readEnv(path.join(ROOT, '.env'))
 const DS_KEY = apiEnv.DEEPSEEK_API_KEY
-// natively-api's own Gemini key is out of prepaid credits (429 RESOURCE_EXHAUSTED),
+// MeetFloo-api's own Gemini key is out of prepaid credits (429 RESOURCE_EXHAUSTED),
 // so the comparison uses the repo-root key. Same model, same request shape.
 const GEM_KEY = rootEnv.GEMINI_API_KEY
 
-const SYSTEM = 'You are Natively, a screen-analysis assistant. Answer only from the screenshot, tersely, one numbered line per question. If a value is not legible, say UNKNOWN rather than guessing.'
+const SYSTEM = 'You are MeetFloo, a screen-analysis assistant. Answer only from the screenshot, tersely, one numbered line per question. If a value is not legible, say UNKNOWN rather than guessing.'
 
 // Pricing per 1M tokens, for the cost column (DeepSeek off-peak; Gemini list).
 const PRICE = { deepseek: { in: 0.15, out: 0.60 }, gemini: { in: 0.30, out: 2.50 } }
@@ -64,7 +64,7 @@ const taskImages = (task) => Promise.all((task.shots ?? [task.shot]).map(shotIma
 async function callDeepSeek(q, imgs, { thinking = false } = {}) {
   const body = buildDeepSeekBody('deepseek-flash', [{ role: 'user', content: q }], SYSTEM, { stream: false, images: imgs })
   // --with-thinking probes whether DeepSeek's counting/comparison errors are a
-  // reasoning gap rather than a seeing gap. Not Natively's configuration: the
+  // reasoning gap rather than a seeing gap. Not MeetFloo's configuration: the
   // shipped path sends thinking disabled.
   if (thinking) { body.thinking = { type: 'enabled' }; body.reasoning_effort = 'low' }
   const t0 = Date.now()

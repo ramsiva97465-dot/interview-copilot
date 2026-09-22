@@ -1,4 +1,4 @@
-// F-204 repro: NativelyProSTT.setSampleRate's gate diverges from its own
+// F-204 repro: MeetFlooProSTT.setSampleRate's gate diverges from its own
 // comment, so a rate change is SKIPPED in the window where it matters most.
 //
 // The comment says only two pre-handshake states need no reconnect:
@@ -34,19 +34,19 @@ Module._load = function patched(request) {
   return origLoad.apply(this, arguments);
 };
 
-const { NativelyProSTT } = await import(pathToFileURL(path.join(distRoot, 'NativelyProSTT.js')).href);
-const stt = new NativelyProSTT('audit-key', 'system');
-stt.on('error', () => {});
+const { MeetFlooProSTT } = await import(pathToFileURL(path.join(distRoot, 'MeetFlooProSTT.js')).href);
+const stt = new MeetFlooProSTT('audit-key', 'system');
+stt.on('error', () => { });
 
 let closed = false;
 stt.isActive = true;
 stt.isConnected = false;               // server has NOT confirmed yet
 stt.ws = {                              // auth frame already sent in 'open'
   readyState: 1,                        // WebSocket.OPEN
-  removeAllListeners() {},
-  on() {},
+  removeAllListeners() { },
+  on() { },
   close() { closed = true; },
-  send() {},
+  send() { },
 };
 
 stt.setSampleRate(48000);               // differs from the default

@@ -40,15 +40,15 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 // test process. A syntactically valid dummy key file makes it use the file and
 // never probe. No RPC is ever issued — the client is replaced below.
 // (Same preamble as GoogleSTTDropsKeepaliveSilence.test.mjs.)
-const DUMMY_KEY = path.join(os.tmpdir(), `natively-stt-dg-test-sa-${process.pid}.json`);
+const DUMMY_KEY = path.join(os.tmpdir(), `MeetFloo-stt-dg-test-sa-${process.pid}.json`);
 fs.writeFileSync(
   DUMMY_KEY,
   JSON.stringify({
     type: 'service_account',
-    project_id: 'natively-stt-test',
+    project_id: 'MeetFloo-stt-test',
     private_key_id: 'test',
     private_key: '-----BEGIN PRIVATE KEY-----\nMIIBVAIBADAN\n-----END PRIVATE KEY-----\n',
-    client_email: 'test@natively-stt-test.iam.gserviceaccount.com',
+    client_email: 'test@MeetFloo-stt-test.iam.gserviceaccount.com',
     client_id: '0',
     token_uri: 'https://oauth2.googleapis.com/token',
   }),

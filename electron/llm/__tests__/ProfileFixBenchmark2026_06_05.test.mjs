@@ -74,7 +74,7 @@ describe('fix: JD-fit routing', () => {
     'Do you fit what this Data Analyst position needs?', 'How good are you for this job?',
     'Are you good for this job?', 'Why you for this job, not generally, this one?',
     'You said full stack, but this is data analyst, connect it.',
-    'Natively is not data analysis, so why is it relevant?',
+    'MeetFloo is not data analysis, so why is it relevant?',
     'Full-stack is different from data analyst, explain the connection.',
     'Your experience seems engineering-heavy, why data?',
     "You don't seem like pure analyst, convince me.",
@@ -228,7 +228,7 @@ describe('fix: single-project fast path (deterministic, zero latency)', () => {
   const profile = {
     identity: { name: 'Test Candidate' },
     projects: [
-      { name: 'Natively – Open Source AI Meeting Copilot', description: 'a privacy-first AI meeting assistant', technologies: ['Electron', 'TypeScript', 'Rust'] },
+      { name: 'MeetFloo – Open Source AI Meeting Copilot', description: 'a privacy-first AI meeting assistant', technologies: ['Electron', 'TypeScript', 'Rust'] },
       { name: 'TalentScope', description: 'a technical interview platform', technologies: ['React', 'Node'] },
     ],
     experience: [{ company: 'Acme', role: 'Engineer' }],
@@ -242,24 +242,24 @@ describe('fix: single-project fast path (deterministic, zero latency)', () => {
   // ManualProfileRouteResult.answer is typed `never`). These assert the project
   // + stack are SELECTED as evidence, which is what reaches the JIT prompt.
   const evidenceText = (r) => (r?.items || []).map((it) => (typeof it.value === 'string' ? it.value : JSON.stringify(it.value))).join(' | ');
-  test('"Tell me about Natively." → selects the project + stack as evidence', () => {
-    const r = fp('Tell me about Natively.');
+  test('"Tell me about MeetFloo." → selects the project + stack as evidence', () => {
+    const r = fp('Tell me about MeetFloo.');
     assert.ok(r && Array.isArray(r.items) && r.items.length > 0, 'expected selected evidence');
     const txt = evidenceText(r);
-    assert.match(txt, /Natively/);
+    assert.match(txt, /MeetFloo/);
     assert.match(txt, /Electron|TypeScript|Rust/);
   });
-  test('"What tech stack did you use in Natively?" → selects the stack as evidence', () => {
-    const r = fp('What tech stack did you use in Natively?');
+  test('"What tech stack did you use in MeetFloo?" → selects the stack as evidence', () => {
+    const r = fp('What tech stack did you use in MeetFloo?');
     assert.ok(r && Array.isArray(r.items) && r.items.length > 0, 'expected selected evidence');
     assert.match(evidenceText(r), /Electron|TypeScript|Rust/);
   });
-  test('narrative drill-in "What was your role in Natively?" defers to LLM (no fast path)', () => {
-    const r = fp('What was your role in Natively?');
+  test('narrative drill-in "What was your role in MeetFloo?" defers to LLM (no fast path)', () => {
+    const r = fp('What was your role in MeetFloo?');
     assert.equal(r, null, 'narrative drill-in should reach the grounded LLM');
   });
-  test('"how was Natively developed?" defers to LLM (narrative)', () => {
-    const r = fp('how was Natively developed?');
+  test('"how was MeetFloo developed?" defers to LLM (narrative)', () => {
+    const r = fp('how was MeetFloo developed?');
     assert.equal(r, null);
   });
 });

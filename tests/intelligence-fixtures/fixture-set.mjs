@@ -1,9 +1,9 @@
 // tests/intelligence-fixtures/fixture-set.mjs
-// Helper to create structured fixture sets for Natively intelligence evaluation
+// Helper to create structured fixture sets for MeetFloo intelligence evaluation
 
 /**
  * Create a fixture set for a given role profile.
- * Used by eval harness to test Natively's intelligence pipeline.
+ * Used by eval harness to test MeetFloo's intelligence pipeline.
  */
 export function createFixtureSet(fixtures) {
   return fixtures.map(f => ({

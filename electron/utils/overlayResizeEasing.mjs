@@ -11,7 +11,7 @@
 // THAT IS NO LONGER TRUE. The OS overlay window is now a FIXED WIDTH (780) for
 // its entire visible lifetime; only the panel animates 600↔780 centered inside
 // it (see WindowHelper.setOverlayDimensionsCentered + the startTransition in
-// NativelyInterface). The main process never animates width and never imports
+// MeetFlooInterface). The main process never animates width and never imports
 // this module's width sampler — grep WindowHelper.ts: no widthAt /
 // easeOverlayResize / resize loop. So the width channel is now PURELY
 // renderer-side, and nothing downstream consumes an in-between width. That
@@ -39,7 +39,7 @@
 //     reduced-motion fallback, or a re-introduced native width loop) can use it.
 //
 // Pure, dependency-free, importable from:
-//   • renderer  (src/components/NativelyInterface.tsx)
+//   • renderer  (src/components/MeetFlooInterface.tsx)
 //   • node test (electron/utils/__tests__/overlayResizeEasing.test.mjs)
 //
 // MONOTONIC BY CONSTRUCTION: easeOverlayResize / easeOutQuint are strictly
@@ -190,7 +190,7 @@ export function isResizeComplete(elapsedMs, durationMs = OVERLAY_RESIZE_DURATION
  *   • HEIGHT is the shell card's auto height, and the card is `overflow-hidden`
  *     with the footer at the bottom of a flex column — tweening the CARD would
  *     slice the footer off for the whole 300ms (see the
- *     STREAMING_HEIGHT_GROW_BUFFER_PX comment in NativelyInterface.tsx).
+ *     STREAMING_HEIGHT_GROW_BUFFER_PX comment in MeetFlooInterface.tsx).
  * So the SIGNATURE is adopted in a JS channel instead: an animated-height
  * wrapper around the chat viewport — the card's only elastic element — carries
  * this curve. (The width bullet above is why a CSS transition could not have

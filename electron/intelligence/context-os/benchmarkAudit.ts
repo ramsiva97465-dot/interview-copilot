@@ -1,7 +1,7 @@
 // Context OS benchmark-only provenance ring.
 //
-// Enabled exclusively by NATIVELY_CONTEXT_OS_BENCHMARK_AUDIT=1 alongside
-// NATIVELY_E2E=1. It intentionally retains IDs, counts, and source metadata —
+// Enabled exclusively by MEETFLOO_CONTEXT_OS_BENCHMARK_AUDIT=1 alongside
+// MEETFLOO_E2E=1. It intentionally retains IDs, counts, and source metadata —
 // never question text, evidence text, prompts, credentials, or provider headers.
 
 import type { EvidencePack } from './evidencePack';
@@ -32,8 +32,8 @@ export interface ContextOsBenchmarkAuditRecord {
   terminal: 'dispatch' | 'clarify' | 'refuse' | 'error';
 }
 
-const enabled = (): boolean => process.env.NATIVELY_E2E === '1'
-  && process.env.NATIVELY_CONTEXT_OS_BENCHMARK_AUDIT === '1';
+const enabled = (): boolean => process.env.MEETFLOO_E2E === '1'
+  && process.env.MEETFLOO_CONTEXT_OS_BENCHMARK_AUDIT === '1';
 
 const toSafePack = (pack: EvidencePack | null | undefined): ContextOsBenchmarkAuditRecord['pack'] => {
   if (!pack) return null;

@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useT } from '../../i18n';
 
 /**
- * Provider performance — what Natively has learned about each provider on this
+ * Provider performance — what MeetFloo has learned about each provider on this
  * machine, and what it does with it.
  *
  * DESIGN CONSTRAINT, taken from the spec that produced this feature: "Do not

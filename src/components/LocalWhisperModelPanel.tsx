@@ -231,7 +231,7 @@ export function LocalWhisperModelPanel({ onModelConfigChanged }: LocalWhisperMod
         systemModelId: '',
         globalModelId: ''
     });
-    
+
     const [downloadProgress, setDownloadProgress] = useState<Record<string, number>>({});
     const [downloadingSet, setDownloadingSet] = useState<Set<string>>(new Set());
     const [recoveryNotice, setRecoveryNotice] = useState<RecoveryNotice | null>(null);
@@ -402,7 +402,7 @@ export function LocalWhisperModelPanel({ onModelConfigChanged }: LocalWhisperMod
             setDownloadProgress(prev => { const d = { ...prev }; delete d[data.modelId]; return d; });
             setModels(prev => prev.map(m => m.id === data.modelId ? { ...m, status: 'error', errorMessage: data.error } : m));
         });
-        
+
         return () => { unsubProgress?.(); unsubComplete?.(); unsubError?.(); };
     }, [loadData]);
 
@@ -540,7 +540,7 @@ export function LocalWhisperModelPanel({ onModelConfigChanged }: LocalWhisperMod
                     <div className="flex-1 min-w-0">
                         <div className="text-xs font-semibold" style={{ color: 'var(--aip-primary)' }}>{t('Recovered local transcription')}</div>
                         <p className="text-[11px] mt-1 leading-relaxed" style={{ color: 'var(--aip-secondary)' }}>
-                            {t('Natively recovered from a local transcription model crash. We reset')} <span className="font-mono" style={{ color: 'var(--aip-primary)' }}>{recoveryNotice.badModelId}</span> {t('to')} <span className="font-mono" style={{ color: 'var(--aip-primary)' }}>{recoveryNotice.fallbackModelId}</span> {t('so the app can start safely.')}
+                            {t('MeetFloo recovered from a local transcription model crash. We reset')} <span className="font-mono" style={{ color: 'var(--aip-primary)' }}>{recoveryNotice.badModelId}</span> {t('to')} <span className="font-mono" style={{ color: 'var(--aip-primary)' }}>{recoveryNotice.fallbackModelId}</span> {t('so the app can start safely.')}
                         </p>
                     </div>
                     <button
@@ -770,87 +770,87 @@ export function LocalWhisperModelPanel({ onModelConfigChanged }: LocalWhisperMod
 
                                 <div className="space-y-1.5">
                                     {rows.map(model => {
-                                    const isDownloading = model.status === 'downloading' || downloadingSet.has(model.id);
-                                    const progress = downloadProgress[model.id] || 0;
-                                    const isAvailable = model.status === 'available';
-                                    const isFailed = model.status === 'error' || model.status === 'interrupted' || model.status === 'cancelled';
-                                    const isRecommended = hardware?.recommendedModel === model.id;
-                                    const inUseLabel = inUseLabels.get(model.id);
-                                    const isInUse = inUseLabel !== undefined;
+                                        const isDownloading = model.status === 'downloading' || downloadingSet.has(model.id);
+                                        const progress = downloadProgress[model.id] || 0;
+                                        const isAvailable = model.status === 'available';
+                                        const isFailed = model.status === 'error' || model.status === 'interrupted' || model.status === 'cancelled';
+                                        const isRecommended = hardware?.recommendedModel === model.id;
+                                        const inUseLabel = inUseLabels.get(model.id);
+                                        const isInUse = inUseLabel !== undefined;
 
-                                    return (
-                                        // Every row gets the same surface. The in-use row used to carry an
-                                        // accent border and fill, which is a second status colour saying
-                                        // exactly what its badge says — and this sheet is explicit that the
-                                        // badge is the ONE status primitive ("Nothing else may carry a
-                                        // status colour", above .aip-badge). Fifteen rows also need a
-                                        // uniform surface to stay scannable; one tinted card pulls the eye
-                                        // to a row that needs no action.
-                                        <div
-                                            key={model.id}
-                                            className="aip-card flex items-center justify-between gap-3 p-3"
-                                        >
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    {/* Installed vs not — the one thing no badge states, and which
+                                        return (
+                                            // Every row gets the same surface. The in-use row used to carry an
+                                            // accent border and fill, which is a second status colour saying
+                                            // exactly what its badge says — and this sheet is explicit that the
+                                            // badge is the ONE status primitive ("Nothing else may carry a
+                                            // status colour", above .aip-badge). Fifteen rows also need a
+                                            // uniform surface to stay scannable; one tinted card pulls the eye
+                                            // to a row that needs no action.
+                                            <div
+                                                key={model.id}
+                                                className="aip-card flex items-center justify-between gap-3 p-3"
+                                            >
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        {/* Installed vs not — the one thing no badge states, and which
                                                         was previously legible only as the ABSENCE of an Install
                                                         button. Deliberately NOT accent when in use: that is status,
                                                         and status belongs to the badge. */}
-                                                    <span
-                                                        aria-hidden="true"
-                                                        className="w-1.5 h-1.5 rounded-full shrink-0"
-                                                        style={{
-                                                            background: isAvailable ? 'var(--aip-tertiary)' : 'transparent',
-                                                            border: isAvailable ? undefined : '1px solid var(--aip-border-strong)',
-                                                        }}
-                                                    />
-                                                    <span className="aip-model-name font-medium truncate" style={{ color: 'var(--aip-primary)' }}>{model.name}</span>
-                                                    {/* AipBadge carries the panel's tone grammar — ok / info / warn /
+                                                        <span
+                                                            aria-hidden="true"
+                                                            className="w-1.5 h-1.5 rounded-full shrink-0"
+                                                            style={{
+                                                                background: isAvailable ? 'var(--aip-tertiary)' : 'transparent',
+                                                                border: isAvailable ? undefined : '1px solid var(--aip-border-strong)',
+                                                            }}
+                                                        />
+                                                        <span className="aip-model-name font-medium truncate" style={{ color: 'var(--aip-primary)' }}>{model.name}</span>
+                                                        {/* AipBadge carries the panel's tone grammar — ok / info / warn /
                                                         danger / neutral — instead of five hand-rolled chip styles. */}
-                                                    {inUseLabel && <AipBadge tone="info" label={inUseLabel} />}
-                                                    {isRecommended && !isInUse && <AipBadge tone="ok" label={t('Recommended')} />}
-                                                    {model.requiresAppleSilicon && <AipBadge tone="neutral" label="Apple Silicon" />}
-                                                </div>
-                                                {/* Size leads because it is the one hard number, and it is the
+                                                        {inUseLabel && <AipBadge tone="info" label={inUseLabel} />}
+                                                        {isRecommended && !isInUse && <AipBadge tone="ok" label={t('Recommended')} />}
+                                                        {model.requiresAppleSilicon && <AipBadge tone="neutral" label="Apple Silicon" />}
+                                                    </div>
+                                                    {/* Size leads because it is the one hard number, and it is the
                                                     constraint people actually weigh. Speed and accuracy are plain
                                                     words — the enums are still humanised ("very-fast" → "Very
                                                     fast", and "acc" spelled out), but the value IS the label, so
                                                     it needs no graphic to be read. */}
-                                                <div className="flex items-center gap-2 text-[11px]" style={{ color: 'var(--aip-tertiary)' }}>
-                                                    <span className="flex items-center gap-1.5 tabular-nums"><HardDrive size={12} className="opacity-70" /> {formatSize(model.sizeMb)}</span>
-                                                    <span aria-hidden="true">·</span>
-                                                    <span>{t(SPEED_LABEL[model.speed])}</span>
-                                                    <span aria-hidden="true">·</span>
-                                                    <span>{t(ACCURACY_LABEL[model.accuracy])} {t('accuracy')}</span>
-                                                </div>
+                                                    <div className="flex items-center gap-2 text-[11px]" style={{ color: 'var(--aip-tertiary)' }}>
+                                                        <span className="flex items-center gap-1.5 tabular-nums"><HardDrive size={12} className="opacity-70" /> {formatSize(model.sizeMb)}</span>
+                                                        <span aria-hidden="true">·</span>
+                                                        <span>{t(SPEED_LABEL[model.speed])}</span>
+                                                        <span aria-hidden="true">·</span>
+                                                        <span>{t(ACCURACY_LABEL[model.accuracy])} {t('accuracy')}</span>
+                                                    </div>
 
-                                                {isDownloading && (
-                                                    <div className="mt-2.5">
-                                                        <div className="flex justify-between items-center text-[10px] mb-1.5 font-medium" style={{ color: 'var(--aip-secondary)' }}>
-                                                            <span>{t('Downloading')} · <span className="tabular-nums" style={{ color: 'var(--aip-accent)' }}>{Math.round(progress)}%</span></span>
-                                                            <button
-                                                                onClick={(e) => { e.stopPropagation(); handleCancel(model.id); }}
-                                                                className="aip-btn"
-                                                                data-size="sm"
-                                                                data-variant="ghost"
-                                                                title={t("Cancel download")}
-                                                            >
-                                                                {t('Cancel')}
-                                                            </button>
-                                                        </div>
-                                                        {/* The progress track is the one place a raw colour is still
+                                                    {isDownloading && (
+                                                        <div className="mt-2.5">
+                                                            <div className="flex justify-between items-center text-[10px] mb-1.5 font-medium" style={{ color: 'var(--aip-secondary)' }}>
+                                                                <span>{t('Downloading')} · <span className="tabular-nums" style={{ color: 'var(--aip-accent)' }}>{Math.round(progress)}%</span></span>
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); handleCancel(model.id); }}
+                                                                    className="aip-btn"
+                                                                    data-size="sm"
+                                                                    data-variant="ghost"
+                                                                    title={t("Cancel download")}
+                                                                >
+                                                                    {t('Cancel')}
+                                                                </button>
+                                                            </div>
+                                                            {/* The progress track is the one place a raw colour is still
                                                             right: it is a data channel, not chrome. Tokens for the
                                                             surface, accent for the fill. */}
-                                                        <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: 'var(--aip-well-bg)' }}>
-                                                            <div
-                                                                className="h-full transition-[width] duration-300 ease-out"
-                                                                style={{ width: `${progress}%`, background: 'var(--aip-accent)' }}
-                                                            />
+                                                            <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: 'var(--aip-well-bg)' }}>
+                                                                <div
+                                                                    className="h-full transition-[width] duration-300 ease-out"
+                                                                    style={{ width: `${progress}%`, background: 'var(--aip-accent)' }}
+                                                                />
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                )}
+                                                    )}
 
-                                                {/* Plain text, no filled container. A boxed advisory is the weight
+                                                    {/* Plain text, no filled container. A boxed advisory is the weight
                                                     this panel reserves for something needing action NOW; a stalled
                                                     download already has its Retry button one column over, so the
                                                     box argued for attention the row had already earned — and at
@@ -861,56 +861,56 @@ export function LocalWhisperModelPanel({ onModelConfigChanged }: LocalWhisperMod
                                                     "Download was interrupted. Click Install to retry." while the
                                                     button beside them said "Retry" — pointing at a control that
                                                     was not there. */}
-                                                {isFailed && (
-                                                    <div className="mt-1.5 flex items-start gap-1.5 text-[11px]" style={{ color: 'var(--aip-danger)' }}>
-                                                        <AlertCircle size={12} className="shrink-0 mt-[1px]" />
-                                                        <span>
-                                                            {model.status === 'interrupted'
-                                                                ? t('Download was interrupted.')
-                                                                : model.status === 'cancelled'
-                                                                  ? t('Download cancelled.')
-                                                                  : (model.errorMessage || t('Download failed.'))}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
+                                                    {isFailed && (
+                                                        <div className="mt-1.5 flex items-start gap-1.5 text-[11px]" style={{ color: 'var(--aip-danger)' }}>
+                                                            <AlertCircle size={12} className="shrink-0 mt-[1px]" />
+                                                            <span>
+                                                                {model.status === 'interrupted'
+                                                                    ? t('Download was interrupted.')
+                                                                    : model.status === 'cancelled'
+                                                                        ? t('Download cancelled.')
+                                                                        : (model.errorMessage || t('Download failed.'))}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
 
-                                            <div className="flex-shrink-0 flex items-center gap-2">
-                                                {!isAvailable && !isDownloading && (
-                                                    <button
-                                                        onClick={() => handleDownload(model.id)}
-                                                        // Default .aip-btn — no accent variant, no danger tone. Install
-                                                        // is the ordinary action on almost every row here, so tinting
-                                                        // it made thirteen buttons shout at once; and a red Retry was a
-                                                        // second status colour beside the failure line that already
-                                                        // says what went wrong. The label carries the difference.
-                                                        className="aip-btn"
-                                                        data-size="row"
-                                                    >
-                                                        <Download size={13} />
-                                                        <span>{isFailed ? t('Retry') : t('Install')}</span>
-                                                    </button>
-                                                )}
+                                                <div className="flex-shrink-0 flex items-center gap-2">
+                                                    {!isAvailable && !isDownloading && (
+                                                        <button
+                                                            onClick={() => handleDownload(model.id)}
+                                                            // Default .aip-btn — no accent variant, no danger tone. Install
+                                                            // is the ordinary action on almost every row here, so tinting
+                                                            // it made thirteen buttons shout at once; and a red Retry was a
+                                                            // second status colour beside the failure line that already
+                                                            // says what went wrong. The label carries the difference.
+                                                            className="aip-btn"
+                                                            data-size="row"
+                                                        >
+                                                            <Download size={13} />
+                                                            <span>{isFailed ? t('Retry') : t('Install')}</span>
+                                                        </button>
+                                                    )}
 
-                                                {isAvailable && (
-                                                    <button
-                                                        onClick={() => handleDelete(model.id)}
-                                                        className="aip-btn"
-                                                        data-size="row"
-                                                        data-icon="true"
-                                                        data-variant="danger-ghost"
-                                                        // Deleting the model that is currently transcribing would
-                                                        // silently break the engine, and nothing else on this panel
-                                                        // would say why. The "In use" badge explains the disabled state.
-                                                        disabled={isInUse}
-                                                        title={isInUse ? t("This model is in use — select another first") : t("Delete model")}
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                )}
+                                                    {isAvailable && (
+                                                        <button
+                                                            onClick={() => handleDelete(model.id)}
+                                                            className="aip-btn"
+                                                            data-size="row"
+                                                            data-icon="true"
+                                                            data-variant="danger-ghost"
+                                                            // Deleting the model that is currently transcribing would
+                                                            // silently break the engine, and nothing else on this panel
+                                                            // would say why. The "In use" badge explains the disabled state.
+                                                            disabled={isInUse}
+                                                            title={isInUse ? t("This model is in use — select another first") : t("Delete model")}
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    );
+                                        );
                                     })}
                                 </div>
                             </section>
@@ -919,7 +919,7 @@ export function LocalWhisperModelPanel({ onModelConfigChanged }: LocalWhisperMod
                     })}
                 </div>
             </div>
-            
+
             {/* ── Footer note ── */}
             {hardware?.tier === 'limited' && (
                 <div className="aip-inline-warn flex items-start gap-2">

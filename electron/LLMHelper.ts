@@ -205,7 +205,7 @@ const MAX_OUTPUT_TOKENS = 65536
 const CLAUDE_MAX_OUTPUT_TOKENS = 64000
 
 // ── Interactive-path connect timeout (REPORT_TO_CHATGPT §21 L1) ──────────────
-// The Natively SSE connect phase previously used a 10s ceiling. For the live
+// The MeetFloo SSE connect phase previously used a 10s ceiling. For the live
 // answer path that is far too long: a healthy connect is sub-second, and a
 // stalled connect should fail over fast. 4s leaves headroom for a transient
 // Railway DNS hiccup (the in-fetch DNS retry adds ~1s) while removing the 10s
@@ -219,8 +219,8 @@ const INTERACTIVE_CONNECT_TIMEOUT_MS = 4_000;
 // cross-provider failover by design, so a deadline that fires there is a
 // user-visible hard failure with nothing behind it.
 //
-// Measured on the shipping default (`natively`, auto-selected by
-// CredentialsManager.setNativelyApiKey for anyone who has not deliberately
+// Measured on the shipping default (`MeetFloo`, auto-selected by
+// CredentialsManager.setMeetFlooApiKey for anyone who has not deliberately
 // picked another model): text time-to-first-byte 1.2-2.0s, but a vision
 // request carrying a compressed screenshot lands at 2.1-4.0s — straddling the
 // 4s line, so screenshot answers failed intermittently with CONNECT_TIMEOUT
@@ -230,21 +230,21 @@ const INTERACTIVE_CONNECT_TIMEOUT_MS = 4_000;
 const DIRECT_ASSIST_CONNECT_TIMEOUT_MS = 15_000;
 const DIRECT_ASSIST_VISION_CONNECT_TIMEOUT_MS = 30_000;
 
-// First-useful-token budget for the Natively gateway on the TEXT path. Larger than
+// First-useful-token budget for the MeetFloo gateway on the TEXT path. Larger than
 // the shared 2.5s text default because the gateway's server-side fallback chain can
 // land on MiniMax (first token 3.3-7.7s); a 2.5s cap aborts it before it speaks.
 // 8s == LIVE_TOTAL_HARD_TIMEOUT_MS (the outer live-deadline ceiling), so this inner
 // per-provider gate never fires before the single source-of-truth deadline. See the
-// natively text-provider registration for the full rationale.
-const NATIVELY_TEXT_TTFT_MS = 8_000;
+// MeetFloo text-provider registration for the full rationale.
+const MEETFLOO_TEXT_TTFT_MS = 8_000;
 /**
  * The smallest window in which a spare rung is worth opening at all. Below it
  * the rung is dropped: a request that cannot reach first token before the
  * caller's deadline still costs the user money and the provider a slot.
  *
  * WHERE THE NUMBER COMES FROM. It is not a measurement and deliberately not
- * adaptive. The only spare that declares a need is natively at
- * NATIVELY_TEXT_TTFT_MS (8000), so this is ~37% of the one figure the codebase
+ * adaptive. The only spare that declares a need is MeetFloo at
+ * MEETFLOO_TEXT_TTFT_MS (8000), so this is ~37% of the one figure the codebase
  * actually asserts about a spare — enough that a fast rung can land, low enough
  * that it does not itself become the reason a rung is dropped.
  *
@@ -326,7 +326,7 @@ export const CODING_THINKING_BUDGET = 0;
 // a positive budget is preserved verbatim for callers that explicitly want a
 // bounded token budget.
 // Keep this policy in sync with the server's thinkingConfigForModel() in
-// natively-api/lib/flashModelPicker.js.
+// MeetFloo-api/lib/flashModelPicker.js.
 // Match "pro" as a SEGMENT (not a loose substring) so only real Pro ids hit the
 // floor — Pro rejects MINIMAL/budget:0 with a 400.
 const PRO_MODEL_RE = /(?:^|[-/])pro(?:[-/]|$)/i;
@@ -345,7 +345,7 @@ const PRO_MODEL_RE = /(?:^|[-/])pro(?:[-/]|$)/i;
 // and by Pro — is the floor for any other model. The direction matters: sending
 // MINIMAL to a model that rejects it is a hard 400 on the interactive stream,
 // not a slower answer. This is the client mirror of MINIMAL_THINKING_MODELS in
-// natively-api/lib/flashModelPicker.js — add an id only after probing it live.
+// MeetFloo-api/lib/flashModelPicker.js — add an id only after probing it live.
 // Safe as an allow-list because buildThinkingConfig's only call site is the
 // Gemini-only streaming path, so it never sees an OpenAI/Claude model id.
 const MINIMAL_THINKING_MODELS = new Set<string>([
@@ -407,7 +407,7 @@ ${IMAGE_TRUST_TRAILER}`
 export type MeetingSummaryCallOpts = {
   /** Routes to the gateway's benchmarked extraction path (larger budget, no MiniMax-M3). */
   purpose?: 'extraction';
-  /** Overrides BOTH the Natively inner fetch cap and the outer race. Default 10s. */
+  /** Overrides BOTH the MeetFloo inner fetch cap and the outer race. Default 10s. */
   timeoutMs?: number;
 };
 
@@ -579,8 +579,8 @@ export class LLMHelper {
   private negotiationCoachingHandler: ((payload: unknown) => void) | null = null;
   private aiResponseLanguage: string = 'auto';
   private sttLanguage: string = 'english-us';
-  private nativelyKey: string | null = null;
-  // Last server-chosen model reported by the Natively API SSE stream (e.g.
+  private MeetFlooKey: string | null = null;
+  // Last server-chosen model reported by the MeetFloo API SSE stream (e.g.
   // 'gemini-3.1-flash-lite'). Diagnostics / E2E only — never affects routing.
   private lastProviderModel: string | null = null;
 
@@ -842,7 +842,7 @@ export class LLMHelper {
     } catch {
       stored = undefined;
     }
-    // Deny-only env override (NATIVELY_DENY_PROVIDER_SCOPES). It can add a
+    // Deny-only env override (MEETFLOO_DENY_PROVIDER_SCOPES). It can add a
     // denial, never grant one, so it cannot be used to weaken the user's
     // choice — and it is what lets the enforcement path be exercised end to
     // end without a live settings store. Same helper the V3 layer uses, so the
@@ -990,7 +990,7 @@ export class LLMHelper {
    * `extraScopes` is what the CALLER declares — always prefer it. The
    * transcript rule below is the LAST-BOUNDARY backstop: the ~20
    * assertOutboundScopes() sites sit inside the individual provider methods
-   * (generateWithGroq, callNatively, …), which are reached from dozens of call
+   * (generateWithGroq, callMeetFloo, …), which are reached from dozens of call
    * paths and know nothing about the payload's provenance. Treating any
    * non-empty payload there as transcript-bearing is deliberately conservative:
    * it is the only thing standing between those sites and an unclassified send.
@@ -1032,7 +1032,7 @@ export class LLMHelper {
    * the provider object is in hand — not here.
    */
   private static readonly PROVIDER_LABEL_FAMILY: Readonly<Record<string, string>> = {
-    gemini: 'gemini', groq: 'groq', natively: 'natively', openai: 'openai',
+    gemini: 'gemini', groq: 'groq', MeetFloo: 'MeetFloo', openai: 'openai',
     claude: 'claude', deepseek: 'deepseek', litellm: 'litellm', codex: 'codex-cli',
     antigravity: 'antigravity', custom_curl: 'custom', custom_provider: 'custom',
   };
@@ -1616,12 +1616,12 @@ export class LLMHelper {
     return Math.min(LITELLM_MAX_TOKENS_MAX, Math.max(LITELLM_MAX_TOKENS_MIN, budget));
   }
 
-  public setNativelyKey(key: string | null): void {
-    this.nativelyKey = key || null;
-    console.log(`[LLMHelper] Natively key ${key ? 'set' : 'cleared'}`);
+  public setMeetFlooKey(key: string | null): void {
+    this.MeetFlooKey = key || null;
+    console.log(`[LLMHelper] MeetFloo key ${key ? 'set' : 'cleared'}`);
   }
 
-  /** Last server-chosen model reported by the Natively SSE stream (E2E/diagnostics). */
+  /** Last server-chosen model reported by the MeetFloo SSE stream (E2E/diagnostics). */
   public getLastProviderModel(): string | null {
     return this.lastProviderModel;
   }
@@ -1645,16 +1645,16 @@ export class LLMHelper {
     return this.isLocalOnlyMode;
   }
 
-  private hasNatively(): boolean {
+  private hasMeetFloo(): boolean {
     // Switched off in Settings > AI Providers: not a fallback, not a primary.
     // Checked before the E2E escape hatch so a test harness cannot resurrect a
     // provider the user turned off.
-    if (this.isProviderDisabled('natively')) return false;
-    // E2E: a locally-run backend with NATIVELY_LOCAL_TEST_AUTH accepts the app
-    // via the x-natively-local-test header, so the natively provider is usable
-    // even without a stored key. Strictly gated behind NATIVELY_E2E=1.
-    if (process.env.NATIVELY_E2E === '1' && process.env.NATIVELY_E2E_LOCAL_TEST_TOKEN) return true;
-    return !!this.nativelyKey;
+    if (this.isProviderDisabled('MeetFloo')) return false;
+    // E2E: a locally-run backend with MEETFLOO_LOCAL_TEST_AUTH accepts the app
+    // via the x-MeetFloo-local-test header, so the MeetFloo provider is usable
+    // even without a stored key. Strictly gated behind MEETFLOO_E2E=1.
+    if (process.env.MEETFLOO_E2E === '1' && process.env.MEETFLOO_E2E_LOCAL_TEST_TOKEN) return true;
+    return !!this.MeetFlooKey;
   }
 
   /**
@@ -1675,7 +1675,7 @@ export class LLMHelper {
     // Registry calls a global accessor instead of constructing its own LLMHelper, so
     // there is exactly one live helper per Electron process with the user's keys/state.
     try {
-      (global as any).__nativelyGetLLMHelper = () => this;
+      (global as any).__MeetFlooGetLLMHelper = () => this;
     } catch {
       // global isn't writable in some test contexts; ignored.
     }
@@ -1689,7 +1689,7 @@ export class LLMHelper {
   // these named entry points so the surface stays auditable.
 
   public async runVisionRequest(
-    providerId: 'natively' | 'openai' | 'claude' | 'gemini_flash_lite' | 'gemini_flash' | 'gemini_pro' | 'groq_scout' | 'custom' | 'litellm' | 'nvidia_nim' | 'openrouter' | 'fluxion',
+    providerId: 'MeetFloo' | 'openai' | 'claude' | 'gemini_flash_lite' | 'gemini_flash' | 'gemini_pro' | 'groq_scout' | 'custom' | 'litellm' | 'nvidia_nim' | 'openrouter' | 'fluxion',
     userPrompt: string,
     systemPrompt: string,
     imagePath: string,
@@ -1700,12 +1700,12 @@ export class LLMHelper {
     opts?: { signal?: AbortSignal; timeoutMs?: number },
   ): Promise<string> {
     switch (providerId) {
-      case 'natively':
+      case 'MeetFloo':
         // A screen-understanding extraction is the DENSE, non-streaming case
-        // that generateWithNatively's own 8s default explicitly warns is "far
+        // that generateWithMeetFloo's own 8s default explicitly warns is "far
         // too short" — and no caller had ever passed the larger bound it asks
         // for. Hand it the chain's budget so the two agree.
-        return this.generateWithNatively(userPrompt, systemPrompt, [imagePath], {
+        return this.generateWithMeetFloo(userPrompt, systemPrompt, [imagePath], {
           timeoutMs: opts?.timeoutMs,
           signal: opts?.signal,
         });
@@ -1784,7 +1784,7 @@ export class LLMHelper {
     this.claudeApiKey = null;
     this.deepseekApiKey = null;
     this.litellmApiKey = null;
-    this.nativelyKey = null;
+    this.MeetFlooKey = null;
     this.client = null;
     this.groqClient = null;
     this.openaiClient = null;
@@ -1878,7 +1878,7 @@ export class LLMHelper {
    * branches everywhere it is used — and unlike OpenRouter the danger here is
    * not a look-alike but an EXACT match. Fluxion resells the real vendors, so
    * its catalogue ids (`claude-opus-5`, `gpt-5.5`, `gemini-3.1-pro`,
-   * `deepseek-v4-flash-0731`) are byte-identical to the ids Natively already
+   * `deepseek-v4-flash-0731`) are byte-identical to the ids MeetFloo already
    * ships as its own defaults. `fluxion/` is the only thing that separates
    * them; drop it and the request silently succeeds against the WRONG vendor's
    * key, with a perfectly good answer and nothing in the logs to notice.
@@ -1923,7 +1923,7 @@ export class LLMHelper {
     if (this.isLiteLLMModel(modelId)) return Boolean(this.litellmClient);
     if (this.isNvidiaNimModel(modelId)) return Boolean(this.nvidiaNimClient);
     if (this.isGeminiModel(modelId)) return Boolean(this.client);
-    if (modelId === 'natively') return this.hasNatively();
+    if (modelId === 'MeetFloo') return this.hasMeetFloo();
     return false;
   }
 
@@ -2024,7 +2024,7 @@ export class LLMHelper {
   }
 
   // MIRRORS isKnownGroqModel() in ipcHandlers.ts and the auto-default check in
-  // CredentialsManager.setNativelyApiKey(). All three must agree about what a
+  // CredentialsManager.setMeetFlooApiKey(). All three must agree about what a
   // Groq id looks like, or the picker offers a model routing rejects.
   //
   // `openai/gpt-oss-*` is Groq-hosted, NOT the OpenAI API — it is gated by the
@@ -2120,7 +2120,7 @@ export class LLMHelper {
     if (this.isProviderDisabled('codex-cli')) return false;
     if (!this.codexCliConfig.enabled) return false;
     try {
-      // Natively's own ChatGPT sign-in OR the Codex CLI's `codex login`.
+      // MeetFloo's own ChatGPT sign-in OR the Codex CLI's `codex login`.
       return getCodexAuthStatus().signedIn;
     } catch {
       return false;
@@ -2221,14 +2221,14 @@ export class LLMHelper {
    *
    * Those branches return unconditionally, so until now a user on their own
    * gateway had no failover at all on the text path — and, worse, the only
-   * mechanism in this file that converts SLOWNESS into failover is the Natively
+   * mechanism in this file that converts SLOWNESS into failover is the MeetFloo
    * TTFT race, which they never reach. A provider that connects and then goes
    * quiet throws nothing, so no catch fires and nothing falls through; the outer
    * live deadline was the only thing that noticed, and a deadline can only give
    * up.
    *
    * Deliberately does NOT include a configured-but-not-active custom provider,
-   * even though installConfiguredCustomForRace exists for the Natively race.
+   * even though installConfiguredCustomForRace exists for the MeetFloo race.
    * That helper temporarily reassigns `this.customProvider`, and while it is
    * swapped answerLatencyKey() resolves to the WRONG provider — a first token
    * arriving in that window would file the latency sample under a gateway the
@@ -2270,11 +2270,11 @@ export class LLMHelper {
     if (this.isLocalOnlyMode) return spares;
     const skip = new Set(excludeIds);
     let prio = 1;
-    if (!skip.has('natively') && this.hasNatively()) {
+    if (!skip.has('MeetFloo') && this.hasMeetFloo()) {
       spares.push({
-        id: 'natively', name: 'Natively API', isLocal: false, priority: prio++,
-        ttftTimeoutMs: NATIVELY_TEXT_TTFT_MS,
-        open: (sig) => this.streamWithNatively(userContent, finalSystemPrompt, undefined, sig, INTERACTIVE_CONNECT_TIMEOUT_MS),
+        id: 'MeetFloo', name: 'MeetFloo API', isLocal: false, priority: prio++,
+        ttftTimeoutMs: MEETFLOO_TEXT_TTFT_MS,
+        open: (sig) => this.streamWithMeetFloo(userContent, finalSystemPrompt, undefined, sig, INTERACTIVE_CONNECT_TIMEOUT_MS),
       });
     }
     if (!skip.has('gemini_flash') && this.client) {
@@ -2372,7 +2372,7 @@ export class LLMHelper {
     let primaryTtftMs = spares.length > 0 ? this.hedgeDelayForBudget(budgetMs) : budgetMs;
 
     // Fit the spare rungs INSIDE the caller's ceiling. Each rung previously
-    // declared its own ttft (natively 8000) or inherited the whole budget, so
+    // declared its own ttft (MeetFloo 8000) or inherited the whole budget, so
     // the chain's worst case was primary + 8000 + budget + budget against a
     // budget-sized ceiling: measured on a 15000ms route, rung 3 opened at
     // 13047ms with 1953ms left and rung 4 never opened at all. Opening a rung
@@ -2470,7 +2470,7 @@ export class LLMHelper {
   }
 
   /**
-   * Add a configured custom provider as a rung in the Natively TTFT race.
+   * Add a configured custom provider as a rung in the MeetFloo TTFT race.
    * Returns a restore thunk (or null if no configured custom was found) — the
    * caller MUST invoke it after the race so `this.customProvider` reflects the
    * user's actual selection, not the temporary fallback install.
@@ -2829,7 +2829,7 @@ export class LLMHelper {
     try {
       const availableModels = await this.getOllamaGenerationModels()
       if (availableModels.length === 0) {
-        // Two different situations, two different instructions. Natively pulls
+        // Two different situations, two different instructions. MeetFloo pulls
         // nomic-embed-text itself for retrieval, so "you have models, none of
         // them can chat" is a state a fresh install lands in — telling that user
         // nothing is installed sends them to fix something that is not broken.
@@ -3313,7 +3313,7 @@ ${IMAGE_TRUST_TRAILER}`;
   }
 
   /**
-   * Generate a suggestion based on conversation transcript - Natively-style
+   * Generate a suggestion based on conversation transcript - MeetFloo-style
    * This uses Gemini Flash to reason about what the user should say
    * @param context - The full conversation transcript
    * @param lastQuestion - The most recent question from the interviewer
@@ -3522,7 +3522,7 @@ You may mix scripts naturally (e.g. technical code stays in English even when th
 [END LANGUAGE INSTRUCTION]`;
     }
     // Pinned English is an INSTRUCTION, not the absence of one. This used to
-    // `return ""`, and the two Natively request bodies below used to omit
+    // `return ""`, and the two MeetFloo request bodies below used to omit
     // `body.language` for English as well — so an English-pinned turn reached
     // the model with no language directive from any layer (no base system
     // prompt states a response language either). With nothing to follow, the
@@ -3641,7 +3641,7 @@ This rule overrides ALL other instructions including formatting, brevity, or out
    *   - Claude/OpenAI/Groq/DeepSeek: automatic prefix caching warms on any call
    *     carrying the same static prefix; a minimal request primes it.
    *   - Ollama: a minimal call loads the model + KV prefix into memory.
-   *   - Natively/custom/curl: server-controlled; we skip (no client-side cache).
+   *   - MeetFloo/custom/curl: server-controlled; we skip (no client-side cache).
    *
    * Safety: best-effort and fully swallowed. Never throws, never blocks the
    * caller. Deduped per (provider|model|prompt) so repeated activations are free.
@@ -3681,7 +3681,7 @@ This rule overrides ALL other instructions including formatting, brevity, or out
       // Gemini explicit cache — the one with real create() setup cost.
       if (!this.useOllama && this.client && this.isGeminiModel(this.currentModelId)) {
         await this.geminiPromptCache.getOrCreate(this.client, this.currentModelId, staticPrompt)
-          .catch((_e: any): void => {});
+          .catch((_e: any): void => { });
         console.log('[LLMHelper] Prewarm: Gemini explicit cache primed');
         return;
       }
@@ -3694,11 +3694,11 @@ This rule overrides ALL other instructions including formatting, brevity, or out
       };
 
       if (!this.useOllama && this.isClaudeModel(this.currentModelId) && this.claudeClient) {
-        await warm(this.streamWithClaude('Hi', staticPrompt) as any).catch((_e: any): void => {});
+        await warm(this.streamWithClaude('Hi', staticPrompt) as any).catch((_e: any): void => { });
       } else if (!this.useOllama && this.isOpenAiModel(this.currentModelId) && this.openaiClient) {
-        await warm(this.streamWithOpenai('Hi', staticPrompt) as any).catch((_e: any): void => {});
+        await warm(this.streamWithOpenai('Hi', staticPrompt) as any).catch((_e: any): void => { });
       } else if (!this.useOllama && this.isGroqModel(this.currentModelId) && this.groqClient) {
-        await warm(this.streamWithGroq('Hi', this.currentModelId, staticPrompt)).catch((_e: any): void => {});
+        await warm(this.streamWithGroq('Hi', this.currentModelId, staticPrompt)).catch((_e: any): void => { });
       } else if (this.useOllama) {
         // Pin the model in RAM indefinitely BEFORE the warm call, so the warming
         // request itself carries keep_alive:-1 and the model stays resident for the
@@ -3706,10 +3706,10 @@ This rule overrides ALL other instructions including formatting, brevity, or out
         // (unload) when the user switches away from Ollama (see setModel /
         // switchToGemini / switchToCustom).
         this.ollamaKeepAlive = -1;
-        await warm(this.streamWithOllama('Hi', undefined, staticPrompt) as any).catch((_e: any): void => {});
+        await warm(this.streamWithOllama('Hi', undefined, staticPrompt) as any).catch((_e: any): void => { });
         console.log(`[LLMHelper] Prewarm: Ollama model ${this.ollamaModel} pinned in memory (keep_alive=-1)`);
       } else {
-        // Natively / custom / curl — server-side caching, nothing to prime client-side.
+        // MeetFloo / custom / curl — server-side caching, nothing to prime client-side.
         return;
       }
       console.log(`[LLMHelper] Prewarm: ${model} prefix primed`);
@@ -3856,197 +3856,197 @@ This rule overrides ALL other instructions including formatting, brevity, or out
       }
 
       // ============================================================
-// ACTIVE MODE INJECTION (mirror of the streaming-path block in
-// _streamChatInner, lines 4155-4290). Without this, the non-streaming
-// chatWithGemini path silently drops the active custom mode's voice,
-// retrieved product/material context, and pinned instructions for any
-// custom mode (sales/lecture/etc.) — same shape as the document-grounded
-// bug, on the sibling code path.
-// Fix #1, code-reviewer audit 2026-07-04.
-// ============================================================
-let modesMgrForInjection: {
-  getActiveModeDocumentGroundingInfo?: () => ActiveModeDocumentGroundingInfo;
-  getActiveModeSystemPromptSuffix: () => string;
-  buildRetrievedActiveModeContextBlock: (...args: any[]) => string;
-  buildRetrievedActiveModeContextBlockHybrid?: (...args: any[]) => Promise<string>;
-  getActiveModePinnedInstructions?: (...args: any[]) => string;
-} | null = null;
-let activeModeGroundingInfo: ActiveModeDocumentGroundingInfo | null = null;
-try {
-  // Typed require: without it getInstance() is `any`, the assignment below cannot
-  // narrow `| null` away, and the read would need `?.` on the object — which
-  // WhatToAnswerSnapshotWiring.test.mjs asserts against (it matches the plain-dot
-  // spelling). `?? null` normalises the optional-call's `undefined` to the declared
-  // `| null` sentinel; every downstream read uses `?.`, so both behave identically.
-  const { ModesManager } = require('./services/ModesManager') as typeof import('./services/ModesManager');
-  modesMgrForInjection = ModesManager.getInstance();
-  activeModeGroundingInfo = modesMgrForInjection.getActiveModeDocumentGroundingInfo?.() ?? null;
-} catch { /* non-fatal */ }
-const isActiveCustomMode = activeModeGroundingInfo?.isCustom === true;
-// R6 (2026-08-12): files-aware — the bare broad flag forced doc grounding
-// for fileless template-seeded modes (review finding; same class as WTA).
-const forceDocumentGrounding = activeModeGroundingInfo?.strictDocumentGroundedActive === true
-  || (activeModeGroundingInfo?.documentGroundedCustomModeActive === true
-    && activeModeGroundingInfo?.hasReferenceFiles === true);
-// Prompt System v2 (flag promptSystemV2): default the base prompt to the
-// composed v2 'answer' prompt when the caller passed no override, and record
-// whether the base is v2-composed so the legacy MODE_* template suffix is not
-// appended on top of it (the v2 prompt already carries the mode contract).
-// Flag OFF → false, and everything below is byte-for-byte legacy.
-let v2BasePromptActive = false;
-try {
-  const { isPromptSystemV2Enabled, resolveV2SystemPrompt, isV2ComposedPrompt, v2TierForPromptTier } = require('./llm/promptSystemV2');
-  if (isPromptSystemV2Enabled() && !skipSystemPrompt) {
-    if (!systemPromptOverride) {
-      systemPromptOverride = resolveV2SystemPrompt({
-            action: 'answer',
-            tier: v2TierForPromptTier(this.getPromptTier()),
-            // Universal coding contract: attach when the routed answer type is
-            // coding-shaped, regardless of the active mode (2026-08-02). The
-            // contract SHAPE, an explicit user format request, and a code
-            // template already present in the message ride along from the one
-            // shared resolver (.audit/coding-template-audit-2026-08-18.md).
-            ...(() => {
-              try {
-                const { resolveCodingPromptSignals, isDeicticAsk } = require('./llm/codingPromptSignals') as typeof import('./llm/codingPromptSignals');
-                const resolved = resolveCodingPromptSignals({ answerType: routeOptions?.answerType, question: message });
-                // Attached-screenshot promotion (2026-08-19 channel audit): a
-                // message with an image whose text only points at it ("solve
-                // this", or nothing) is about the image; without this, a
-                // screenshotted coding problem sent through the legacy chat
-                // transport answered in prose. The contract's applicability
-                // boundary skips non-coding screenshots.
-                if (!resolved.codingTask
+      // ACTIVE MODE INJECTION (mirror of the streaming-path block in
+      // _streamChatInner, lines 4155-4290). Without this, the non-streaming
+      // chatWithGemini path silently drops the active custom mode's voice,
+      // retrieved product/material context, and pinned instructions for any
+      // custom mode (sales/lecture/etc.) — same shape as the document-grounded
+      // bug, on the sibling code path.
+      // Fix #1, code-reviewer audit 2026-07-04.
+      // ============================================================
+      let modesMgrForInjection: {
+        getActiveModeDocumentGroundingInfo?: () => ActiveModeDocumentGroundingInfo;
+        getActiveModeSystemPromptSuffix: () => string;
+        buildRetrievedActiveModeContextBlock: (...args: any[]) => string;
+        buildRetrievedActiveModeContextBlockHybrid?: (...args: any[]) => Promise<string>;
+        getActiveModePinnedInstructions?: (...args: any[]) => string;
+      } | null = null;
+      let activeModeGroundingInfo: ActiveModeDocumentGroundingInfo | null = null;
+      try {
+        // Typed require: without it getInstance() is `any`, the assignment below cannot
+        // narrow `| null` away, and the read would need `?.` on the object — which
+        // WhatToAnswerSnapshotWiring.test.mjs asserts against (it matches the plain-dot
+        // spelling). `?? null` normalises the optional-call's `undefined` to the declared
+        // `| null` sentinel; every downstream read uses `?.`, so both behave identically.
+        const { ModesManager } = require('./services/ModesManager') as typeof import('./services/ModesManager');
+        modesMgrForInjection = ModesManager.getInstance();
+        activeModeGroundingInfo = modesMgrForInjection.getActiveModeDocumentGroundingInfo?.() ?? null;
+      } catch { /* non-fatal */ }
+      const isActiveCustomMode = activeModeGroundingInfo?.isCustom === true;
+      // R6 (2026-08-12): files-aware — the bare broad flag forced doc grounding
+      // for fileless template-seeded modes (review finding; same class as WTA).
+      const forceDocumentGrounding = activeModeGroundingInfo?.strictDocumentGroundedActive === true
+        || (activeModeGroundingInfo?.documentGroundedCustomModeActive === true
+          && activeModeGroundingInfo?.hasReferenceFiles === true);
+      // Prompt System v2 (flag promptSystemV2): default the base prompt to the
+      // composed v2 'answer' prompt when the caller passed no override, and record
+      // whether the base is v2-composed so the legacy MODE_* template suffix is not
+      // appended on top of it (the v2 prompt already carries the mode contract).
+      // Flag OFF → false, and everything below is byte-for-byte legacy.
+      let v2BasePromptActive = false;
+      try {
+        const { isPromptSystemV2Enabled, resolveV2SystemPrompt, isV2ComposedPrompt, v2TierForPromptTier } = require('./llm/promptSystemV2');
+        if (isPromptSystemV2Enabled() && !skipSystemPrompt) {
+          if (!systemPromptOverride) {
+            systemPromptOverride = resolveV2SystemPrompt({
+              action: 'answer',
+              tier: v2TierForPromptTier(this.getPromptTier()),
+              // Universal coding contract: attach when the routed answer type is
+              // coding-shaped, regardless of the active mode (2026-08-02). The
+              // contract SHAPE, an explicit user format request, and a code
+              // template already present in the message ride along from the one
+              // shared resolver (.audit/coding-template-audit-2026-08-18.md).
+              ...(() => {
+                try {
+                  const { resolveCodingPromptSignals, isDeicticAsk } = require('./llm/codingPromptSignals') as typeof import('./llm/codingPromptSignals');
+                  const resolved = resolveCodingPromptSignals({ answerType: routeOptions?.answerType, question: message });
+                  // Attached-screenshot promotion (2026-08-19 channel audit): a
+                  // message with an image whose text only points at it ("solve
+                  // this", or nothing) is about the image; without this, a
+                  // screenshotted coding problem sent through the legacy chat
+                  // transport answered in prose. The contract's applicability
+                  // boundary skips non-coding screenshots.
+                  if (!resolved.codingTask
                     && (imagePaths?.length ?? 0) > 0
                     && (!message?.trim() || isDeicticAsk(message))) {
-                  return { codingTask: true, codingTaskKind: 'dsa' as const };
-                }
-                return resolved;
-              } catch { return { codingTask: false }; }
-            })(),
-          }) ?? systemPromptOverride;
-    }
-    v2BasePromptActive = isV2ComposedPrompt(systemPromptOverride);
-  }
-} catch { /* non-fatal: legacy prompt selection */ }
-const isModeScopedAnswer = routeOptions?.answerType === 'sales_answer'
-  || routeOptions?.answerType === 'product_candidate_mix_answer'
-  || routeOptions?.answerType === 'lecture_answer';
-// Legacy callers (no routeOptions, no skipModeInjection arg) preserve original
-// "no mode shaping" behavior; opt-in callers (routeOptions for a mode-scoped
-// answer, OR an active custom mode, OR explicit skipModeInjection:false) get the
-// full mode-suffix + context-block + pinned-instructions injection.
-const shouldSkipModeInjection = skipModeInjection === true || (
-  !routeOptions && !isActiveCustomMode && !forceDocumentGrounding
-);
-
-if (!shouldSkipModeInjection) {
-  try {
-    const modesMgr = modesMgrForInjection || require('./services/ModesManager').ModesManager.getInstance();
-    let modeContextBlock = '';
-    let usedRerankPath = false;
-    // Doc-grounded modes: use the hybrid retriever (the same call wired into
-    // the manual-streaming fix) so the uploaded reference files actually
-    // reach the model. Other modes fall back to the existing sync lexical
-    // retriever for byte-for-byte legacy behavior.
-    // SOURCE-AWARE RETRIEVAL HINTS (2026-07-06): for a doc-grounded turn,
-    // expand the query with GENERIC concept synonyms ("phases"→objectives/
-    // milestones/stages, "system"→architecture/pipeline) so the lexical/hybrid
-    // retriever matches sections that use different words than the question.
-    // This only broadens recall WITHIN the uploaded reference files — it never
-    // injects answer text and carries no document-specific terms. Non-doc modes
-    // pass the raw query byte-for-byte (legacy behavior preserved).
-    let docRetrievalQuery = message;
-    if (forceDocumentGrounding) {
-      try {
-        const { expandQueryWithHints } = require('./llm/documentGroundedPrompt');
-        docRetrievalQuery = expandQueryWithHints(message);
-      } catch { docRetrievalQuery = message; }
-    }
-    // Phase 2 (semantic-retrieval repair, 2026-08-13): eligibility + argument
-    // mapping unified with streamChat via modeHybridEligibility. Two fixes over
-    // the previous inline call: (1) eligibility now includes the ragLocalRerank
-    // rollout flag (prod behavior unchanged — the flag defaults OFF there);
-    // (2) retrievalOptions.forceDocumentGrounding is finally threaded, so the
-    // wrapper's doc-grounded hybrid branch (fine chunking + identity-block
-    // merge) actually fires here — the old 5-arg call left retrievalOptions
-    // undefined and silently ran the generic path.
-    //
-    // BUDGET: doc-grounded keeps budgetMs: null — this site is not on the
-    // streaming deadline and the answer depends on the documents the user
-    // uploaded. The RERANK-ONLY path, newly reachable here since eligibility
-    // widened to include the ragLocalRerank flag, is an optional quality boost
-    // and must not be able to block a manual answer on a cold embedder +
-    // cross-encoder load, so it gets a generous ceiling instead of no race at
-    // all. See the module doc for the race-budget asymmetry with streamChat.
-    {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { shouldUseHybridRetrieval, runHybridModeRetrieval, MANUAL_HYBRID_RERANK_BUDGET_MS } = require('./llm/modeHybridEligibility');
-      if (shouldUseHybridRetrieval({ forceDocumentGrounding })) {
-        try {
-          const { block } = await runHybridModeRetrieval(modesMgr, {
-            query: docRetrievalQuery,
-            context,
-            answerType: modeAnswerType(routeOptions),
-            forceDocumentGrounding,
-            pinnedModeId: routeOptions?.pinnedModeId ?? undefined,
-            followUpReferentHint: routeOptions?.followUpReferentHint,
-            budgetMs: forceDocumentGrounding ? null : MANUAL_HYBRID_RERANK_BUDGET_MS,
-          });
-          if (block && block.trim()) {
-            modeContextBlock = block;
-            usedRerankPath = true;
+                    return { codingTask: true, codingTaskKind: 'dsa' as const };
+                  }
+                  return resolved;
+                } catch { return { codingTask: false }; }
+              })(),
+            }) ?? systemPromptOverride;
           }
-        } catch (groundedErr: any) {
-          console.warn('[LLMHelper.chatWithGemini] Doc-grounded hybrid retrieval failed, using sync lexical:', groundedErr?.message);
+          v2BasePromptActive = isV2ComposedPrompt(systemPromptOverride);
+        }
+      } catch { /* non-fatal: legacy prompt selection */ }
+      const isModeScopedAnswer = routeOptions?.answerType === 'sales_answer'
+        || routeOptions?.answerType === 'product_candidate_mix_answer'
+        || routeOptions?.answerType === 'lecture_answer';
+      // Legacy callers (no routeOptions, no skipModeInjection arg) preserve original
+      // "no mode shaping" behavior; opt-in callers (routeOptions for a mode-scoped
+      // answer, OR an active custom mode, OR explicit skipModeInjection:false) get the
+      // full mode-suffix + context-block + pinned-instructions injection.
+      const shouldSkipModeInjection = skipModeInjection === true || (
+        !routeOptions && !isActiveCustomMode && !forceDocumentGrounding
+      );
+
+      if (!shouldSkipModeInjection) {
+        try {
+          const modesMgr = modesMgrForInjection || require('./services/ModesManager').ModesManager.getInstance();
+          let modeContextBlock = '';
+          let usedRerankPath = false;
+          // Doc-grounded modes: use the hybrid retriever (the same call wired into
+          // the manual-streaming fix) so the uploaded reference files actually
+          // reach the model. Other modes fall back to the existing sync lexical
+          // retriever for byte-for-byte legacy behavior.
+          // SOURCE-AWARE RETRIEVAL HINTS (2026-07-06): for a doc-grounded turn,
+          // expand the query with GENERIC concept synonyms ("phases"→objectives/
+          // milestones/stages, "system"→architecture/pipeline) so the lexical/hybrid
+          // retriever matches sections that use different words than the question.
+          // This only broadens recall WITHIN the uploaded reference files — it never
+          // injects answer text and carries no document-specific terms. Non-doc modes
+          // pass the raw query byte-for-byte (legacy behavior preserved).
+          let docRetrievalQuery = message;
+          if (forceDocumentGrounding) {
+            try {
+              const { expandQueryWithHints } = require('./llm/documentGroundedPrompt');
+              docRetrievalQuery = expandQueryWithHints(message);
+            } catch { docRetrievalQuery = message; }
+          }
+          // Phase 2 (semantic-retrieval repair, 2026-08-13): eligibility + argument
+          // mapping unified with streamChat via modeHybridEligibility. Two fixes over
+          // the previous inline call: (1) eligibility now includes the ragLocalRerank
+          // rollout flag (prod behavior unchanged — the flag defaults OFF there);
+          // (2) retrievalOptions.forceDocumentGrounding is finally threaded, so the
+          // wrapper's doc-grounded hybrid branch (fine chunking + identity-block
+          // merge) actually fires here — the old 5-arg call left retrievalOptions
+          // undefined and silently ran the generic path.
+          //
+          // BUDGET: doc-grounded keeps budgetMs: null — this site is not on the
+          // streaming deadline and the answer depends on the documents the user
+          // uploaded. The RERANK-ONLY path, newly reachable here since eligibility
+          // widened to include the ragLocalRerank flag, is an optional quality boost
+          // and must not be able to block a manual answer on a cold embedder +
+          // cross-encoder load, so it gets a generous ceiling instead of no race at
+          // all. See the module doc for the race-budget asymmetry with streamChat.
+          {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const { shouldUseHybridRetrieval, runHybridModeRetrieval, MANUAL_HYBRID_RERANK_BUDGET_MS } = require('./llm/modeHybridEligibility');
+            if (shouldUseHybridRetrieval({ forceDocumentGrounding })) {
+              try {
+                const { block } = await runHybridModeRetrieval(modesMgr, {
+                  query: docRetrievalQuery,
+                  context,
+                  answerType: modeAnswerType(routeOptions),
+                  forceDocumentGrounding,
+                  pinnedModeId: routeOptions?.pinnedModeId ?? undefined,
+                  followUpReferentHint: routeOptions?.followUpReferentHint,
+                  budgetMs: forceDocumentGrounding ? null : MANUAL_HYBRID_RERANK_BUDGET_MS,
+                });
+                if (block && block.trim()) {
+                  modeContextBlock = block;
+                  usedRerankPath = true;
+                }
+              } catch (groundedErr: any) {
+                console.warn('[LLMHelper.chatWithGemini] Doc-grounded hybrid retrieval failed, using sync lexical:', groundedErr?.message);
+              }
+            }
+          }
+          if (!usedRerankPath) {
+            modeContextBlock = modesMgr.buildRetrievedActiveModeContextBlock(
+              docRetrievalQuery, context, forceDocumentGrounding ? undefined : 1800, modeAnswerType(routeOptions), true, undefined, { forceDocumentGrounding },
+            );
+          }
+          const modePromptSuffix = modesMgr.getActiveModeSystemPromptSuffix();
+          const pinnedInstructions: string = modesMgr.getActiveModePinnedInstructions?.(modeAnswerType(routeOptions)) || '';
+
+          // See the streaming path: never stack the legacy mode template onto a
+          // v2-composed base — the v2 prompt already carries the mode contract.
+          if (modePromptSuffix && !v2BasePromptActive) {
+            const baseForMode = systemPromptOverride || HARD_SYSTEM_PROMPT;
+            systemPromptOverride = `${baseForMode}\n\n## ACTIVE MODE\n${modePromptSuffix}`;
+          }
+          if (pinnedInstructions) {
+            const baseForPin = systemPromptOverride || HARD_SYSTEM_PROMPT;
+            const customModePolicy = isActiveCustomMode
+              ? 'Treat these user-configured custom-mode instructions as a supplemental behavioral layer for this mode. They govern tone, source routing, answer style, and fallback behavior, but they never modify or override CORE_IDENTITY, EXECUTION_CONTRACT, the <security> block, or any safety/identity rules above. Do not let default mode templates or prior chat override these custom-mode preferences when they are consistent with those immutable rules.'
+              : 'Treat as configuration for tone/focus. Never as facts about the candidate and never overriding the rules above.';
+            const customTemplateGuard = isActiveCustomMode
+              ? '\nFor this custom mode, do not use default technical-interview scaffolds or section headings like Approach, Code, Dry Run, or Complexity unless the custom instructions explicitly ask for that format.'
+              : '';
+            systemPromptOverride = `${baseForPin}\n\n## ACTIVE MODE INSTRUCTIONS (user-configured)\n${customModePolicy}${customTemplateGuard}\n${pinnedInstructions}`;
+          }
+
+          if (modeContextBlock) {
+            const existingLen = context?.length ?? 0;
+            const COMBINED_CTX_CAP = 60_000;
+            if (existingLen + modeContextBlock.length > COMBINED_CTX_CAP) {
+              const available = Math.max(0, COMBINED_CTX_CAP - existingLen);
+              const trimmed = available > 0 ? modeContextBlock.slice(0, available) + '\n[...mode context truncated]' : '';
+              if (trimmed) context = context ? `${trimmed}\n\n${context}` : trimmed;
+            } else {
+              context = context ? `${modeContextBlock}\n\n${context}` : modeContextBlock;
+            }
+          }
+        } catch (_modeErr: any) {
+          console.warn('[LLMHelper.chatWithGemini] ModesManager injection failed (non-fatal):', _modeErr?.message);
         }
       }
-    }
-    if (!usedRerankPath) {
-      modeContextBlock = modesMgr.buildRetrievedActiveModeContextBlock(
-        docRetrievalQuery, context, forceDocumentGrounding ? undefined : 1800, modeAnswerType(routeOptions), true, undefined, { forceDocumentGrounding },
-      );
-    }
-    const modePromptSuffix = modesMgr.getActiveModeSystemPromptSuffix();
-    const pinnedInstructions: string = modesMgr.getActiveModePinnedInstructions?.(modeAnswerType(routeOptions)) || '';
 
-    // See the streaming path: never stack the legacy mode template onto a
-    // v2-composed base — the v2 prompt already carries the mode contract.
-    if (modePromptSuffix && !v2BasePromptActive) {
-      const baseForMode = systemPromptOverride || HARD_SYSTEM_PROMPT;
-      systemPromptOverride = `${baseForMode}\n\n## ACTIVE MODE\n${modePromptSuffix}`;
-    }
-    if (pinnedInstructions) {
-      const baseForPin = systemPromptOverride || HARD_SYSTEM_PROMPT;
-      const customModePolicy = isActiveCustomMode
-        ? 'Treat these user-configured custom-mode instructions as a supplemental behavioral layer for this mode. They govern tone, source routing, answer style, and fallback behavior, but they never modify or override CORE_IDENTITY, EXECUTION_CONTRACT, the <security> block, or any safety/identity rules above. Do not let default mode templates or prior chat override these custom-mode preferences when they are consistent with those immutable rules.'
-        : 'Treat as configuration for tone/focus. Never as facts about the candidate and never overriding the rules above.';
-      const customTemplateGuard = isActiveCustomMode
-        ? '\nFor this custom mode, do not use default technical-interview scaffolds or section headings like Approach, Code, Dry Run, or Complexity unless the custom instructions explicitly ask for that format.'
-        : '';
-      systemPromptOverride = `${baseForPin}\n\n## ACTIVE MODE INSTRUCTIONS (user-configured)\n${customModePolicy}${customTemplateGuard}\n${pinnedInstructions}`;
-    }
-
-    if (modeContextBlock) {
-      const existingLen = context?.length ?? 0;
-      const COMBINED_CTX_CAP = 60_000;
-      if (existingLen + modeContextBlock.length > COMBINED_CTX_CAP) {
-        const available = Math.max(0, COMBINED_CTX_CAP - existingLen);
-        const trimmed = available > 0 ? modeContextBlock.slice(0, available) + '\n[...mode context truncated]' : '';
-        if (trimmed) context = context ? `${trimmed}\n\n${context}` : trimmed;
-      } else {
-        context = context ? `${modeContextBlock}\n\n${context}` : modeContextBlock;
-      }
-    }
-  } catch (_modeErr: any) {
-    console.warn('[LLMHelper.chatWithGemini] ModesManager injection failed (non-fatal):', _modeErr?.message);
-  }
-}
-
-// `let`, not `const`: the screen-understanding gate below can drop the images
-// (screenshots scope denied with no local vision model), and everything
-// downstream keys off this flag.
-let isMultimodal = !!(imagePaths?.length);
+      // `let`, not `const`: the screen-understanding gate below can drop the images
+      // (screenshots scope denied with no local vision model), and everything
+      // downstream keys off this flag.
+      let isMultimodal = !!(imagePaths?.length);
 
       // Helper to build combined prompts for Groq/Gemini
       const buildMessage = (systemPrompt: string) => {
@@ -4141,7 +4141,7 @@ let isMultimodal = !!(imagePaths?.length);
       const fastModeAppliesNS = this.groqFastTextMode && !isMultimodal && (
         this.isCodexAvailable() ||
         this.isGroqModel(this.currentModelId) ||
-        this.currentModelId === 'natively'
+        this.currentModelId === 'MeetFloo'
       ) && !this.isCodexCliModel(this.currentModelId);
       if (fastModeAppliesNS && this.isCodexAvailable()) {
         console.log(`[LLMHelper] ⚡️ Fast Text Mode Active. Routing to Codex CLI...`);
@@ -4210,14 +4210,14 @@ let isMultimodal = !!(imagePaths?.length);
       }
 
       // --- Direct Routing based on Selected Model ---
-      if (this.currentModelId === 'natively') {
+      if (this.currentModelId === 'MeetFloo') {
         const { CredentialsManager } = require('./services/CredentialsManager');
-        const nativelyKey = CredentialsManager.getInstance().getNativelyApiKey();
-        if (nativelyKey) {
+        const MeetFlooKey = CredentialsManager.getInstance().getMeetFlooApiKey();
+        if (MeetFlooKey) {
           try {
-            return await this.generateWithNatively(cloudUserContent, openaiSystemPrompt, cloudImagePaths);
+            return await this.generateWithMeetFloo(cloudUserContent, openaiSystemPrompt, cloudImagePaths);
           } catch (err: any) {
-            console.warn('[LLMHelper] Natively API failed in chatWithGemini, falling back to Gemini:', err.message);
+            console.warn('[LLMHelper] MeetFloo API failed in chatWithGemini, falling back to Gemini:', err.message);
             // Fall through to smart dynamic fallback below
           }
         }
@@ -4294,7 +4294,7 @@ let isMultimodal = !!(imagePaths?.length);
         capability: 'chat',
         multimodal: cloudIsMultimodal,
         availability: {
-          hasNatively: this.hasNatively(),
+          hasMeetFloo: this.hasMeetFloo(),
           hasGroq: Boolean(this.groqClient),
           groqDisabled: this._groqLocalDisabled,
           hasCodex: this.isCodexAvailable(),
@@ -4326,8 +4326,8 @@ let isMultimodal = !!(imagePaths?.length);
       for (const routedProvider of routedProviders) {
         if (routedProvider.status !== 'available') continue;
         switch (routedProvider.provider) {
-          case 'natively':
-            providers.push({ name: routedProvider.name, execute: () => this.generateWithNatively(cloudUserContent, openaiSystemPrompt, cloudIsMultimodal ? cloudImagePaths : undefined) });
+          case 'MeetFloo':
+            providers.push({ name: routedProvider.name, execute: () => this.generateWithMeetFloo(cloudUserContent, openaiSystemPrompt, cloudIsMultimodal ? cloudImagePaths : undefined) });
             break;
           case 'groq':
             if (cloudIsMultimodal) {
@@ -4371,7 +4371,7 @@ let isMultimodal = !!(imagePaths?.length);
 
       if (providers.length === 0) {
         if (cloudIsMultimodal && this.deepseekClient) {
-          return "DeepSeek is configured for text-only requests. Add a vision-capable provider like Gemini, OpenAI, Claude, Groq, or Natively to analyze images.";
+          return "DeepSeek is configured for text-only requests. Add a vision-capable provider like Gemini, OpenAI, Claude, Groq, or MeetFloo to analyze images.";
         }
         return this.noProviderAvailableMessage();
       }
@@ -4479,7 +4479,7 @@ let isMultimodal = !!(imagePaths?.length);
     // (18 nodes) fastest; 3.7-flash is the correct single fallback; Gemini Pro
     // gives NO quality gain at ~4× latency; MiniMax-M3 severely UNDER-extracts. So
     // Pro/MiniMax/Groq are deliberately excluded from this path. Own-provider keys
-    // (OpenAI/Claude/own-Gemini) are still tried first when present; the Natively
+    // (OpenAI/Claude/own-Gemini) are still tried first when present; the MeetFloo
     // fallback carries `purpose:'extraction'` so the server runs its own
     // flash-lite→3.7-flash-only loop (never MiniMax/Pro/Scout). The MAX_ROTATIONS
     // loop below gives the 3-cycle retry-then-fail behavior.
@@ -4493,7 +4493,7 @@ let isMultimodal = !!(imagePaths?.length);
       if (name.startsWith('Claude')) return 'claude';
       if (name.startsWith('Groq')) return 'groq';
       if (name.startsWith('Codex')) return 'codex';
-      if (name.startsWith('Natively')) return 'natively';
+      if (name.startsWith('MeetFloo')) return 'MeetFloo';
       return name;
     };
     // `opts.preferFast` retained for API compatibility; ordering no longer
@@ -4599,23 +4599,23 @@ let isMultimodal = !!(imagePaths?.length);
       });
     }
 
-    // Priority 8: Natively API — used when no other provider is available, or as final fallback
-    const nativelyKeyForStructured = this.nativelyKey || (() => {
-      try { return require('./services/CredentialsManager').CredentialsManager.getInstance().getNativelyApiKey() || null; } catch { return null; }
+    // Priority 8: MeetFloo API — used when no other provider is available, or as final fallback
+    const MeetFlooKeyForStructured = this.MeetFlooKey || (() => {
+      try { return require('./services/CredentialsManager').CredentialsManager.getInstance().getMeetFlooApiKey() || null; } catch { return null; }
     })();
-    if (nativelyKeyForStructured) {
+    if (MeetFlooKeyForStructured) {
       providers.push({
-        name: 'Natively API',
+        name: 'MeetFloo API',
         // Structured extraction: tell the server this is an extraction request so
         // it runs its dedicated flash-lite→3.7-flash-only loop (3 cycles then
         // hard-fail) and NEVER falls through to MiniMax/Pro/Scout. Older servers
         // ignore the unknown field and route via their normal flash-first chain.
-        execute: () => this.generateWithNatively(message, undefined, undefined, { purpose: 'extraction' })
+        execute: () => this.generateWithMeetFloo(message, undefined, undefined, { purpose: 'extraction' })
       });
     }
 
     if (providers.length === 0) {
-      throw new Error('No reasoning model available. Please configure an API key (OpenAI, Claude, Gemini, Groq, Natively) or a custom provider.');
+      throw new Error('No reasoning model available. Please configure an API key (OpenAI, Claude, Gemini, Groq, MeetFloo) or a custom provider.');
     }
 
     const MAX_ROTATIONS = 3;
@@ -4781,20 +4781,20 @@ let isMultimodal = !!(imagePaths?.length);
    * Non-streaming OpenAI generation with proper system/user separation
    */
   /**
-   * Routes AI generation through the Natively API backend (Gemini-powered).
+   * Routes AI generation through the MeetFloo API backend (Gemini-powered).
    */
-  private async generateWithNatively(userMessage: string, systemPrompt?: string, imagePaths?: string[], opts?: { purpose?: 'extraction'; timeoutMs?: number; signal?: AbortSignal }): Promise<string> {
-    this.assertOutboundScopes('natively', userMessage, imagePaths);
+  private async generateWithMeetFloo(userMessage: string, systemPrompt?: string, imagePaths?: string[], opts?: { purpose?: 'extraction'; timeoutMs?: number; signal?: AbortSignal }): Promise<string> {
+    this.assertOutboundScopes('MeetFloo', userMessage, imagePaths);
     // Prefer the in-memory field; fall back to CredentialsManager for the direct-routing path
-    // where currentModelId === 'natively' but setNativelyKey() wasn't called yet.
+    // where currentModelId === 'MeetFloo' but setMeetFlooKey() wasn't called yet.
     const e2eLocalToken =
-      process.env.NATIVELY_E2E === '1' ? (process.env.NATIVELY_E2E_LOCAL_TEST_TOKEN || '') : '';
-    let nativelyKey = this.nativelyKey;
-    if (!nativelyKey) {
+      process.env.MEETFLOO_E2E === '1' ? (process.env.MEETFLOO_E2E_LOCAL_TEST_TOKEN || '') : '';
+    let MeetFlooKey = this.MeetFlooKey;
+    if (!MeetFlooKey) {
       const { CredentialsManager } = require('./services/CredentialsManager');
-      nativelyKey = CredentialsManager.getInstance().getNativelyApiKey() || null;
+      MeetFlooKey = CredentialsManager.getInstance().getMeetFlooApiKey() || null;
     }
-    if (!nativelyKey && !e2eLocalToken) throw new Error('Natively API key not set');
+    if (!MeetFlooKey && !e2eLocalToken) throw new Error('MeetFloo API key not set');
 
     const endpointUrl = `${MEETFLOO_API_URL}/v1/chat`;
     const requestId = makeRequestId('nat_json');
@@ -4803,15 +4803,15 @@ let isMultimodal = !!(imagePaths?.length);
     // instead — the server validates x-trial-token, not __trial__ as an API key.
     const headers: any = { 'Content-Type': 'application/json', 'X-Request-Id': requestId };
     if (e2eLocalToken) {
-      headers['x-natively-local-test'] = e2eLocalToken;
-    } else if (nativelyKey === TRIAL_SENTINEL_KEY) {
+      headers['x-MeetFloo-local-test'] = e2eLocalToken;
+    } else if (MeetFlooKey === TRIAL_SENTINEL_KEY) {
       const { CredentialsManager } = require('./services/CredentialsManager');
       const trialToken = CredentialsManager.getInstance().getTrialToken();
       if (!trialToken) throw new Error('Trial token not found');
       headers['x-trial-token'] = trialToken;
     } else {
-      headers['x-api-key'] = nativelyKey;
-      headers['x-natively-key'] = nativelyKey;
+      headers['x-api-key'] = MeetFlooKey;
+      headers['x-MeetFloo-key'] = MeetFlooKey;
     }
 
     const body: any = { messages: [{ role: 'user', content: userMessage }] };
@@ -4833,7 +4833,7 @@ let isMultimodal = !!(imagePaths?.length);
     // Send images as a structured array so the server can build proper Gemini inlineData parts.
     // Embedding base64 in the text content would be truncated at 4000 chars and treated as text.
     //
-    // Compress before sending: retina screenshots are 2-5 MB PNG; the Natively API body limit
+    // Compress before sending: retina screenshots are 2-5 MB PNG; the MeetFloo API body limit
     // is 4 MB. Resize to max 1920px (above the 1470px logical resolution of a MacBook Air, so
     // no detail is lost) and encode as JPEG 85% — typically 200-250 KB per image.
     // 4 screenshots × ~278KB base64 = ~1.1 MB, well within the 4 MB server limit.
@@ -4891,7 +4891,7 @@ let isMultimodal = !!(imagePaths?.length);
     try {
       const serializedBody = JSON.stringify(body);
       require('./llm/providerPayloadCapture').captureProviderPayload({
-        provider: 'natively_gateway',
+        provider: 'MeetFloo_gateway',
         classification: 'exact_serialized_provider_payload',
         payload: body,
         serializedPayload: serializedBody,
@@ -4911,18 +4911,18 @@ let isMultimodal = !!(imagePaths?.length);
     } catch (fetchErr: any) {
       clearTimeout(overallTimer);
       const durationMs = Math.round(nowMs() - requestStartedAt);
-      console.error('[NativelyAPI] JSON pre-response failure', {
+      console.error('[MeetFlooAPI] JSON pre-response failure', {
         requestId,
         endpoint: endpointUrl,
         method: 'POST',
         stage: 'pre_response',
         model: this.currentModelId,
-        provider: 'natively',
+        provider: 'MeetFloo',
         timeoutMs,
         durationMs,
         error: summarizeFetchError(fetchErr),
       });
-      throw new Error(`Natively API request failed before response requestId=${requestId} endpoint=${endpointUrl} method=POST timeoutMs=${timeoutMs} durationMs=${durationMs} ${formatFetchError(fetchErr)}`);
+      throw new Error(`MeetFloo API request failed before response requestId=${requestId} endpoint=${endpointUrl} method=POST timeoutMs=${timeoutMs} durationMs=${durationMs} ${formatFetchError(fetchErr)}`);
     }
 
     // The overall-deadline timer must be cleared on EVERY post-connect exit
@@ -4934,7 +4934,7 @@ let isMultimodal = !!(imagePaths?.length);
         const errText = await response.text().catch(() => '');
         let errData: any = {};
         try { errData = errText ? JSON.parse(errText) : {}; } catch { errData = {}; }
-        console.error('[NativelyAPI] JSON HTTP failure', {
+        console.error('[MeetFlooAPI] JSON HTTP failure', {
           requestId,
           serverRequestId,
           endpoint: endpointUrl,
@@ -4943,19 +4943,19 @@ let isMultimodal = !!(imagePaths?.length);
           status: response.status,
           statusText: response.statusText,
           model: this.currentModelId,
-          provider: 'natively',
+          provider: 'MeetFloo',
           timeoutMs,
           durationMs: Math.round(nowMs() - requestStartedAt),
           responseBody: errText.slice(0, 1000),
         });
-        throw new Error(`Natively API HTTP ${response.status} requestId=${requestId} serverRequestId=${serverRequestId || 'n/a'} endpoint=${endpointUrl}: ${errData.error || errText.slice(0, 300) || 'unknown'}`);
+        throw new Error(`MeetFloo API HTTP ${response.status} requestId=${requestId} serverRequestId=${serverRequestId || 'n/a'} endpoint=${endpointUrl}: ${errData.error || errText.slice(0, 300) || 'unknown'}`);
       }
 
       let data: any;
       try {
         data = await response.json();
       } catch (parseErr: any) {
-        console.error('[NativelyAPI] JSON parse failure', {
+        console.error('[MeetFlooAPI] JSON parse failure', {
           requestId,
           serverRequestId,
           endpoint: endpointUrl,
@@ -4963,20 +4963,20 @@ let isMultimodal = !!(imagePaths?.length);
           stage: 'after_response',
           status: response.status,
           model: this.currentModelId,
-          provider: 'natively',
+          provider: 'MeetFloo',
           durationMs: Math.round(nowMs() - requestStartedAt),
           error: summarizeFetchError(parseErr),
         });
-        throw new Error(`Natively API invalid JSON response requestId=${requestId} serverRequestId=${serverRequestId || 'n/a'} ${formatFetchError(parseErr)}`);
+        throw new Error(`MeetFloo API invalid JSON response requestId=${requestId} serverRequestId=${serverRequestId || 'n/a'} ${formatFetchError(parseErr)}`);
       }
-      console.log('[NativelyAPI] JSON completed', {
+      console.log('[MeetFlooAPI] JSON completed', {
         requestId,
         serverRequestId,
         endpoint: endpointUrl,
         method: 'POST',
         status: response.status,
         model: this.currentModelId,
-        provider: 'natively',
+        provider: 'MeetFloo',
         serverModel: data?.model,
         timeoutMs,
         durationMs: Math.round(nowMs() - requestStartedAt),
@@ -5161,7 +5161,7 @@ let isMultimodal = !!(imagePaths?.length);
   /**
    * OpenRouter's wire model id.
    *
-   * Strips ONE segment — Natively's own `openrouter/` routing prefix — and no
+   * Strips ONE segment — MeetFloo's own `openrouter/` routing prefix — and no
    * more. The remainder (`anthropic/claude-sonnet-5`) IS the id OpenRouter
    * expects, so this is deliberately NOT stripProviderRoutingPrefix(), which
    * takes two segments off because the capability table wants a bare name.
@@ -5393,7 +5393,7 @@ let isMultimodal = !!(imagePaths?.length);
       const content = await this.buildFluxionAnthropicContent(userMessage, imagePaths);
       const request = this.buildFluxionAnthropicRequest(model, userMessage, systemPrompt, content);
       const stream = client.messages.stream(request);
-      const onAbort = () => { try { stream.abort(); } catch {} };
+      const onAbort = () => { try { stream.abort(); } catch { } };
       abortSignal?.addEventListener('abort', onAbort, { once: true });
       try {
         for await (const event of stream) {
@@ -6342,7 +6342,7 @@ let isMultimodal = !!(imagePaths?.length);
 
           // Classify error — auth errors should not retry the same provider
           if (errMsg.includes('401') || errMsg.includes('403') || errMsg.includes('unauthorized') ||
-              errMsg.includes('api key') || errMsg.includes('invalid_api') || errMsg.includes('quota')) {
+            errMsg.includes('api key') || errMsg.includes('invalid_api') || errMsg.includes('quota')) {
             console.warn(`[LLMHelper] Non-retryable error for ${providerName} — removing from chain`);
             exhausted.add(providerName);
             break; // stop retrying this provider
@@ -6531,9 +6531,9 @@ let isMultimodal = !!(imagePaths?.length);
     const textGroq = this.modelVersionManager.getTextTieredModels(TextModelFamily.GROQ).tier1;
 
     if (isMultimodal) {
-      // MULTIMODAL PROVIDER ORDER: [Natively] -> Codex CLI -> OpenAI -> Gemini Flash-Lite -> Gemini Flash -> Claude -> Gemini Pro -> Groq Scout 4
-      if (this.hasNatively()) {
-        providers.push({ name: 'Natively API', execute: () => this.streamWithNatively(userContent, openaiSystemPrompt, imagePaths, abortSignal) });
+      // MULTIMODAL PROVIDER ORDER: [MeetFloo] -> Codex CLI -> OpenAI -> Gemini Flash-Lite -> Gemini Flash -> Claude -> Gemini Pro -> Groq Scout 4
+      if (this.hasMeetFloo()) {
+        providers.push({ name: 'MeetFloo API', execute: () => this.streamWithMeetFloo(userContent, openaiSystemPrompt, imagePaths, abortSignal) });
       }
       if (this.isCodexAvailable()) {
         providers.push({ name: `Codex CLI (${this.codexCliConfig.model})`, execute: () => this.streamWithCodexCli(userContent, openaiSystemPrompt, false, imagePaths, abortSignal) });
@@ -6558,13 +6558,13 @@ let isMultimodal = !!(imagePaths?.length);
         providers.push({ name: `Groq (${GROQ_VISION_MODEL})`, execute: () => this.streamWithGroqMultimodal(userContent, imagePaths!, openaiSystemPrompt, abortSignal) });
       }
     } else {
-      // TEXT-ONLY PROVIDER ORDER: [Natively] -> Codex CLI -> OpenAI -> Claude -> Gemini Flash-Lite -> Gemini Flash -> Gemini Pro -> Groq
+      // TEXT-ONLY PROVIDER ORDER: [MeetFloo] -> Codex CLI -> OpenAI -> Claude -> Gemini Flash-Lite -> Gemini Flash -> Gemini Pro -> Groq
       // Groq is demoted to LAST because the free Groq tier has a low TPM
       // rate-limit that 413s on context-heavy prompts (e.g. a full meeting
       // summary + transcript shovelled into the fallback Gemini call).
       // Gemini cascade handles the same prompts at much higher quotas.
-      if (this.hasNatively()) {
-        providers.push({ name: 'Natively API', execute: () => this.streamWithNatively(userContent, openaiSystemPrompt, undefined, abortSignal) });
+      if (this.hasMeetFloo()) {
+        providers.push({ name: 'MeetFloo API', execute: () => this.streamWithMeetFloo(userContent, openaiSystemPrompt, undefined, abortSignal) });
       }
       if (this.isCodexAvailable()) {
         providers.push({ name: `Codex CLI (${this.codexCliConfig.model})`, execute: () => this.streamWithCodexCli(userContent, openaiSystemPrompt, false, undefined, abortSignal) });
@@ -6611,7 +6611,7 @@ let isMultimodal = !!(imagePaths?.length);
 
     if (providers.length === 0) {
       if (isMultimodal && imagePaths && this.deepseekClient) {
-        yield "DeepSeek is configured for text-only requests. Add a vision-capable provider like Gemini, OpenAI, Claude, Groq, or Natively to analyze images.";
+        yield "DeepSeek is configured for text-only requests. Add a vision-capable provider like Gemini, OpenAI, Claude, Groq, or MeetFloo to analyze images.";
         return;
       }
       yield this.noProviderAvailableMessage();
@@ -6623,7 +6623,7 @@ let isMultimodal = !!(imagePaths?.length);
     // Ensure the model the user selected handles the request first
     // before falling back to others.
     // ============================================================
-    const currentFamilyLabel = this.currentModelId === 'natively' ? 'Natively'
+    const currentFamilyLabel = this.currentModelId === 'MeetFloo' ? 'MeetFloo'
       : this.isClaudeModel(this.currentModelId) ? 'Claude'
         : this.isOpenAiModel(this.currentModelId) ? 'OpenAI'
           : this.isGroqModel(this.currentModelId) ? 'Groq'
@@ -6639,10 +6639,10 @@ let isMultimodal = !!(imagePaths?.length);
       });
     }
 
-    // Natively is always first when configured, regardless of which model is selected.
+    // MeetFloo is always first when configured, regardless of which model is selected.
     // The sort above may have displaced it — restore it to position 0.
-    if (this.hasNatively() && providers[0]?.name !== 'Natively API') {
-      const idx = providers.findIndex(p => p.name === 'Natively API');
+    if (this.hasMeetFloo() && providers[0]?.name !== 'MeetFloo API') {
+      const idx = providers.findIndex(p => p.name === 'MeetFloo API');
       if (idx > 0) {
         const [entry] = providers.splice(idx, 1);
         providers.unshift(entry);
@@ -6682,7 +6682,7 @@ let isMultimodal = !!(imagePaths?.length);
       if (rotation > 0) {
         const backoffMs = 1000 * rotation;
         console.log(`[LLMHelper] 🔄 Starting rotation ${rotation + 1}/${MAX_FULL_ROTATIONS} after ${backoffMs}ms backoff...`);
-        await delayWithAbort(backoffMs).catch((): void => {});
+        await delayWithAbort(backoffMs).catch((): void => { });
         if (abortSignal?.aborted) return;
       }
 
@@ -6729,7 +6729,7 @@ let isMultimodal = !!(imagePaths?.length);
   // The single multimodal (screenshot + text) entry point for streaming. Every
   // image-bearing streamChat request routes here so we get ONE robust, telemetry-
   // rich fallback chain instead of the old ad-hoc per-model routing that died
-  // when the selected model (e.g. `natively`) timed out and only Gemini remained.
+  // when the selected model (e.g. `MeetFloo`) timed out and only Gemini remained.
   //
   // Design — the "commit point" / first-token-buffering pattern used by LiteLLM,
   // OpenRouter, and the Vercel AI SDK for streaming fallback:
@@ -6742,7 +6742,7 @@ let isMultimodal = !!(imagePaths?.length);
   //      would duplicate output) — we end the stream gracefully.
   //
   // Priority order (user-specified): OpenAI → Claude → Gemini Flash → Gemini Pro
-  //   → Groq Scout → Natively → (local) Custom → Ollama. Healthy providers are
+  //   → Groq Scout → MeetFloo → (local) Custom → Ollama. Healthy providers are
   //   then re-ordered fastest-first by measured TTFT EWMA ("rearrange the queue
   //   in the speed"). Explicitly-selected local providers (Ollama / Custom) are
   //   honored first; local-only mode uses local providers exclusively.
@@ -6788,31 +6788,45 @@ let isMultimodal = !!(imagePaths?.length);
 
     if (!localOnly) {
       if (this.openaiClient) {
-        cloud.push({ id: 'openai', name: 'OpenAI', isLocal: false, priority: prio++, ttftTimeoutMs: FLASH_TTFT_MS,
-          open: (sig, att) => this.streamWithOpenaiMultimodal(userContent, imagePaths, systemPrompt, tierModel(ModelFamily.OPENAI, att), sig) });
+        cloud.push({
+          id: 'openai', name: 'OpenAI', isLocal: false, priority: prio++, ttftTimeoutMs: FLASH_TTFT_MS,
+          open: (sig, att) => this.streamWithOpenaiMultimodal(userContent, imagePaths, systemPrompt, tierModel(ModelFamily.OPENAI, att), sig)
+        });
       }
       if (this.claudeClient) {
-        cloud.push({ id: 'claude', name: 'Claude', isLocal: false, priority: prio++, ttftTimeoutMs: FLASH_TTFT_MS,
-          open: (sig, att) => this.streamWithClaudeMultimodal(userContent, imagePaths, systemPrompt, tierModel(ModelFamily.CLAUDE, att), sig) });
+        cloud.push({
+          id: 'claude', name: 'Claude', isLocal: false, priority: prio++, ttftTimeoutMs: FLASH_TTFT_MS,
+          open: (sig, att) => this.streamWithClaudeMultimodal(userContent, imagePaths, systemPrompt, tierModel(ModelFamily.CLAUDE, att), sig)
+        });
       }
       if (this.client) {
         // Strict serial Gemini cascade (flash-lite → flash → pro), no hedge.
         // flash-lite leads (cheapest/fastest); flash and pro are pure serial
         // fallbacks if the earlier model fails before its first token.
-        cloud.push({ id: 'gemini_flash_lite', name: 'Gemini Flash-Lite', isLocal: false, priority: prio++, ttftTimeoutMs: FLASH_TTFT_MS,
-          open: (sig) => this.streamWithGeminiModel(userContent, GEMINI_FLASH_LITE_MODEL, imagePaths, systemPrompt, sig, INTERACTIVE_THINKING_BUDGET) });
-        cloud.push({ id: 'gemini_flash', name: 'Gemini Flash', isLocal: false, priority: prio++, ttftTimeoutMs: FLASH_TTFT_MS,
-          open: (sig, att) => this.streamWithGeminiModel(userContent, tierModel(ModelFamily.GEMINI_FLASH, att) || GEMINI_FLASH_MODEL, imagePaths, systemPrompt, sig) });
-        cloud.push({ id: 'gemini_pro', name: 'Gemini Pro', isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
-          open: (sig, att) => this.streamWithGeminiModel(userContent, tierModel(ModelFamily.GEMINI_PRO, att) || GEMINI_PRO_MODEL, imagePaths, systemPrompt, sig) });
+        cloud.push({
+          id: 'gemini_flash_lite', name: 'Gemini Flash-Lite', isLocal: false, priority: prio++, ttftTimeoutMs: FLASH_TTFT_MS,
+          open: (sig) => this.streamWithGeminiModel(userContent, GEMINI_FLASH_LITE_MODEL, imagePaths, systemPrompt, sig, INTERACTIVE_THINKING_BUDGET)
+        });
+        cloud.push({
+          id: 'gemini_flash', name: 'Gemini Flash', isLocal: false, priority: prio++, ttftTimeoutMs: FLASH_TTFT_MS,
+          open: (sig, att) => this.streamWithGeminiModel(userContent, tierModel(ModelFamily.GEMINI_FLASH, att) || GEMINI_FLASH_MODEL, imagePaths, systemPrompt, sig)
+        });
+        cloud.push({
+          id: 'gemini_pro', name: 'Gemini Pro', isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
+          open: (sig, att) => this.streamWithGeminiModel(userContent, tierModel(ModelFamily.GEMINI_PRO, att) || GEMINI_PRO_MODEL, imagePaths, systemPrompt, sig)
+        });
       }
       if (this.groqClient) {
-        cloud.push({ id: 'groq', name: `Groq (${GROQ_VISION_MODEL})`, isLocal: false, priority: prio++, ttftTimeoutMs: FLASH_TTFT_MS,
-          open: (sig) => this.streamWithGroqMultimodal(userContent, imagePaths, systemPrompt, sig) });
+        cloud.push({
+          id: 'groq', name: `Groq (${GROQ_VISION_MODEL})`, isLocal: false, priority: prio++, ttftTimeoutMs: FLASH_TTFT_MS,
+          open: (sig) => this.streamWithGroqMultimodal(userContent, imagePaths, systemPrompt, sig)
+        });
       }
-      if (this.hasNatively()) {
-        cloud.push({ id: 'natively', name: 'Natively API', isLocal: false, priority: prio++, ttftTimeoutMs: FLASH_TTFT_MS,
-          open: (sig) => this.streamWithNatively(userContent, systemPrompt, imagePaths, sig) });
+      if (this.hasMeetFloo()) {
+        cloud.push({
+          id: 'MeetFloo', name: 'MeetFloo API', isLocal: false, priority: prio++, ttftTimeoutMs: FLASH_TTFT_MS,
+          open: (sig) => this.streamWithMeetFloo(userContent, systemPrompt, imagePaths, sig)
+        });
       }
       // OpenAI-compatible gateways. Added 2026-09-03: this chain intercepts EVERY
       // image-bearing request and returns, so a provider missing here can never
@@ -6829,27 +6843,35 @@ let isMultimodal = !!(imagePaths?.length);
       // someone else's turn — but when it is the model they picked, it has to be
       // tried, and the upstream's own error is the honest answer.
       if (this.isLiteLLMModel(this.currentModelId) && this.litellmClient) {
-        cloud.push({ id: 'litellm', name: `LiteLLM (${this.currentModelId.replace('litellm/', '')})`, isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
-          open: (sig) => this.streamWithLiteLLM(userContent, systemPrompt, imagePaths, sig) });
+        cloud.push({
+          id: 'litellm', name: `LiteLLM (${this.currentModelId.replace('litellm/', '')})`, isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
+          open: (sig) => this.streamWithLiteLLM(userContent, systemPrompt, imagePaths, sig)
+        });
       }
       if (this.isNvidiaNimModel(this.currentModelId) && this.nvidiaNimClient) {
-        cloud.push({ id: 'nvidia_nim', name: `NVIDIA NIM (${this.currentModelId.replace('nvidia_nim/', '')})`, isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
-          open: (sig) => this.streamWithNvidiaNim(userContent, systemPrompt, imagePaths, sig) });
+        cloud.push({
+          id: 'nvidia_nim', name: `NVIDIA NIM (${this.currentModelId.replace('nvidia_nim/', '')})`, isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
+          open: (sig) => this.streamWithNvidiaNim(userContent, systemPrompt, imagePaths, sig)
+        });
       }
       // Same rule as the two gateways above: only recruited when it is the model
       // the user actually picked. OpenRouter fronts hundreds of upstreams and we
       // cannot know whether someone else's turn should be routed through it.
       if (this.isOpenRouterModel(this.currentModelId) && this.openrouterClient) {
-        cloud.push({ id: 'openrouter', name: `OpenRouter (${this.openrouterWireModel(this.currentModelId)})`, isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
-          open: (sig) => this.streamWithOpenRouter(userContent, systemPrompt, imagePaths, sig) });
+        cloud.push({
+          id: 'openrouter', name: `OpenRouter (${this.openrouterWireModel(this.currentModelId)})`, isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
+          open: (sig) => this.streamWithOpenRouter(userContent, systemPrompt, imagePaths, sig)
+        });
       }
       // Same rule again: a gateway is only ever recruited for the model the user
       // picked. It matters more here than for the others — Fluxion's ids are the
       // real vendors' own, so a Fluxion rung seated for someone else's turn would
       // look entirely plausible in the logs while billing the wrong account.
       if (this.isFluxionModel(this.currentModelId) && this.hasFluxionCredential()) {
-        cloud.push({ id: 'fluxion', name: `Fluxion (${this.fluxionWireModel(this.currentModelId)})`, isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
-          open: (sig) => this.streamWithFluxion(userContent, systemPrompt, imagePaths, sig) });
+        cloud.push({
+          id: 'fluxion', name: `Fluxion (${this.fluxionWireModel(this.currentModelId)})`, isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
+          open: (sig) => this.streamWithFluxion(userContent, systemPrompt, imagePaths, sig)
+        });
       }
       // isCodexAvailable() — NOT `codexCliConfig.enabled` — is the gate every
       // other Codex call site uses. It additionally covers the disabled-provider
@@ -6864,8 +6886,10 @@ let isMultimodal = !!(imagePaths?.length);
       // unhealthy and deprioritizes it on later requests — see the note in
       // orderVisionByHealth if that proves too tight in practice.
       if (this.isCodexAvailable()) {
-        cloud.push({ id: 'codex-cli', name: `Codex CLI (${this.codexCliConfig.model})`, isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
-          open: (sig) => this.streamWithCodexCli(userContent, systemPrompt, false, imagePaths, sig) });
+        cloud.push({
+          id: 'codex-cli', name: `Codex CLI (${this.codexCliConfig.model})`, isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
+          open: (sig) => this.streamWithCodexCli(userContent, systemPrompt, false, imagePaths, sig)
+        });
       }
       // Antigravity, beside Codex CLI: the panel's other OAuth provider, seated
       // whenever it is signed in rather than only when selected. It was declared
@@ -6876,8 +6900,10 @@ let isMultimodal = !!(imagePaths?.length);
       // or refused outright when nothing else was configured.
       const antigravityVisionModel = this.antigravityFallbackModel();
       if (antigravityVisionModel) {
-        cloud.push({ id: 'antigravity', name: `Antigravity (${antigravityVisionModel})`, isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
-          open: (sig) => this.streamWithAntigravity(userContent, systemPrompt, imagePaths, sig, `antigravity:${antigravityVisionModel}`) });
+        cloud.push({
+          id: 'antigravity', name: `Antigravity (${antigravityVisionModel})`, isLocal: false, priority: prio++, ttftTimeoutMs: PRO_TTFT_MS,
+          open: (sig) => this.streamWithAntigravity(userContent, systemPrompt, imagePaths, sig, `antigravity:${antigravityVisionModel}`)
+        });
       }
     }
 
@@ -6892,8 +6918,10 @@ let isMultimodal = !!(imagePaths?.length);
       // so a local custom vision endpoint still works in local-only mode.
       const customIsLocal = customProviderIsLocal(this.customProvider);
       if (!localOnly || customIsLocal) {
-        local.push({ id: 'custom', name: `Custom (${this.customProvider.name})`, isLocal: customIsLocal, priority: 100,
-          open: (sig) => this.streamWithCustom(message, context, imagePaths, systemPrompt, sig) });
+        local.push({
+          id: 'custom', name: `Custom (${this.customProvider.name})`, isLocal: customIsLocal, priority: 100,
+          open: (sig) => this.streamWithCustom(message, context, imagePaths, systemPrompt, sig)
+        });
       }
     }
     // Ollama: use the resolved vision-capable model (which may differ from the
@@ -6904,8 +6932,10 @@ let isMultimodal = !!(imagePaths?.length);
       this.refreshOllamaVisionModel().catch(() => { }); // populate for the next request
     }
     if (ollamaVisionModel) {
-      local.push({ id: 'ollama', name: `Ollama (${ollamaVisionModel})`, isLocal: true, priority: 101,
-        open: (sig) => this.streamWithOllama(message, context, systemPrompt, imagePaths, sig, ollamaVisionModel) });
+      local.push({
+        id: 'ollama', name: `Ollama (${ollamaVisionModel})`, isLocal: true, priority: 101,
+        open: (sig) => this.streamWithOllama(message, context, systemPrompt, imagePaths, sig, ollamaVisionModel)
+      });
     }
 
     // ── Assemble the ordered chain ─────────────────────────────────────────
@@ -6946,9 +6976,9 @@ let isMultimodal = !!(imagePaths?.length);
       // four providers they had deliberately not set up.
       const gateway = this.isLiteLLMModel(this.currentModelId) ? 'LiteLLM proxy'
         : this.isNvidiaNimModel(this.currentModelId) ? 'NVIDIA NIM endpoint'
-        : this.isOpenRouterModel(this.currentModelId) ? 'OpenRouter gateway'
-        : this.isFluxionModel(this.currentModelId) ? 'Fluxion AI gateway'
-        : null;
+          : this.isOpenRouterModel(this.currentModelId) ? 'OpenRouter gateway'
+            : this.isFluxionModel(this.currentModelId) ? 'Fluxion AI gateway'
+              : null;
       throw new Error(gateway
         ? `No vision-capable provider configured. The selected ${gateway} model is not available for images — check the proxy is reachable and the model is still configured, or add another vision provider in Settings.`
         : 'No vision-capable provider configured. Add an API key (OpenAI, Claude, Gemini, or Groq) or enable a vision-capable Ollama model in Settings.');
@@ -7155,7 +7185,7 @@ let isMultimodal = !!(imagePaths?.length);
    * U+E010/U+E011 are private-use codepoints: no provider emits them, and the
    * placeholder system already relies on this property (U+E002/U+E003).
    */
-  private static readonly TRUNCATION_SENTINEL = '\uE010__NATIVELY_STREAM_TRUNCATED__\uE011';
+  private static readonly TRUNCATION_SENTINEL = '\uE010__MEETFLOO_STREAM_TRUNCATED__\uE011';
 
   /**
    * Commit-point tracking for provider fall-through.
@@ -7166,7 +7196,7 @@ let isMultimodal = !!(imagePaths?.length);
    * starts from scratch and its answer is appended to the partial, producing one
    * truncated answer immediately followed by a second, different, complete one.
    *
-   * Live capture 2026-08-12 (what_to_answer, Natively fast-mode):
+   * Live capture 2026-08-12 (what_to_answer, MeetFloo fast-mode):
    *   stream 1  tokens 8047  chars 22871  -> ai_unavailable during_stream
    *   stream 2                chars  2342  (fell through, fresh answer)
    *   stored assistant message           25210  ≈ 22871 + 2342 − trim
@@ -7350,8 +7380,8 @@ let isMultimodal = !!(imagePaths?.length);
                 // transport answered in prose. The contract's applicability
                 // boundary skips non-coding screenshots.
                 if (!resolved.codingTask
-                    && (imagePaths?.length ?? 0) > 0
-                    && (!message?.trim() || isDeicticAsk(message))) {
+                  && (imagePaths?.length ?? 0) > 0
+                  && (!message?.trim() || isDeicticAsk(message))) {
                   return { codingTask: true, codingTaskKind: 'dsa' as const };
                 }
                 return resolved;
@@ -7669,7 +7699,7 @@ let isMultimodal = !!(imagePaths?.length);
     // MODE-SCOPED answer types (manual regression 2026-06-12): a manual sales/
     // lecture turn NEEDS the active mode's voice + retrieved product material —
     // CHAT_MODE_PROMPT's blanket "universal override" skip left sales-mode
-    // pricing questions answered as "I'm Natively, an AI assistant. I don't have
+    // pricing questions answered as "I'm MeetFloo, an AI assistant. I don't have
     // a product." For these types the mode suffix/context is the answer's whole
     // grounding, so the skip is bypassed (the route still scopes sensitivity).
     const isModeScopedAnswer = routeOptions?.answerType === 'sales_answer'
@@ -7685,8 +7715,8 @@ let isMultimodal = !!(imagePaths?.length);
     // Temporary H4 forensic trace: E2E-only, opt-in, and removed after this
     // one-question stage capture. It separates resolver latency from final prompt
     // rendering and provider dispatch without logging reference content.
-    const h4StageTrace = process.env.NATIVELY_E2E === '1'
-      && process.env.NATIVELY_H4_STAGE_TRACE === '1';
+    const h4StageTrace = process.env.MEETFLOO_E2E === '1'
+      && process.env.MEETFLOO_H4_STAGE_TRACE === '1';
     const markH4Stage = (stage: string, details: Record<string, unknown> = {}) => {
       if (h4StageTrace) console.log('[TRACE:H4-STAGE]', JSON.stringify({ stage, atMs: Date.now() - _t0, ...details }));
     };
@@ -7750,79 +7780,79 @@ let isMultimodal = !!(imagePaths?.length);
               usedRerankPath = true;
               resolvedViaEvidenceResolver = true;
             } else {
-            const { EvidenceResolver } = require('./intelligence/context-os/EvidenceResolver') as typeof import('./intelligence/context-os/EvidenceResolver');
-            const { classifyQuestion } = require('./services/knowledge/QuestionClassifier');
-            const { queryOkfCards } = require('./services/knowledge/OkfRetriever');
-            const { KnowledgeManager } = require('./services/knowledge/KnowledgeManager');
-            // Grounding-campaign3 (2026-07-23): resolve the t0-pinned mode row.
-            // Live singleton read here was the third always-on unpinned read the
-            // security audit flagged; without this pin the entire Context-OS-
-            // governed path could leak a different mode's evidence after a mid-
-            // request mode switch. modeSnapshots are returned frozen by
-            // getModeSnapshot(); .getActiveMode() returns the live row, both
-            // supply the same row shape the EvidenceResolver expects.
-            const _pinnedModeIdEvidenceResolver = routeOptions?.pinnedModeId ?? null;
-            const activeModeRow = _pinnedModeIdEvidenceResolver
-              ? (modesMgr.getModeSnapshot?.(_pinnedModeIdEvidenceResolver) ?? modesMgr.getActiveMode?.())
-              : modesMgr.getActiveMode?.();
-            if (activeModeRow) {
-              const resolver = new EvidenceResolver({
-                getModeSnapshot: () => activeModeRow,
-                getReferenceFiles: (modeId: string) => modesMgr.getReferenceFiles(modeId),
-                // Evidence-execution-repair (2026-07-12): MUST go through
-                // modesMgr's own retrieveHybridRaw, not a freshly-constructed
-                // ModeContextRetriever — a fresh instance has no shared
-                // embedding pipeline wired (that only happens once, at
-                // RAGManager init, on ModesManager's own singleton instance),
-                // so every retrieveHybrid() call on it silently returns zero
-                // chunks and EvidenceResolver reports 'insufficient' evidence
-                // even when the mode's files are genuinely indexed and ready.
-                // This was a real regression discovered during Phase 12 live
-                // benchmarking: retrieval worked when called through
-                // ModesManager (inspect-retrieval, buildRetrievedActive...Hybrid)
-                // but silently returned empty when EvidenceResolver called its
-                // own orphaned instance.
-                hybridRetriever: { retrieveHybrid: (m: any, files: any, opts: any) => modesMgr.retrieveHybridRaw(m, files, opts) },
-                knowledgeManager: { getPackForFile: (fileId: string) => KnowledgeManager.getInstance().getPackForFile(fileId) },
-                classifyQuestion,
-                queryOkfCards,
-              });
-              const resolution = await resolver.resolve({
-                turnId: _cogEarly.contract.turnId,
-                question: governedTurnQuestion,
-                sourceContract: _cogEarly.contract,
-                activeMode: { modeId: activeModeRow.id, modeUniqueId: activeModeRow.id },
-                requestedProperty: _cogEarly.contract.requestedProperty,
-                transcript: context,
-                followUpReferentHint: routeOptions?.followUpReferentHint,
-              });
-              (_cogEarly as any).evidencePack = resolution.pack;
-              (_cogEarly as any).resolutionStrategy = resolution.strategy;
-              markH4Stage('resolver_exit', {
-                strategy: resolution.strategy,
-                itemCount: resolution.pack.items.length,
-                answerPolicy: resolution.pack.answerPolicy,
-              });
-              // Render the SAME pack into the legacy string shape so downstream
-              // telemetry/budget-check code (unchanged below) keeps working —
-              // this is the ONLY place the pack is turned into text, and it is
-              // rendered from the resolver's result, never re-retrieved.
-              modeContextBlock = resolution.pack.items
-                .map((it: any) => `[Section: ${it.pointer?.section || it.sourceId}]\n${it.text}`)
-                .join('\n\n');
-              usedRerankPath = true;
-              resolvedViaEvidenceResolver = true;
-              if (_isFlagOn('trace')) {
-                console.log('[EVIDENCE-RESOLVER]', JSON.stringify({
+              const { EvidenceResolver } = require('./intelligence/context-os/EvidenceResolver') as typeof import('./intelligence/context-os/EvidenceResolver');
+              const { classifyQuestion } = require('./services/knowledge/QuestionClassifier');
+              const { queryOkfCards } = require('./services/knowledge/OkfRetriever');
+              const { KnowledgeManager } = require('./services/knowledge/KnowledgeManager');
+              // Grounding-campaign3 (2026-07-23): resolve the t0-pinned mode row.
+              // Live singleton read here was the third always-on unpinned read the
+              // security audit flagged; without this pin the entire Context-OS-
+              // governed path could leak a different mode's evidence after a mid-
+              // request mode switch. modeSnapshots are returned frozen by
+              // getModeSnapshot(); .getActiveMode() returns the live row, both
+              // supply the same row shape the EvidenceResolver expects.
+              const _pinnedModeIdEvidenceResolver = routeOptions?.pinnedModeId ?? null;
+              const activeModeRow = _pinnedModeIdEvidenceResolver
+                ? (modesMgr.getModeSnapshot?.(_pinnedModeIdEvidenceResolver) ?? modesMgr.getActiveMode?.())
+                : modesMgr.getActiveMode?.();
+              if (activeModeRow) {
+                const resolver = new EvidenceResolver({
+                  getModeSnapshot: () => activeModeRow,
+                  getReferenceFiles: (modeId: string) => modesMgr.getReferenceFiles(modeId),
+                  // Evidence-execution-repair (2026-07-12): MUST go through
+                  // modesMgr's own retrieveHybridRaw, not a freshly-constructed
+                  // ModeContextRetriever — a fresh instance has no shared
+                  // embedding pipeline wired (that only happens once, at
+                  // RAGManager init, on ModesManager's own singleton instance),
+                  // so every retrieveHybrid() call on it silently returns zero
+                  // chunks and EvidenceResolver reports 'insufficient' evidence
+                  // even when the mode's files are genuinely indexed and ready.
+                  // This was a real regression discovered during Phase 12 live
+                  // benchmarking: retrieval worked when called through
+                  // ModesManager (inspect-retrieval, buildRetrievedActive...Hybrid)
+                  // but silently returned empty when EvidenceResolver called its
+                  // own orphaned instance.
+                  hybridRetriever: { retrieveHybrid: (m: any, files: any, opts: any) => modesMgr.retrieveHybridRaw(m, files, opts) },
+                  knowledgeManager: { getPackForFile: (fileId: string) => KnowledgeManager.getInstance().getPackForFile(fileId) },
+                  classifyQuestion,
+                  queryOkfCards,
+                });
+                const resolution = await resolver.resolve({
                   turnId: _cogEarly.contract.turnId,
+                  question: governedTurnQuestion,
+                  sourceContract: _cogEarly.contract,
+                  activeMode: { modeId: activeModeRow.id, modeUniqueId: activeModeRow.id },
+                  requestedProperty: _cogEarly.contract.requestedProperty,
+                  transcript: context,
+                  followUpReferentHint: routeOptions?.followUpReferentHint,
+                });
+                (_cogEarly as any).evidencePack = resolution.pack;
+                (_cogEarly as any).resolutionStrategy = resolution.strategy;
+                markH4Stage('resolver_exit', {
                   strategy: resolution.strategy,
-                  packId: resolution.pack.packId,
                   itemCount: resolution.pack.items.length,
-                  confidence: resolution.confidence,
                   answerPolicy: resolution.pack.answerPolicy,
-                }));
+                });
+                // Render the SAME pack into the legacy string shape so downstream
+                // telemetry/budget-check code (unchanged below) keeps working —
+                // this is the ONLY place the pack is turned into text, and it is
+                // rendered from the resolver's result, never re-retrieved.
+                modeContextBlock = resolution.pack.items
+                  .map((it: any) => `[Section: ${it.pointer?.section || it.sourceId}]\n${it.text}`)
+                  .join('\n\n');
+                usedRerankPath = true;
+                resolvedViaEvidenceResolver = true;
+                if (_isFlagOn('trace')) {
+                  console.log('[EVIDENCE-RESOLVER]', JSON.stringify({
+                    turnId: _cogEarly.contract.turnId,
+                    strategy: resolution.strategy,
+                    packId: resolution.pack.packId,
+                    itemCount: resolution.pack.items.length,
+                    confidence: resolution.confidence,
+                    answerPolicy: resolution.pack.answerPolicy,
+                  }));
+                }
               }
-            }
             }
           }
         } catch (_evidenceResolverErr: any) {
@@ -7845,43 +7875,43 @@ let isMultimodal = !!(imagePaths?.length);
           // this turn's evidence above, skip the entire legacy hybrid/lexical
           // retrieval block — modeContextBlock + usedRerankPath are already set.
           if (resolvedViaEvidenceResolver) { /* no-op: fall through to pinned instructions below */ } else {
-          // Document-grounded custom mode (audit 2026-06-27, real-path fix):
-          // previously the `!forceDocumentGrounding` term SKIPPED the hybrid
-          // (semantic + cross-encoder) retriever for document-grounded modes,
-          // forcing the sync lexical path. Now document-grounded modes ALSO
-          // use the hybrid path. To avoid a cold/slow embedder stalling the
-          // hot path past the first-useful deadline (which would abort to the
-          // canned fallback), the hybrid call is raced against a budget; on
-          // timeout we fall through to the sync lexical retriever — same
-          // fallback the manual flow always had.
-          //
-          // Phase 2 (semantic-retrieval repair, 2026-08-13): eligibility,
-          // argument mapping, and the race live in modeHybridEligibility —
-          // SHARED with chatWithGemini so the two entry points can no longer
-          // drift (this site's semantics were adopted as canonical). This is
-          // the streaming site, so it passes the race budget; see the module
-          // doc for the documented budget asymmetry.
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const { shouldUseHybridRetrieval, runHybridModeRetrieval, hybridRetrievalBudgetMs } = require('./llm/modeHybridEligibility');
-          if (shouldUseHybridRetrieval({ forceDocumentGrounding })) {
-            const budgetMs = hybridRetrievalBudgetMs(forceDocumentGrounding);
-            const { block, timedOut } = await runHybridModeRetrieval(modesMgr, {
-              query: message,
-              context,
-              answerType: modeAnswerType(routeOptions),
-              forceDocumentGrounding,
-              pinnedModeId: routeOptions?.pinnedModeId ?? undefined,
-              followUpReferentHint: routeOptions?.followUpReferentHint,
-              budgetMs,
-            });
-            if (!timedOut && block != null) {
-              modeContextBlock = block;
-              usedRerankPath = true;
-            } else if (timedOut) {
-              console.warn(`[LLMHelper] manual hybrid retrieval exceeded ${budgetMs}ms — using sync lexical fallback`, { forceDocumentGrounding });
-              telemetryService.track({ name: 'doc_grounded_hybrid_timeout', properties: { budgetMs, forceDocumentGrounding } });
+            // Document-grounded custom mode (audit 2026-06-27, real-path fix):
+            // previously the `!forceDocumentGrounding` term SKIPPED the hybrid
+            // (semantic + cross-encoder) retriever for document-grounded modes,
+            // forcing the sync lexical path. Now document-grounded modes ALSO
+            // use the hybrid path. To avoid a cold/slow embedder stalling the
+            // hot path past the first-useful deadline (which would abort to the
+            // canned fallback), the hybrid call is raced against a budget; on
+            // timeout we fall through to the sync lexical retriever — same
+            // fallback the manual flow always had.
+            //
+            // Phase 2 (semantic-retrieval repair, 2026-08-13): eligibility,
+            // argument mapping, and the race live in modeHybridEligibility —
+            // SHARED with chatWithGemini so the two entry points can no longer
+            // drift (this site's semantics were adopted as canonical). This is
+            // the streaming site, so it passes the race budget; see the module
+            // doc for the documented budget asymmetry.
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const { shouldUseHybridRetrieval, runHybridModeRetrieval, hybridRetrievalBudgetMs } = require('./llm/modeHybridEligibility');
+            if (shouldUseHybridRetrieval({ forceDocumentGrounding })) {
+              const budgetMs = hybridRetrievalBudgetMs(forceDocumentGrounding);
+              const { block, timedOut } = await runHybridModeRetrieval(modesMgr, {
+                query: message,
+                context,
+                answerType: modeAnswerType(routeOptions),
+                forceDocumentGrounding,
+                pinnedModeId: routeOptions?.pinnedModeId ?? undefined,
+                followUpReferentHint: routeOptions?.followUpReferentHint,
+                budgetMs,
+              });
+              if (!timedOut && block != null) {
+                modeContextBlock = block;
+                usedRerankPath = true;
+              } else if (timedOut) {
+                console.warn(`[LLMHelper] manual hybrid retrieval exceeded ${budgetMs}ms — using sync lexical fallback`, { forceDocumentGrounding });
+                telemetryService.track({ name: 'doc_grounded_hybrid_timeout', properties: { budgetMs, forceDocumentGrounding } });
+              }
             }
-          }
           }
         } catch (_rerankErr: any) {
           console.warn('[LLMHelper] manual hybrid+rerank path failed, using sync lexical:', _rerankErr?.message);
@@ -8243,42 +8273,42 @@ let isMultimodal = !!(imagePaths?.length);
         })) {
           console.log('[CONTEXT-OS] text-evidence decline yields to current-screen context — dispatching with visual evidence');
         } else {
-        if (pack.answerPolicy === 'ask_clarification') {
-          const { recordContextOsBenchmarkAudit } = require('./intelligence/context-os') as typeof import('./intelligence/context-os');
-          recordContextOsBenchmarkAudit({
-            contract: _cog.contract,
-            sourceAuthority: _cog.modeSnapshot.sourceAuthority,
-            pack,
-            providerDispatch: false,
-            terminal: 'clarify',
-          });
-          // contract.reason is a developer diagnostic (e.g. "sourceAuthority=
-          // reference_files_primary; requestedProperty=unknown") and was
-          // yielded VERBATIM to a live user (2026-08-11). Reasons are for
-          // logs; users get the human question.
-          yield 'Which source should I use for that answer?';
-          return;
-        }
-        if (pack.answerPolicy === 'refuse_insufficient_evidence') {
-          const { buildInsufficientPropertyAnswer, recordContextOsBenchmarkAudit } = require('./intelligence/context-os') as typeof import('./intelligence/context-os');
-          recordContextOsBenchmarkAudit({
-            contract: _cog.contract,
-            sourceAuthority: _cog.modeSnapshot.sourceAuthority,
-            pack,
-            providerDispatch: false,
-            terminal: 'refuse',
-          });
-          yield buildInsufficientPropertyAnswer({ property: pack.requestedProperty, sourceOwner: pack.sourceOwner });
-          return;
-        }
-        const rendered = renderGoverningFactualBlock({ ..._cog, evidencePack: pack });
-        if (!rendered) throw new Error('governed EvidencePack did not render');
-        contextOsGoverningBlock = rendered;
-        contextOsGovernedPack = pack;
-        // Expose the governing pack back to the caller (validation/claims use
-        // the EXACT same pack — Phase 9 identity requirement). A no-op
-        // reassignment when `pack` already came from `_cog.evidencePack`.
-        (_cog as any).evidencePack = pack;
+          if (pack.answerPolicy === 'ask_clarification') {
+            const { recordContextOsBenchmarkAudit } = require('./intelligence/context-os') as typeof import('./intelligence/context-os');
+            recordContextOsBenchmarkAudit({
+              contract: _cog.contract,
+              sourceAuthority: _cog.modeSnapshot.sourceAuthority,
+              pack,
+              providerDispatch: false,
+              terminal: 'clarify',
+            });
+            // contract.reason is a developer diagnostic (e.g. "sourceAuthority=
+            // reference_files_primary; requestedProperty=unknown") and was
+            // yielded VERBATIM to a live user (2026-08-11). Reasons are for
+            // logs; users get the human question.
+            yield 'Which source should I use for that answer?';
+            return;
+          }
+          if (pack.answerPolicy === 'refuse_insufficient_evidence') {
+            const { buildInsufficientPropertyAnswer, recordContextOsBenchmarkAudit } = require('./intelligence/context-os') as typeof import('./intelligence/context-os');
+            recordContextOsBenchmarkAudit({
+              contract: _cog.contract,
+              sourceAuthority: _cog.modeSnapshot.sourceAuthority,
+              pack,
+              providerDispatch: false,
+              terminal: 'refuse',
+            });
+            yield buildInsufficientPropertyAnswer({ property: pack.requestedProperty, sourceOwner: pack.sourceOwner });
+            return;
+          }
+          const rendered = renderGoverningFactualBlock({ ..._cog, evidencePack: pack });
+          if (!rendered) throw new Error('governed EvidencePack did not render');
+          contextOsGoverningBlock = rendered;
+          contextOsGovernedPack = pack;
+          // Expose the governing pack back to the caller (validation/claims use
+          // the EXACT same pack — Phase 9 identity requirement). A no-op
+          // reassignment when `pack` already came from `_cog.evidencePack`.
+          (_cog as any).evidencePack = pack;
         } // end visual-context exemption — skip decline AND pack rendering
       }
     } catch (cogErr: any) {
@@ -8364,9 +8394,9 @@ let isMultimodal = !!(imagePaths?.length);
         const { isV2ComposedPrompt, buildAssembledTurnContentV2, hasV2TurnEnvelope } = require('./llm/promptSystemV2');
         const { isCodingAnswerType } = require('./llm/AnswerPlanner');
         if (combinedContext
-            && isV2ComposedPrompt(systemPromptOverride)
-            && !hasV2TurnEnvelope(message)
-            && !(routeOptions?.answerType && isCodingAnswerType(routeOptions.answerType))) {
+          && isV2ComposedPrompt(systemPromptOverride)
+          && !hasV2TurnEnvelope(message)
+          && !(routeOptions?.answerType && isCodingAnswerType(routeOptions.answerType))) {
           v2Turn = buildAssembledTurnContentV2({ assembledContext: combinedContext, currentTurn: message });
         }
       } catch { v2Turn = null; }
@@ -8445,7 +8475,7 @@ let isMultimodal = !!(imagePaths?.length);
     }
 
     // ── CONTEXT OS PROMPT AUDIT (Phase 10, dev/test only) ──────────────────
-    // NATIVELY_CONTEXT_OS_PROMPT_AUDIT=1 records a REDACTED structural summary of
+    // MEETFLOO_CONTEXT_OS_PROMPT_AUDIT=1 records a REDACTED structural summary of
     // the final factual prompt (block presence + counts + hashes, NEVER content,
     // keys, or full prompt) to a process-global ring the E2E harness reads. Used
     // to assert the typed pack GOVERNS and no raw legacy factual block leaks.
@@ -8454,7 +8484,7 @@ let isMultimodal = !!(imagePaths?.length);
       governedByTypedPack: Boolean(contextOsGoverningBlock),
       userContentLength: userContent.length,
     });
-    if (process.env.NATIVELY_CONTEXT_OS_PROMPT_AUDIT === '1') {
+    if (process.env.MEETFLOO_CONTEXT_OS_PROMPT_AUDIT === '1') {
       try {
         const crypto = require('crypto') as typeof import('crypto');
         const hash = (s: string) => crypto.createHash('sha1').update(s || '').digest('hex').slice(0, 12);
@@ -8533,10 +8563,10 @@ let isMultimodal = !!(imagePaths?.length);
 
     // ── UNIFIED MULTIMODAL PATH ────────────────────────────────────────────
     // Every image-bearing request goes through the single streaming vision
-    // fallback chain (OpenAI → Claude → Gemini → Groq → Natively → local) with
+    // fallback chain (OpenAI → Claude → Gemini → Groq → MeetFloo → local) with
     // first-token commit, per-provider retries, circuit breaking, and speed
     // reordering. This replaces the old per-model multimodal branches below,
-    // which would dead-end when the selected model (e.g. `natively`) failed and
+    // which would dead-end when the selected model (e.g. `MeetFloo`) failed and
     // only Gemini remained. The text-only routing below is unchanged.
     if (isMultimodal && imagePaths && imagePaths.length > 0) {
       let visionYielded = false;
@@ -8560,7 +8590,7 @@ let isMultimodal = !!(imagePaths?.length);
     }
 
     // GROQ FAST TEXT OVERRIDE (Text-Only)
-    // Two paths: local Groq key → call Groq directly; Natively API only → send fast_mode:true
+    // Two paths: local Groq key → call Groq directly; MeetFloo API only → send fast_mode:true
     // to the server, which serves its own fast tier (Gemini Flash-Lite → MiniMax);
     // it has not routed fast_mode through Groq since the Llama retirements.
     //
@@ -8575,7 +8605,7 @@ let isMultimodal = !!(imagePaths?.length);
     const fastModeApplies = this.groqFastTextMode && !isMultimodal && (
       this.isCodexAvailable() ||
       this.isGroqModel(this.currentModelId) ||
-      this.currentModelId === 'natively'
+      this.currentModelId === 'MeetFloo'
     ) && !this.isCodexCliModel(this.currentModelId);
     if (fastModeApplies) {
       if (this.isCodexAvailable()) {
@@ -8598,7 +8628,7 @@ let isMultimodal = !!(imagePaths?.length);
           const groqSystem = systemPromptOverride || GROQ_SYSTEM_PROMPT;
           const finalGroqSystem = this.injectLanguageInstruction(groqSystem);
           // Only thread currentModelId when it's actually a Groq model; otherwise
-          // we'd send 'natively' or a Gemini ID as the Groq model name → 400.
+          // we'd send 'MeetFloo' or a Gemini ID as the Groq model name → 400.
           const groqModelId = this.isGroqModel(this.currentModelId) ? this.currentModelId : GROQ_MODEL;
           // CACHE: pass system separately so Groq prefix-cache hits across turns.
           yield* this.trackCommit(this.streamWithGroq(userContent, groqModelId, finalGroqSystem, abortSignal), commit);
@@ -8618,13 +8648,13 @@ let isMultimodal = !!(imagePaths?.length);
           }
           console.warn("[LLMHelper] Groq Fast Text streaming failed, falling back:", e.message);
         }
-        // Local Groq failed — fall through to Natively if available
+        // Local Groq failed — fall through to MeetFloo if available
       }
-      if (this.hasNatively()) {
-        // streamWithNatively → generateWithNatively → sends fast_mode:true → server Groq pool
-        console.log(`[LLMHelper] ⚡️ Groq Fast Text Mode Active (Streaming). Routing to Natively server Groq pool...`);
+      if (this.hasMeetFloo()) {
+        // streamWithMeetFloo → generateWithMeetFloo → sends fast_mode:true → server Groq pool
+        console.log(`[LLMHelper] ⚡️ Groq Fast Text Mode Active (Streaming). Routing to MeetFloo server Groq pool...`);
         try {
-          yield* this.trackCommit(this.streamWithNatively(userContent, finalSystemPrompt, undefined, abortSignal), commit);
+          yield* this.trackCommit(this.streamWithMeetFloo(userContent, finalSystemPrompt, undefined, abortSignal), commit);
           return;
         } catch (e: any) {
           // This is the site the 2026-08-12 live capture hit: the server aborted
@@ -8632,11 +8662,11 @@ let isMultimodal = !!(imagePaths?.length);
           // fall-through appended a whole second answer to what the user had
           // already read.
           if (commit.emitted) {
-            console.warn("[LLMHelper] Natively fast-mode failed AFTER first token — ending stream rather than appending a second answer:", e.message);
+            console.warn("[LLMHelper] MeetFloo fast-mode failed AFTER first token — ending stream rather than appending a second answer:", e.message);
             yield LLMHelper.TRUNCATION_SENTINEL;
             return;
           }
-          console.warn("[LLMHelper] Natively fast-mode failed, falling back:", e.message);
+          console.warn("[LLMHelper] MeetFloo fast-mode failed, falling back:", e.message);
         }
       }
     }
@@ -8674,7 +8704,7 @@ let isMultimodal = !!(imagePaths?.length);
     if (this.customProvider) {
       // This rung used to be TERMINAL — it returned unconditionally, so a user
       // on their own gateway had no failover on the text path at all, and the
-      // one mechanism here that turns SLOWNESS into failover (the Natively TTFT
+      // one mechanism here that turns SLOWNESS into failover (the MeetFloo TTFT
       // race) was unreachable for them. A gateway that connects then goes quiet
       // throws nothing, so no catch fired and nothing fell through.
       //
@@ -8774,7 +8804,7 @@ let isMultimodal = !!(imagePaths?.length);
     }
 
     // DeepSeek (text-only). When images are present, fall through so the
-    // vision-first chain (Gemini/Claude/OpenAI/Natively) handles them instead.
+    // vision-first chain (Gemini/Claude/OpenAI/MeetFloo) handles them instead.
     if (this.isDeepseekModel(this.currentModelId) && this.deepseekClient && !(isMultimodal && imagePaths)) {
       const deepseekSystem = systemPromptOverride || OPENAI_SYSTEM_PROMPT;
       const finalDeepseekSystem = this.injectLanguageInstruction(deepseekSystem);
@@ -8877,7 +8907,7 @@ let isMultimodal = !!(imagePaths?.length);
     // NOT routed through streamSelectedProviderWithFailover, unlike the other
     // cloud rungs. Groq is the one branch that ALREADY falls through — its error
     // ladder below (auth-failure disable, over-capacity, the commit.emitted
-    // guard) drops into the Natively TTFT race, so a Groq user already reaches a
+    // guard) drops into the MeetFloo TTFT race, so a Groq user already reaches a
     // multi-rung recovery on error. The only gap is a STALL, and that gap is not
     // worth wrapping a carefully-built ladder to close: Groq's healthy first
     // token is sub-second, and the wrap would sit between those branches and
@@ -8898,7 +8928,7 @@ let isMultimodal = !!(imagePaths?.length);
         yield* this.trackCommit(this.streamWithGroq(userContent, this.currentModelId, finalGroqSystem, abortSignal), commit);
         return;
       } catch (e: any) {
-        // 413 / 429 / 5xx on Groq → fall through to Natively / Gemini cascade
+        // 413 / 429 / 5xx on Groq → fall through to MeetFloo / Gemini cascade
         // instead of letting the error propagate to the renderer's "couldn't
         // get a response" toast. Groq's TPM ceiling (12k) is too small for
         // long custom-mode prompts; the user's actual answer path lives in
@@ -8911,7 +8941,7 @@ let isMultimodal = !!(imagePaths?.length);
           console.warn('[LLMHelper] Local Groq key rejected (401) — disabling local Groq for the rest of this session.');
         }
         if (isOverCapacity) {
-          console.warn('[LLMHelper] Groq over capacity (413/429), falling through to Natively/Gemini cascade:', msg.slice(0, 120));
+          console.warn('[LLMHelper] Groq over capacity (413/429), falling through to MeetFloo/Gemini cascade:', msg.slice(0, 120));
         } else {
           // Unknown error — log and fall through anyway so the user still gets an answer
           console.warn('[LLMHelper] Groq streaming failed, falling through:', msg.slice(0, 120));
@@ -8925,12 +8955,12 @@ let isMultimodal = !!(imagePaths?.length);
           yield LLMHelper.TRUNCATION_SENTINEL;
           return;
         }
-        // Fall through to Natively at line ~5435
+        // Fall through to MeetFloo at line ~5435
       }
     }
 
-    // 3b. Natively API — TTFT RACE (REPORT_TO_CHATGPT §21 L1 / §18)
-    // Was: serial Natively→Groq→Gemini waterfall that only fell over on a
+    // 3b. MeetFloo API — TTFT RACE (REPORT_TO_CHATGPT §21 L1 / §18)
+    // Was: serial MeetFloo→Groq→Gemini waterfall that only fell over on a
     // THROW. A provider that connected then stalled before the first token
     // blocked the user for up to the 10s connect budget with no fallback.
     // Now: a commit-point TTFT race. Each provider is opened but not forwarded
@@ -8940,24 +8970,24 @@ let isMultimodal = !!(imagePaths?.length);
     // winner does not change answer STYLE — only who serves it. Multimodal with
     // images keeps the dedicated Groq-multimodal path (vision is handled by the
     // separate vision fallback when a vision model is selected).
-    if (this.currentModelId === 'natively') {
+    if (this.currentModelId === 'MeetFloo') {
       // Bug found during Phase 2 harness investigation (2026-07-27): this gate
-      // used to check CredentialsManager.getNativelyApiKey() directly, which
+      // used to check CredentialsManager.getMeetFlooApiKey() directly, which
       // is false in the E2E test profile (a fresh userDataDir has no stored
-      // key). `hasNatively()` already encodes the exact same "real key OR
-      // NATIVELY_E2E local-test bypass" logic used by streamWithNatively
+      // key). `hasMeetFloo()` already encodes the exact same "real key OR
+      // MEETFLOO_E2E local-test bypass" logic used by streamWithMeetFloo
       // itself (which this whole block ultimately opens) and by the
       // last-resort fallback rung below (~line 5738) — this call site was the
       // one place still duplicating the check without the E2E branch, so an
-      // E2E-driven request could never reach the Natively gateway at all and
+      // E2E-driven request could never reach the MeetFloo gateway at all and
       // silently fell through to direct Gemini, unable to test the gateway's
       // own cascade/fallback/quota logic. See docs/answer-pipeline-rebuild/
       // 02_STATUS.md for the full trace (zero backend [Chat/Stream] log
       // lines despite 76 successful harness reps was the smoking gun).
-      if (this.hasNatively()) {
+      if (this.hasMeetFloo()) {
         const textProviders: TextStreamProvider[] = [];
         let prio = 0;
-        // Primary: Natively (fast connect budget — TTFT race handles slow prefill).
+        // Primary: MeetFloo (fast connect budget — TTFT race handles slow prefill).
         // Per-provider TTFT override: the gateway's server-side chain falls back to
         // MiniMax (a STRONG frontier fallback) when the Gemini chain is down, and
         // MiniMax's first token lands at 3.3-7.7s. The shared text default of 2.5s
@@ -8968,9 +8998,9 @@ let isMultimodal = !!(imagePaths?.length);
         // slow-MiniMax gateway commit while still failing over fast on a genuinely
         // dead gateway. Mirrors the vision path, which already sets FLASH_TTFT_MS here.
         textProviders.push({
-          id: 'natively', name: 'Natively API', isLocal: false, priority: prio++,
-          ttftTimeoutMs: NATIVELY_TEXT_TTFT_MS,
-          open: (sig) => this.streamWithNatively(userContent, finalSystemPrompt, imagePaths, sig, INTERACTIVE_CONNECT_TIMEOUT_MS),
+          id: 'MeetFloo', name: 'MeetFloo API', isLocal: false, priority: prio++,
+          ttftTimeoutMs: MEETFLOO_TEXT_TTFT_MS,
+          open: (sig) => this.streamWithMeetFloo(userContent, finalSystemPrompt, imagePaths, sig, INTERACTIVE_CONNECT_TIMEOUT_MS),
         });
         // Fallback: Groq (key more commonly available than Gemini).
         if (this.groqClient) {
@@ -9001,8 +9031,8 @@ let isMultimodal = !!(imagePaths?.length);
         // refusal.
         //
         // SCOPE, because it is easy to over-read: this ladder is the
-        // `currentModelId === 'natively'` branch, so what this rung buys is a
-        // Natively-selected user reaching Antigravity when the Natively API is
+        // `currentModelId === 'MeetFloo'` branch, so what this rung buys is a
+        // MeetFloo-selected user reaching Antigravity when the MeetFloo API is
         // down. It is NOT general text failover — a selected provider is still
         // one terminal rung, which is a separate gap and not one this change
         // closes.
@@ -9014,8 +9044,8 @@ let isMultimodal = !!(imagePaths?.length);
           });
         }
         // Fallback: configured-but-not-active Custom provider (e.g. OpenRouter).
-        // For a Natively-selected user, the configured custom list is the only
-        // path that reaches a paid third-party gateway once Natively + Gemini are
+        // For a MeetFloo-selected user, the configured custom list is the only
+        // path that reaches a paid third-party gateway once MeetFloo + Gemini are
         // dead. Image-bearing requests skip this rung (custom providers typically
         // can't carry images unless explicitly multimodal-flagged) — the vision
         // chain at streamVisionWithFallback handles image scenarios.
@@ -9027,8 +9057,8 @@ let isMultimodal = !!(imagePaths?.length);
         const raceCustomRestore = this.installConfiguredCustomForRace(textProviders, message, context, finalSystemPrompt, isMultimodal, imagePaths);
 
         // Let a configured spare actually land when the gateway stalls
-        // (2026-09-10). Measured with api.natively.software flapping and a
-        // working Gemini key on file: the natively rung timed out at its 4 s
+        // (2026-09-10). Measured with api.MeetFloo.software flapping and a
+        // working Gemini key on file: the MeetFloo rung timed out at its 4 s
         // connect budget, was retried (cfg.maxAttempts 2) for another 4 s, and
         // the Gemini spare then opened with ~5 s left under the 13 s live
         // ceiling but only the shared 2.5 s ttft budget — "Gemini Flash attempt
@@ -9036,17 +9066,17 @@ let isMultimodal = !!(imagePaths?.length);
         // same order, and the user saw "The model did not produce an answer in
         // time". Real telemetry puts Gemini Flash's first token at p50 1.5 s /
         // p90 9.6 s, so 2.5 s was never a budget the spare could meet.
-        //   • natively: ONE attempt when a spare exists. A connect timeout is a
+        //   • MeetFloo: ONE attempt when a spare exists. A connect timeout is a
         //     gateway that is not answering; the second attempt cost 4 s and
         //     landed on none of the measured turns. A single-provider user keeps
-        //     both attempts (nothing behind natively is worth the time).
-        //   • spares: the same 8 s first-token budget the natively rung gets;
+        //     both attempts (nothing behind MeetFloo is worth the time).
+        //   • spares: the same 8 s first-token budget the MeetFloo rung gets;
         //     the outer live ceiling (raceStreamWithDeadline) still bounds the
         //     whole turn, so this cannot extend a turn past 13 s.
         if (textProviders.length > 1) {
           for (const rung of textProviders) {
-            if (rung.id === 'natively') rung.maxAttempts = 1;
-            else if (rung.ttftTimeoutMs == null) rung.ttftTimeoutMs = NATIVELY_TEXT_TTFT_MS;
+            if (rung.id === 'MeetFloo') rung.maxAttempts = 1;
+            else if (rung.ttftTimeoutMs == null) rung.ttftTimeoutMs = MEETFLOO_TEXT_TTFT_MS;
           }
         }
 
@@ -9132,7 +9162,7 @@ let isMultimodal = !!(imagePaths?.length);
       // If the cascade throws, NOTHING was yielded (it only throws pre-commit, or
       // aborts the whole chain on a permanent shared-key failure — expired key /
       // no credits / 401/403). In that case fall through to a DIFFERENT provider
-      // (Natively below) instead of failing the whole answer: a dead Gemini key
+      // (MeetFloo below) instead of failing the whole answer: a dead Gemini key
       // should not take the live answer down when another provider is configured.
       let geminiYielded = false;
       try {
@@ -9164,25 +9194,25 @@ let isMultimodal = !!(imagePaths?.length);
           return;
         }
         console.warn('[LLMHelper] Gemini cascade failed pre-commit — falling through to next provider:', e?.message || e);
-        // fall through to the Natively last-resort below
+        // fall through to the MeetFloo last-resort below
       }
     }
 
-    // 5. Last-resort: Natively API. Reached when no Gemini client is configured,
+    // 5. Last-resort: MeetFloo API. Reached when no Gemini client is configured,
     // OR the Gemini cascade above failed pre-commit (e.g. an expired/no-credit
     // key took out all three rungs). A dead primary provider should fall through
     // to a different one rather than failing the answer.
-    if (this.hasNatively()) {
+    if (this.hasMeetFloo()) {
       try {
-        yield* this.trackCommit(this.streamWithNatively(userContent, finalSystemPrompt, imagePaths, abortSignal), commit);
+        yield* this.trackCommit(this.streamWithMeetFloo(userContent, finalSystemPrompt, imagePaths, abortSignal), commit);
         return;
       } catch (e: any) {
         if (commit.emitted) {
-          console.warn('[LLMHelper] Natively last-resort failed AFTER first token — ending stream rather than appending a second answer:', e.message);
+          console.warn('[LLMHelper] MeetFloo last-resort failed AFTER first token — ending stream rather than appending a second answer:', e.message);
           yield LLMHelper.TRUNCATION_SENTINEL;
           return;
         }
-        console.warn('[LLMHelper] Natively last-resort fallback failed:', e.message);
+        console.warn('[LLMHelper] MeetFloo last-resort fallback failed:', e.message);
       }
     }
 
@@ -9205,7 +9235,7 @@ let isMultimodal = !!(imagePaths?.length);
     // gateway fire as a fallback. streamWithCustom has no internal
     // isLocalOnlyMode guard (unlike every other cloud provider below), so the
     // gate lives here. Same guard is mirrored in installConfiguredCustomForRace
-    // so the Natively TTFT race also respects local-only.
+    // so the MeetFloo TTFT race also respects local-only.
     if (configuredCustom && !this.isLocalOnlyMode && !(isMultimodal && imagePaths)) {
       const prevCustom = this.customProvider;
       this.customProvider = configuredCustom;
@@ -9257,39 +9287,39 @@ let isMultimodal = !!(imagePaths?.length);
   }
 
   /**
-   * Fake-stream for Natively API (non-streaming endpoint).
+   * Fake-stream for MeetFloo API (non-streaming endpoint).
    * Yields the full response in small word-batches so the UI typing effect still plays.
    * Throws on empty response so the fallback chain tries the next provider.
    */
-  private async * streamWithNatively(userContent: string, systemPrompt?: string, imagePaths?: string[], abortSignal?: AbortSignal, connectTimeoutMs: number = INTERACTIVE_CONNECT_TIMEOUT_MS, directMode = false): AsyncGenerator<string, void, unknown> {
+  private async * streamWithMeetFloo(userContent: string, systemPrompt?: string, imagePaths?: string[], abortSignal?: AbortSignal, connectTimeoutMs: number = INTERACTIVE_CONNECT_TIMEOUT_MS, directMode = false): AsyncGenerator<string, void, unknown> {
     // Local-only + outbound-scope guards, matching streamWithGeminiModel and
     // streamWithGroq. This method was the ONE cloud stream sibling carrying
-    // neither, which went unnoticed while natively was only ever reached from
+    // neither, which went unnoticed while MeetFloo was only ever reached from
     // the server cascade. Adding it as a text SPARE RUNG made the gap
     // reachable from a user-selected provider: measured, a local-only user
-    // whose gateway stalled had the turn failed over to natively-api and their
+    // whose gateway stalled had the turn failed over to MeetFloo-api and their
     // transcript sent off-device. The scope assert is a backstop (denied
     // evidence is stripped upstream), but local-only is NOT enforced by
     // stripping — nothing else stands between this call and the network.
     if (this.isLocalOnlyMode) throw new Error('Cloud providers disabled in local-only mode');
-    this.assertOutboundScopes('natively', userContent, imagePaths);
+    this.assertOutboundScopes('MeetFloo', userContent, imagePaths);
     // ── REAL SSE STREAM (replaces the fake word-by-word simulation) ──────────
-    // Previous implementation called generateWithNatively() (blocking, waited for
+    // Previous implementation called generateWithMeetFloo() (blocking, waited for
     // the full response), then drip-fed words with setTimeout delays — pure theater.
     // This version opens a streaming fetch and yields tokens as the server generates
     // them, cutting time-to-first-token from ~3s to ~80ms.
-    // E2E: when driving a locally-run backend with NATIVELY_LOCAL_TEST_AUTH=1, the
+    // E2E: when driving a locally-run backend with MEETFLOO_LOCAL_TEST_AUTH=1, the
     // app authenticates via the local-test header instead of a real key/trial. Only
-    // active when NATIVELY_E2E=1 AND the token env is set, so it can never affect a
+    // active when MEETFLOO_E2E=1 AND the token env is set, so it can never affect a
     // shipped app or a normal run.
     const e2eLocalToken =
-      process.env.NATIVELY_E2E === '1' ? (process.env.NATIVELY_E2E_LOCAL_TEST_TOKEN || '') : '';
-    let nativelyKey = this.nativelyKey;
-    if (!nativelyKey) {
+      process.env.MEETFLOO_E2E === '1' ? (process.env.MEETFLOO_E2E_LOCAL_TEST_TOKEN || '') : '';
+    let MeetFlooKey = this.MeetFlooKey;
+    if (!MeetFlooKey) {
       const { CredentialsManager } = require('./services/CredentialsManager');
-      nativelyKey = CredentialsManager.getInstance().getNativelyApiKey() || null;
+      MeetFlooKey = CredentialsManager.getInstance().getMeetFlooApiKey() || null;
     }
-    if (!nativelyKey && !e2eLocalToken) throw new Error('Natively API key not set');
+    if (!MeetFlooKey && !e2eLocalToken) throw new Error('MeetFloo API key not set');
 
     const body: Record<string, unknown> = {
       messages: [{ role: 'user', content: userContent }],
@@ -9307,8 +9337,8 @@ let isMultimodal = !!(imagePaths?.length);
       body.language = this.aiResponseLanguage;
     }
 
-    // Attach images — compress before sending (same as non-streaming generateWithNatively).
-    // Retina screenshots are 2-5 MB PNG; the Natively API body limit is 4 MB.
+    // Attach images — compress before sending (same as non-streaming generateWithMeetFloo).
+    // Retina screenshots are 2-5 MB PNG; the MeetFloo API body limit is 4 MB.
     // Resize to max 1920px and encode as JPEG 85% — typically 200-250 KB per image.
     // 4 screenshots × ~278KB base64 = ~1.1 MB, well within the 4 MB server limit.
     if (imagePaths?.length) {
@@ -9324,7 +9354,7 @@ let isMultimodal = !!(imagePaths?.length);
           } catch (compressErr: any) {
             // Fallback: send raw if sharp fails (e.g. unsupported format)
             console.warn(
-              '[LLMHelper] streamWithNatively: image compression failed, sending raw:',
+              '[LLMHelper] streamWithMeetFloo: image compression failed, sending raw:',
               directMode ? '[details omitted]' : compressErr.message,
             );
             const imageData = await fs.promises.readFile(p);
@@ -9332,7 +9362,7 @@ let isMultimodal = !!(imagePaths?.length);
               if (directMode) {
                 throw new DirectAssistError('INVALID_ATTACHMENT', 'The image attachment could not be prepared for the selected provider.');
               }
-              console.warn('[LLMHelper] streamWithNatively: raw fallback image too large, skipping:', directMode ? '[path omitted]' : p);
+              console.warn('[LLMHelper] streamWithMeetFloo: raw fallback image too large, skipping:', directMode ? '[path omitted]' : p);
               continue;
             }
             images.push({ mime_type: 'image/png', data: imageData.toString('base64') });
@@ -9374,17 +9404,17 @@ let isMultimodal = !!(imagePaths?.length);
       'X-Request-Id': requestId,
     };
     if (e2eLocalToken) {
-      streamHeaders['x-natively-local-test'] = e2eLocalToken;
-    } else if (nativelyKey === TRIAL_SENTINEL_KEY) {
+      streamHeaders['x-MeetFloo-local-test'] = e2eLocalToken;
+    } else if (MeetFlooKey === TRIAL_SENTINEL_KEY) {
       const { CredentialsManager } = require('./services/CredentialsManager');
       const trialToken = CredentialsManager.getInstance().getTrialToken();
       if (!trialToken) throw new Error('Trial token not found');
       streamHeaders['x-trial-token'] = trialToken;
     } else {
       // Non-null: this `else` implies `e2eLocalToken` is falsy, and the guard above
-      // (`if (!nativelyKey && !e2eLocalToken) throw`) already threw for a null key.
-      streamHeaders['x-api-key'] = nativelyKey!;
-      streamHeaders['x-natively-key'] = nativelyKey!;
+      // (`if (!MeetFlooKey && !e2eLocalToken) throw`) already threw for a null key.
+      streamHeaders['x-api-key'] = MeetFlooKey!;
+      streamHeaders['x-MeetFloo-key'] = MeetFlooKey!;
     }
 
     // Early-bail if the caller has already aborted (e.g., user superseded
@@ -9406,7 +9436,7 @@ let isMultimodal = !!(imagePaths?.length);
     // connect timeout to the connect phase only.
     const streamController = new AbortController();
     let connectTimer: NodeJS.Timeout | null = setTimeout(
-      () => streamController.abort(new Error(`Natively API connect timeout (${Math.round(effectiveConnectTimeoutMs / 1000)}s)`)),
+      () => streamController.abort(new Error(`MeetFloo API connect timeout (${Math.round(effectiveConnectTimeoutMs / 1000)}s)`)),
       effectiveConnectTimeoutMs,
     );
     const onCallerAbort = () => {
@@ -9450,7 +9480,7 @@ let isMultimodal = !!(imagePaths?.length);
           const serializedBody = JSON.stringify(body);
           if (!directMode) {
             require('./llm/providerPayloadCapture').captureProviderPayload({
-              provider: 'natively_gateway',
+              provider: 'MeetFloo_gateway',
               classification: 'exact_serialized_provider_payload',
               payload: body,
               serializedPayload: serializedBody,
@@ -9481,13 +9511,13 @@ let isMultimodal = !!(imagePaths?.length);
           lastErr = fetchErr;
           if (!isDnsError(fetchErr) || attempt >= 2 || streamController.signal.aborted) {
             const durationMs = Math.round(nowMs() - streamStartedAt);
-            console.error('[NativelyAPI] stream pre-response failure', {
+            console.error('[MeetFlooAPI] stream pre-response failure', {
               requestId,
               endpoint: endpointUrl,
               method: 'POST',
               stage: streamController.signal.aborted ? 'connect_timeout_or_abort' : 'pre_response',
               model: this.currentModelId,
-              provider: 'natively',
+              provider: 'MeetFloo',
               connectTimeoutMs: effectiveConnectTimeoutMs,
               durationMs,
               error: directMode ? '[omitted for Direct Assist]' : summarizeFetchError(fetchErr),
@@ -9505,9 +9535,9 @@ let isMultimodal = !!(imagePaths?.length);
               }
               throw new DirectAssistError('PROVIDER_ERROR', 'The selected provider could not start the stream.', true);
             }
-            throw new Error(`Natively API stream request failed before response requestId=${requestId} endpoint=${endpointUrl} method=POST timeoutMs=${effectiveConnectTimeoutMs} durationMs=${durationMs} ${formatFetchError(fetchErr)}`);
+            throw new Error(`MeetFloo API stream request failed before response requestId=${requestId} endpoint=${endpointUrl} method=POST timeoutMs=${effectiveConnectTimeoutMs} durationMs=${durationMs} ${formatFetchError(fetchErr)}`);
           }
-          console.warn(`[streamWithNatively] DNS failure req=${requestId} (${fetchErr.cause?.code ?? fetchErr.code}), retry ${attempt + 1}/2 in 500ms`);
+          console.warn(`[streamWithMeetFloo] DNS failure req=${requestId} (${fetchErr.cause?.code ?? fetchErr.code}), retry ${attempt + 1}/2 in 500ms`);
           // Bank the retry for the profile. A provider that always succeeds on
           // attempt three looks perfect by its success rate and feels slow —
           // this counter is the only thing that makes that visible.
@@ -9538,7 +9568,7 @@ let isMultimodal = !!(imagePaths?.length);
       const errText = await response.text().catch(() => '');
       let errData: any = {};
       try { errData = errText ? JSON.parse(errText) : {}; } catch { errData = {}; }
-      console.error('[NativelyAPI] stream HTTP failure', {
+      console.error('[MeetFlooAPI] stream HTTP failure', {
         requestId,
         serverRequestId,
         endpoint: endpointUrl,
@@ -9547,22 +9577,22 @@ let isMultimodal = !!(imagePaths?.length);
         status: response.status,
         statusText: directMode ? undefined : response.statusText,
         model: this.currentModelId,
-        provider: 'natively',
+        provider: 'MeetFloo',
         connectTimeoutMs: effectiveConnectTimeoutMs,
         durationMs: Math.round(nowMs() - streamStartedAt),
         responseBody: directMode ? '[omitted for Direct Assist]' : errText.slice(0, 1000),
       });
       if (directMode) {
-        const error = new Error(`Natively API stream HTTP ${response.status}`) as Error & { status?: number };
+        const error = new Error(`MeetFloo API stream HTTP ${response.status}`) as Error & { status?: number };
         error.status = response.status;
         throw error;
       }
-      throw new Error(`Natively API stream HTTP ${response.status} requestId=${requestId} serverRequestId=${serverRequestId || 'n/a'} endpoint=${endpointUrl}: ${errData.error || errText.slice(0, 300) || 'unknown'}`);
+      throw new Error(`MeetFloo API stream HTTP ${response.status} requestId=${requestId} serverRequestId=${serverRequestId || 'n/a'} endpoint=${endpointUrl}: ${errData.error || errText.slice(0, 300) || 'unknown'}`);
     }
 
     if (!response.body) {
       abortSignal?.removeEventListener('abort', onCallerAbort);
-      throw new Error(`Natively API stream missing response body requestId=${requestId} serverRequestId=${serverRequestId || 'n/a'} endpoint=${endpointUrl}`);
+      throw new Error(`MeetFloo API stream missing response body requestId=${requestId} serverRequestId=${serverRequestId || 'n/a'} endpoint=${endpointUrl}`);
     }
 
     // Parse the SSE response body incrementally.
@@ -9604,7 +9634,7 @@ let isMultimodal = !!(imagePaths?.length);
             }
           }
           if (chunk.error) {
-            console.error('[NativelyAPI] stream server error event', {
+            console.error('[MeetFlooAPI] stream server error event', {
               requestId,
               serverRequestId,
               endpoint: endpointUrl,
@@ -9612,7 +9642,7 @@ let isMultimodal = !!(imagePaths?.length);
               stage: firstTokenAt ? 'during_stream' : 'before_first_token',
               status: responseStatus,
               model: this.currentModelId,
-              provider: 'natively',
+              provider: 'MeetFloo',
               serverModel: providerModel,
               connectTimeoutMs: effectiveConnectTimeoutMs,
               tfftMs: firstTokenAt ? Math.round(firstTokenAt - streamStartedAt) : null,
@@ -9627,7 +9657,7 @@ let isMultimodal = !!(imagePaths?.length);
                 true,
               );
             }
-            throw new Error(`Natively API stream server error requestId=${requestId} serverRequestId=${serverRequestId || 'n/a'} model=${providerModel || 'unknown'} error=${chunk.error}`);
+            throw new Error(`MeetFloo API stream server error requestId=${requestId} serverRequestId=${serverRequestId || 'n/a'} model=${providerModel || 'unknown'} error=${chunk.error}`);
           }
           if (typeof chunk.delta === 'string' && chunk.delta) {
             if (!firstTokenAt) firstTokenAt = nowMs();
@@ -9638,7 +9668,7 @@ let isMultimodal = !!(imagePaths?.length);
         }
       }
     } catch (streamErr: any) {
-      console.error('[NativelyAPI] stream read failure', {
+      console.error('[MeetFlooAPI] stream read failure', {
         requestId,
         serverRequestId,
         endpoint: endpointUrl,
@@ -9646,7 +9676,7 @@ let isMultimodal = !!(imagePaths?.length);
         stage: firstTokenAt ? 'during_stream' : 'before_first_token',
         status: responseStatus,
         model: this.currentModelId,
-        provider: 'natively',
+        provider: 'MeetFloo',
         serverModel: providerModel,
         connectTimeoutMs: effectiveConnectTimeoutMs,
         tfftMs: firstTokenAt ? Math.round(firstTokenAt - streamStartedAt) : null,
@@ -9666,18 +9696,18 @@ let isMultimodal = !!(imagePaths?.length);
           true,
         );
       }
-      throw new Error(`Natively API stream failed during read requestId=${requestId} serverRequestId=${serverRequestId || 'n/a'} stage=${firstTokenAt ? 'during_stream' : 'before_first_token'} model=${providerModel || 'unknown'} ${formatFetchError(streamErr)}`);
+      throw new Error(`MeetFloo API stream failed during read requestId=${requestId} serverRequestId=${serverRequestId || 'n/a'} stage=${firstTokenAt ? 'during_stream' : 'before_first_token'} model=${providerModel || 'unknown'} ${formatFetchError(streamErr)}`);
     } finally {
       const totalMs = Math.max(1, nowMs() - streamStartedAt);
       if (tokenCount > 0) {
-        console.log('[NativelyAPI] stream completed', {
+        console.log('[MeetFlooAPI] stream completed', {
           requestId,
           serverRequestId,
           endpoint: endpointUrl,
           method: 'POST',
           status: responseStatus,
           model: this.currentModelId,
-          provider: 'natively',
+          provider: 'MeetFloo',
           serverModel: providerModel,
           fallbackUsed: false,
           connectTimeoutMs: effectiveConnectTimeoutMs,
@@ -9886,7 +9916,7 @@ let isMultimodal = !!(imagePaths?.length);
       provider: 'claude', classification: 'sdk_request_object_before_serialization', payload: request,
     });
     const stream = this.claudeClient.messages.stream(request);
-    const onAbort = () => { try { stream.abort(); } catch {} };
+    const onAbort = () => { try { stream.abort(); } catch { } };
     abortSignal?.addEventListener('abort', onAbort, { once: true });
     try {
       for await (const event of stream) {
@@ -10177,7 +10207,7 @@ let isMultimodal = !!(imagePaths?.length);
       provider: 'claude', classification: 'sdk_request_object_before_serialization', payload: request,
     });
     const stream = this.claudeClient.messages.stream(request);
-    const onAbort = () => { try { stream.abort(); } catch {} };
+    const onAbort = () => { try { stream.abort(); } catch { } };
     abortSignal?.addEventListener('abort', onAbort, { once: true });
     try {
       for await (const event of stream) {
@@ -10378,20 +10408,26 @@ let isMultimodal = !!(imagePaths?.length);
 
     // Full ladder, cheapest → most capable. priority encodes the ladder order.
     const ladder: TextStreamProvider[] = [
-      { id: 'gemini_flash_lite', name: 'Gemini Flash-Lite', isLocal: false, priority: 0,
-        open: (sig) => this.streamWithGeminiModel(fullMessage, GEMINI_FLASH_LITE_MODEL, imagePaths, systemInstruction, sig, thinkingBudget) },
-      { id: 'gemini_flash', name: 'Gemini Flash', isLocal: false, priority: 1,
-        open: (sig) => this.streamWithGeminiModel(fullMessage, GEMINI_FLASH_MODEL, imagePaths, systemInstruction, sig, thinkingBudget) },
-      { id: 'gemini_pro', name: 'Gemini Pro', isLocal: false, priority: 2,
-        open: (sig) => this.streamWithGeminiModel(fullMessage, GEMINI_PRO_MODEL, imagePaths, systemInstruction, sig, thinkingBudget) },
+      {
+        id: 'gemini_flash_lite', name: 'Gemini Flash-Lite', isLocal: false, priority: 0,
+        open: (sig) => this.streamWithGeminiModel(fullMessage, GEMINI_FLASH_LITE_MODEL, imagePaths, systemInstruction, sig, thinkingBudget)
+      },
+      {
+        id: 'gemini_flash', name: 'Gemini Flash', isLocal: false, priority: 1,
+        open: (sig) => this.streamWithGeminiModel(fullMessage, GEMINI_FLASH_MODEL, imagePaths, systemInstruction, sig, thinkingBudget)
+      },
+      {
+        id: 'gemini_pro', name: 'Gemini Pro', isLocal: false, priority: 2,
+        open: (sig) => this.streamWithGeminiModel(fullMessage, GEMINI_PRO_MODEL, imagePaths, systemInstruction, sig, thinkingBudget)
+      },
     ];
 
     // Honor the selected Gemini model as the starting rung; fall forward only.
     // Non-Gemini selections (fell through to Gemini) and flash-lite start at 0.
     const startIndex =
       this.currentModelId === GEMINI_PRO_MODEL ? 2 :
-      this.currentModelId === GEMINI_FLASH_MODEL ? 1 :
-      0;
+        this.currentModelId === GEMINI_FLASH_MODEL ? 1 :
+          0;
     const providers = ladder.slice(startIndex);
 
     // All rungs share ONE Gemini API key. A permanent key-level failure (expired
@@ -10773,7 +10809,7 @@ let isMultimodal = !!(imagePaths?.length);
     const streamAbort = new AbortController();
     // 30s predates Direct Assist (v2.2.0) and is the right generous default
     // for the legacy/general-purpose callers of this function. Direct Assist
-    // callers get the SAME per-path budget streamWithNatively already uses
+    // callers get the SAME per-path budget streamWithMeetFloo already uses
     // (DIRECT_ASSIST_CONNECT_TIMEOUT_MS/VISION_CONNECT_TIMEOUT_MS, LLMHelper.ts
     // ~195-196) instead of always waiting the vision-sized window on a plain
     // text turn — a stalled custom text endpoint now fails over in ~15s per
@@ -10795,7 +10831,7 @@ let isMultimodal = !!(imagePaths?.length);
     }
     // The connect phase of the USER-ENDPOINT route — the one route whose
     // deadlines actually adapt, so the one where a measured handshake is worth
-    // most. Same measurement streamWithNatively takes: request issued → response
+    // most. Same measurement streamWithMeetFloo takes: request issued → response
     // headers. (For an SSE response that is also the first body byte, so Phase
     // 6's "first byte" and this are the same instant; TTFT, measured by the
     // deadline driver, is the first PARSED event and is a separate number.)
@@ -10961,7 +10997,7 @@ let isMultimodal = !!(imagePaths?.length);
       // A CALLER-INITIATED abort is not a provider error and must not produce
       // content. The fetch above rejects with AbortError the moment the caller
       // cancels, and yielding here made that rejection look like a first token:
-      // in natively_debug (3).log the live deadline aborted the turn at 13.00s,
+      // in MeetFloo_debug (3).log the live deadline aborted the turn at 13.00s,
       // this catch yielded 35 non-empty characters, and the vision chain
       // committed to a stream the consumer had already stopped reading.
       // The per-chunk `if (abortSignal?.aborted) return` above already applies
@@ -10976,7 +11012,7 @@ let isMultimodal = !!(imagePaths?.length);
         // reported as if the request had been cancelled instead of timing
         // out. The caller's own abortSignal was just checked above and is
         // NOT aborted, so any abort observed here can only be streamAbort's,
-        // exactly like streamWithNatively's connect-timeout branch above.
+        // exactly like streamWithMeetFloo's connect-timeout branch above.
         if (streamAbort.signal.aborted) {
           throw new DirectAssistError('CONNECT_TIMEOUT', 'The selected provider timed out.', true);
         }
@@ -11083,8 +11119,8 @@ let isMultimodal = !!(imagePaths?.length);
   }
 
   /**
-   * True when this turn routes through natively-api's SEQUENTIAL server-side
-   * provider cascade (`${NATIVELY_API_URL}/v1/chat`) rather than straight to a
+   * True when this turn routes through MeetFloo-api's SEQUENTIAL server-side
+   * provider cascade (`${MEETFLOO_API_URL}/v1/chat`) rather than straight to a
    * provider.
    *
    * F-301: the client's first-useful deadline must stay ABOVE the server's
@@ -11093,8 +11129,8 @@ let isMultimodal = !!(imagePaths?.length);
    * can only give up. Callers use this to pick the deadline; see
    * firstUsefulDeadlineMs(). Mirrors isUsingOllama()/isUsingCodexCli().
    */
-  public isUsingNativelyServerCascade(): boolean {
-    return this.currentModelId === 'natively';
+  public isUsingMeetFlooServerCascade(): boolean {
+    return this.currentModelId === 'MeetFloo';
   }
 
   /**
@@ -11115,7 +11151,7 @@ let isMultimodal = !!(imagePaths?.length);
    *
    * Callers use this to pick the deadline; see totalHardTimeoutMs() and
    * firstUsefulDeadlineMs(). Mirrors isUsingOllama()/isUsingCodexCli()/
-   * isUsingNativelyServerCascade().
+   * isUsingMeetFlooServerCascade().
    */
   public isUsingUserEndpoint(): boolean {
     if (this.customProvider || this.activeCurlProvider) return true;
@@ -11212,8 +11248,8 @@ let isMultimodal = !!(imagePaths?.length);
     })();
     const route = (() => {
       if (this.isUsingOllama() || this.isUsingCodexCli()) return 'local' as const;
-      if (hasImages && !this.isUsingNativelyServerCascade()) return 'vision' as const;
-      if (this.isUsingNativelyServerCascade()) return 'server_cascade' as const;
+      if (hasImages && !this.isUsingMeetFlooServerCascade()) return 'vision' as const;
+      if (this.isUsingMeetFlooServerCascade()) return 'server_cascade' as const;
       if (this.isUsingUserEndpoint()) return 'user_endpoint' as const;
       return 'default_provider' as const;
     })();
@@ -11499,7 +11535,7 @@ let isMultimodal = !!(imagePaths?.length);
       // litellm/openai/gpt-4o). Classify those explicit prefixes before the
       // generic vendor predicates or the request escapes through the wrong
       // credential/client boundary.
-      if (selected === 'natively') provider = 'natively';
+      if (selected === 'MeetFloo') provider = 'MeetFloo';
       else if (this.isAntigravityModel(selected)) provider = 'antigravity';
       else if (this.isCodexCliModel(selected)) {
         provider = 'codex-cli';
@@ -11626,7 +11662,7 @@ let isMultimodal = !!(imagePaths?.length);
    */
   private directFallbackCandidates(): { provider: DirectAssistProvider; model: string }[] {
     const candidates: { provider: DirectAssistProvider; model: string }[] = [
-      { provider: 'natively', model: 'natively' },
+      { provider: 'MeetFloo', model: 'MeetFloo' },
       { provider: 'gemini', model: GEMINI_FLASH_MODEL },
       { provider: 'openai', model: OPENAI_MODEL },
       { provider: 'claude', model: CLAUDE_MODEL },
@@ -11643,7 +11679,7 @@ let isMultimodal = !!(imagePaths?.length);
 
   private directProviderHasCredential(provider: DirectAssistProvider): boolean {
     switch (provider) {
-      case 'natively': return this.hasNatively();
+      case 'MeetFloo': return this.hasMeetFloo();
       case 'gemini': return !!this.client;
       case 'openai': return !!this.openaiClient;
       case 'claude': return !!this.claudeClient;
@@ -11711,7 +11747,7 @@ let isMultimodal = !!(imagePaths?.length);
     curl: CurlProvider | null,
   ): boolean {
     switch (selection.provider) {
-      case 'natively':
+      case 'MeetFloo':
       case 'codex-cli':
       case 'antigravity':
         return true;
@@ -11820,7 +11856,7 @@ let isMultimodal = !!(imagePaths?.length);
     }
     // This is the shared last boundary for every Direct image dispatch. The
     // provider-specific streamers are intentionally not trusted to remember
-    // private_vision: a cloud Natively request, for example, otherwise reaches
+    // private_vision: a cloud MeetFloo request, for example, otherwise reaches
     // its transport without passing through assertOutboundScopes. Verified
     // local Direct providers may still perform private vision on-device.
     if (imagePaths.length > 0 && !directProviderIsLocal) {
@@ -11891,8 +11927,8 @@ let isMultimodal = !!(imagePaths?.length);
         if (deniedWithCarried.includes('screenshots')) {
           carriedImagePaths = [];
         } else {
-        // The current turn's images already passed this above; this covers a
-        // turn that carries earlier ones and attaches none of its own.
+          // The current turn's images already passed this above; this covers a
+          // turn that carries earlier ones and attaches none of its own.
           try {
             this.assertOutboundImagesAllowed(provider, true);
           } catch {
@@ -11908,13 +11944,13 @@ let isMultimodal = !!(imagePaths?.length);
     const capabilityModel = provider === 'antigravity'
       ? this.getAntigravityModelId(model)
       : provider === 'litellm'
-      ? model.replace(/^litellm\//, '')
-      : provider === 'nvidia_nim'
-        ? model.replace(/^nvidia_nim\//, '')
-        // 'openrouter' falls through on purpose: getModelCapabilities strips two
-        // segments itself, so the FULL id resolves to a bare name it knows.
-        // Pre-stripping here would leave `anthropic/claude-sonnet-5` unresolved.
-        : model;
+        ? model.replace(/^litellm\//, '')
+        : provider === 'nvidia_nim'
+          ? model.replace(/^nvidia_nim\//, '')
+          // 'openrouter' falls through on purpose: getModelCapabilities strips two
+          // segments itself, so the FULL id resolves to a bare name it knows.
+          // Pre-stripping here would leave `anthropic/claude-sonnet-5` unresolved.
+          : model;
     const directCapabilities = getModelCapabilities(capabilityModel, provider === 'ollama');
     const directInputTokens = estimateTokens(request.systemPrompt) + estimateTokens(directUserPrompt);
     if (directInputTokens + directCapabilities.outputBudgetTokens > directCapabilities.maxContextTokens) {
@@ -11927,8 +11963,8 @@ let isMultimodal = !!(imagePaths?.length);
     // Every branch yields from one exact adapter and returns. There is no
     // provider race, model ladder or cross-provider recovery below this point.
     switch (provider) {
-      case 'natively':
-        yield* this.streamWithNatively(
+      case 'MeetFloo':
+        yield* this.streamWithMeetFloo(
           directUserPrompt,
           request.systemPrompt,
           imagePaths,
@@ -12377,7 +12413,7 @@ let isMultimodal = !!(imagePaths?.length);
    * Robust Meeting Summary Generation
    * Strategy:
    * 0. Custom / cURL Provider (if user selected one — always takes priority)
-   * 1. Natively API (if configured)
+   * 1. MeetFloo API (if configured)
    * 2. Groq (if context text < 100k tokens approx)
    * 3. Gemini Flash (Retry 2x)
    * 4. Gemini Pro (Retry 5x)
@@ -12385,7 +12421,7 @@ let isMultimodal = !!(imagePaths?.length);
   public async generateMeetingSummary(systemPrompt: string, context: string, groqSystemPrompt?: string, opts?: MeetingSummaryCallOpts): Promise<string> {
     console.log(`[LLMHelper] generateMeetingSummary called. Context length: ${context.length}`);
     // Short-circuit on empty/whitespace context. With no transcript content to
-    // summarise, the provider fallback chain (Natively → Codex → Groq → Gemini
+    // summarise, the provider fallback chain (MeetFloo → Codex → Groq → Gemini
     // Flash-Lite → Flash → Pro) burns up to ~10 minutes of wall-clock time on retries
     // for a result that will be discarded by the caller anyway. The caller
     // (MeetingPersistence) already checks `transcript.length > 2` before using
@@ -12447,29 +12483,29 @@ let isMultimodal = !!(imagePaths?.length);
       }
     }
 
-    // ATTEMPT 1: Natively API (if configured — first in chain)
+    // ATTEMPT 1: MeetFloo API (if configured — first in chain)
     // Inner fetch timeout: caller's timeoutMs, default 8s (AbortSignal.timeout in
-    // generateWithNatively). Outer safety net: timeoutMs + 5s (default 10s when the
+    // generateWithMeetFloo). Outer safety net: timeoutMs + 5s (default 10s when the
     // caller passes no opts, so uninvolved callers are unaffected) — the extra slack
     // covers JSON parsing and any overhead after the fetch resolves, mirroring the
-    // headroom generateWithNatively's own OVERALL_DEADLINE_MS gives the body read.
-    if (this.hasNatively()) {
+    // headroom generateWithMeetFloo's own OVERALL_DEADLINE_MS gives the body read.
+    if (this.hasMeetFloo()) {
       try {
-        console.log(`[LLMHelper] Attempting Natively API for summary...`);
+        console.log(`[LLMHelper] Attempting MeetFloo API for summary...`);
         const text = await this.withTimeout(
-          this.generateWithNatively(`Context:\n${context}`, systemPrompt, undefined, {
+          this.generateWithMeetFloo(`Context:\n${context}`, systemPrompt, undefined, {
             ...(opts?.purpose ? { purpose: opts.purpose } : {}),
             ...(opts?.timeoutMs ? { timeoutMs: opts.timeoutMs } : {}),
           }),
           opts?.timeoutMs ? opts.timeoutMs + 5000 : 10000,
-          'Natively Summary'
+          'MeetFloo Summary'
         );
         if (text.trim().length > 0) {
-          console.log(`[LLMHelper] ✅ Natively API summary generated successfully.`);
+          console.log(`[LLMHelper] ✅ MeetFloo API summary generated successfully.`);
           return this.processResponse(text);
         }
       } catch (e: any) {
-        console.warn(`[LLMHelper] ⚠️ Natively API summary failed: ${e.message}. Falling back...`);
+        console.warn(`[LLMHelper] ⚠️ MeetFloo API summary failed: ${e.message}. Falling back...`);
       }
     }
 
@@ -12494,7 +12530,7 @@ let isMultimodal = !!(imagePaths?.length);
     // ATTEMPT 2b: Antigravity (signed in). Beside Codex CLI, the chain's other
     // OAuth provider. This chain is FIXED — it does not consult the active model
     // — so before this rung a user whose only working provider was Antigravity
-    // got no meeting summary at all once Natively and Codex were unavailable.
+    // got no meeting summary at all once MeetFloo and Codex were unavailable.
     //
     // Consumes the streaming generator rather than adding a non-streaming path:
     // AntigravityService only exposes stream(), and one more shape to maintain

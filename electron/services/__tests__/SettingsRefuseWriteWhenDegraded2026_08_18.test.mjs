@@ -40,7 +40,7 @@ function withUserData(dir, fn) {
   const origLoad = Module._load;
   Module._load = function patched(request) {
     if (request === 'electron') {
-      return { app: { getPath: () => dir, isPackaged: false, getAppPath: () => dir, isReady: () => true, on: () => {} } };
+      return { app: { getPath: () => dir, isPackaged: false, getAppPath: () => dir, isReady: () => true, on: () => { } } };
     }
     if (request.endsWith('.node') || request.includes('native-module')) return {};
     return origLoad.apply(this, arguments);
@@ -55,7 +55,7 @@ test('a corrupt settings.json is quarantined intact, and the store keeps working
   fs.writeFileSync(file, CORRUPT);
 
   withUserData(tmp, () => {
-    delete globalThis.__nativelySettingsManagerV1__;
+    delete globalThis.__MeetFlooSettingsManagerV1__;
     delete require_.cache[require_.resolve(dist)];
     const { SettingsManager } = require_(dist);
     const sm = SettingsManager.getInstance();
@@ -88,7 +88,7 @@ test('a settings file that cannot be quarantined falls back to refusing writes',
   fs.renameSync = () => { throw new Error('EPERM: simulated rename failure'); };
   try {
     withUserData(tmp, () => {
-      delete globalThis.__nativelySettingsManagerV1__;
+      delete globalThis.__MeetFlooSettingsManagerV1__;
       delete require_.cache[require_.resolve(dist)];
       const { SettingsManager } = require_(dist);
       const sm = SettingsManager.getInstance();
@@ -109,7 +109,7 @@ test('a fresh profile with no settings file still writes normally', () => {
   const file = path.join(tmp, 'settings.json');
 
   withUserData(tmp, () => {
-    delete globalThis.__nativelySettingsManagerV1__;
+    delete globalThis.__MeetFlooSettingsManagerV1__;
     delete require_.cache[require_.resolve(dist)];
     const { SettingsManager } = require_(dist);
     const sm = SettingsManager.getInstance();

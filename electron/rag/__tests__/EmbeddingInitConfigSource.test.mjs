@@ -5,10 +5,10 @@
 // THE BUG: ProcessingHelper re-initialized embeddings with a hand-picked subset
 // — `{ openaiKey, geminiKey, providerDataScopes }` — and nothing else. It ran
 // after the correct startup init and CLOBBERED it, silently dropping:
-//   nativelyApiKey, ollamaUrl, every model/dims field, and (fatally) the user's
+//   MeetFlooApiKey, ollamaUrl, every model/dims field, and (fatally) the user's
 //   embeddingMode / embeddingProvider selection.
 //
-// Observed: settings held {mode:'manual', provider:'natively'}, yet the pipeline
+// Observed: settings held {mode:'manual', provider:'MeetFloo'}, yet the pipeline
 // resolved gemini, because by the time it resolved, the config in play was the
 // subset — which has no concept of a chosen provider. Selecting a model in
 // Settings appeared to do nothing.
@@ -34,7 +34,7 @@ describe('every initializeEmbeddings caller uses the shared builder', () => {
     test(`${file} does not hand-roll an embedding config`, () => {
       const src = read(file);
       let from = 0;
-      for (;;) {
+      for (; ;) {
         const i = src.indexOf('initializeEmbeddings(', from);
         if (i === -1) break;
         from = i + 1;

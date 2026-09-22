@@ -14,7 +14,7 @@
 ✖ A: 8s cold-start mock survives a 60_000ms service timeout (Codex service deadline is independent of live-deadline)
 ✖ AIProvidersSettings credential synchronization
 ✖ AppState sends model-changed only to current model listeners
-✖ B5: dev-mode TCC bypass is opt-in (NATIVELY_DEV_BYPASS_SCREEN_TCC=1) only
+✖ B5: dev-mode TCC bypass is opt-in (MEETFLOO_DEV_BYPASS_SCREEN_TCC=1) only
 ✖ B: --image <path> flag is emitted for EACH image in imagePaths
 ✖ BUG-MODE-BLEEDING: Async post-call summary mode snapshot
 ✖ BrainstormLLM: every streamChat() call passes ignoreKnowledgeMode=true
@@ -46,7 +46,7 @@
 ✖ LocalReranker.isCached() resolves true against a SIMULATED packaged-build resourcesPath layout
 ✖ ModeContextRetriever includes reference grounding guard with retrieved snippets
 ✖ ModesManager.getOrMigrateSourceContract — create-then-update migration timing bug (2026-07-11)
-✖ NativelyInterface.tsx renders a Repair Permissions button gated by isMac
+✖ MeetFlooInterface.tsx renders a Repair Permissions button gated by isMac
 ✖ PERMANENT: 3 distinct cold-start decrypt failures escalate to needsCredentialReentry
 ✖ PR #370: keyring AVAILABLE but encryptString throws → save falls through to fallback (returns true, NOT false)
 ✖ PR #370: loadCredentials detects stale-keyring state via mtime and unlinks before read

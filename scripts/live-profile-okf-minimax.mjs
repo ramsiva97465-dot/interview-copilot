@@ -48,19 +48,19 @@ if (!process.env.MINIMAX_API_KEY) {
   console.error('FATAL: MINIMAX_API_KEY not found in .env');
   process.exit(2);
 }
-if (!process.env.NATIVELY_TEST_USERDATA) {
-  process.env.NATIVELY_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'okf-live-'));
+if (!process.env.MEETFLOO_TEST_USERDATA) {
+  process.env.MEETFLOO_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'okf-live-'));
 }
 // Force the OKF profile layer ON for this live run.
-process.env.NATIVELY_OKF_PROFILE_PACKS = '1';
-process.env.NATIVELY_OKF_PROFILE_HYBRID_RETRIEVAL = '1';
+process.env.MEETFLOO_OKF_PROFILE_PACKS = '1';
+process.env.MEETFLOO_OKF_PROFILE_HYBRID_RETRIEVAL = '1';
 
 async function load(rel) {
   return import(pathToFileURL(path.join(distRoot, rel)).href);
 }
 
 // ── MiniMax-M3 caller (reuses the app's own provider module) ──
-const minimax = await import(pathToFileURL(path.join(repoRoot, 'natively-api/lib/minimaxProvider.js')).href);
+const minimax = await import(pathToFileURL(path.join(repoRoot, 'MeetFloo-api/lib/minimaxProvider.js')).href);
 
 async function callMiniMax(systemPrompt, userContent) {
   const body = minimax.buildMiniMaxBody(

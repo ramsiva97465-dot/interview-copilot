@@ -8,7 +8,7 @@
 // set-gemini-api-key + set-openai-api-key) and had ALREADY drifted: `geminiKeys`
 // was passed at only one of them, so Gemini key rotation silently didn't apply
 // when a key was entered through Settings. Any newly added field inherits that
-// drift by default, which is how a Natively key would reach the resolver from
+// drift by default, which is how a MeetFloo key would reach the resolver from
 // some entry points and not others.
 
 import type { AppAPIConfig } from './EmbeddingProviderResolver';
@@ -23,7 +23,7 @@ import { TRIAL_SENTINEL_KEY } from '../config/constants';
 export interface EmbeddingCredentialStore {
   getGeminiApiKey(): string | undefined;
   getOpenaiApiKey(): string | undefined;
-  getNativelyApiKey(): string | undefined;
+  getMeetFlooApiKey(): string | undefined;
   getTrialToken?(): string | undefined;
   /** Optional bearer token for a user-hosted endpoint. */
   getCustomEmbeddingApiKey?(): string | undefined;
@@ -32,8 +32,8 @@ export interface EmbeddingCredentialStore {
 }
 
 export interface EmbeddingConfigSources {
-  nativelyApiKey?: string;
-  /** The real credential when nativelyApiKey is the trial sentinel. */
+  MeetFlooApiKey?: string;
+  /** The real credential when MeetFlooApiKey is the trial sentinel. */
   trialToken?: string;
   openaiKey?: string;
   geminiKey?: string;
@@ -64,7 +64,7 @@ export interface EmbeddingConfigSources {
   geminiEmbeddingDims?: number;
   localEmbeddingModel?: string;
   localEmbeddingDims?: number;
-  nativelyApiUrl?: string;
+  MeetFlooApiUrl?: string;
   providerDataScopes?: AppAPIConfig['providerDataScopes'];
   explicitKeyManagement?: boolean;
 }
@@ -77,13 +77,13 @@ const clean = (v?: string): string | undefined => {
 
 /** Assemble the resolver config from already-read credential values. Pure. */
 export function embeddingConfigFrom(sources: EmbeddingConfigSources): AppAPIConfig {
-  const nativelyApiKey = clean(sources.nativelyApiKey);
+  const MeetFlooApiKey = clean(sources.MeetFlooApiKey);
   return {
-    nativelyApiKey,
+    MeetFlooApiKey,
     // Only meaningful for the sentinel, but carried whenever present so the
     // change-detector can see a new trial arrive.
-    nativelyTrialToken: clean(sources.trialToken),
-    nativelyApiUrl: clean(sources.nativelyApiUrl),
+    MeetFlooTrialToken: clean(sources.trialToken),
+    MeetFlooApiUrl: clean(sources.MeetFlooApiUrl),
     openaiKey: clean(sources.openaiKey),
     geminiKey: clean(sources.geminiKey),
     geminiKeys: (sources.geminiKeys || []).map(k => clean(k)).filter((k): k is string => !!k),
@@ -140,7 +140,7 @@ export function resolveEmbeddingCredentials(
     store.getGeminiApiKey() || (explicitKeyManagement ? undefined : (process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY)));
   const openaiKey = pick('openaiKey', () =>
     store.getOpenaiApiKey() || (explicitKeyManagement ? undefined : process.env.OPENAI_API_KEY));
-  const nativelyApiKey = pick('nativelyApiKey', () => store.getNativelyApiKey());
+  const MeetFlooApiKey = pick('MeetFlooApiKey', () => store.getMeetFlooApiKey());
   const customEmbeddingKey = pick('customEmbeddingKey', () => store.getCustomEmbeddingApiKey?.());
   const openrouterKey = pick('openrouterKey', () => store.getOpenrouterApiKey?.());
   const voyageKey = pick('voyageKey', () => store.getVoyageApiKey?.());
@@ -172,10 +172,10 @@ export function resolveEmbeddingCredentials(
   // field list for this config.
   return embeddingConfigFrom({
     ...overrides,
-    nativelyApiKey,
+    MeetFlooApiKey,
     // A trial's sentinel key is not a credential — the token is. Read it
     // whenever the sentinel is in play so trials get managed embeddings too.
-    trialToken: (clean(nativelyApiKey) === TRIAL_SENTINEL_KEY)
+    trialToken: (clean(MeetFlooApiKey) === TRIAL_SENTINEL_KEY)
       ? (has('trialToken') ? overrides.trialToken : store.getTrialToken?.())
       : undefined,
     openaiKey,
@@ -190,7 +190,7 @@ export function resolveEmbeddingCredentials(
     customEmbeddingKey,
     openrouterKey,
     voyageKey,
-    nativelyApiUrl: overrides.nativelyApiUrl ?? process.env.APP_API_URL,
+    MeetFlooApiUrl: overrides.MeetFlooApiUrl ?? process.env.APP_API_URL,
     providerDataScopes: overrides.providerDataScopes,
     explicitKeyManagement,
   });
@@ -272,7 +272,7 @@ export function buildEmbeddingConfig(overrides: Partial<EmbeddingConfigSources> 
     : { customEmbeddingUrl: customEndpoint };
 
   // The choice itself, not just its model/dims hints. Every provider is covered
-  // here — including natively and local, which have no hints to carry and were
+  // here — including MeetFloo and local, which have no hints to carry and were
   // therefore dropped entirely before.
   const choice = { embeddingMode: chosen?.mode, embeddingProvider: effectiveProvider };
 
@@ -291,11 +291,11 @@ export function embeddingConfigChanged(prev: AppAPIConfig, next: AppAPIConfig): 
   const normList = (values?: string[]) => (values || []).map(norm).filter(Boolean).join('\n');
   const normScopes = (value: AppAPIConfig['providerDataScopes']) => JSON.stringify(value || {});
   return (
-    norm(prev.nativelyApiKey) !== norm(next.nativelyApiKey) ||
+    norm(prev.MeetFlooApiKey) !== norm(next.MeetFlooApiKey) ||
     // The sentinel key is IDENTICAL across trials, so comparing the key alone
     // would treat a brand-new trial as unchanged and keep using the dead token.
-    norm(prev.nativelyTrialToken) !== norm(next.nativelyTrialToken) ||
-    norm(prev.nativelyApiUrl) !== norm(next.nativelyApiUrl) ||
+    norm(prev.MeetFlooTrialToken) !== norm(next.MeetFlooTrialToken) ||
+    norm(prev.MeetFlooApiUrl) !== norm(next.MeetFlooApiUrl) ||
     norm(prev.openaiKey) !== norm(next.openaiKey) ||
     norm(prev.geminiKey) !== norm(next.geminiKey) ||
     norm(prev.ollamaUrl) !== norm(next.ollamaUrl) ||
@@ -322,7 +322,7 @@ export function embeddingConfigChanged(prev: AppAPIConfig, next: AppAPIConfig): 
     norm(prev.localEmbeddingModel) !== norm(next.localEmbeddingModel) ||
     (prev.localEmbeddingDims || 0) !== (next.localEmbeddingDims || 0) ||
     // Width is part of the embedding SPACE, so a change here is a re-index.
-    // Without these, switching from (say) Natively to Built-in changes no model
+    // Without these, switching from (say) MeetFloo to Built-in changes no model
     // or width, so initialize() would find the config "unchanged", skip
     // re-resolution, and the switch would silently do nothing.
     norm(prev.embeddingMode) !== norm(next.embeddingMode) ||

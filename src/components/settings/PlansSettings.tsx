@@ -1,19 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useT } from '../../i18n';
-import { NativelyApiSettings } from './NativelyApiSettings';
-import { NativelyProSettings } from './NativelyProSettings';
+import { MeetFlooApiSettings } from './NativelyApiSettings';
+import { MeetFlooProSettings } from './NativelyProSettings';
 import { HowItWorksRefund } from './HowItWorksRefund';
 import { getLicenseSnapshot, setLicenseSnapshot } from '../../lib/licenseCache';
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'framer-motion';
 import { BEAT, EASE_ENTER, EASE_LEAVE, INK, SETTLE } from '../../lib/plansMotion';
 
 // ─── Thin container ─────────────────────────────────────────
-// Natively API (managed AI/STT/search usage) and Natively Pro (a device
+// MeetFloo API (managed AI/STT/search usage) and MeetFloo Pro (a device
 // license unlocking local-only features like Modes Manager and Resume/JD
 // grounding) used to live as two separate, identically-branded settings
 // tabs. That read as two competing products even though buying an API
 // Pro/Max/Ultra plan already bundles — and auto-activates — a Pro license
-// server-side (ipcHandlers.ts `set-natively-api-key` handler).
+// server-side (ipcHandlers.ts `set-MeetFloo-api-key` handler).
 //
 // This wraps both existing components UNCHANGED under one tab and adds a
 // single explanatory line so the relationship is visible instead of
@@ -23,20 +23,20 @@ import { BEAT, EASE_ENTER, EASE_LEAVE, INK, SETTLE } from '../../lib/plansMotion
 // fix.
 interface PlansSettingsProps {
     initialIsPremium?: boolean | null;
-    initialHasNativelyKey?: boolean;
+    initialHasMeetFlooKey?: boolean;
 }
 
 export const PlansSettings: React.FC<PlansSettingsProps> = ({
     initialIsPremium = null,
-    initialHasNativelyKey = false,
+    initialHasMeetFlooKey = false,
 }) => {
     const t = useT();
     const reduceMotion = useReducedMotion();
-    // NativelyProSettings independently re-derives isPremium (and provider,
+    // MeetFlooProSettings independently re-derives isPremium (and provider,
     // for its own status-card copy) for its own rendering — this copy exists
     // only to decide whether to collapse the app-only-license section below.
     // Never a source of truth for the child's own render.
-    // Seeded from the same process-level snapshot NativelyProSettings uses, so
+    // Seeded from the same process-level snapshot MeetFlooProSettings uses, so
     // the two cannot disagree on the first paint of a revisit. They previously
     // ran two independent async reads that both started from "unknown", which
     // is what made this section appear and then collapse on open.
@@ -150,16 +150,16 @@ export const PlansSettings: React.FC<PlansSettingsProps> = ({
                 applyPremium(!!details.isPremium);
                 setLicenseSnapshot({ isPremium: !!details.isPremium, provider: (details as any).provider });
             })
-            .catch(() => {});
+            .catch(() => { });
     }, [applyPremium]);
 
-    useEffect(() => { readLicense(); }, [initialHasNativelyKey, readLicense]);
+    useEffect(() => { readLicense(); }, [initialHasMeetFlooKey, readLicense]);
 
     // `isPremium` now decides WHERE the Pro section renders, not just whether
     // it collapses, so a mount-time read alone is no longer enough: activating
-    // a standalone licence happens inside NativelyApiSettings (the shared key
-    // box routes a non-`natively_sk_` value to activation), which does not
-    // change `initialHasNativelyKey` and so never re-ran the effect above. The
+    // a standalone licence happens inside MeetFlooApiSettings (the shared key
+    // box routes a non-`MeetFloo_sk_` value to activation), which does not
+    // change `initialHasMeetFlooKey` and so never re-ran the effect above. The
     // child re-derived its own state from this event and would flip to the
     // receipt card, but it would flip in the LOWER slot and stay there until
     // the tab was reopened. Same event, same source of truth, so the two
@@ -169,7 +169,7 @@ export const PlansSettings: React.FC<PlansSettingsProps> = ({
     }, [readLicense]);
 
     const isPremium = !!licenseDetails?.isPremium;
-    // Natively API is the primary/default-visible path (it's the managed
+    // MeetFloo API is the primary/default-visible path (it's the managed
     // subscription this product sells). The app-only license is always the
     // secondary option UNLESS it's the user's actual active entitlement —
     // once isPremium is true it renders as a compact status card (not a
@@ -183,22 +183,22 @@ export const PlansSettings: React.FC<PlansSettingsProps> = ({
     // grey title plus a grey paragraph and a chevron — visually identical to
     // the "How it works & refund policy" row directly beneath it, i.e. a
     // purchase path dressed as an FAQ entry, carrying no price and no call to
-    // action. NativelyProSettings now owns a compact always-visible teaser
+    // action. MeetFlooProSettings now owns a compact always-visible teaser
     // plaque instead (one row, live price, one high-contrast CTA) that
     // expands to the cards.
     //
     // It has to live in the child, not here, for two hard reasons: every
     // `.pricing-*` rule in index.css is scoped under
-    // [data-interface-theme="…"], an attribute NativelyProSettings sets on
+    // [data-interface-theme="…"], an attribute MeetFlooProSettings sets on
     // its own root and this component never sets; and the prices are literals
-    // owned by NativelyProSettings, so summarising them here would mean a
+    // owned by MeetFlooProSettings, so summarising them here would mean a
     // second copy of them. (They were briefly meant to come from a
-    // `getNativelyPricing` fetch; its /v1/pricing route was never built on the
+    // `getMeetFlooPricing` fetch; its /v1/pricing route was never built on the
     // server and the call has been removed.)
     const collapseProSection = !isPremium;
 
     const proSection = (
-        <NativelyProSettings
+        <MeetFlooProSettings
             initialIsPremium={initialIsPremium}
             collapsePricing={collapseProSection}
             justActivated={justActivated}
@@ -213,8 +213,8 @@ export const PlansSettings: React.FC<PlansSettingsProps> = ({
         // the SAME layout pass. Without it each region FLIPs independently and
         // they can disagree about where they are mid-transition.
         <LayoutGroup>
-        {/* Deliberately NO `data-settings-stagger` here, or in NativelyApiSettings /
-            NativelyProSettings. Every other Settings tab opts into the entrance
+            {/* Deliberately NO `data-settings-stagger` here, or in MeetFlooApiSettings /
+            MeetFlooProSettings. Every other Settings tab opts into the entrance
             cascade in src/index.css; this tab is the one exception and the omission
             is intentional:
 
@@ -226,101 +226,101 @@ export const PlansSettings: React.FC<PlansSettingsProps> = ({
                  framer fades out via inline opacity. A CSS animation with
                  `animation-fill-mode: both` PINS opacity and silently swallows that
                  exit — the exact bug the comment below this one records as the
-                 reason `animated fadeIn` was stripped from NativelyProSettings.
+                 reason `animated fadeIn` was stripped from MeetFlooProSettings.
 
             This tab already animates; it does not need the generic cascade. */}
-        <div className="space-y-6 animated fadeIn">
-            <header>
-                <h2 className="text-[17px] font-semibold text-text-primary tracking-[-0.015em]">{t('Plans & Billing')}</h2>
-                <p className="text-[12px] text-text-secondary leading-relaxed mt-1.5">
-                    {t('MeetFloo API covers AI, knowledge, voice, and research. Pro, Max, and Ultra include the Pro app license at no extra cost. You can also buy Pro on its own if you prefer to use your own AI keys.')}
-                </p>
-            </header>
+            <div className="space-y-6 animated fadeIn">
+                <header>
+                    <h2 className="text-[17px] font-semibold text-text-primary tracking-[-0.015em]">{t('Plans & Billing')}</h2>
+                    <p className="text-[12px] text-text-secondary leading-relaxed mt-1.5">
+                        {t('MeetFloo API covers AI, knowledge, voice, and research. Pro, Max, and Ultra include the Pro app license at no extra cost. You can also buy Pro on its own if you prefer to use your own AI keys.')}
+                    </p>
+                </header>
 
-            {/* Position flips on entitlement. With no licence the app-only
+                {/* Position flips on entitlement. With no licence the app-only
                 option is an alternative to subscribing, so it belongs after the
                 plans as the "or" — it is competing for the same decision. Once
                 owned it is no longer an offer but a receipt, and a receipt
                 belongs next to the credential box it describes, not stranded
                 below a wall of pricing that no longer applies to it.
-                That target seam sits INSIDE NativelyApiSettings (between its
+                That target seam sits INSIDE MeetFlooApiSettings (between its
                 key card and its plan chooser), which is why this goes through a
                 slot prop rather than sibling ordering here.
                 `isPremium` alone is the right test even though this only
                 concerns STANDALONE Pro: a user who got Pro bundled with an API
-                plan makes NativelyProSettings return null, so it renders
+                plan makes MeetFlooProSettings return null, so it renders
                 nothing in either position and the choice is moot. Checking
                 provider here would mean a second reason to care about it and
                 two places to keep in sync. */}
-            {/* Shifts rather than appears, so it needs `layout="position"` or it
+                {/* Shifts rather than appears, so it needs `layout="position"` or it
                 jumps when the Pro section changes size. Every element that should
                 slide needs this prop; anything without it snaps. */}
-            <motion.div layout="position" transition={{ layout: { duration: SETTLE.remove, ease: EASE_ENTER } }}>
-                <NativelyApiSettings
-                    initialIsSaved={initialHasNativelyKey}
-                    afterKeySection={isPremium ? proSection : null}
-                />
-            </motion.div>
+                <motion.div layout="position" transition={{ layout: { duration: SETTLE.remove, ease: EASE_ENTER } }}>
+                    <MeetFlooApiSettings
+                        initialIsSaved={initialHasMeetFlooKey}
+                        afterKeySection={isPremium ? proSection : null}
+                    />
+                </motion.div>
 
-            {/* "Included with your Natively API plan" used to render as its own
+                {/* "Included with your MeetFloo API plan" used to render as its own
                 banner here, immediately above the Pro status card below, which
                 says the same thing again ("Pro Active" + "no separate purchase")
                 a few lines later — two ways of saying "you have Pro" back to
                 back. That message now lives once, inside the status card itself
-                (NativelyProSettings.tsx), which is also the more reliable place
+                (MeetFlooProSettings.tsx), which is also the more reliable place
                 for it: this component and that one each fetch license details
                 independently and asynchronously, so a banner rendered here could
                 briefly disagree with the card rendered there mid-fetch. */}
 
-            {/* Second in the arrival sequence when the API key is removed: the
+                {/* Second in the arrival sequence when the API key is removed: the
                 app-only licence becomes relevant again the moment the
                 subscription that bundled it is gone. One BEAT after the plan
                 chooser above, so the two read as a sequence rather than as one
                 simultaneous reflow. */}
-            <AnimatePresence mode="popLayout" initial={false}>
-                {!isPremium && (
-                    <motion.div
-                        key="pro-section"
-                        layout="position"
-                        style={{ width: '100%', contain: 'layout' }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0, scale: 0.985 }}
-                        transition={
-                            reduceMotion
-                                ? { duration: INK.in, delay: BEAT }
-                                : {
-                                    layout: { duration: SETTLE.remove, ease: EASE_ENTER },
-                                    opacity: { duration: INK.in, ease: EASE_ENTER, delay: BEAT },
-                                    default: { duration: INK.out, ease: EASE_LEAVE },
-                                }
-                        }
-                    >
-                        {proSection}
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                <AnimatePresence mode="popLayout" initial={false}>
+                    {!isPremium && (
+                        <motion.div
+                            key="pro-section"
+                            layout="position"
+                            style={{ width: '100%', contain: 'layout' }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0, scale: 0.985 }}
+                            transition={
+                                reduceMotion
+                                    ? { duration: INK.in, delay: BEAT }
+                                    : {
+                                        layout: { duration: SETTLE.remove, ease: EASE_ENTER },
+                                        opacity: { duration: INK.in, ease: EASE_ENTER, delay: BEAT },
+                                        default: { duration: INK.out, ease: EASE_LEAVE },
+                                    }
+                            }
+                        >
+                            {proSection}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-            {/* Renders last, below the app-only-license section. It used to live
-                at the tail of NativelyApiSettings, which pinned it *above* the
+                {/* Renders last, below the app-only-license section. It used to live
+                at the tail of MeetFlooApiSettings, which pinned it *above* the
                 Pro section (a sibling here), so it was extracted into its own
                 component purely to make this ordering possible.
                 Last in the sequence, and the only region animated with opacity
                 and y but NO height: it is not appearing, it is being pushed down
                 by what appeared above it. Animating a height it always had would
                 misstate what changed. */}
-            <motion.div
-                // `layout="position"` and nothing else. This region never
-                // appears or disappears — it only SHIFTS as things above it
-                // change. FLIP translates it from its old box to its new one;
-                // giving it an entrance would animate an arrival that isn't
-                // happening. Without this prop it would simply jump.
-                layout="position"
-                transition={{ layout: { duration: SETTLE.remove, ease: EASE_ENTER } }}
-            >
-                <HowItWorksRefund />
-            </motion.div>
-        </div>
+                <motion.div
+                    // `layout="position"` and nothing else. This region never
+                    // appears or disappears — it only SHIFTS as things above it
+                    // change. FLIP translates it from its old box to its new one;
+                    // giving it an entrance would animate an arrival that isn't
+                    // happening. Without this prop it would simply jump.
+                    layout="position"
+                    transition={{ layout: { duration: SETTLE.remove, ease: EASE_ENTER } }}
+                >
+                    <HowItWorksRefund />
+                </motion.div>
+            </div>
         </LayoutGroup>
     );
 };

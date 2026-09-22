@@ -22,7 +22,7 @@ function harness({ ready, providerName }) {
     getEmbeddingsWithFallback: mock.fn(() => Promise.reject(new Error('should not embed'))),
     getEmbedding: mock.fn(() => Promise.reject(new Error('should not embed'))),
   };
-  const db = { prepare: mock.fn(() => ({ get: mock.fn(() => null), all: mock.fn(() => []), run: mock.fn() })), exec: mock.fn(() => {}) };
+  const db = { prepare: mock.fn(() => ({ get: mock.fn(() => null), all: mock.fn(() => []), run: mock.fn() })), exec: mock.fn(() => { }) };
   return new ModeHybridRetriever(db, { searchSimilar: mock.fn(() => Promise.resolve([])), hasEmbeddings: mock.fn(() => false) }, pipeline);
 }
 
@@ -35,7 +35,7 @@ const TIMELINE = [
 const HANDBOOK = 'Northstar operations handbook. Secrets rotate every 90 days. Break-glass credentials expire after 4 hours. Deploy freeze on Fridays before holidays.';
 
 for (const [label, cfg] of [
-  ['embedding provider unavailable (isReady false)', { ready: false, providerName: 'natively' }],
+  ['embedding provider unavailable (isReady false)', { ready: false, providerName: 'MeetFloo' }],
   ['local ONNX provider active for a manual query', { ready: true, providerName: 'local' }],
 ]) {
   describe(`lexical floor — ${label}`, () => {
@@ -63,13 +63,13 @@ describe('thin-results top-up on the hybrid arm (2026-09-11)', () => {
   function thinHarness() {
     const pipeline = {
       isReady: mock.fn(() => true),
-      getActiveProviderName: mock.fn(() => 'natively'),
-      getActiveSpaceKey: mock.fn(() => 'natively:x:4'),
+      getActiveProviderName: mock.fn(() => 'MeetFloo'),
+      getActiveSpaceKey: mock.fn(() => 'MeetFloo:x:4'),
       getEmbeddingForQuery: mock.fn(() => Promise.resolve([1, 0, 0, 0])),
-      getEmbeddingsWithFallback: mock.fn((texts) => Promise.resolve({ embeddings: texts.map((_, i) => (i === 0 ? [1, 0, 0, 0] : [0, 1, 0, 0])), space: 'natively:x:4' })),
+      getEmbeddingsWithFallback: mock.fn((texts) => Promise.resolve({ embeddings: texts.map((_, i) => (i === 0 ? [1, 0, 0, 0] : [0, 1, 0, 0])), space: 'MeetFloo:x:4' })),
       getEmbedding: mock.fn(() => Promise.resolve([1, 0, 0, 0])),
     };
-    const db = { prepare: mock.fn(() => ({ get: mock.fn(() => null), all: mock.fn(() => []), run: mock.fn() })), exec: mock.fn(() => {}) };
+    const db = { prepare: mock.fn(() => ({ get: mock.fn(() => null), all: mock.fn(() => []), run: mock.fn() })), exec: mock.fn(() => { }) };
     return new ModeHybridRetriever(db, { searchSimilar: mock.fn(() => Promise.resolve([])), hasEmbeddings: mock.fn(() => false) }, pipeline);
   }
   const HANDBOOK = [

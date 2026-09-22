@@ -81,13 +81,13 @@ function freshManager(env) {
   const mod = require(COMPILED);
   if (mod.CredentialsManager.instance) mod.CredentialsManager.instance = undefined;
   const g = globalThis;
-  delete g.__nativelyCredentialsManagerV1__;
+  delete g.__MeetFlooCredentialsManagerV1__;
   const cm = mod.CredentialsManager.getInstance();
   cm.init();
   return cm;
 }
 
-const TOKEN = 'natively_trial_LIVE_SENTINEL_abc123';
+const TOKEN = 'MeetFloo_trial_LIVE_SENTINEL_abc123';
 const inThirtyMinutes = () => new Date(Date.now() + 30 * 60_000).toISOString();
 const keyringPath = (env) => path.join(env.userData, 'credentials.enc');
 

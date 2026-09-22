@@ -24,7 +24,7 @@ const src = fs.readFileSync(
 test('a key canary is stamped by whoever writes the credential file', () => {
   // The canary must be written in the SAME place as the content hash, or the
   // record could describe a different write than the file it sits beside.
-  assert.match(src, /const KEY_CANARY_PLAINTEXT = 'natively\.safe-storage\.key-canary\.v1';/);
+  assert.match(src, /const KEY_CANARY_PLAINTEXT = 'MeetFloo\.safe-storage\.key-canary\.v1';/);
   assert.match(
     src,
     /this\.stampProvenance\('enc', Buffer\.from\(encrypted\)\);[\s\S]{0,400}?this\.stampKeyCanary\(\);/,

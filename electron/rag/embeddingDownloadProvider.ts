@@ -15,13 +15,13 @@ import { STATIC_EMBEDDING_MODELS } from './embeddingCatalog';
 function fallbackUserDataDir(): string {
   const home = process.env.HOME || process.env.USERPROFILE || '';
   if (process.platform === 'darwin') {
-    return path.join(home, 'Library', 'Application Support', 'natively');
+    return path.join(home, 'Library', 'Application Support', 'MeetFloo');
   }
   if (process.platform === 'win32') {
     const appData = process.env.APPDATA || path.join(home, 'AppData', 'Roaming');
-    return path.join(appData, 'natively');
+    return path.join(appData, 'MeetFloo');
   }
-  return path.join(home, '.config', 'natively');
+  return path.join(home, '.config', 'MeetFloo');
 }
 
 /**
@@ -29,8 +29,8 @@ function fallbackUserDataDir(): string {
  * Uses electron app.getPath('userData') so models persist across app updates.
  */
 export function getEmbeddingModelsDir(): string {
-  if (process.env.NATIVELY_LOCAL_MODELS_PATH) {
-    return process.env.NATIVELY_LOCAL_MODELS_PATH;
+  if (process.env.MEETFLOO_LOCAL_MODELS_PATH) {
+    return process.env.MEETFLOO_LOCAL_MODELS_PATH;
   }
   try {
     const userData = app?.getPath?.('userData');

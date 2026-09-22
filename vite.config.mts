@@ -10,7 +10,7 @@ process.env.VITE_APP_VERSION = version;
 // Bake source provenance into the renderer. Packaged apps cannot rely on a
 // `.git` directory being present at runtime, so the commit must be resolved at
 // build time (CI may provide an explicit SHA when building from an archive).
-const explicitBuildCommit = process.env.NATIVELY_BUILD_COMMIT || process.env.GITHUB_SHA;
+const explicitBuildCommit = process.env.MEETFLOO_BUILD_COMMIT || process.env.GITHUB_SHA;
 let buildCommit = explicitBuildCommit?.trim() || 'unknown';
 if (buildCommit === 'unknown') {
     try {
@@ -65,12 +65,12 @@ export default defineConfig({
                 '**/dist-electron/**',
                 '**/release/**',
                 // Browser extension has its own esbuild pipeline
-                // (natively-browser/esbuild.config.mjs) — its .html is NOT a
+                // (MeetFloo-browser/esbuild.config.mjs) — its .html is NOT a
                 // Vite entry. Without this, Vite auto-discovers
-                // natively-browser/src/popup.html on startup and fails because
+                // MeetFloo-browser/src/popup.html on startup and fails because
                 // the script tag references popup.js, which lives in src/ as
-                // popup.ts and is bundled separately to natively-browser/dist/.
-                '**/natively-browser/**',
+                // popup.ts and is bundled separately to MeetFloo-browser/dist/.
+                '**/MeetFloo-browser/**',
             ],
         },
     },
@@ -82,8 +82,8 @@ export default defineConfig({
         chunkSizeWarningLimit: 1500,
         rollupOptions: {
             // Pin the entry to the app's index.html so Vite doesn't auto-
-            // discover natively-browser/src/popup.html (extension builds via
-            // esbuild, not Vite — see natively-browser/esbuild.config.mjs).
+            // discover MeetFloo-browser/src/popup.html (extension builds via
+            // esbuild, not Vite — see MeetFloo-browser/esbuild.config.mjs).
             input: path.resolve(__dirname, 'index.html'),
             output: {
                 // Manual vendor splits — keep the main bundle below ~500kB

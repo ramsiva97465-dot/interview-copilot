@@ -1,5 +1,5 @@
 /**
- * Public extension API surface — Natively Core, API version "1".
+ * Public extension API surface — MeetFloo Core, API version "1".
  *
  * Core defines INTERFACES ONLY. Nothing in this file is model-specific, no
  * extension is named here, and Core never imports from an extension. This is
@@ -7,7 +7,7 @@
  *
  * The extension system exists so that a third party can ship a model adapter
  * — together with that model's own licence obligations — without those
- * obligations attaching to Natively Core. Core distributes no model weights
+ * obligations attaching to MeetFloo Core. Core distributes no model weights
  * and downloads none without an explicit user action.
  */
 

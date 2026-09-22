@@ -1,6 +1,6 @@
 /**
  * Event-driven wait for the STT "tail" after the user presses Stop on the
- * voice-dictation Answer flow (src/components/NativelyInterface.tsx,
+ * voice-dictation Answer flow (src/components/MeetFlooInterface.tsx,
  * handleAnswerNow). Pure helper, unit-tested — see
  * src/lib/__tests__/AnswerNowTranscriptTail2026_09_11.test.mjs.
  *

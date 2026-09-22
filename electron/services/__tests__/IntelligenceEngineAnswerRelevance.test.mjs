@@ -18,7 +18,7 @@
 // OBSERVE-ONLY BY DEFAULT (2026-07-19, validation run-032 finding): the
 // live-fire regeneration behavior is gated behind the `answerRelevanceGuardLive`
 // intelligence flag, DEFAULT OFF, because validation against the real
-// natively-api/MiniMax-M3 backend on a live multi-turn transcript proved the
+// MeetFloo-api/MiniMax-M3 backend on a live multi-turn transcript proved the
 // classifier's confidence distribution for REAL, on-topic answers
 // (observed ~0.0002-0.09) overlaps almost entirely with the synthetic
 // single-turn tuning corpus's known-bad range (~0.0-0.224) — no threshold
@@ -29,9 +29,9 @@
 // classifier-transfer-gap problem remains unresolved). Tests below therefore
 // verify TWO contracts: (1) flag OFF (default) — the classifier still runs
 // and traces its verdict, but fullAnswer/session history are NEVER touched;
-// (2) flag ON (opt-in, `NATIVELY_ANSWER_RELEVANCE_GUARD_LIVE=1`) — the full
+// (2) flag ON (opt-in, `MEETFLOO_ANSWER_RELEVANCE_GUARD_LIVE=1`) — the full
 // regeneration/re-check/leak-rejection/generation-supersession machinery
-// behaves exactly as designed. Mirrors the `NATIVELY_RAG_CONFIDENCE_GATE`
+// behaves exactly as designed. Mirrors the `MEETFLOO_RAG_CONFIDENCE_GATE`
 // observe-only precedent (ModeRetrievalConfidence.test.mjs).
 import { test, describe, beforeEach, afterEach, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -51,11 +51,11 @@ const sessionPath = path.resolve(__dirname, '../../../dist-electron/electron/Ses
 after(() => new Promise(resolve => setTimeout(() => { process.exit(0); resolve(); }, 200)));
 const require = createRequire(import.meta.url);
 
-const FLAG = 'NATIVELY_ANSWER_RELEVANCE_GUARD_LIVE';
+const FLAG = 'MEETFLOO_ANSWER_RELEVANCE_GUARD_LIVE';
 
 function makeHelper({ repairChunks = [] } = {}) {
   return {
-    setNegotiationCoachingHandler() {},
+    setNegotiationCoachingHandler() { },
     isUsingOllama() { return false; },
     async *streamChat() {
       for (const chunk of repairChunks) yield chunk;

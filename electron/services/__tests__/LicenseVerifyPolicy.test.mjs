@@ -14,7 +14,7 @@ async function loadPolicy() {
 }
 
 // Regression for F4 (Phase 2): a transient server state (429 ip_blocked, 403 account_suspended,
-// 5xx, network error, unparseable body) must NEVER revoke a paying user's natively_api Pro
+// 5xx, network error, unparseable body) must NEVER revoke a paying user's MeetFloo_api Pro
 // license. Only a CONFIRMED loss of entitlement (plan downgraded / subscription_inactive /
 // key_not_found) revokes.
 

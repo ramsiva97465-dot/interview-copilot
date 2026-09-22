@@ -22,7 +22,7 @@ const { app } = require('electron');
 
 const repoRoot = path.resolve(__dirname, '..');
 const distRoot = path.join(repoRoot, 'dist-electron', 'electron');
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-okf-bench-'));
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-okf-bench-'));
 app.setPath('userData', tmpUserData);
 
 const PDF_PATH = process.env.OKF_BENCH_PDF || path.join(repoRoot, 'Sample thesis for testing.pdf');

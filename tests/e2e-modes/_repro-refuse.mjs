@@ -14,11 +14,11 @@ async function extract(rel) {
 
 const app = await electron.launch({
   args: ['dist-electron/electron/main.js'],
-  env: { ...process.env, NATIVELY_E2E: '1', NATIVELY_API_URL: 'http://localhost:3000', NODE_ENV: 'development', NATIVELY_DEV_BYPASS_SCREEN_TCC: '1', NATIVELY_E2E_LOCAL_TEST_TOKEN: 'local-test' },
+  env: { ...process.env, MEETFLOO_E2E: '1', MEETFLOO_API_URL: 'http://localhost:3000', NODE_ENV: 'development', MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1', MEETFLOO_E2E_LOCAL_TEST_TOKEN: 'local-test' },
   timeout: 60000,
 });
 const win = await app.firstWindow({ timeout: 30000 });
-await win.waitForLoadState('domcontentloaded').catch(() => {});
+await win.waitForLoadState('domcontentloaded').catch(() => { });
 const R = async (ch, ...a) => {
   for (let k = 0; k < 4; k++) {
     try {
@@ -67,6 +67,6 @@ try {
 } catch (e) {
   console.log('ERROR:', e.message);
 } finally {
-  await app.close().catch(() => {});
+  await app.close().catch(() => { });
   console.log('CLOSED');
 }

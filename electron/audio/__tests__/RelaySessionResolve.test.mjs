@@ -35,9 +35,9 @@ function validServerResponse(overrides = {}) {
   return {
     session_id: 'st_abc123',
     session_token: SECRET_TOKEN,
-    relay_ws_url: 'wss://us-relay.natively.software/ws',
-    fallback_relay_ws_url: 'wss://asia-relay.natively.software/ws',
-    railway_fallback_ws_url: 'wss://api.natively.software/v1/transcribe',
+    relay_ws_url: 'wss://us-relay.MeetFloo.software/ws',
+    fallback_relay_ws_url: 'wss://asia-relay.MeetFloo.software/ws',
+    railway_fallback_ws_url: 'wss://api.MeetFloo.software/v1/transcribe',
     selected_region: 'us',
     stt_config: {
       sample_rate: 16000,
@@ -78,7 +78,7 @@ function makeFetch({ status = 200, json, throwName } = {}) {
 }
 
 const baseOpts = {
-  apiKey: 'natively_sk_test',
+  apiKey: 'MeetFloo_sk_test',
   channel: 'system',
   language: 'en-US',
   languageAlternates: ['en-GB'],
@@ -86,7 +86,7 @@ const baseOpts = {
   audioChannels: 1,
   appVersion: '2.7.0',
   platform: 'mac',
-  controlPlaneBaseUrl: 'https://api.natively.software',
+  controlPlaneBaseUrl: 'https://api.MeetFloo.software',
 };
 
 test('resolveRelaySession happy path → parsed RelaySessionConfig (snake→camel)', async () => {
@@ -97,9 +97,9 @@ test('resolveRelaySession happy path → parsed RelaySessionConfig (snake→came
   assert.ok(config, 'expected a config on a valid 200 response');
   assert.equal(config.sessionId, 'st_abc123');
   assert.equal(config.sessionToken, SECRET_TOKEN);
-  assert.equal(config.relayWsUrl, 'wss://us-relay.natively.software/ws');
-  assert.equal(config.fallbackRelayWsUrl, 'wss://asia-relay.natively.software/ws');
-  assert.equal(config.railwayFallbackWsUrl, 'wss://api.natively.software/v1/transcribe');
+  assert.equal(config.relayWsUrl, 'wss://us-relay.MeetFloo.software/ws');
+  assert.equal(config.fallbackRelayWsUrl, 'wss://asia-relay.MeetFloo.software/ws');
+  assert.equal(config.railwayFallbackWsUrl, 'wss://api.MeetFloo.software/v1/transcribe');
   assert.equal(config.selectedRegion, 'us');
   assert.equal(config.sttConfig.sampleRate, 16000);
   assert.equal(config.sttConfig.language, 'en-US');
@@ -123,8 +123,8 @@ test('resolveRelaySession sends the correct request body (key, hints, channel)',
     latencyProbes: { us: 42, asia: 187 },
     fetchImpl: fetchSpy,
   });
-  assert.equal(captured.url, 'https://api.natively.software/v1/stt/session');
-  assert.equal(captured.body.key, 'natively_sk_test');
+  assert.equal(captured.url, 'https://api.MeetFloo.software/v1/stt/session');
+  assert.equal(captured.body.key, 'MeetFloo_sk_test');
   assert.equal(captured.body.trial_token, undefined, 'paid key must not send trial_token');
   assert.equal(captured.body.region_hint, 'us');
   assert.deepEqual(captured.body.latency_probes, { us: 42, asia: 187 });
@@ -143,10 +143,10 @@ test('resolveRelaySession trial token path sends trial_token, not key', async ()
   await resolveRelaySession({
     ...baseOpts,
     apiKey: undefined,
-    trialToken: 'natively_trial_xyz',
+    trialToken: 'MeetFloo_trial_xyz',
     fetchImpl: fetchSpy,
   });
-  assert.equal(captured.trial_token, 'natively_trial_xyz');
+  assert.equal(captured.trial_token, 'MeetFloo_trial_xyz');
   assert.equal(captured.key, undefined, 'trial path must not send key');
 });
 

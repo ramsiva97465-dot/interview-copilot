@@ -55,7 +55,7 @@ const LADDER = [
 function selectStartIndex(selectedModelId) {
   return selectedModelId === PRO ? 2
     : selectedModelId === FLASH ? 1
-    : 0;
+      : 0;
 }
 
 // Build the active provider list for a given selected model + per-id behavior.
@@ -95,7 +95,7 @@ describe('Gemini text cascade (replaces the old flash→flash-lite hedge)', () =
     assert.equal(selectStartIndex(FLASH), 1);
     assert.equal(selectStartIndex(PRO), 2);
     // Default / unknown / non-Gemini fall-through → full ladder (start 0).
-    assert.equal(selectStartIndex('natively'), 0);
+    assert.equal(selectStartIndex('MeetFloo'), 0);
     assert.equal(selectStartIndex(undefined), 0);
   });
 

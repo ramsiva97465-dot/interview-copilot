@@ -4,7 +4,7 @@
 // live real-UI failure was `resumeLoaded=false` for 169s because structured
 // extraction is LLM-only — when the extraction LLM is down/billing-blocked it
 // throws, ingestDocument returns {success:false}, activeResume is never saved,
-// and the profile is NEVER ready (identity/projects fall back to "I am Natively").
+// and the profile is NEVER ready (identity/projects fall back to "I am MeetFloo").
 //
 // These tests prove the orchestrator now degrades gracefully:
 //   1. extraction-LLM failure → heuristic fallback → ingest SUCCEEDS, profile READY
@@ -36,7 +36,7 @@ Frameworks: React, FastAPI
 Cloud: AWS, GCP
 
 EXPERIENCE
-Founder at Natively (2024-01 - Present)
+Founder at MeetFloo (2024-01 - Present)
 - Built a real-time meeting copilot.
 
 PROJECTS
@@ -69,8 +69,8 @@ describe('D2: ingest resilience when the extraction LLM is down', () => {
     resumeFile = makeTemp(RESUME);
   });
   afterEach(() => {
-    try { fs.unlinkSync(resumeFile); } catch {}
-    try { db.close?.(); } catch {}
+    try { fs.unlinkSync(resumeFile); } catch { }
+    try { db.close?.(); } catch { }
     delete process.env.PI_HEURISTIC_EXTRACTION;
   });
 
@@ -84,7 +84,7 @@ describe('D2: ingest resilience when the extraction LLM is down', () => {
     const profile = orchestrator.getProfileData();
     assert.ok(profile, 'profile must exist after heuristic ingest');
     assert.equal(profile.identity.name, 'Evin John');
-    assert.ok(profile.experience.some((e) => /natively/i.test(e.company) || /founder/i.test(e.role)));
+    assert.ok(profile.experience.some((e) => /MeetFloo/i.test(e.company) || /founder/i.test(e.role)));
     assert.ok((profile.skillsFlat || []).length > 0, 'skills should be populated heuristically');
     assert.equal(profile.structured_data?._extraction_mode ?? profile._extraction_mode ?? 'heuristic', 'heuristic');
   });
@@ -98,7 +98,7 @@ describe('D2: ingest resilience when the extraction LLM is down', () => {
     orchestrator.setGenerateContentFn(async () => JSON.stringify({
       identity: { name: 'Evin John', email: '', phone: '', location: '', linkedin: '', github: '', website: '', summary: '' },
       skills: { languages: ['TypeScript'], frameworks: ['React'], cloud: [], databases: [], ml: [], devops: [], tools: [] },
-      experience: [{ company: 'Natively', role: 'Founder', start_date: '2024-01', end_date: null, bullets: ['Built copilot'] }],
+      experience: [{ company: 'MeetFloo', role: 'Founder', start_date: '2024-01', end_date: null, bullets: ['Built copilot'] }],
       projects: [], education: [], achievements: [], certifications: [], leadership: [],
     }));
     orchestrator.setEmbedFn(EMBED_DOWN);

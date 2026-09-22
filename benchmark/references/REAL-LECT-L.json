@@ -1,7 +1,7 @@
 {
   "id": "REAL-LECT-L",
   "category": "lecture",
-  "natively_mode": "lecture",
+  "MeetFloo_mode": "lecture",
   "length_bucket": "long",
   "speakers": [
     {

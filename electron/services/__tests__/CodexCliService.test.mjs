@@ -34,7 +34,7 @@ import os from 'node:os';
 // Hermetic (issue #558): Codex now also accepts the Codex CLI's `codex login`
 // from $CODEX_HOME/auth.json. Point it at an empty dir so these tests never
 // pick up — or send requests with — the developer's real CLI login.
-process.env.CODEX_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-codex-home-'));
+process.env.CODEX_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-codex-home-'));
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const compiledPath = path.resolve(__dirname, '../../../dist-electron/electron/services/CodexCliService.js');
@@ -451,7 +451,7 @@ test('parseSseStream: post-response.completed AbortError does NOT throw "Codex r
     for await (const delta of gen) collected.push(delta);
     return collected;
   })();
-  drain.catch(() => {}); // attach a no-op catch so any rejection isn't unhandled
+  drain.catch(() => { }); // attach a no-op catch so any rejection isn't unhandled
   await new Promise((r) => setTimeout(r, 50));
   assert.equal(collected.join(''), 'Hello world',
     'both deltas should be delivered before the post-completion abort');
@@ -512,7 +512,7 @@ test('parseSseStream: response.incomplete is treated as terminal (post-completio
     for await (const delta of gen) collected.push(delta);
     return collected;
   })();
-  drain.catch(() => {});
+  drain.catch(() => { });
   await new Promise((r) => setTimeout(r, 30));
   assert.equal(collected.join(''), 'partial');
   ctrl.abortBody();
@@ -696,7 +696,7 @@ test('parseSseStream: stream emits :keepalive comment after response.completed (
     for await (const delta of gen) collected.push(delta);
     return collected;
   })();
-  drain.catch(() => {}); // attach a no-op catch to absorb unhandled-rejection warnings
+  drain.catch(() => { }); // attach a no-op catch to absorb unhandled-rejection warnings
   await new Promise((r) => setTimeout(r, 50));
   assert.equal(collected.join(''), 'partial answer',
     'deltas and the response.completed terminal event must yield BEFORE the keepalive lines');

@@ -53,44 +53,68 @@ interface RefProblem {
 // 12 problems with executable verification (Python, deterministic).
 const PROBLEMS: Problem[] = [
   // EASY
-  { id: 'two-sum', difficulty: 'easy', entry: 'two_sum',
+  {
+    id: 'two-sum', difficulty: 'easy', entry: 'two_sum',
     prompt: 'Write a Python function `two_sum(nums, target)` returning indices of the two numbers adding to target as [i, j] with i < j.',
-    cases: [{ input: [[2,7,11,15],9], expected: [0,1] }, { input: [[3,2,4],6], expected: [1,2] }, { input: [[3,3],6], expected: [0,1] }] },
-  { id: 'valid-parentheses', difficulty: 'easy', entry: 'is_valid',
+    cases: [{ input: [[2, 7, 11, 15], 9], expected: [0, 1] }, { input: [[3, 2, 4], 6], expected: [1, 2] }, { input: [[3, 3], 6], expected: [0, 1] }]
+  },
+  {
+    id: 'valid-parentheses', difficulty: 'easy', entry: 'is_valid',
     prompt: 'Write a Python function `is_valid(s)` returning True if the bracket string s of ()[]{} is validly matched, else False.',
-    cases: [{ input: ['()'], expected: true }, { input: ['()[]{}'], expected: true }, { input: ['(]'], expected: false }, { input: ['([)]'], expected: false }, { input: ['{[]}'], expected: true }] },
-  { id: 'fizzbuzz', difficulty: 'easy', entry: 'fizzbuzz',
+    cases: [{ input: ['()'], expected: true }, { input: ['()[]{}'], expected: true }, { input: ['(]'], expected: false }, { input: ['([)]'], expected: false }, { input: ['{[]}'], expected: true }]
+  },
+  {
+    id: 'fizzbuzz', difficulty: 'easy', entry: 'fizzbuzz',
     prompt: 'Write a Python function `fizzbuzz(n)` returning a list of strings for 1..n: "Fizz" if divisible by 3, "Buzz" if by 5, "FizzBuzz" if both, else the number as a string.',
-    cases: [{ input: [5], expected: ['1','2','Fizz','4','Buzz'] }, { input: [15], expected: ['1','2','Fizz','4','Buzz','Fizz','7','8','Fizz','Buzz','11','Fizz','13','14','FizzBuzz'] }] },
-  { id: 'reverse-integer', difficulty: 'easy', entry: 'reverse',
+    cases: [{ input: [5], expected: ['1', '2', 'Fizz', '4', 'Buzz'] }, { input: [15], expected: ['1', '2', 'Fizz', '4', 'Buzz', 'Fizz', '7', '8', 'Fizz', 'Buzz', '11', 'Fizz', '13', '14', 'FizzBuzz'] }]
+  },
+  {
+    id: 'reverse-integer', difficulty: 'easy', entry: 'reverse',
     prompt: 'Write a Python function `reverse(x)` that reverses the digits of a signed 32-bit integer x. If the result overflows [-2**31, 2**31-1], return 0.',
-    cases: [{ input: [123], expected: 321 }, { input: [-123], expected: -321 }, { input: [120], expected: 21 }, { input: [1534236469], expected: 0 }] },
+    cases: [{ input: [123], expected: 321 }, { input: [-123], expected: -321 }, { input: [120], expected: 21 }, { input: [1534236469], expected: 0 }]
+  },
   // MEDIUM
-  { id: 'longest-substring', difficulty: 'medium', entry: 'length_of_longest_substring',
+  {
+    id: 'longest-substring', difficulty: 'medium', entry: 'length_of_longest_substring',
     prompt: 'Write a Python function `length_of_longest_substring(s)` returning the length of the longest substring of s without repeating characters.',
-    cases: [{ input: ['abcabcbb'], expected: 3 }, { input: ['bbbbb'], expected: 1 }, { input: ['pwwkew'], expected: 3 }, { input: [''], expected: 0 }, { input: ['dvdf'], expected: 3 }] },
-  { id: 'group-anagrams', difficulty: 'medium', entry: 'group_anagrams',
+    cases: [{ input: ['abcabcbb'], expected: 3 }, { input: ['bbbbb'], expected: 1 }, { input: ['pwwkew'], expected: 3 }, { input: [''], expected: 0 }, { input: ['dvdf'], expected: 3 }]
+  },
+  {
+    id: 'group-anagrams', difficulty: 'medium', entry: 'group_anagrams',
     prompt: 'Write a Python function `group_anagrams(strs)` grouping anagrams together. Sort each group ascending AND sort the list of groups ascending so the output is deterministic.',
-    cases: [{ input: [['eat','tea','tan','ate','nat','bat']], expected: [['ate','eat','tea'],['bat'],['nat','tan']] }, { input: [['']], expected: [['']] }, { input: [['a']], expected: [['a']] }] },
-  { id: 'coin-change', difficulty: 'medium', entry: 'coin_change',
+    cases: [{ input: [['eat', 'tea', 'tan', 'ate', 'nat', 'bat']], expected: [['ate', 'eat', 'tea'], ['bat'], ['nat', 'tan']] }, { input: [['']], expected: [['']] }, { input: [['a']], expected: [['a']] }]
+  },
+  {
+    id: 'coin-change', difficulty: 'medium', entry: 'coin_change',
     prompt: 'Write a Python function `coin_change(coins, amount)` returning the fewest coins to make amount (coins reusable), or -1 if impossible.',
-    cases: [{ input: [[1,2,5],11], expected: 3 }, { input: [[2],3], expected: -1 }, { input: [[1],0], expected: 0 }, { input: [[1,2,5],100], expected: 20 }] },
-  { id: 'product-except-self', difficulty: 'medium', entry: 'product_except_self',
+    cases: [{ input: [[1, 2, 5], 11], expected: 3 }, { input: [[2], 3], expected: -1 }, { input: [[1], 0], expected: 0 }, { input: [[1, 2, 5], 100], expected: 20 }]
+  },
+  {
+    id: 'product-except-self', difficulty: 'medium', entry: 'product_except_self',
     prompt: 'Write a Python function `product_except_self(nums)` returning a list where output[i] is the product of all elements except nums[i], without division.',
-    cases: [{ input: [[1,2,3,4]], expected: [24,12,8,6] }, { input: [[-1,1,0,-3,3]], expected: [0,0,9,0,0] }] },
+    cases: [{ input: [[1, 2, 3, 4]], expected: [24, 12, 8, 6] }, { input: [[-1, 1, 0, -3, 3]], expected: [0, 0, 9, 0, 0] }]
+  },
   // HARD
-  { id: 'median-two-sorted', difficulty: 'hard', entry: 'find_median_sorted_arrays',
+  {
+    id: 'median-two-sorted', difficulty: 'hard', entry: 'find_median_sorted_arrays',
     prompt: 'Write a Python function `find_median_sorted_arrays(nums1, nums2)` returning the median of the two sorted arrays as a float.',
-    cases: [{ input: [[1,3],[2]], expected: 2.0 }, { input: [[1,2],[3,4]], expected: 2.5 }, { input: [[],[1]], expected: 1.0 }, { input: [[0,0],[0,0]], expected: 0.0 }] },
-  { id: 'trapping-rain-water', difficulty: 'hard', entry: 'trap',
+    cases: [{ input: [[1, 3], [2]], expected: 2.0 }, { input: [[1, 2], [3, 4]], expected: 2.5 }, { input: [[], [1]], expected: 1.0 }, { input: [[0, 0], [0, 0]], expected: 0.0 }]
+  },
+  {
+    id: 'trapping-rain-water', difficulty: 'hard', entry: 'trap',
     prompt: 'Write a Python function `trap(height)` returning how much rain water can be trapped given the elevation map list height.',
-    cases: [{ input: [[0,1,0,2,1,0,1,3,2,1,2,1]], expected: 6 }, { input: [[4,2,0,3,2,5]], expected: 9 }, { input: [[]], expected: 0 }] },
-  { id: 'word-break', difficulty: 'hard', entry: 'word_break',
+    cases: [{ input: [[0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]], expected: 6 }, { input: [[4, 2, 0, 3, 2, 5]], expected: 9 }, { input: [[]], expected: 0 }]
+  },
+  {
+    id: 'word-break', difficulty: 'hard', entry: 'word_break',
     prompt: 'Write a Python function `word_break(s, word_dict)` returning True if s can be segmented into a space-separated sequence of one or more words from list word_dict.',
-    cases: [{ input: ['leetcode',['leet','code']], expected: true }, { input: ['applepenapple',['apple','pen']], expected: true }, { input: ['catsandog',['cats','dog','sand','and','cat']], expected: false }] },
-  { id: 'lru-cache', difficulty: 'hard', entry: 'run_ops',
+    cases: [{ input: ['leetcode', ['leet', 'code']], expected: true }, { input: ['applepenapple', ['apple', 'pen']], expected: true }, { input: ['catsandog', ['cats', 'dog', 'sand', 'and', 'cat']], expected: false }]
+  },
+  {
+    id: 'lru-cache', difficulty: 'hard', entry: 'run_ops',
     prompt: 'Write a Python class `LRUCache` with __init__(self, capacity), get(self, key) (returns value or -1), and put(self, key, value) evicting the least-recently-used key when over capacity. ALSO provide a module-level function `run_ops(capacity, ops)` where ops is a list like [["put",1,1],["get",1]]; apply them to an LRUCache and return the list of results from each "get" in order.',
-    cases: [{ input: [2, [['put',1,1],['put',2,2],['get',1],['put',3,3],['get',2],['put',4,4],['get',1],['get',3],['get',4]]], expected: [1,-1,-1,3,4] }] },
+    cases: [{ input: [2, [['put', 1, 1], ['put', 2, 2], ['get', 1], ['put', 3, 3], ['get', 2], ['put', 4, 4], ['get', 1], ['get', 3], ['get', 4]]], expected: [1, -1, -1, 3, 4] }]
+  },
 ];
 
 const nowMs = () => Number(process.hrtime.bigint() / 1000000n);
@@ -301,12 +325,12 @@ function loadRefDataset(log: (s: string) => void): RefProblem[] {
 interface MatrixConfig { label: string; cfg: any; }
 
 const DEFAULT_MATRIX_CONFIGS: MatrixConfig[] = [
-  { label: 'budget:0',    cfg: { thinkingConfig: { thinkingBudget: 0 } } },
-  { label: 'budget:512',  cfg: { thinkingConfig: { thinkingBudget: 512 } } },
+  { label: 'budget:0', cfg: { thinkingConfig: { thinkingBudget: 0 } } },
+  { label: 'budget:512', cfg: { thinkingConfig: { thinkingBudget: 512 } } },
   { label: 'budget:1024', cfg: { thinkingConfig: { thinkingBudget: 1024 } } },
   { label: 'level:minimal', cfg: { thinkingConfig: { thinkingLevel: 'minimal' } } },
-  { label: 'level:low',     cfg: { thinkingConfig: { thinkingLevel: 'low' } } },
-  { label: 'level:medium',  cfg: { thinkingConfig: { thinkingLevel: 'medium' } } },
+  { label: 'level:low', cfg: { thinkingConfig: { thinkingLevel: 'low' } } },
+  { label: 'level:medium', cfg: { thinkingConfig: { thinkingLevel: 'medium' } } },
 ];
 
 // Parse a config spec like "budget:0,budget:512,level:low,level:medium,level:high".
@@ -335,14 +359,14 @@ export async function runThinkingMatrix(llmHelper: LLMHelper, opts: { model?: st
 
   // KEY ROTATION (opt-in): Pro free-tier is 250 req/day/key AND has a ~30s RPM
   // window. Rotating across several keys multiplies effective throughput. When
-  // THINKING_BENCH_KEYS_FROM_NATIVELY=1, load every GEMINI_API_KEY* from
-  // natively-api/.env, build a client per key, rotate per call, and on a 429
+  // THINKING_BENCH_KEYS_FROM_MEETFLOO=1, load every GEMINI_API_KEY* from
+  // MeetFloo-api/.env, build a client per key, rotate per call, and on a 429
   // retry on the NEXT key after a short backoff. Falls back to the app client.
   const clients: any[] = [];
-  if (process.env.THINKING_BENCH_KEYS_FROM_NATIVELY === '1') {
+  if (process.env.THINKING_BENCH_KEYS_FROM_MEETFLOO === '1') {
     try {
       const { GoogleGenAI } = require('@google/genai');
-      const envPath = path.join(process.cwd(), 'natively-api/.env');
+      const envPath = path.join(process.cwd(), 'MeetFloo-api/.env');
       const env = fs.readFileSync(envPath, 'utf8');
       let keys = [...env.matchAll(/^GEMINI_API_KEY(?:_\d+)?="?([^"\n]+)"?$/mg)].map(m => m[1].trim());
       keys = Array.from(new Set(keys));
@@ -351,7 +375,7 @@ export async function runThinkingMatrix(llmHelper: LLMHelper, opts: { model?: st
       const only = (process.env.THINKING_BENCH_KEY_INDICES || '').split(',').map(s => Number(s.trim())).filter(n => n > 0);
       if (only.length) keys = only.map(n => keys[n - 1]).filter(Boolean);
       for (const k of keys) clients.push(new GoogleGenAI({ apiKey: k }));
-      log(`[matrix] rotating across ${clients.length} keys from natively-api/.env${only.length ? ` (indices ${only.join(',')})` : ''}`);
+      log(`[matrix] rotating across ${clients.length} keys from MeetFloo-api/.env${only.length ? ` (indices ${only.join(',')})` : ''}`);
     } catch (e: any) { log(`[matrix] key load failed: ${e?.message}; using app client`); }
   }
   if (!clients.length) clients.push(appClient);
@@ -536,7 +560,7 @@ export async function runThinkingBudgetBench(llmHelper: LLMHelper, opts: BenchOp
   const prevModel = (llmHelper as any).currentModelId as string | undefined;
   try { llmHelper.setModel(model); } catch { /* ignore */ }
 
-  const counts = { easy: problems.filter(p => p.difficulty==='easy').length, medium: problems.filter(p => p.difficulty==='medium').length, hard: problems.filter(p => p.difficulty==='hard').length };
+  const counts = { easy: problems.filter(p => p.difficulty === 'easy').length, medium: problems.filter(p => p.difficulty === 'medium').length, hard: problems.filter(p => p.difficulty === 'hard').length };
   log(`\n[ThinkingBudgetBench] model=${model} budgets=[${budgets.join(', ')}] repeats=${repeats} problems=${problems.length} (E${counts.easy}/M${counts.medium}/H${counts.hard})`);
   const all: any[] = [];
 

@@ -60,7 +60,7 @@ describe('DatabaseManager — reserved __profile_okf__ mode is ensured on every 
 
   before(() => {
     userData = fs.mkdtempSync(path.join(os.tmpdir(), 'profile-okf-sentinel-'));
-    process.env.NATIVELY_TEST_USERDATA = userData;
+    process.env.MEETFLOO_TEST_USERDATA = userData;
   });
 
   after(() => {

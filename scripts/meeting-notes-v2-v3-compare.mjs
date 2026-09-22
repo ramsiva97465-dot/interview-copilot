@@ -1,4 +1,4 @@
-// Opt-in comparison harness: runs the SAME transcript through both of Natively's
+// Opt-in comparison harness: runs the SAME transcript through both of MeetFloo's
 // meeting-notes pipelines (V2 legacy single-pass, V3 chunked map-reduce) in one
 // process and dumps both results side by side for manual quality comparison.
 //
@@ -39,7 +39,7 @@
 // would produce for a stock built-in mode with no custom instructions.
 //
 // generateMeetingSummary(...) itself (the provider fallback ladder: custom provider ->
-// Natively API -> Codex CLI -> Groq -> Gemini Flash-Lite -> Flash -> Pro -> Ollama) is
+// MeetFloo API -> Codex CLI -> Groq -> Gemini Flash-Lite -> Flash -> Pro -> Ollama) is
 // called directly on the real, compiled LLMHelper — nothing about that ladder is
 // reimplemented here.
 //
@@ -65,10 +65,10 @@ const probeUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'notes-v2v3-compare-
 const fakeElectron = {
   app: {
     getPath: () => probeUserData,
-    getName: () => 'Natively',
+    getName: () => 'MeetFloo',
     getVersion: () => '0.0.0-probe',
     isPackaged: false,
-    on: () => {},
+    on: () => { },
     whenReady: () => Promise.resolve(),
   },
   safeStorage: {
@@ -76,8 +76,8 @@ const fakeElectron = {
     encryptString: (s) => Buffer.from(String(s)),
     decryptString: (b) => Buffer.from(b).toString('utf8'),
   },
-  BrowserWindow: class {},
-  ipcMain: { on: () => {}, handle: () => {}, removeHandler: () => {} },
+  BrowserWindow: class { },
+  ipcMain: { on: () => { }, handle: () => { }, removeHandler: () => { } },
   screen: { getPrimaryDisplay: () => ({ workAreaSize: { width: 1920, height: 1080 } }) },
   nativeTheme: { shouldUseDarkColors: false },
 };
@@ -152,25 +152,25 @@ console.log(`credentials        gemini=${apiKey ? 'yes' : 'no'} groq=${groqApiKe
 
 // Copied verbatim from electron/MeetingPersistence.ts:1074-1094 (buildBalancedTranscriptContext).
 function buildBalancedTranscriptContext(transcript, maxChars) {
-    const lines = (Array.isArray(transcript) ? transcript : [])
-        .map(segment => `${segment.speaker || 'speaker'}: ${segment.text || ''}`)
-        .filter(line => line.trim().length > 0);
-    const full = lines.join('\n');
-    if (full.length <= maxChars) return full;
+  const lines = (Array.isArray(transcript) ? transcript : [])
+    .map(segment => `${segment.speaker || 'speaker'}: ${segment.text || ''}`)
+    .filter(line => line.trim().length > 0);
+  const full = lines.join('\n');
+  if (full.length <= maxChars) return full;
 
-    const budget = Math.max(3000, maxChars);
-    const part = Math.floor(budget / 3);
-    const start = full.slice(0, part);
-    const middleStart = Math.max(0, Math.floor(full.length / 2) - Math.floor(part / 2));
-    const middle = full.slice(middleStart, middleStart + part);
-    const end = full.slice(Math.max(0, full.length - part));
-    return [
-        start,
-        '\n[...middle of transcript preserved below...]\n',
-        middle,
-        '\n[...end of transcript preserved below...]\n',
-        end,
-    ].join('').slice(0, maxChars);
+  const budget = Math.max(3000, maxChars);
+  const part = Math.floor(budget / 3);
+  const start = full.slice(0, part);
+  const middleStart = Math.max(0, Math.floor(full.length / 2) - Math.floor(part / 2));
+  const middle = full.slice(middleStart, middleStart + part);
+  const end = full.slice(Math.max(0, full.length - part));
+  return [
+    start,
+    '\n[...middle of transcript preserved below...]\n',
+    middle,
+    '\n[...end of transcript preserved below...]\n',
+    end,
+  ].join('').slice(0, maxChars);
 }
 
 // Copied verbatim from electron/MeetingPersistence.ts:511-566 (prompt construction inside
@@ -178,8 +178,8 @@ function buildBalancedTranscriptContext(transcript, maxChars) {
 // here — see header comment for why that matches the real code path for a template-only
 // mode with no custom mode record.
 function buildV2Prompts(modeNoteSections) {
-    const modeContextBlock = '';
-    const baseRules = `RULES:
+  const modeContextBlock = '';
+  const baseRules = `RULES:
 - Do NOT invent information not present in the context
 - You MAY infer implied action items or next steps if they are logical consequences of the discussion
 - Do NOT explain or define concepts mentioned
@@ -190,20 +190,20 @@ function buildV2Prompts(modeNoteSections) {
 
 STYLE: Calm, neutral, professional, skim-friendly. Short bullets, no sub-bullets.`;
 
-    let summaryPrompt;
-    let groqSummaryPrompt;
+  let summaryPrompt;
+  let groqSummaryPrompt;
 
-    if (modeNoteSections.length > 0) {
-        const sectionList = modeNoteSections
-            .map(s => s.description?.trim()
-                ? `- "${s.title}": ${s.description}`
-                : `- "${s.title}"`)
-            .join('\n');
-        const sectionKeys = modeNoteSections
-            .map(s => `    "${s.title}": []`)
-            .join(',\n');
+  if (modeNoteSections.length > 0) {
+    const sectionList = modeNoteSections
+      .map(s => s.description?.trim()
+        ? `- "${s.title}": ${s.description}`
+        : `- "${s.title}"`)
+      .join('\n');
+    const sectionKeys = modeNoteSections
+      .map(s => `    "${s.title}": []`)
+      .join(',\n');
 
-        summaryPrompt = `You are a silent meeting note-taker. Extract structured notes from the conversation transcript below.
+    summaryPrompt = `You are a silent meeting note-taker. Extract structured notes from the conversation transcript below.
 ${modeContextBlock}
 ${baseRules}
 
@@ -218,9 +218,9 @@ Return ONLY valid JSON — no markdown fences, no comments, no extra keys. Each 
 ${sectionKeys}
   }
 }`;
-        groqSummaryPrompt = summaryPrompt;
-    } else {
-        summaryPrompt = `You are a silent meeting summarizer. Convert this conversation into concise internal meeting notes.
+    groqSummaryPrompt = summaryPrompt;
+  } else {
+    summaryPrompt = `You are a silent meeting summarizer. Convert this conversation into concise internal meeting notes.
 
 ${baseRules}
 
@@ -230,10 +230,10 @@ Return ONLY valid JSON (no markdown code blocks):
   "keyPoints": ["3-6 specific bullets - each = one concrete topic or point discussed"],
   "actionItems": ["specific next steps, assigned tasks, or implied follow-ups. If absolutely none found, return empty array"]
 }`;
-        groqSummaryPrompt = GROQ_SUMMARY_JSON_PROMPT;
-    }
+    groqSummaryPrompt = GROQ_SUMMARY_JSON_PROMPT;
+  }
 
-    return { summaryPrompt, groqSummaryPrompt };
+  return { summaryPrompt, groqSummaryPrompt };
 }
 
 // generateMeetingSummary() logs the winning provider via console.log("[LLMHelper] ✅ ...

@@ -1,6 +1,6 @@
 # Vision Model Benchmark
 
-`Vision Model Benchmark` is an internal screenshot-to-answer benchmark for Natively's Gemini path. It is a CLI-only developer tool. The benchmark is isolated from normal chat, screenshot capture, prompt selection, and provider fallback behavior.
+`Vision Model Benchmark` is an internal screenshot-to-answer benchmark for MeetFloo's Gemini path. It is a CLI-only developer tool. The benchmark is isolated from normal chat, screenshot capture, prompt selection, and provider fallback behavior.
 
 The benchmark originally shipped with a developer-only Settings tab. That surface was removed on 2026-08-01: its main-process handlers were never registered, so the tab never functioned, and the renderer's unconditional `vision-benchmark:info` probe logged a `No handler registered` error on every launch. The CLI is the supported entry point.
 
@@ -11,7 +11,7 @@ The benchmark originally shipped with a developer-only Settings tab. That surfac
 - `vision-benchmark.models.json` is the benchmark-only fallback model configuration.
 - `electron/visionBenchmark/__tests__/VisionBenchmark.test.mjs` uses mocked streams. Normal tests make no paid API calls.
 
-The runner uses the production `@google/genai` dependency and the production `v1alpha` API version. It imports prompt constants directly from `electron/services/screen/visionPrompts.ts` and `electron/llm/prompts.ts`; it does not keep a duplicate shortened Natively prompt.
+The runner uses the production `@google/genai` dependency and the production `v1alpha` API version. It imports prompt constants directly from `electron/services/screen/visionPrompts.ts` and `electron/llm/prompts.ts`; it does not keep a duplicate shortened MeetFloo prompt.
 
 The supplied master-prompt repository was compared with the checked-in prompt sources. After removing the Markdown code fences and section separators, its `electron/llm/prompts.ts` and `electron/services/screen/visionPrompts.ts` sections match the repository files byte-for-byte. No production prompt was changed.
 
@@ -41,15 +41,15 @@ Resolution follows the requested precedence for each label:
 
 Environment names:
 
-- `NATIVELY_BENCHMARK_GEMINI_37_FLASH_MODEL`
-- `NATIVELY_BENCHMARK_GEMINI_31_FLASH_LITE_MODEL`
-- `NATIVELY_BENCHMARK_GEMINI_35_FLASH_LITE_MODEL`
+- `MEETFLOO_BENCHMARK_GEMINI_37_FLASH_MODEL`
+- `MEETFLOO_BENCHMARK_GEMINI_31_FLASH_LITE_MODEL`
+- `MEETFLOO_BENCHMARK_GEMINI_35_FLASH_LITE_MODEL`
 
 Because repository IDs have first precedence, an environment value applies only when that label is absent from the repository registry. An unavailable ID is never replaced: its run fails as `invalid_model`, the rejected ID stays visible, and the remaining models continue.
 
 ## Run settings
 
-Supply a PNG, JPEG, or WebP screenshot, then select models, a prompt source, a Natively mode, and the run settings. Provider-reported input usage is the authoritative token count after a request; no approximate tokenizer is presented as exact.
+Supply a PNG, JPEG, or WebP screenshot, then select models, a prompt source, a MeetFloo mode, and the run settings. Provider-reported input usage is the authoritative token count after a request; no approximate tokenizer is presented as exact.
 
 Defaults are 10 measured runs, 2 warm-ups, minimal thinking, temperature 0, high resolution, sequential execution, warm client reuse, and randomized model order. Sequential execution reduces cross-request network distortion.
 
@@ -79,7 +79,7 @@ When `--image` is omitted, a native picker is available only when the runner is 
 Live calls are explicitly opt-in:
 
 ```bash
-NATIVELY_RUN_LIVE_BENCHMARKS=true npm run benchmark:vision:live -- --image "/absolute/path/to/screenshot.png" --runs 1 --warmups 0
+MEETFLOO_RUN_LIVE_BENCHMARKS=true npm run benchmark:vision:live -- --image "/absolute/path/to/screenshot.png" --runs 1 --warmups 0
 ```
 
 ## Timing definitions

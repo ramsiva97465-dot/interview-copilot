@@ -33,7 +33,7 @@ function makeProvider(name, space, behaviour) {
 function makePipeline(primary, fallback) {
   const p = Object.create(EmbeddingPipeline.prototype);
   p.provider = primary; p.fallbackProvider = fallback;
-  p.db = { prepare: () => ({ run: () => {} }) };
+  p.db = { prepare: () => ({ run: () => { } }) };
   p.queryFailureHistory = []; p.primaryReprobeTimer = null;
   p.queryRetryBackoffMs = [0, 0];
   return p;
@@ -42,7 +42,7 @@ const down = () => new Error('embedQuery() timed out after 3000ms');
 
 describe('query-embed retries respect the caller\'s budget', () => {
   test('a 1200 ms live budget allows exactly ONE attempt — the 3 s retry cannot fit', async () => {
-    const primary = makeProvider('natively', 'natively:voyage-4:2048', down());
+    const primary = makeProvider('MeetFloo', 'MeetFloo:voyage-4:2048', down());
     const p = makePipeline(primary, makeProvider('local', 'local:minilm:384', VEC));
     await assert.rejects(() => p.getEmbeddingForQuery('q', { retryBudgetMs: 1200 }), /timed out/);
     assert.equal(primary.calls, 1, 'no retry may start when backoff + 3000 ms exceeds the budget');
@@ -50,21 +50,21 @@ describe('query-embed retries respect the caller\'s budget', () => {
   });
 
   test('a generous budget keeps the full ladder', async () => {
-    const primary = makeProvider('natively', 'natively:voyage-4:2048', down());
+    const primary = makeProvider('MeetFloo', 'MeetFloo:voyage-4:2048', down());
     const p = makePipeline(primary, makeProvider('local', 'local:minilm:384', VEC));
     await assert.rejects(() => p.getEmbeddingForQuery('q', { retryBudgetMs: 20_000 }));
     assert.equal(primary.calls, 3, 'three attempts fit in 20 s');
   });
 
   test('no budget means the historical ladder (ingest / manual callers are untouched)', async () => {
-    const primary = makeProvider('natively', 'natively:voyage-4:2048', down());
+    const primary = makeProvider('MeetFloo', 'MeetFloo:voyage-4:2048', down());
     const p = makePipeline(primary, makeProvider('local', 'local:minilm:384', VEC));
     await assert.rejects(() => p.getEmbeddingForQuery('q'));
     assert.equal(primary.calls, 3);
   });
 
   test('a first-attempt success under a budget is just a success', async () => {
-    const primary = makeProvider('natively', 'natively:voyage-4:2048', VEC);
+    const primary = makeProvider('MeetFloo', 'MeetFloo:voyage-4:2048', VEC);
     const p = makePipeline(primary, null);
     assert.deepEqual(await p.getEmbeddingForQuery('q', { retryBudgetMs: 1200 }), VEC);
     assert.equal(primary.calls, 1);

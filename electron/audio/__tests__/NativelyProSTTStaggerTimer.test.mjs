@@ -1,5 +1,5 @@
 // Regression test for the "bogus 3000ms per-key stagger" bug in
-// NativelyProSTT.connect().
+// MeetFlooProSTT.connect().
 //
 // Symptom: connect() used to gate every same-apiKey connection behind a
 // static `nextSlotByKey` map with `SLOT_INTERVAL_MS = 3000`. The map was
@@ -9,7 +9,7 @@
 // explicitly supported concurrent streams disambiguated by the `channel`
 // field in the auth frame.
 //
-// Net effect of the bug: starting a meeting opens two NativelyProSTT
+// Net effect of the bug: starting a meeting opens two MeetFlooProSTT
 // connections (one 'system', one 'mic') with the same apiKey. The second
 // connect would land in the stagger window of the first and pend a
 // setTimeout for ~3000 ms — pushing visible mic activation 3 s past the
@@ -21,7 +21,7 @@
 // "concurrent key collision prevention" sleep "to be safe") fails CI
 // loudly.
 //
-// Strategy: load the COMPILED NativelyProSTT with `Module._load` patched so
+// Strategy: load the COMPILED MeetFlooProSTT with `Module._load` patched so
 // `require('electron')` is harmless, then create two instances sharing one
 // apiKey but distinct channels ('system' and 'mic'). Spy on connect() to
 // observe whether either instance has pendingConnectTimer set after
@@ -45,7 +45,7 @@ Module._load = function patchedLoad(request, _parent, _isMain) {
     if (request === 'electron') {
         return {
             app: {
-                getAppPath: () => '/tmp/fake-natively-app',
+                getAppPath: () => '/tmp/fake-MeetFloo-app',
                 isPackaged: false,
                 isReady: () => false,
             },
@@ -54,14 +54,14 @@ Module._load = function patchedLoad(request, _parent, _isMain) {
     return origLoad.apply(this, arguments);
 };
 
-const { NativelyProSTT } = await import(pathToFileURL(path.join(distRoot, 'NativelyProSTT.js')).href);
+const { MeetFlooProSTT } = await import(pathToFileURL(path.join(distRoot, 'MeetFlooProSTT.js')).href);
 
 test('connect() must NOT stagger same-apiKey connections (mic + system concurrent)', async () => {
     const API_KEY = 'no-stagger-regression-key';
 
     // Two channels on the same apiKey — exactly the production startMeeting shape.
-    const sysStt = new NativelyProSTT(API_KEY, 'system');
-    const micStt = new NativelyProSTT(API_KEY, 'mic');
+    const sysStt = new MeetFlooProSTT(API_KEY, 'system');
+    const micStt = new MeetFlooProSTT(API_KEY, 'mic');
 
     // Spy on connect: short-circuit BEFORE `new WebSocket(...)` (we don't want
     // a real socket attempt) but record the moment the connect body has
@@ -69,7 +69,7 @@ test('connect() must NOT stagger same-apiKey connections (mic + system concurren
     // We do this by leaving the real connect on the prototype but overriding
     // the WebSocket constructor via a marker flag we read after start().
     const tsSystem = { entered: null };
-    const tsMic    = { entered: null };
+    const tsMic = { entered: null };
 
     const origConnectSys = sysStt.connect.bind(sysStt);
     const origConnectMic = micStt.connect.bind(micStt);
@@ -81,14 +81,14 @@ test('connect() must NOT stagger same-apiKey connections (mic + system concurren
         // real path, but stop before `new WebSocket(...)`.
         if (this.isConnecting || !this.isActive) return;
         this.isConnecting = true;
-        this.isConnected  = false;
+        this.isConnected = false;
         // Do NOT call origConnectSys — that would try to open a real WS.
     };
     micStt.connect = function (skipStagger = false) {
         tsMic.entered = Date.now();
         if (this.isConnecting || !this.isActive) return;
         this.isConnecting = true;
-        this.isConnected  = false;
+        this.isConnected = false;
     };
 
     // ── Issue the two starts back-to-back ────────────────────────────
@@ -115,7 +115,7 @@ test('connect() must NOT stagger same-apiKey connections (mic + system concurren
     // synchronously inside start(). Real wallclock delta must be tiny (<50ms
     // in the test env). If it's anywhere near 3000 ms, the stagger is back.
     assert.notEqual(tsSystem.entered, null, 'system connect() must have been invoked synchronously by start()');
-    assert.notEqual(tsMic.entered,    null, 'mic connect() must have been invoked synchronously by start()');
+    assert.notEqual(tsMic.entered, null, 'mic connect() must have been invoked synchronously by start()');
     const delta = Math.abs(tsMic.entered - tsSystem.entered);
     assert.ok(
         delta < 50,
@@ -156,7 +156,7 @@ test('language_detected reconnect must fire at ~250 ms (no stagger added on top)
     // INSIDE the resulting connect() pushed total reconnect latency to
     // ~3250 ms. This test pins the new behavior: only the 250 ms inline
     // debounce remains; the resulting connect() must NOT defer further.
-    const stt = new NativelyProSTT('lang-detected-key', 'mic');
+    const stt = new MeetFlooProSTT('lang-detected-key', 'mic');
 
     // Spy on connect to record when it actually invokes the
     // WebSocket-construction branch (we short-circuit before `new WebSocket`).
@@ -165,7 +165,7 @@ test('language_detected reconnect must fire at ~250 ms (no stagger added on top)
         if (this.isConnecting || !this.isActive) return;
         connectFiredAt = Date.now();
         this.isConnecting = true;
-        this.isConnected  = false;
+        this.isConnected = false;
     };
 
     // Force the state language_detected needs to schedule its inline 250 ms
@@ -176,16 +176,16 @@ test('language_detected reconnect must fire at ~250 ms (no stagger added on top)
     stt.isActive = true;
     stt.isConnecting = false;
     stt.isConnected = true;
-    stt.ws = { close() {}, removeAllListeners() {}, readyState: 1 };
+    stt.ws = { close() { }, removeAllListeners() { }, readyState: 1 };
 
     // Simulate the server's language_detected branch directly. We can't
     // round-trip a real WebSocket message, so we replicate exactly the
-    // handler body from NativelyProSTT.ts (language_detected path).
+    // handler body from MeetFlooProSTT.ts (language_detected path).
     const detected = 'ja-JP';
-    stt.languageBcp47       = detected;
-    stt.languageAlternates  = [];
-    stt.reconnectAttempts   = 0;
-    stt.intentionalClose    = true;
+    stt.languageBcp47 = detected;
+    stt.languageAlternates = [];
+    stt.reconnectAttempts = 0;
+    stt.intentionalClose = true;
     stt.closeUpstream();
     if (stt.pendingConnectTimer) clearTimeout(stt.pendingConnectTimer);
     const scheduledAt = Date.now();
@@ -214,19 +214,19 @@ test('language_detected reconnect must fire at ~250 ms (no stagger added on top)
     stt.stop();
 });
 
-test('NativelyProSTT must not expose a per-key stagger map (structural guard)', async () => {
+test('MeetFlooProSTT must not expose a per-key stagger map (structural guard)', async () => {
     // Belt-and-braces: even if someone re-adds a serial-gate mechanism, this
     // pins the specific name we used to use. If anyone reintroduces the
     // static map under the same name, this fails — forcing them to read the
     // comment in connect() before bringing the regression back.
     assert.equal(
-        NativelyProSTT.nextSlotByKey,
+        MeetFlooProSTT.nextSlotByKey,
         undefined,
-        'NativelyProSTT.nextSlotByKey must not exist — the per-key stagger was deliberately removed (Deepgram concurrency is per-project quota, not per-key serial)',
+        'MeetFlooProSTT.nextSlotByKey must not exist — the per-key stagger was deliberately removed (Deepgram concurrency is per-project quota, not per-key serial)',
     );
     assert.equal(
-        NativelyProSTT.SLOT_INTERVAL_MS,
+        MeetFlooProSTT.SLOT_INTERVAL_MS,
         undefined,
-        'NativelyProSTT.SLOT_INTERVAL_MS must not exist — the 3000 ms stagger interval was deliberately removed',
+        'MeetFlooProSTT.SLOT_INTERVAL_MS must not exist — the 3000 ms stagger interval was deliberately removed',
     );
 });

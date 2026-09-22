@@ -84,7 +84,7 @@ export function sourceTypesForScopes(scopes: readonly ProviderDataScope[]): Set<
 
 /**
  * Deny-only environment override, e.g.
- *   NATIVELY_DENY_PROVIDER_SCOPES=transcript,reference_files
+ *   MEETFLOO_DENY_PROVIDER_SCOPES=transcript,reference_files
  *
  * It can only ADD denials on top of the stored policy — it can never grant a
  * scope the user switched off. That direction is deliberate: a loosening
@@ -93,7 +93,7 @@ export function sourceTypesForScopes(scopes: readonly ProviderDataScope[]): Set<
  * real enforcement path end to end in a test, since the settings store needs a
  * live Electron app).
  */
-export const DENY_PROVIDER_SCOPES_ENV = 'NATIVELY_DENY_PROVIDER_SCOPES';
+export const DENY_PROVIDER_SCOPES_ENV = 'MEETFLOO_DENY_PROVIDER_SCOPES';
 
 // Derived, never re-typed: a hand-copied list here is exactly the drift that
 // let `code_execution` be enforced in one place and erased in another.

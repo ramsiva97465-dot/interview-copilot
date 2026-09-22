@@ -37,7 +37,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 describe('ONNX available-memory gate', () => {
   test('getAvailableMemoryGB reports MORE than os.freemem() on macOS/Linux (reclaimable cache counted)', () => {
-    delete process.env.NATIVELY_ONNX_AVAILABLE_MEM_GB;
+    delete process.env.MEETFLOO_ONNX_AVAILABLE_MEM_GB;
     const avail = getAvailableMemoryGB();
     assert.ok(Number.isFinite(avail) && avail >= 0, 'available memory is a non-negative number');
     if (process.platform === 'darwin' || process.platform === 'linux') {
@@ -52,36 +52,36 @@ describe('ONNX available-memory gate', () => {
   });
 
   test('env override forces a deterministic value', async () => {
-    process.env.NATIVELY_ONNX_AVAILABLE_MEM_GB = '7.5';
+    process.env.MEETFLOO_ONNX_AVAILABLE_MEM_GB = '7.5';
     await sleep(CACHE_TTL_MS);
     assert.equal(getAvailableMemoryGB(), 7.5);
-    delete process.env.NATIVELY_ONNX_AVAILABLE_MEM_GB;
+    delete process.env.MEETFLOO_ONNX_AVAILABLE_MEM_GB;
   });
 
   test('gate ADMITS when available memory is above the floor (the fix)', async () => {
-    process.env.NATIVELY_ONNX_AVAILABLE_MEM_GB = String(getMinFreeGBForOnnxSession() + 4);
+    process.env.MEETFLOO_ONNX_AVAILABLE_MEM_GB = String(getMinFreeGBForOnnxSession() + 4);
     await sleep(CACHE_TTL_MS);
     assert.equal(hasEnoughMemoryForOnnxSession(), true);
-    delete process.env.NATIVELY_ONNX_AVAILABLE_MEM_GB;
+    delete process.env.MEETFLOO_ONNX_AVAILABLE_MEM_GB;
   });
 
   test('gate REFUSES when available memory is below the floor', async () => {
-    process.env.NATIVELY_ONNX_AVAILABLE_MEM_GB = '0.25';
+    process.env.MEETFLOO_ONNX_AVAILABLE_MEM_GB = '0.25';
     await sleep(CACHE_TTL_MS);
     assert.equal(hasEnoughMemoryForOnnxSession(), false);
-    delete process.env.NATIVELY_ONNX_AVAILABLE_MEM_GB;
+    delete process.env.MEETFLOO_ONNX_AVAILABLE_MEM_GB;
   });
 
   test('a floor of 0 always admits (test/CI escape hatch still works)', async () => {
-    // NATIVELY_ONNX_MIN_FREE_GB=0 is what the existing suites set — verify the
+    // MEETFLOO_ONNX_MIN_FREE_GB=0 is what the existing suites set — verify the
     // available-memory path honors it identically to the old freemem path.
-    const prev = process.env.NATIVELY_ONNX_MIN_FREE_GB;
-    process.env.NATIVELY_ONNX_MIN_FREE_GB = '0';
-    process.env.NATIVELY_ONNX_AVAILABLE_MEM_GB = '0.1';
+    const prev = process.env.MEETFLOO_ONNX_MIN_FREE_GB;
+    process.env.MEETFLOO_ONNX_MIN_FREE_GB = '0';
+    process.env.MEETFLOO_ONNX_AVAILABLE_MEM_GB = '0.1';
     await sleep(CACHE_TTL_MS);
     assert.equal(hasEnoughMemoryForOnnxSession(), true, '0GB floor admits even at 0.1GB available');
-    if (prev === undefined) delete process.env.NATIVELY_ONNX_MIN_FREE_GB;
-    else process.env.NATIVELY_ONNX_MIN_FREE_GB = prev;
-    delete process.env.NATIVELY_ONNX_AVAILABLE_MEM_GB;
+    if (prev === undefined) delete process.env.MEETFLOO_ONNX_MIN_FREE_GB;
+    else process.env.MEETFLOO_ONNX_MIN_FREE_GB = prev;
+    delete process.env.MEETFLOO_ONNX_AVAILABLE_MEM_GB;
   });
 });

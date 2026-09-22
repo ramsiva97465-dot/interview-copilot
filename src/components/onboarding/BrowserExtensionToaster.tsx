@@ -3,7 +3,7 @@
 // Skills: ui-ux-pro-max · ui-design-system · frontend-design
 //
 // Claymorphic "install the browser extension" nudge.
-// Shown ONCE per install/update to v2.8.0+ when the Natively browser
+// Shown ONCE per install/update to v2.8.0+ when the MeetFloo browser
 // extension is not yet connected. Indigo accent to differentiate from
 // the violet trial and coral support toasters.
 //
@@ -18,8 +18,8 @@ import { X, ArrowRight } from 'lucide-react';
 import { useResolvedTheme } from '../../hooks/useResolvedTheme';
 import { BrowserExtensionIcon } from './BrowserExtensionIcon';
 
-const DISMISS_KEY         = 'natively_ext_connect_dismissed_v1';
-const MIN_VERSION         = '2.8.0';
+const DISMISS_KEY = 'MeetFloo_ext_connect_dismissed_v1';
+const MIN_VERSION = '2.8.0';
 
 // Canonical Chrome Web Store URL (also in HelpSettings.tsx).
 const CHROME_STORE_URL =
@@ -27,18 +27,18 @@ const CHROME_STORE_URL =
 
 // ─── Design tokens ────────────────────────────────────────────
 const T = {
-  font:   '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif',
+  font: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif',
   indigo: '#6366F1',
-  indigoB:'#4F46E5',
-  indigoD:'#4338CA',
-  indigoG:'rgba(99,102,241,0.35)',
-  indigo2:'rgba(99,102,241,0.14)',
+  indigoB: '#4F46E5',
+  indigoD: '#4338CA',
+  indigoG: 'rgba(99,102,241,0.35)',
+  indigo2: 'rgba(99,102,241,0.14)',
 };
 
 const STAGGER = { hidden: {}, show: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } };
-const ITEM    = {
+const ITEM = {
   hidden: { opacity: 0, y: 14, filter: 'blur(4px)' },
-  show:   { opacity: 1, y: 0,  filter: 'blur(0px)', transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as any } },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as any } },
 };
 
 // ─── Custom hero icon: simplified browser frame with extension piece ──
@@ -63,13 +63,13 @@ function versionGte(a: string, b: string): boolean {
 }
 
 interface Props {
-  isOpen:    boolean;
+  isOpen: boolean;
   onDismiss: () => void;
-  onSkip?:   () => void;
+  onSkip?: () => void;
 }
 
 export const BrowserExtensionToaster: React.FC<Props> = ({ isOpen, onDismiss, onSkip: _onSkip }) => {
-  const [opening, setOpening]     = useState(false);
+  const [opening, setOpening] = useState(false);
   const reduced = useReducedMotion() ?? false;
   const isLight = useResolvedTheme() === 'light';
 
@@ -152,8 +152,8 @@ export const BrowserExtensionToaster: React.FC<Props> = ({ isOpen, onDismiss, on
           aria-modal="true"
           aria-labelledby="ext-toast-title"
           initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.93, y: 22, filter: 'blur(10px)' }}
-          animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1,    y: 0,  filter: 'blur(0px)' }}
-          exit={   reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 14, filter: 'blur(4px)', transition: { duration: 0.15 } }}
+          animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+          exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 14, filter: 'blur(4px)', transition: { duration: 0.15 } }}
           transition={{ type: 'spring', stiffness: 290, damping: 25, mass: 0.82 }}
           style={{
             borderRadius: '24px',
@@ -232,7 +232,7 @@ export const BrowserExtensionToaster: React.FC<Props> = ({ isOpen, onDismiss, on
                     maxWidth: '380px', margin: '0 auto',
                   }}>
                     {[
-                      { label: '~3× faster',  sub: 'responses' },
+                      { label: '~3× faster', sub: 'responses' },
                       { label: '−90% tokens', sub: 'per turn' },
                       { label: 'Auto-detect', sub: 'coding pages' },
                     ].map(({ label, sub }) => (
@@ -276,14 +276,14 @@ export const BrowserExtensionToaster: React.FC<Props> = ({ isOpen, onDismiss, on
                   />
 
                   <button onClick={() => {
-                      // "I don't want to" = explicit skip — distinct from
-                      // background click or X (which counts as plain dismiss).
-                      // For now both end up at the same handler since the
-                      // extension's re-eligibility is controlled by the
-                      // permanent DISMISS_KEY flag.
-                      handlePermanentDismiss();
-                      _onSkip?.();
-                    }}
+                    // "I don't want to" = explicit skip — distinct from
+                    // background click or X (which counts as plain dismiss).
+                    // For now both end up at the same handler since the
+                    // extension's re-eligibility is controlled by the
+                    // permanent DISMISS_KEY flag.
+                    handlePermanentDismiss();
+                    _onSkip?.();
+                  }}
                     aria-label="Dismiss browser extension invitation"
                     style={{
                       background: 'none', border: 'none', cursor: 'pointer',
@@ -322,7 +322,7 @@ const IndigoCTA: React.FC<{ label: string; onClick: () => void; disabled: boolea
       onHoverEnd={() => setHovered(false)}
       whileHover={reduced || disabled ? {} : { scale: 1.015, y: -1 }}
       whileTap={{ scale: 0.985 }}
-      aria-label="Install Natively browser extension on Chrome"
+      aria-label="Install MeetFloo browser extension on Chrome"
       style={{
         position: 'relative', width: '100%', height: '48px', overflow: 'hidden',
         display: 'flex', alignItems: 'center', justifyContent: 'center',

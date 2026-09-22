@@ -109,7 +109,7 @@ describe('source guards', () => {
     // ~30 bundle depths esbuild inlines this class into), and a source scan
     // reported that refactor as a missing safety rule.
     const { resolveRagWorker } = require(path.join(repoRoot, 'dist-electron/electron/rag/resolveRagWorker.js'));
-    const inside = '/Applications/Natively.app/Contents/Resources/app.asar/dist-electron/electron/services/reranking';
+    const inside = '/Applications/MeetFloo.app/Contents/Resources/app.asar/dist-electron/electron/services/reranking';
     const resolved = resolveRagWorker(inside, 'ggufRerankerWorker.js', () => true);
     assert.match(resolved, /app\.asar\.unpacked/);
     assert.doesNotMatch(resolved, /app\.asar(?!\.unpacked)/,

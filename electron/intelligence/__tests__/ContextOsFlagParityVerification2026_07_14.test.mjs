@@ -37,25 +37,25 @@ const {
 } = mod;
 
 const RESTORED_ENV_KEYS = [
-  'NATIVELY_RAG_CONFIDENCE_GATE',
-  'NATIVELY_RAG_LOCAL_RERANK',
-  'NATIVELY_OKF_KNOWLEDGE_PACKS',
-  'NATIVELY_OKF_HYBRID_RETRIEVAL',
-  'NATIVELY_JIT_FINAL_ANSWER_ENFORCED',
-  'NATIVELY_CONTEXT_OS',
-  'NATIVELY_CONTEXT_OS_MANUAL_CHAT',
-  'NATIVELY_CONTEXT_OS_WTA',
-  'NATIVELY_CONTEXT_OS_RECAP_FOLLOWUP',
-  'NATIVELY_CONTEXT_OS_EVIDENCE_PACK',
-  'NATIVELY_CONTEXT_OS_MEMORY_SAFETY',
-  'NATIVELY_CONTEXT_OS_ENFORCE_CAPABILITIES',
-  'NATIVELY_CONTEXT_OS_PROPERTY_VALIDATION',
-  'NATIVELY_CONTEXT_OS_MULTI_FAMILY_EVIDENCE',
-  'NATIVELY_VERIFICATION_MODE',
+  'MEETFLOO_RAG_CONFIDENCE_GATE',
+  'MEETFLOO_RAG_LOCAL_RERANK',
+  'MEETFLOO_OKF_KNOWLEDGE_PACKS',
+  'MEETFLOO_OKF_HYBRID_RETRIEVAL',
+  'MEETFLOO_JIT_FINAL_ANSWER_ENFORCED',
+  'MEETFLOO_CONTEXT_OS',
+  'MEETFLOO_CONTEXT_OS_MANUAL_CHAT',
+  'MEETFLOO_CONTEXT_OS_WTA',
+  'MEETFLOO_CONTEXT_OS_RECAP_FOLLOWUP',
+  'MEETFLOO_CONTEXT_OS_EVIDENCE_PACK',
+  'MEETFLOO_CONTEXT_OS_MEMORY_SAFETY',
+  'MEETFLOO_CONTEXT_OS_ENFORCE_CAPABILITIES',
+  'MEETFLOO_CONTEXT_OS_PROPERTY_VALIDATION',
+  'MEETFLOO_CONTEXT_OS_MULTI_FAMILY_EVIDENCE',
+  'MEETFLOO_VERIFICATION_MODE',
   'NODE_ENV',
   'BENCHMARK_MODEL',
-  'NATIVELY_INTERNAL',
-  'NATIVELY_DEV',
+  'MEETFLOO_INTERNAL',
+  'MEETFLOO_DEV',
 ];
 
 function clearEnv() {
@@ -79,7 +79,7 @@ describe('flag-parity verification (2026-07-14)', () => {
   });
 
   test('outside a dev/test/benchmark context (2026-08-30 update, two batches): ragConfidenceGate/ragLocalRerank/okfKnowledgePacks/okfHybridRetrieval/contextOsEnforceSourceCapabilities/contextOsPropertyValidation/contextOsMultiFamilyEvidenceEnabled are ALL production-on (user-directed override, no packaged-build validation)', () => {
-    // No NODE_ENV, no BENCHMARK_MODEL, no NATIVELY_INTERNAL/DEV → production-like.
+    // No NODE_ENV, no BENCHMARK_MODEL, no MEETFLOO_INTERNAL/DEV → production-like.
     assert.equal(isIntelligenceFlagEnabled('ragConfidenceGate'), true);
     assert.equal(isIntelligenceFlagEnabled('ragLocalRerank'), true);
     assert.equal(isIntelligenceFlagEnabled('okfKnowledgePacks'), true);
@@ -106,16 +106,16 @@ describe('flag-parity verification (2026-07-14)', () => {
   });
 
   test('an explicit OFF remains an immediate kill switch for a production-default Context OS surface', () => {
-    process.env.NATIVELY_CONTEXT_OS = '0';
+    process.env.MEETFLOO_CONTEXT_OS = '0';
     assert.equal(isIntelligenceFlagEnabled('contextOsEnabled'), false);
-    process.env.NATIVELY_CONTEXT_OS_MANUAL_CHAT = 'off';
+    process.env.MEETFLOO_CONTEXT_OS_MANUAL_CHAT = 'off';
     assert.equal(isIntelligenceFlagEnabled('contextOsManualChatEnabled'), false);
   });
 
   test('an explicit env override still wins over the restored default (both directions)', () => {
     process.env.NODE_ENV = 'test';
-    process.env.NATIVELY_OKF_KNOWLEDGE_PACKS = '0';
-    process.env.NATIVELY_JIT_FINAL_ANSWER_ENFORCED = '0';
+    process.env.MEETFLOO_OKF_KNOWLEDGE_PACKS = '0';
+    process.env.MEETFLOO_JIT_FINAL_ANSWER_ENFORCED = '0';
     assert.equal(isIntelligenceFlagEnabled('okfKnowledgePacks'), false, 'explicit off must still override a true default');
     assert.equal(isIntelligenceFlagEnabled('jitFinalAnswerEnforced'), false, 'explicit off must still override the unconditional true default');
   });
@@ -131,14 +131,14 @@ describe('flag-parity verification (2026-07-14)', () => {
   });
 
   test('assertVerificationFlagsOrThrow THROWS when verification mode is on and a required flag is disabled', () => {
-    process.env.NATIVELY_VERIFICATION_MODE = '1';
-    process.env.NATIVELY_OKF_KNOWLEDGE_PACKS = '0'; // force one required flag off
+    process.env.MEETFLOO_VERIFICATION_MODE = '1';
+    process.env.MEETFLOO_OKF_KNOWLEDGE_PACKS = '0'; // force one required flag off
     process.env.NODE_ENV = 'test'; // the others would otherwise resolve true
     assert.throws(() => assertVerificationFlagsOrThrow(), /okfKnowledgePacks/);
   });
 
   test('assertVerificationFlagsOrThrow does NOT throw when verification mode is on and every required flag is enabled', () => {
-    process.env.NATIVELY_VERIFICATION_MODE = '1';
+    process.env.MEETFLOO_VERIFICATION_MODE = '1';
     process.env.NODE_ENV = 'test'; // all 5 required flags resolve true under this context
     assert.doesNotThrow(() => assertVerificationFlagsOrThrow());
   });

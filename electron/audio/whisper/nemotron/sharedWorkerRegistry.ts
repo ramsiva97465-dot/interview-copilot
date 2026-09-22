@@ -45,8 +45,8 @@ interface SharedNemotronWorkerState {
 
 function getState(): SharedNemotronWorkerState {
   const g = globalThis as unknown as Record<string, SharedNemotronWorkerState | undefined>;
-  if (!g.__nativelySharedNemotronWorkerV1__) {
-    g.__nativelySharedNemotronWorkerV1__ = {
+  if (!g.__MeetFlooSharedNemotronWorkerV1__) {
+    g.__MeetFlooSharedNemotronWorkerV1__ = {
       worker: null,
       modelId: null,
       refCount: 0,
@@ -58,10 +58,10 @@ function getState(): SharedNemotronWorkerState {
   // Defensive: a state object created by an older bundle generation (before
   // this field existed) would otherwise leave `acquireLock` undefined here —
   // the same multi-bundle skew the doc comment above exists to survive.
-  if (!g.__nativelySharedNemotronWorkerV1__.acquireLock) {
-    g.__nativelySharedNemotronWorkerV1__.acquireLock = Promise.resolve();
+  if (!g.__MeetFlooSharedNemotronWorkerV1__.acquireLock) {
+    g.__MeetFlooSharedNemotronWorkerV1__.acquireLock = Promise.resolve();
   }
-  return g.__nativelySharedNemotronWorkerV1__;
+  return g.__MeetFlooSharedNemotronWorkerV1__;
 }
 
 /**
@@ -113,7 +113,7 @@ function attachRegistryListeners(state: SharedNemotronWorkerState, worker: Worke
   // expected shutdown and only runs the full reset for a genuine surprise).
   // Every LocalWhisperSTT instance sharing this worker has its OWN 'error'/
   // 'exit' listener attached directly on this same worker object (Node's
-  // EventEmitter supports multiple listeners on one event natively) — those
+  // EventEmitter supports multiple listeners on one event MeetFloo) — those
   // are what actually surface a real, visible error to each channel's own
   // consumer. This listener's only job is resetting the REGISTRY's internal
   // bookkeeping so the NEXT acquireSharedNemotronWorker call cold-starts

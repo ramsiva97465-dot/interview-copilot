@@ -1,10 +1,10 @@
 {
-  "benchmark_id": "natively-summary-models-2026-09-17",
+  "benchmark_id": "MeetFloo-summary-models-2026-09-17",
   "runs_per_pair": 3,
   "configs": [
     {
       "id": "ds-flash-prod",
-      "label": "DeepSeek V4.1 Flash - current Natively config (thinking disabled)",
+      "label": "DeepSeek V4.1 Flash - current MeetFloo config (thinking disabled)",
       "provider": "deepseek",
       "model": "deepseek-v4-flash",
       "thinking": "production",
@@ -69,14 +69,24 @@
     "source_checked": "2026-09-17",
     "deepseek-flash": {
       "source": "https://api-docs.deepseek.com/quick_start/pricing/",
-      "peak": { "input_cache_miss": 0.30, "input_cache_hit": 0.006, "output": 1.20 },
-      "off_peak": { "input_cache_miss": 0.15, "input_cache_hit": 0.003, "output": 0.60 },
+      "peak": {
+        "input_cache_miss": 0.30,
+        "input_cache_hit": 0.006,
+        "output": 1.20
+      },
+      "off_peak": {
+        "input_cache_miss": 0.15,
+        "input_cache_hit": 0.003,
+        "output": 0.60
+      },
       "peak_windows_utc": "Mon-Fri 01:00-04:00 and 06:00-10:00",
       "reasoning_billing": "reasoning tokens are part of completion_tokens (billed as output)"
     },
     "gpt-5.6-luna": {
       "source": "https://developers.openai.com/api/docs/models/gpt-5.6-luna",
-      "input": 0.20, "cached_input": 0.02, "output": 1.20,
+      "input": 0.20,
+      "cached_input": 0.02,
+      "output": 1.20,
       "reasoning_billing": "reasoning tokens billed as output (included in output_tokens)"
     }
   },

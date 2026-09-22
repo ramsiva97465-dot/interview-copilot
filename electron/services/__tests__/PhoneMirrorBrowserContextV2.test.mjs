@@ -25,7 +25,7 @@ const WS = require('ws').WebSocket;
 
 const compiledServicePath = path.resolve(repoRoot, 'dist-electron/electron/services/PhoneMirrorService.js');
 
-const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-bc-test-'));
+const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-bc-test-'));
 const safeStorageStub = {
   isEncryptionAvailable: () => true,
   encryptString: (s) => Buffer.from('enc:' + s, 'utf8'),
@@ -42,7 +42,7 @@ class FakeBrowserWindow {
   static getFocusedWindow() { return null; }
 }
 const electronStub = {
-  app: { isReady: () => true, getPath: () => userDataDir, whenReady: () => Promise.resolve(), on: () => {} },
+  app: { isReady: () => true, getPath: () => userDataDir, whenReady: () => Promise.resolve(), on: () => { } },
   BrowserWindow: FakeBrowserWindow,
   safeStorage: safeStorageStub,
 };
@@ -59,7 +59,7 @@ before(async () => {
 });
 after(() => {
   Module._load = originalLoad;
-  try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch {}
+  try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch { }
 });
 
 const EXT_ORIGIN = 'chrome-extension://macjecgdfliikhplbbdbpljomcigjnjg';
@@ -68,7 +68,7 @@ function connectExtension(port, token) {
   return new Promise((resolve, reject) => {
     const ws = new WS(`ws://127.0.0.1:${port}/ws?t=${encodeURIComponent(token)}`);
     const frames = [];
-    ws.on('message', (d) => { try { frames.push(JSON.parse(d.toString())); } catch {} });
+    ws.on('message', (d) => { try { frames.push(JSON.parse(d.toString())); } catch { } });
     ws.on('error', reject);
     ws.on('open', () => {
       ws.send(JSON.stringify({ type: 'hello', role: 'extension', v: 1 }));
@@ -89,7 +89,7 @@ async function postDom(port, token, body, origin) {
     body: JSON.stringify(body),
   });
   let json = null;
-  try { json = await res.json(); } catch {}
+  try { json = await res.json(); } catch { }
   return { status: res.status, json };
 }
 
@@ -247,7 +247,7 @@ async function postClassify(port, token, body, origin) {
     body: JSON.stringify(body),
   });
   let json = null;
-  try { json = await res.json(); } catch {}
+  try { json = await res.json(); } catch { }
   return { status: res.status, json };
 }
 

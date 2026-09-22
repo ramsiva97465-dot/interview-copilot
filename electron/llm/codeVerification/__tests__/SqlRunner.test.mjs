@@ -132,8 +132,8 @@ describe('runSqlCase — real sqlite3 execution', async () => {
     assert.equal(fail.status, 'fail');
   });
   maybe('-safe blocks ATTACH (no filesystem escape)', async () => {
-    const canary = `/tmp/natively-sql-canary-${process.pid}.db`;
-    try { fs.rmSync(canary, { force: true }); } catch {}
+    const canary = `/tmp/MeetFloo-sql-canary-${process.pid}.db`;
+    try { fs.rmSync(canary, { force: true }); } catch { }
     // ATTACH is non-SELECT so it's rejected upstream; assert no file regardless.
     const r = await runSqlCase(`ATTACH DATABASE '${canary}' AS evil`, { schema, seeds, expected: [] });
     assert.equal(r.status, 'error');

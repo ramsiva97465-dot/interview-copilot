@@ -1,6 +1,6 @@
 // F-301 regression test (audit/autopilot-2026-08-18).
 //
-// natively-api runs a SEQUENTIAL provider cascade and cuts over to the next
+// MeetFloo-api runs a SEQUENTIAL provider cascade and cuts over to the next
 // provider at AI_TTFT_BUDGET_MS (10s). The manual-chat handler used
 // firstUsefulDeadlineMs() = 7000 and aborted the HTTP request at 7s, so the
 // server's rotation — the only thing that can actually RESCUE a slow turn —
@@ -21,11 +21,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '../../..');
 const { firstUsefulDeadlineMs, LIVE_DEFAULT_PROVIDER_TOTAL_HARD_TIMEOUT_MS } = await import(pathToFileURL(path.join(root, 'dist-electron/electron/llm/liveDeadlines.js')).href);
 
-// The server's rotation budget, read from natively-api/server.js when that tree
+// The server's rotation budget, read from MeetFloo-api/server.js when that tree
 // is available so real drift is caught, and falling back to the DOCUMENTED value
 // when it is not.
 //
-// `natively-api` is an UNDESCRIBED gitlink — .gitmodules only describes
+// `MeetFloo-api` is an UNDESCRIBED gitlink — .gitmodules only describes
 // `premium` — so CI never checks it out and readFileSync threw there. That made
 // this test fail on a machine where the invariant was perfectly fine, while
 // passing locally where the directory is present. The fallback keeps the real
@@ -34,7 +34,7 @@ const { firstUsefulDeadlineMs, LIVE_DEFAULT_PROVIDER_TOTAL_HARD_TIMEOUT_MS } = a
 const DOCUMENTED_AI_TTFT_BUDGET_MS = 10_000;
 
 function serverBudget() {
-  const serverPath = path.join(root, 'natively-api/server.js');
+  const serverPath = path.join(root, 'MeetFloo-api/server.js');
   let server;
   try {
     server = fs.readFileSync(serverPath, 'utf8');
@@ -42,12 +42,12 @@ function serverBudget() {
     return DOCUMENTED_AI_TTFT_BUDGET_MS;
   }
   const m = server.match(/AI_TTFT_BUDGET_MS\s*=\s*Number\(process\.env\.AI_TTFT_BUDGET_MS\)\s*\|\|\s*([0-9_]+)/);
-  assert.ok(m, 'could not read AI_TTFT_BUDGET_MS from natively-api/server.js');
+  assert.ok(m, 'could not read AI_TTFT_BUDGET_MS from MeetFloo-api/server.js');
   const parsed = Number(m[1].replace(/_/g, ''));
   // If the server tree IS present, its value is authoritative — and a drift from
   // the documented constant is exactly what this test should surface.
   assert.equal(parsed, DOCUMENTED_AI_TTFT_BUDGET_MS,
-    `natively-api's AI_TTFT_BUDGET_MS is ${parsed}ms but this test documents ${DOCUMENTED_AI_TTFT_BUDGET_MS}ms — `
+    `MeetFloo-api's AI_TTFT_BUDGET_MS is ${parsed}ms but this test documents ${DOCUMENTED_AI_TTFT_BUDGET_MS}ms — `
     + 'update the constant here (and re-check the client deadline) rather than letting the two drift');
   return parsed;
 }
@@ -88,7 +88,7 @@ test('the manual-chat call site passes the server-cascade flag', () => {
   // reaches the deadline selector — was untouched. Require the flag, not the arity.
   assert.ok(/firstUsefulDeadlineMs\(answerPlan\.answerType,\s*usingLocalLlm,\s*viaServerCascade[,)]/.test(src),
     'the manual-chat handler must pass viaServerCascade into firstUsefulDeadlineMs (F-301)');
-  assert.ok(/isUsingNativelyServerCascade\?\.\(\)/.test(src),
+  assert.ok(/isUsingMeetFlooServerCascade\?\.\(\)/.test(src),
     'viaServerCascade must be derived from the LLMHelper route predicate');
 });
 
@@ -119,7 +119,7 @@ test('the phone-mirror call site passes BOTH route flags', () => {
     'the phone-mirror handler must pass isLocal AND viaServerCascade into firstUsefulDeadlineMs (CR-05)',
   );
   assert.ok(
-    /phoneViaServerCascade\s*=\s*llmHelper\.isUsingNativelyServerCascade\?\.\(\)\s*===\s*true/.test(codeOnly),
+    /phoneViaServerCascade\s*=\s*llmHelper\.isUsingMeetFlooServerCascade\?\.\(\)\s*===\s*true/.test(codeOnly),
     'phone viaServerCascade must come from the same LLMHelper route predicate as manual chat',
   );
   assert.ok(

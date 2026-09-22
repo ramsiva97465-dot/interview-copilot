@@ -94,17 +94,17 @@ describe('JD branch: flag-gated awaited sequence, unchanged default (fire-and-fo
 describe('atomicJdProfilePackGeneration flag registration', () => {
   test('defaults to true everywhere (promoted 2026-08-30, user-directed override — ships the slower-JD-upload-ack tradeoff to every user)', () => {
     __resetIntelligenceFlagsCache();
-    delete process.env.NATIVELY_ATOMIC_JD_PROFILE_PACK;
+    delete process.env.MEETFLOO_ATOMIC_JD_PROFILE_PACK;
     assert.equal(isIntelligenceFlagEnabled('atomicJdProfilePackGeneration'), true);
   });
 
-  test('NATIVELY_ATOMIC_JD_PROFILE_PACK=0 env override can still force it off (back to the fire-and-forget path)', () => {
+  test('MEETFLOO_ATOMIC_JD_PROFILE_PACK=0 env override can still force it off (back to the fire-and-forget path)', () => {
     __resetIntelligenceFlagsCache();
-    process.env.NATIVELY_ATOMIC_JD_PROFILE_PACK = '0';
+    process.env.MEETFLOO_ATOMIC_JD_PROFILE_PACK = '0';
     try {
       assert.equal(isIntelligenceFlagEnabled('atomicJdProfilePackGeneration'), false);
     } finally {
-      delete process.env.NATIVELY_ATOMIC_JD_PROFILE_PACK;
+      delete process.env.MEETFLOO_ATOMIC_JD_PROFILE_PACK;
       __resetIntelligenceFlagsCache();
     }
   });

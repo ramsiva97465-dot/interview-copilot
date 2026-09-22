@@ -8,7 +8,7 @@
 //
 // It captures BOTH:
 //   (1) the visible answer text, and
-//   (2) the [CONTEXT-OS] stdout trace emitted under NATIVELY_INTELLIGENCE_TRACE=1
+//   (2) the [CONTEXT-OS] stdout trace emitted under MEETFLOO_INTELLIGENCE_TRACE=1
 // and prints a machine-checkable JSON verdict block the caller greps.
 //
 // This is an INJECTED-TRANSCRIPT integration E2E (the question enters via the
@@ -41,16 +41,16 @@ The document does not identify a funding organization or funding grant.`;
 
 const env = {
   ...process.env,
-  NATIVELY_E2E: '1',
+  MEETFLOO_E2E: '1',
   NODE_ENV: 'development',
-  NATIVELY_DEV_BYPASS_SCREEN_TCC: '1',
-  NATIVELY_E2E_LOCAL_TEST_TOKEN: 'local-test',
+  MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1',
+  MEETFLOO_E2E_LOCAL_TEST_TOKEN: 'local-test',
   // Force Context OS ON + trace so we can observe the contract decision.
-  NATIVELY_CONTEXT_OS: '1',
-  NATIVELY_CONTEXT_OS_WTA: '1',
-  NATIVELY_CONTEXT_OS_MANUAL_CHAT: '1',
-  NATIVELY_CONTEXT_OS_PROPERTY_VALIDATION: '1',
-  NATIVELY_INTELLIGENCE_TRACE: '1',
+  MEETFLOO_CONTEXT_OS: '1',
+  MEETFLOO_CONTEXT_OS_WTA: '1',
+  MEETFLOO_CONTEXT_OS_MANUAL_CHAT: '1',
+  MEETFLOO_CONTEXT_OS_PROPERTY_VALIDATION: '1',
+  MEETFLOO_INTELLIGENCE_TRACE: '1',
   OLLAMA_URL: 'http://127.0.0.1:1',
 };
 
@@ -73,14 +73,14 @@ app.process().stdout.on('data', capture);
 app.process().stderr.on('data', capture);
 
 await app.firstWindow({ timeout: 30000 });
-await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => {});
+await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => { });
 // Re-acquire the window each call + retry: the renderer may navigate (a failed
 // settings-window load destroys the execution context) and a held reference goes stale.
 const RAW = async (fn, arg) => {
   for (let attempt = 0; attempt < 4; attempt++) {
     try {
       const w = app.windows()[0] || await app.firstWindow();
-      await w.waitForLoadState('domcontentloaded').catch(() => {});
+      await w.waitForLoadState('domcontentloaded').catch(() => { });
       return await w.evaluate(fn, arg);
     } catch (e) {
       if (attempt === 3) throw e;
@@ -91,7 +91,7 @@ const RAW = async (fn, arg) => {
 const R = (ch, ...a) => RAW(async ({ ch, a }) => (window.electronAPI || window.api).e2eInvoke(ch, ...a), { ch, a });
 
 // Enable pro (reference files/profile are pro-gated in some builds).
-await R('__e2e__:enable-pro').catch(() => {});
+await R('__e2e__:enable-pro').catch(() => { });
 
 // Create a DOCUMENT-GROUNDED custom mode: the custom context must trip
 // detectCustomModeDocumentGrounding (source noun + strict constraint).
@@ -106,7 +106,7 @@ const modeId = await RAW(async () => {
 });
 
 const up = await R('__e2e__:add-reference-file', { modeId, fileName: 'thesis.pdf', content: THESIS, pageCount: 12 });
-await R('__e2e__:prewarm-mode', modeId).catch(() => {});
+await R('__e2e__:prewarm-mode', modeId).catch(() => { });
 
 const ask = async (q) => {
   ctxosTraces.length = 0; // isolate traces per question
@@ -124,7 +124,7 @@ const verdict = {
   phases: {
     answer_preview: phases.answer.slice(0, 400),
     mentions_doc_phases: /data prep|fine.?tun|agent integration|evaluation/i.test(phases.answer),
-    leaks_profile_milestones: /prototype.*beta.*production|natively/i.test(phases.answer),
+    leaks_profile_milestones: /prototype.*beta.*production|MeetFloo/i.test(phases.answer),
     trace_source_owner: phases.traces.map((t) => t.sourceOwner),
     trace_used_sources: phases.traces.map((t) => t.usedSources),
     trace_forbidden: phases.traces[0]?.forbiddenSources || [],
@@ -149,5 +149,5 @@ console.log('CTXOS_VERDICT_BEGIN');
 console.log(JSON.stringify(verdict, null, 2));
 console.log('CTXOS_VERDICT_END');
 
-await app.close().catch(() => {});
+await app.close().catch(() => { });
 console.log('CLOSED');

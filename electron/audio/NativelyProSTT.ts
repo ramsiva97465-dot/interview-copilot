@@ -18,7 +18,7 @@ import {
  * Optional flag/telemetry/resolver injection so the class stays testable.
  * Defaults wire to the real SettingsManager / telemetryService / resolver.
  */
-export interface NativelyProSTTFlags {
+export interface MeetFlooProSTTFlags {
     /** Master switch + deterministic per-key rollout gate (see SettingsManager). */
     isRelayEnabled(apiKey: string | undefined): boolean;
     /** Forced region hint passed as region_hint to session-create, or null. */
@@ -30,17 +30,17 @@ export interface NativelyProSTTFlags {
     getAllowDualStream(): boolean;
 }
 
-export interface NativelyProSTTTelemetry {
+export interface MeetFlooProSTTTelemetry {
     event(name: string, properties?: Record<string, unknown>): void;
 }
 
-export interface NativelyProSTTDeps {
+export interface MeetFlooProSTTDeps {
     controlPlaneBaseUrl?: string;
     appVersion?: string;
     platform?: string;
     resolveSession?: (opts: ResolveRelaySessionOpts) => Promise<RelaySessionConfig | null>;
-    flags?: NativelyProSTTFlags;
-    telemetry?: NativelyProSTTTelemetry;
+    flags?: MeetFlooProSTTFlags;
+    telemetry?: MeetFlooProSTTTelemetry;
 }
 
 /** Discriminates which auth-frame shape a given WS URL needs. */
@@ -60,9 +60,9 @@ interface ResolvedTarget {
 }
 
 /**
- * NativelyProSTT
+ * MeetFlooProSTT
  *
- * Connects to the Natively API WebSocket transcription endpoint.
+ * Connects to the MeetFloo API WebSocket transcription endpoint.
  *
  * TWO auth-frame shapes (Phase 7/8 additive):
  *   LEGACY (Railway, unchanged): { key | trial_token, sample_rate, language,
@@ -79,15 +79,15 @@ interface ResolvedTarget {
  *
  * All subsequent messages are binary LINEAR16 PCM audio.
  */
-export class NativelyProSTT extends EventEmitter {
+export class MeetFlooProSTT extends EventEmitter {
     private apiKey: string;
     private channel: string;  // 'system' | 'mic' — disambiguates concurrent streams per key
     private ws: WebSocket | null = null;
-    private isActive           = false;
-    private isConnected        = false;
-    private isConnecting       = false;
-    private intentionalClose   = false;  // set true before deliberate closeUpstream() to suppress auto-reconnect
-    private sampleRate    = 16000;
+    private isActive = false;
+    private isConnected = false;
+    private isConnecting = false;
+    private intentionalClose = false;  // set true before deliberate closeUpstream() to suppress auto-reconnect
+    private sampleRate = 16000;
     private audioChannels = 1;
     private buffer: Buffer[] = [];
     // Soft cap: at 48 kHz stereo / 20 ms frames a chunk is ~3.8 KB, so 500 chunks
@@ -101,12 +101,12 @@ export class NativelyProSTT extends EventEmitter {
     private bufferDroppedChunks = 0;
 
     // Language state — updated via setRecognitionLanguage()
-    private languageBcp47          = 'en-US';
+    private languageBcp47 = 'en-US';
     private languageAlternates: string[] = [];
     // The key the caller last configured (e.g. 'auto', 'english-us').
     // Preserved so stop() can reset languageBcp47 back to the configured value,
     // ensuring the next start() sends 'auto' again rather than a stale detected language.
-    private configuredLanguageKey  = 'en-US';
+    private configuredLanguageKey = 'en-US';
 
     private reconnectAttempts = 0;
     private readonly RECONNECT_BASE_MS = 1500;
@@ -114,12 +114,12 @@ export class NativelyProSTT extends EventEmitter {
     // multi-minute territory. Without this, attempt #10 would sleep
     // 1500 × 2^9 ≈ 13 minutes before the next try — by which time the user has
     // long since given up. 30s is the standard ceiling for streaming services.
-    private readonly MAX_BACKOFF_MS    = 30_000;
+    private readonly MAX_BACKOFF_MS = 30_000;
     // Soft warning threshold — when reconnect attempts cross this, surface a
     // "still trying to reconnect" UI signal so the user knows the issue is
     // network/server side, not their app.
     private readonly RECONNECT_WARN_AFTER = 5;
-    private readonly DNS_RETRY_MS     = 10_000;  // fixed delay for ENOTFOUND — don't burn backoff on DNS blips
+    private readonly DNS_RETRY_MS = 10_000;  // fixed delay for ENOTFOUND — don't burn backoff on DNS blips
     private isDnsFailure = false;  // true when last error was a DNS resolution failure
     private reconnectTimer: NodeJS.Timeout | null = null;
     // Cleared only after 5 s of stable connection so backoff actually increases on rapid 1006 loops
@@ -132,11 +132,11 @@ export class NativelyProSTT extends EventEmitter {
     // start()/stop() can cancel any in-flight inline timer.
     private pendingConnectTimer: NodeJS.Timeout | null = null;
 
-    private readonly BACKEND_URL = 'wss://api.natively.software/v1/transcribe';
+    private readonly BACKEND_URL = 'wss://api.MeetFloo.software/v1/transcribe';
 
     // ── Regional STT relay state (Phase 7/8 — all additive, flag-gated off) ──
     // Deps default to the real implementations; tests inject fakes.
-    private readonly deps: NativelyProSTTDeps;
+    private readonly deps: MeetFlooProSTTDeps;
     private readonly controlPlaneBaseUrl: string;
     private readonly appVersion: string;
     private readonly platform: string;
@@ -156,32 +156,32 @@ export class NativelyProSTT extends EventEmitter {
     constructor(
         apiKey: string,
         channel: 'system' | 'mic' = 'system',
-        deps: NativelyProSTTDeps = {},
+        deps: MeetFlooProSTTDeps = {},
     ) {
         super();
-        this.apiKey  = apiKey;
+        this.apiKey = apiKey;
         this.channel = channel;
-        this.deps    = deps;
+        this.deps = deps;
         // Derive the control-plane base from the same host as the legacy WS URL
-        // (https equivalent of wss://api.natively.software). Overridable via deps.
+        // (https equivalent of wss://api.MeetFloo.software). Overridable via deps.
         this.controlPlaneBaseUrl = deps.controlPlaneBaseUrl ?? this.deriveControlPlaneBase();
         this.appVersion = deps.appVersion ?? '';
-        this.platform   = deps.platform ?? '';
+        this.platform = deps.platform ?? '';
     }
 
-    /** https://api.natively.software derived from the wss BACKEND_URL host. */
+    /** https://api.MeetFloo.software derived from the wss BACKEND_URL host. */
     private deriveControlPlaneBase(): string {
         try {
-            const u = new URL(this.BACKEND_URL);          // wss://api.natively.software/v1/transcribe
-            return `https://${u.host}`;                    // https://api.natively.software
+            const u = new URL(this.BACKEND_URL);          // wss://api.MeetFloo.software/v1/transcribe
+            return `https://${u.host}`;                    // https://api.MeetFloo.software
         } catch {
-            return 'https://api.natively.software';
+            return 'https://api.MeetFloo.software';
         }
     }
 
     // ── Relay deps resolution (lazy; SettingsManager/telemetry are main-only) ─
 
-    private getFlags(): NativelyProSTTFlags | null {
+    private getFlags(): MeetFlooProSTTFlags | null {
         if (this.deps.flags) return this.deps.flags;
         try {
             // Lazy require: SettingsManager throws if app not ready, and unit
@@ -202,7 +202,7 @@ export class NativelyProSTT extends EventEmitter {
         }
     }
 
-    private getTelemetry(): NativelyProSTTTelemetry {
+    private getTelemetry(): MeetFlooProSTTTelemetry {
         if (this.deps.telemetry) return this.deps.telemetry;
         try {
             const { telemetryService } = require('../services/telemetry/TelemetryService');
@@ -229,7 +229,7 @@ export class NativelyProSTT extends EventEmitter {
         if (rate === this.sampleRate) return;
         const previousRate = this.sampleRate;
         this.sampleRate = rate;
-        console.log(`[NativelyProSTT:${this.channel}] Sample rate ${previousRate}Hz → ${rate}Hz`);
+        console.log(`[MeetFlooProSTT:${this.channel}] Sample rate ${previousRate}Hz → ${rate}Hz`);
 
         // Mid-stream rate change requires reconnection — but ONLY if the
         // server has already confirmed the handshake (`isConnected === true`).
@@ -268,9 +268,9 @@ export class NativelyProSTT extends EventEmitter {
         const socket = this.ws;
         const preHandshake = !socket || socket.readyState === WebSocket.CONNECTING;
         if (this.isActive && !preHandshake) {
-            console.log(`[NativelyProSTT:${this.channel}] Rate changed mid-stream — reconnecting WS so server uses the new declared rate.`);
+            console.log(`[MeetFlooProSTT:${this.channel}] Rate changed mid-stream — reconnecting WS so server uses the new declared rate.`);
             this.reconnectAttempts = 0;     // fresh session — reset backoff
-            this.intentionalClose  = true;  // don't re-trigger via close handler
+            this.intentionalClose = true;  // don't re-trigger via close handler
             this.closeUpstream();
             // Same 250ms gap pattern as setRecognitionLanguage to avoid the
             // server's concurrent_session_blocked race.
@@ -297,20 +297,20 @@ export class NativelyProSTT extends EventEmitter {
         // 'auto' is a sentinel — send it as-is so the backend does parallel batch detection.
         if (key === 'auto') {
             const config = RECOGNITION_LANGUAGES.auto;
-            this.languageBcp47      = 'auto';
+            this.languageBcp47 = 'auto';
             this.languageAlternates = config.alternates ?? [];
-            console.log('[NativelyProSTT] Language set to auto-detect mode');
+            console.log('[MeetFlooProSTT] Language set to auto-detect mode');
         } else {
             const config = RECOGNITION_LANGUAGES[key];
             if (!config) {
-                console.warn(`[NativelyProSTT] Unknown language key: ${key}`);
+                console.warn(`[MeetFlooProSTT] Unknown language key: ${key}`);
                 return;
             }
-            this.languageBcp47      = config.bcp47;
+            this.languageBcp47 = config.bcp47;
             this.languageAlternates = 'alternates' in config
                 ? (config as EnglishVariant).alternates
                 : [];
-            console.log(`[NativelyProSTT] Language set: ${key} → ${this.languageBcp47}`,
+            console.log(`[MeetFlooProSTT] Language set: ${key} → ${this.languageBcp47}`,
                 this.languageAlternates.length ? `(alts: ${this.languageAlternates.join(', ')})` : '');
         }
 
@@ -321,9 +321,9 @@ export class NativelyProSTT extends EventEmitter {
         // committed (isConnected). If we're still mid-connect, the upcoming
         // 'open' handler will use the just-updated language fields.
         if (this.isActive && this.isConnected) {
-            console.log('[NativelyProSTT] Language changed while active — reconnecting');
+            console.log('[MeetFlooProSTT] Language changed while active — reconnecting');
             this.reconnectAttempts = 0;  // reset counter so the new session starts fresh
-            this.intentionalClose  = true;
+            this.intentionalClose = true;
             this.closeUpstream();
             // Small delay so the server processes the old socket's close event before
             // the new connection arrives — prevents concurrent_session_blocked race.
@@ -335,19 +335,19 @@ export class NativelyProSTT extends EventEmitter {
         }
     }
 
-    /** No-op — Natively API server handles VAD internally */
-    public notifySpeechEnded(): void {}
+    /** No-op — MeetFloo API server handles VAD internally */
+    public notifySpeechEnded(): void { }
 
-    /** No-op — Natively API server finalizes via VAD; no client-side flush available */
-    public finalize(): void {}
+    /** No-op — MeetFloo API server finalizes via VAD; no client-side flush available */
+    public finalize(): void { }
 
-    public setCredentials(_path: string): void {}
+    public setCredentials(_path: string): void { }
 
     // ── Lifecycle ─────────────────────────────────────────────
 
     public start(): void {
         if (this.isActive) return;
-        this.isActive         = true;
+        this.isActive = true;
         this.reconnectAttempts = 0;
         // Fresh session: forget any previously-resolved relay target so the
         // first connect of THIS session re-evaluates the flag and (if on)
@@ -377,8 +377,8 @@ export class NativelyProSTT extends EventEmitter {
     }
 
     public stop(): void {
-        this.isActive         = false;
-        this._chunksSent      = 0;
+        this.isActive = false;
+        this._chunksSent = 0;
         this.intentionalClose = false;  // Reset so a subsequent start() can reconnect normally
 
         // Restore the configured language so the next start() uses the right handshake value.
@@ -386,7 +386,7 @@ export class NativelyProSTT extends EventEmitter {
         // and the next meeting would start with French pinned instead of 'auto'.
         if (this.configuredLanguageKey === 'auto') {
             const config = RECOGNITION_LANGUAGES.auto;
-            this.languageBcp47      = 'auto';
+            this.languageBcp47 = 'auto';
             this.languageAlternates = config.alternates ?? [];
         }
 
@@ -440,21 +440,21 @@ export class NativelyProSTT extends EventEmitter {
                 this.bufferDroppedChunks++;
                 if (!this.bufferOverflowReported) {
                     this.bufferOverflowReported = true;
-                    console.warn(`[NativelyProSTT:${this.channel}] Buffer overflow — dropping oldest chunks. Reconnect taking too long; transcript will have a gap.`);
+                    console.warn(`[MeetFlooProSTT:${this.channel}] Buffer overflow — dropping oldest chunks. Reconnect taking too long; transcript will have a gap.`);
                     this.emit('buffer-overflow', { channel: this.channel });
                 }
             }
             // Log first few buffered chunks so we can tell if audio is arriving before connect
             if (this.buffer.length <= 3 || this.buffer.length % 100 === 0) {
-                const wsState = this.ws ? ['CONNECTING','OPEN','CLOSING','CLOSED'][this.ws.readyState] || this.ws.readyState : 'null';
-                console.log(`[NativelyProSTT:${this.channel}] Buffering chunk (buffer=${this.buffer.length}, isConnected=${this.isConnected}, ws=${wsState})`);
+                const wsState = this.ws ? ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'][this.ws.readyState] || this.ws.readyState : 'null';
+                console.log(`[MeetFlooProSTT:${this.channel}] Buffering chunk (buffer=${this.buffer.length}, isConnected=${this.isConnected}, ws=${wsState})`);
             }
             return;
         }
 
         this._chunksSent++;
         if (this._chunksSent <= 5 || this._chunksSent % 200 === 0) {
-            console.log(`[NativelyProSTT:${this.channel}] Sent chunk #${this._chunksSent} (${chunk.length}B) to server`);
+            console.log(`[MeetFlooProSTT:${this.channel}] Sent chunk #${this._chunksSent} (${chunk.length}B) to server`);
         }
         this.ws.send(chunk);
     }
@@ -490,7 +490,7 @@ export class NativelyProSTT extends EventEmitter {
         }
 
         this.isConnecting = true;
-        this.isConnected  = false;
+        this.isConnected = false;
 
         // Pick the URL for THIS attempt: the current fallback-chain target when
         // the relay flag resolved one, else the hardcoded Railway URL (flag-off
@@ -498,7 +498,7 @@ export class NativelyProSTT extends EventEmitter {
         const connectUrl = this.connectUrl();
         this.connectStartedAtMs = Date.now();
 
-        console.log(`[NativelyProSTT] Connecting (attempt ${this.reconnectAttempts + 1})...`);
+        console.log(`[MeetFlooProSTT] Connecting (attempt ${this.reconnectAttempts + 1})...`);
 
         // streamingStttWsOptions sidesteps Node's macOS dual-stack DNS bug for
         // IPv4-only CNAME chains and caps the TLS+upgrade handshake at 15s.
@@ -538,7 +538,7 @@ export class NativelyProSTT extends EventEmitter {
             try {
                 const msg = JSON.parse(data.toString());
                 if (!msg.text || msg.is_final) {
-                    console.log(`[NativelyProSTT:${this.channel}] Server msg`, {
+                    console.log(`[MeetFlooProSTT:${this.channel}] Server msg`, {
                         type: msg.type,
                         final: Boolean(msg.is_final),
                         hasText: Boolean(msg.text),
@@ -547,7 +547,7 @@ export class NativelyProSTT extends EventEmitter {
                 }
 
                 if (msg.error) {
-                    console.error('[NativelyProSTT] Server error:', msg.error, msg.message || '');
+                    console.error('[MeetFlooProSTT] Server error:', msg.error, msg.message || '');
                     this.emit('error', new Error(msg.error));
 
                     // RELAY token-fatal carve-out (Phase 7/8): on a RELAY url an
@@ -559,7 +559,7 @@ export class NativelyProSTT extends EventEmitter {
                     // re-validates the real key. We let the socket close naturally
                     // and the close handler walk the ladder.
                     if (msg.error === 'invalid_key_format' && this.isOnRelayTarget(connectUrl)) {
-                        console.warn(`[NativelyProSTT:${this.channel}] Relay token rejected (invalid_key_format on relay) — advancing to next fallback rung.`);
+                        console.warn(`[MeetFlooProSTT:${this.channel}] Relay token rejected (invalid_key_format on relay) — advancing to next fallback rung.`);
                         clearCachedSession(this.channel);
                         this.forceAdvanceTarget(connectUrl, 'token_fatal');
                         // NOT fatal: leave isActive true so the close handler's
@@ -571,29 +571,29 @@ export class NativelyProSTT extends EventEmitter {
                     // trial_expired must be here: without it the client retries every 1.5-30s
                     // forever, hammering auth DB calls while the server rejects every attempt.
                     // (On the Railway url, invalid_key_format remains fatal exactly as today.)
-                if (msg.error === 'auth_timeout' ||
+                    if (msg.error === 'auth_timeout' ||
                         msg.error === 'invalid_key_format' ||
                         msg.error === 'trial_expired' ||
                         msg.error === 'transcription_quota_exceeded') {
-                    this.isActive = false;
-                }
-                // concurrent_session_blocked is NOT fatal — it means the intentional
-                // reconnect (language/sample-rate change) arrived at the server before
-                // the old socket's close event was processed. The server closes the WS
-                // after sending this error, so ws.on('close') will fire and
-                // scheduleReconnect() will retry after 1.5s by which time the old
-                // session is guaranteed to be cleaned up.
-                //
-                // upstream_closed / upstream_error: server has already closed the WS,
-                // the ws.on('close') handler will schedule a reconnect automatically.
-                // Nothing to do here beyond the emit above.
-                return;
+                        this.isActive = false;
+                    }
+                    // concurrent_session_blocked is NOT fatal — it means the intentional
+                    // reconnect (language/sample-rate change) arrived at the server before
+                    // the old socket's close event was processed. The server closes the WS
+                    // after sending this error, so ws.on('close') will fire and
+                    // scheduleReconnect() will retry after 1.5s by which time the old
+                    // session is guaranteed to be cleaned up.
+                    //
+                    // upstream_closed / upstream_error: server has already closed the WS,
+                    // the ws.on('close') handler will schedule a reconnect automatically.
+                    // Nothing to do here beyond the emit above.
+                    return;
                 }
 
                 if (msg.status === 'connected') {
                     this.isConnecting = false;
-                    this.isConnected  = true;
-                    console.log(`[NativelyProSTT] Connected via ${msg.provider}`);
+                    this.isConnected = true;
+                    console.log(`[MeetFlooProSTT] Connected via ${msg.provider}`);
                     // Relay telemetry: a successful auth on the current rung. We
                     // reset the per-url failure counter so a later blip starts the
                     // ×2 advance rule fresh from this (now-proven) url.
@@ -621,10 +621,10 @@ export class NativelyProSTT extends EventEmitter {
                 // are routed through the correct language model from here on.
                 if (msg.language_detected) {
                     const detected: string = msg.language_detected;
-                    console.log(`[NativelyProSTT] Auto-detected language: ${detected}`);
-                    this.languageBcp47      = detected;
+                    console.log(`[MeetFlooProSTT] Auto-detected language: ${detected}`);
+                    this.languageBcp47 = detected;
                     this.languageAlternates = [];
-                    this.reconnectAttempts  = 0;  // fresh session — reset backoff counter
+                    this.reconnectAttempts = 0;  // fresh session — reset backoff counter
                     this.emit('languageDetected', detected);
                     if (this.isActive && this.ws) {
                         this.intentionalClose = true;
@@ -662,17 +662,17 @@ export class NativelyProSTT extends EventEmitter {
                     // label → today's behaviour exactly.
                     const speakerId = typeof msg.speaker === 'string' ? msg.speaker
                         : typeof msg.speaker === 'number' ? `speaker_${msg.speaker}`
-                        : typeof msg.speaker_id === 'string' ? msg.speaker_id
-                        : undefined;
+                            : typeof msg.speaker_id === 'string' ? msg.speaker_id
+                                : undefined;
                     this.emit('transcript', {
-                        text:       msg.text,
-                        isFinal:    msg.is_final    ?? false,
-                        confidence: msg.confidence  ?? 1.0,
+                        text: msg.text,
+                        isFinal: msg.is_final ?? false,
+                        confidence: msg.confidence ?? 1.0,
                         ...(speakerId ? { speakerId } : {}),
                     });
                 }
             } catch (err) {
-                console.error('[NativelyProSTT] Parse error:', err);
+                console.error('[MeetFlooProSTT] Parse error:', err);
             }
         }));
 
@@ -682,12 +682,12 @@ export class NativelyProSTT extends EventEmitter {
             // instead use a fixed DNS_RETRY_MS delay and keep retrying indefinitely while active.
             this.isDnsFailure = err.code === 'ENOTFOUND' || err.code === 'EAI_AGAIN';
             if (this.isDnsFailure) {
-                console.warn(`[NativelyProSTT:${this.channel}] DNS failure (${err.code}) — will retry in ${this.DNS_RETRY_MS / 1000}s without burning backoff`);
+                console.warn(`[MeetFlooProSTT:${this.channel}] DNS failure (${err.code}) — will retry in ${this.DNS_RETRY_MS / 1000}s without burning backoff`);
             } else {
-                console.error('[NativelyProSTT] WebSocket error:', err.message);
+                console.error('[MeetFlooProSTT] WebSocket error:', err.message);
             }
             this.isConnecting = false;
-            this.isConnected  = false;
+            this.isConnected = false;
             this.emit('error', err);
             if (this.isDnsFailure && this.isActive) {
                 this.scheduleReconnect();
@@ -696,9 +696,9 @@ export class NativelyProSTT extends EventEmitter {
 
         ws.on('close', (code: number) => guard(() => {
             this.isConnecting = false;
-            this.isConnected  = false;
+            this.isConnected = false;
             if (this.ws === ws) this.ws = null;
-            console.log(`[NativelyProSTT] Connection closed (code ${code})`);
+            console.log(`[MeetFlooProSTT] Connection closed (code ${code})`);
 
             // Skip auto-reconnect if this close was intentional (e.g. language change)
             if (this.intentionalClose) {
@@ -733,7 +733,7 @@ export class NativelyProSTT extends EventEmitter {
         // isActive is true, which is safe since the user explicitly started the session.
         if (this.isDnsFailure) {
             this.isDnsFailure = false;  // clear so the next non-DNS error uses normal backoff
-            console.warn(`[NativelyProSTT] DNS retry in ${this.DNS_RETRY_MS / 1000}s...`);
+            console.warn(`[MeetFlooProSTT] DNS retry in ${this.DNS_RETRY_MS / 1000}s...`);
             this.reconnectTimer = setTimeout(() => {
                 this.reconnectTimer = null;
                 if (this.isActive) this.connect();
@@ -752,7 +752,7 @@ export class NativelyProSTT extends EventEmitter {
         const jitter = Math.floor((Math.random() - 0.5) * capped * 0.4);
         const delay = Math.max(this.RECONNECT_BASE_MS, capped + jitter);
         this.reconnectAttempts++;
-        console.log(`[NativelyProSTT:${this.channel}] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})...`);
+        console.log(`[MeetFlooProSTT:${this.channel}] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})...`);
 
         // Surface a soft UI signal once we cross the warning threshold so the
         // user knows the connection problem is sustained, not a momentary blip.
@@ -776,7 +776,7 @@ export class NativelyProSTT extends EventEmitter {
         const pending = this.buffer;
         this.buffer = [];
         if (this.bufferDroppedChunks > 0) {
-            console.warn(`[NativelyProSTT:${this.channel}] Reconnected — flushing ${pending.length} buffered chunks; ${this.bufferDroppedChunks} were dropped during outage`);
+            console.warn(`[MeetFlooProSTT:${this.channel}] Reconnected — flushing ${pending.length} buffered chunks; ${this.bufferDroppedChunks} were dropped during outage`);
         }
         this.bufferDroppedChunks = 0;
         this.bufferOverflowReported = false;
@@ -839,7 +839,7 @@ export class NativelyProSTT extends EventEmitter {
     }
 
     /** Performs the actual session-create + installs the resulting target. */
-    private async resolveRelayTarget(flags: NativelyProSTTFlags): Promise<void> {
+    private async resolveRelayTarget(flags: MeetFlooProSTTFlags): Promise<void> {
         const isTrial = this.apiKey === TRIAL_SENTINEL_KEY;
         let trialToken: string | undefined;
         let apiKey: string | undefined;
@@ -949,14 +949,14 @@ export class NativelyProSTT extends EventEmitter {
         if (this.isOnRelayTarget(url)) {
             const token = this.target!.config!.sessionToken;
             return {
-                session_token:       token,
-                sample_rate:         this.sampleRate,
-                audio_channels:      this.audioChannels,
-                language:            this.languageBcp47,
+                session_token: token,
+                sample_rate: this.sampleRate,
+                audio_channels: this.audioChannels,
+                language: this.languageBcp47,
                 language_alternates: this.languageAlternates,
-                channel:             this.channel,
-                app_version:         this.appVersion,
-                platform:            this.platform,
+                channel: this.channel,
+                app_version: this.appVersion,
+                platform: this.platform,
             };
         }
         return this.buildLegacyAuthFrame();
@@ -970,11 +970,11 @@ export class NativelyProSTT extends EventEmitter {
      */
     private buildLegacyAuthFrame(): Record<string, unknown> {
         const baseFrame: Record<string, unknown> = {
-            sample_rate:         this.sampleRate,
-            language:            this.languageBcp47,
+            sample_rate: this.sampleRate,
+            language: this.languageBcp47,
             language_alternates: this.languageAlternates,
-            audio_channels:      this.audioChannels,
-            channel:             this.channel,
+            audio_channels: this.audioChannels,
+            channel: this.channel,
         };
         if (this.apiKey === TRIAL_SENTINEL_KEY) {
             try {
@@ -1038,13 +1038,13 @@ export class NativelyProSTT extends EventEmitter {
             const toKind = this.kindForUrl(t.chain[t.index]);
             if (toKind === 'railway') t.onRailway = true;
             this.reconnectAttempts = 0; // fresh rung — don't inherit prior backoff
-            console.warn(`[NativelyProSTT:${this.channel}] Advancing fallback rung: ${fromKind} → ${toKind} (${t.chain[t.index]})`);
+            console.warn(`[MeetFlooProSTT:${this.channel}] Advancing fallback rung: ${fromKind} → ${toKind} (${t.chain[t.index]})`);
             this.emitTelemetry('relay_fallback_used', { fromKind, toKind });
         }
     }
 
     private closeUpstream(): void {
-        this.isConnected  = false;
+        this.isConnected = false;
         this.isConnecting = false;
 
         // Clear every owned timer here, not just at stop()/start() boundaries.
@@ -1057,8 +1057,8 @@ export class NativelyProSTT extends EventEmitter {
         // inline reconnect paths immediately re-assign pendingConnectTimer
         // AFTER calling closeUpstream(), so clearing it here is safe — they
         // intentionally overwrite it.
-        if (this.reconnectTimer)     { clearTimeout(this.reconnectTimer);     this.reconnectTimer = null; }
-        if (this.stabilityTimer)     { clearTimeout(this.stabilityTimer);     this.stabilityTimer = null; }
+        if (this.reconnectTimer) { clearTimeout(this.reconnectTimer); this.reconnectTimer = null; }
+        if (this.stabilityTimer) { clearTimeout(this.stabilityTimer); this.stabilityTimer = null; }
         if (this.pendingConnectTimer) { clearTimeout(this.pendingConnectTimer); this.pendingConnectTimer = null; }
 
         if (this.ws) {
@@ -1096,10 +1096,10 @@ export class NativelyProSTT extends EventEmitter {
             // the library's contract is that the caller keeps an 'error'
             // listener attached across the cancellation.
             for (const event of ['open', 'message', 'ping', 'pong', 'upgrade', 'unexpected-response']) {
-                try { dying.removeAllListeners(event); } catch {}
+                try { dying.removeAllListeners(event); } catch { }
             }
-            try { dying.removeAllListeners('error'); } catch {}
-            try { dying.removeAllListeners('close'); } catch {}
+            try { dying.removeAllListeners('error'); } catch { }
+            try { dying.removeAllListeners('close'); } catch { }
 
             // Narrow cancellation listeners for the DETACHED socket only. They
             // are permitted precisely because `dying` is no longer `this.ws`:
@@ -1108,19 +1108,19 @@ export class NativelyProSTT extends EventEmitter {
             // other on 'close' so a discarded socket does not retain listeners
             // — these sockets are cycled on every meeting.
             const consumeDetachedError = (error: Error): void => {
-                if (process.env.NATIVELY_STT_LIFECYCLE_DEBUG === '1') {
+                if (process.env.MEETFLOO_STT_LIFECYCLE_DEBUG === '1') {
                     console.log(
-                        `[NativelyProSTT:${this.channel}] detached socket error ` +
+                        `[MeetFlooProSTT:${this.channel}] detached socket error ` +
                         `state=${readyState} message=${error?.message}`,
                     );
                 }
             };
             const releaseDetachedListeners = (): void => {
-                try { dying.removeListener('error', consumeDetachedError); } catch {}
-                try { dying.removeListener('close', releaseDetachedListeners); } catch {}
+                try { dying.removeListener('error', consumeDetachedError); } catch { }
+                try { dying.removeListener('close', releaseDetachedListeners); } catch { }
             };
-            try { dying.on('error', consumeDetachedError); } catch {}
-            try { dying.on('close', releaseDetachedListeners); } catch {}
+            try { dying.on('error', consumeDetachedError); } catch { }
+            try { dying.on('close', releaseDetachedListeners); } catch { }
 
             // Only CONNECTING/OPEN sockets need a close. A CLOSING socket is
             // already tearing down (its 'close' will fire and release the

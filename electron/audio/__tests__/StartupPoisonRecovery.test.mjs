@@ -1,7 +1,7 @@
 // Regression test for the startup poison-recovery path (2026-07-08).
 //
 // When the previous app process died while loading a local Whisper model
-// natively, the leftover whisper-load-sentinel.json must be consumed BEFORE
+// MeetFloo, the leftover whisper-load-sentinel.json must be consumed BEFORE
 // any validation/preload work in electron/main.ts. If it points to a model
 // id that is currently selected (global or per-channel), those settings must
 // be reset to the safe fallback and a recovery notice must be stashed on

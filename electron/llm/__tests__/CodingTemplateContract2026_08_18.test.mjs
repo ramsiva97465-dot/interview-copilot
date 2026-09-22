@@ -253,7 +253,7 @@ describe('C3 — a template supplied in the question is followed', () => {
     // …including on an explicit-format turn, where the shape changes but the
     // supplied signature is just as binding.
     assert.ok(build({ codingTask: true, codingFormat: 'code_only' }).includes('TEMPLATE CONFORMANCE'));
-    assert.ok(build({ codingTask: true, tier: 'local' , codingTaskKind: 'dsa' }).includes('TEMPLATE CONFORMANCE'));
+    assert.ok(build({ codingTask: true, tier: 'local', codingTaskKind: 'dsa' }).includes('TEMPLATE CONFORMANCE'));
   });
 
   test('a detected template turns the conditional rule into an affirmative one', () => {
@@ -348,7 +348,7 @@ describe("C3b — a pasted stub must not be mistaken for a source-code-evidence 
     for (const q of [
       'what does your actual retrieval code look like',
       'show me your code',
-      'can you show me the natively code for embeddings',
+      'can you show me the MeetFloo code for embeddings',
       'give me a repo-verifiable snippet',
     ]) {
       assert.equal(plan(q), 'source_code_evidence_answer', `${JSON.stringify(q)} lost its source-evidence route`);

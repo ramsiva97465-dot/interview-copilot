@@ -20,7 +20,7 @@
  * CREDENTIALS (2026-09-08): reachability alone was not enough. A signed build ran
  * the full compile + pack + Developer-ID sign and then died in afterSign with
  *
- *   Error: No Keychain password item found for profile: natively-notary
+ *   Error: No Keychain password item found for profile: MeetFloo-notary
  *
  * — a decided credential failure, knowable in about a second, discovered ~20
  * minutes in. checkCredentials() below now resolves the very strategy the build
@@ -43,16 +43,16 @@ const NOTARY_PORT = 443;
  * @returns {{run: boolean, reason: string}}
  */
 function decidePreflight({ platform, env }) {
-  if (env.NATIVELY_SKIP_NOTARY_PREFLIGHT === '1') {
-    return { run: false, reason: 'NATIVELY_SKIP_NOTARY_PREFLIGHT=1 — skipping (offline packaging).' };
+  if (env.MEETFLOO_SKIP_NOTARY_PREFLIGHT === '1') {
+    return { run: false, reason: 'MEETFLOO_SKIP_NOTARY_PREFLIGHT=1 — skipping (offline packaging).' };
   }
   if (platform !== 'darwin') {
     return { run: false, reason: `platform is ${platform}, not darwin — nothing here notarizes.` };
   }
-  if (env.NATIVELY_SKIP_NOTARIZE === '1') {
+  if (env.MEETFLOO_SKIP_NOTARIZE === '1') {
     // Honour the same escape hatch scripts/notarize.js uses; a build that will
     // not notarize must not be blocked by the notary being unreachable.
-    return { run: false, reason: 'NATIVELY_SKIP_NOTARIZE=1 — this build will not notarize.' };
+    return { run: false, reason: 'MEETFLOO_SKIP_NOTARIZE=1 — this build will not notarize.' };
   }
   return { run: true, reason: 'signed darwin build — notarization will need the network.' };
 }
@@ -132,7 +132,7 @@ const CREDENTIAL_FATAL_SIGNATURES = [
  * Ask notarytool itself whether a keychain profile loads.
  *
  * WHY NOT `security find-generic-password`: it CANNOT SEE these items. On
- * 2026-09-08, with `xcrun notarytool history --keychain-profile natively-notary`
+ * 2026-09-08, with `xcrun notarytool history --keychain-profile MeetFloo-notary`
  * succeeding against real submission history, all of `security find-generic-password`
  * by label, by account, by service, and a full `security dump-keychain` found
  * nothing — notarytool stores profiles in the data-protection keychain, which the
@@ -197,8 +197,8 @@ async function checkCredentials(opts = {}) {
   if (effective.APPLE_API_KEY && effective.APPLE_API_KEY_ID && !effective.APPLE_API_ISSUER) {
     warnings.push(
       'APPLE_API_KEY/APPLE_API_KEY_ID are set without APPLE_API_ISSUER. The .app may notarize via the ' +
-        'api-key strategy while the DMG step (scripts/afterAllArtifactBuild.cjs, which requires an issuer) ' +
-        'falls back to the keychain profile. Set APPLE_API_ISSUER for a team key so both paths agree.'
+      'api-key strategy while the DMG step (scripts/afterAllArtifactBuild.cjs, which requires an issuer) ' +
+      'falls back to the keychain profile. Set APPLE_API_ISSUER for a team key so both paths agree.'
     );
   }
 
@@ -251,7 +251,7 @@ async function checkCredentials(opts = {}) {
   if (!fatal) {
     warnings.push(
       `keychain profile "${profile}" could not be verified (${result && result.timedOut ? `no answer within ${timeoutMs}ms` : firstLine(output)}) — ` +
-        'proceeding anyway; an unrecognised failure must not block a build that may be fine.'
+      'proceeding anyway; an unrecognised failure must not block a build that may be fine.'
     );
     return { ok: true, strategy: 'keychain-profile', summary: `keychain profile "${profile}" UNVERIFIED`, warnings };
   }
@@ -265,7 +265,7 @@ async function checkCredentials(opts = {}) {
       `  Recreate it (the app-specific password comes from appleid.apple.com, NOT your Apple ID password):\n` +
       `    xcrun notarytool store-credentials ${profile} --apple-id <your-apple-id> --team-id ${effective.APPLE_TEAM_ID}\n` +
       `  Or use an App Store Connect key: APPLE_API_KEY (path to the .p8) + APPLE_API_KEY_ID + APPLE_API_ISSUER.\n` +
-      `  To build anyway: NATIVELY_SKIP_NOTARY_PREFLIGHT=1 (or NATIVELY_SKIP_NOTARIZE=1 to skip notarizing entirely).`,
+      `  To build anyway: MEETFLOO_SKIP_NOTARY_PREFLIGHT=1 (or MEETFLOO_SKIP_NOTARIZE=1 to skip notarizing entirely).`,
   };
 }
 

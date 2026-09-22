@@ -8,11 +8,11 @@
 // plan requires.
 //
 // Usage:
-//   NATIVELY_API_BASE=http://127.0.0.1:3000 \
+//   MEETFLOO_API_BASE=http://127.0.0.1:3000 \
 //   node tests/context-os-real-backend/judge-score.mjs <results.jsonl> [--out judged.jsonl]
 //
-// Requires the local Natively backend reachable at NATIVELY_API_BASE with the
-// x-natively-local-test token. If the judge backend is unavailable the pass is
+// Requires the local MeetFloo backend reachable at MEETFLOO_API_BASE with the
+// x-MeetFloo-local-test token. If the judge backend is unavailable the pass is
 // marked INCOMPLETE and exits non-zero (a missing judge is a gate failure, never
 // a silent pass — plan section 6).
 

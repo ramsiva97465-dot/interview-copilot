@@ -11,14 +11,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Monitor, Mic, Lightbulb, Check, AlertCircle, ArrowRight, Lock } from 'lucide-react';
-import { NativelyLogoMark } from '../NativelyLogoMark';
-import nativelyIcon from '../../../assets/icon.png';
+import { MeetFlooLogoMark } from '../NativelyLogoMark';
+import MeetFlooIcon from '../../../assets/icon.png';
 import { classifyMicStatus } from '../../lib/micPermissionPolicy.mjs';
 
-const STORAGE_KEY  = 'natively_perms_shown_v1';
+const STORAGE_KEY = 'MeetFloo_perms_shown_v1';
 
 interface Props {
-  isOpen:    boolean;
+  isOpen: boolean;
   onDismiss: () => void;
 }
 
@@ -28,12 +28,12 @@ type PermStatus = 'granted' | 'denied' | 'not-determined' | 'restricted' | 'unkn
 const COLORS = {
   pureSurface: '#FFFFFF',
   charcoalInk: '#18181B',
-  mutedSteel:  '#71717A',
-  lightBg:     '#F4F5F8',
-  rule:        'rgba(0,0,0,0.06)',
-  iosGreen:    '#34D399',
-  iosGray:     '#E9E9EA',
-  activeBlue:  '#007AFF',
+  mutedSteel: '#71717A',
+  lightBg: '#F4F5F8',
+  rule: 'rgba(0,0,0,0.06)',
+  iosGreen: '#34D399',
+  iosGray: '#E9E9EA',
+  activeBlue: '#007AFF',
 };
 
 const SPRING_EASE = [0.23, 1, 0.32, 1] as [number, number, number, number];
@@ -44,7 +44,7 @@ const containerVariants = {
 };
 
 const itemVariants = {
-  hidden:  { opacity: 0, y: 16, filter: 'blur(4px)' },
+  hidden: { opacity: 0, y: 16, filter: 'blur(4px)' },
   visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.5, ease: SPRING_EASE } },
 };
 
@@ -100,12 +100,12 @@ function PermRow({
   onToggle,
   hasBadge = false,
 }: {
-  icon:        React.ElementType;
-  label:       string;
+  icon: React.ElementType;
+  label: string;
   description: string;
-  checked:     boolean;
-  onToggle:    () => void;
-  hasBadge?:   boolean;
+  checked: boolean;
+  onToggle: () => void;
+  hasBadge?: boolean;
 }) {
   return (
     <motion.div
@@ -141,7 +141,7 @@ function PermRow({
         transition: 'background-color 200ms, border-color 200ms',
       }}>
         <Icon size={20} strokeWidth={2} color={checked ? COLORS.iosGreen : COLORS.charcoalInk} />
-        
+
         {/* Overlay Green Tick Badge */}
         {hasBadge && checked && (
           <div style={{
@@ -195,9 +195,9 @@ function PermRow({
 
 // ─── Main PermissionsOnboardingFull Component ───────────────────
 export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }) => {
-  const [platform,   setPlatform]   = useState<string>('darwin');
-  const [micStatus,  setMicStatus]  = useState<PermStatus>('loading');
-  const [scrStatus,  setScrStatus]  = useState<PermStatus>('loading');
+  const [platform, setPlatform] = useState<string>('darwin');
+  const [micStatus, setMicStatus] = useState<PermStatus>('loading');
+  const [scrStatus, setScrStatus] = useState<PermStatus>('loading');
   const [requesting, setRequesting] = useState(false);
   const [assistActive, setAssistActive] = useState(true);
   const [canClick, setCanClick] = useState(false);
@@ -209,7 +209,7 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
       if (!p) return;
       setPlatform(p.platform);
       setMicStatus(p.microphone as PermStatus);
-      setScrStatus(p.screen     as PermStatus);
+      setScrStatus(p.screen as PermStatus);
     } catch {
       setMicStatus('not-determined');
       setScrStatus('not-determined');
@@ -225,7 +225,7 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
     // Safety cooldown to prevent event bubbling/double-clicks from Greetings transition
     const timer = setTimeout(() => {
       setCanClick(true);
-    }, 600); 
+    }, 600);
     return () => clearTimeout(timer);
   }, [isOpen, refreshStatus]);
 
@@ -268,7 +268,7 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
   const handleDismiss = () => {
     if (!canClick) return;
     localStorage.setItem(STORAGE_KEY, '1');
-    window.electronAPI?.onboardingSetFlag?.('permsShown', true).catch(() => {});
+    window.electronAPI?.onboardingSetFlag?.('permsShown', true).catch(() => { });
     onDismiss();
   };
 
@@ -295,7 +295,7 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
         // No control can fix this; say so rather than offering a dead button.
         return {
           label: 'Microphone blocked by your organization',
-          action: () => {},
+          action: () => { },
           active: false,
         };
       }
@@ -371,8 +371,8 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
           >
             {/* Top Bar Skip Button */}
             <motion.div variants={itemVariants} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-              <button 
-                onClick={handleDismiss} 
+              <button
+                onClick={handleDismiss}
                 aria-label="Skip for now"
                 style={{
                   background: 'none',
@@ -419,17 +419,17 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
                   fontFamily: "'Inter', sans-serif",
                 }}
               >
-                Allow Natively the following system accesses to enable premium recording, real-time assist tools, and seamless audio transcriptions.
+                Allow MeetFloo the following system accesses to enable premium recording, real-time assist tools, and seamless audio transcriptions.
               </motion.p>
 
               {/* High-Fidelity Permission list items */}
               <motion.div variants={itemVariants} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '36px' }}>
-                
+
                 {/* Item 1: Assist Toggle */}
                 <PermRow
                   icon={Lightbulb}
-                  label="Allow Natively to assist"
-                  description="Natively can prompt you to start taking notes when you join a meeting."
+                  label="Allow MeetFloo to assist"
+                  description="MeetFloo can prompt you to start taking notes when you join a meeting."
                   checked={assistActive}
                   onToggle={() => setAssistActive(!assistActive)}
                   hasBadge={true}
@@ -438,18 +438,18 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
                 {/* Item 2: Microphone Permission */}
                 <PermRow
                   icon={Mic}
-                  label="Allow Natively to hear you"
-                  description="Natively needs to capture your voice to transcribe your meetings in real-time."
+                  label="Allow MeetFloo to hear you"
+                  description="MeetFloo needs to capture your voice to transcribe your meetings in real-time."
                   checked={micStatus === 'granted'}
-                  onToggle={micStatus !== 'granted' ? handleMicRequest : () => {}}
+                  onToggle={micStatus !== 'granted' ? handleMicRequest : () => { }}
                   hasBadge={true}
                 />
 
                 {/* Item 3: Screen Capture Permission */}
                 <PermRow
                   icon={Monitor}
-                  label="Allow Natively to see your screen"
-                  description="Natively can answer questions about what you're viewing."
+                  label="Allow MeetFloo to see your screen"
+                  description="MeetFloo can answer questions about what you're viewing."
                   checked={scrStatus === 'granted'}
                   onToggle={openScreenSettings}
                 />
@@ -506,7 +506,7 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
                 <span style={{ position: 'relative', zIndex: 20 }}>{btnConfig.label}</span>
                 <ArrowRight size={18} strokeWidth={2.5} color={btnConfig.active ? '#FFFFFF' : '#9CA3AF'} style={{ position: 'relative', zIndex: 20 }} />
               </motion.button>
-              
+
             </motion.div>
           </motion.div>
         </div>
@@ -566,7 +566,7 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
               gap: '16px',
             }}>
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                {/* Natively App Icon with camera well */}
+                {/* MeetFloo App Icon with camera well */}
                 <div style={{
                   width: '42px',
                   height: '42px',
@@ -574,8 +574,8 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
                   flexShrink: 0,
                 }}>
                   <img
-                    src={nativelyIcon}
-                    alt="Natively Icon"
+                    src={MeetFlooIcon}
+                    alt="MeetFloo Icon"
                     style={{
                       width: '42px',
                       height: '42px',
@@ -610,7 +610,7 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
                     lineHeight: 1.35,
                     fontFamily: "'Inter', sans-serif",
                   }}>
-                    "Natively" would like to record this computer's screen and audio.
+                    "MeetFloo" would like to record this computer's screen and audio.
                   </div>
                   <div style={{
                     fontSize: '10px',
@@ -728,11 +728,11 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
                   </div>
                 </div>
 
-                {/* App Row 3: Natively (Active!) */}
+                {/* App Row 3: MeetFloo (Active!) */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <img
-                    src={nativelyIcon}
-                    alt="Natively"
+                    src={MeetFlooIcon}
+                    alt="MeetFloo"
                     style={{
                       width: '22px',
                       height: '22px',
@@ -741,7 +741,7 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
                       flexShrink: 0,
                     }}
                   />
-                  <span style={{ fontSize: '11px', fontWeight: 650, color: COLORS.charcoalInk, flex: 1 }}>Natively</span>
+                  <span style={{ fontSize: '11px', fontWeight: 650, color: COLORS.charcoalInk, flex: 1 }}>MeetFloo</span>
                   <div style={{
                     width: '28px',
                     height: '16px',
@@ -764,9 +764,9 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
                     <path d="M16 10L18.5 8C18.7761 7.77909 19 7.97541 19 8.33333V15.6667C19 16.0246 18.7761 16.2209 18.5 16L16 14V10Z" fill="white" />
                   </svg>
                   <span style={{ fontSize: '11px', fontWeight: 550, color: COLORS.charcoalInk, flex: 1 }}>zoom</span>
-                  
+
                   {/* iOS switch that animates with CSS */}
-                  <div 
+                  <div
                     style={{
                       width: '28px',
                       height: '16px',
@@ -778,7 +778,7 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
                       animation: 'zoomToggleActive 4s infinite ease-in-out',
                     }}
                   >
-                    <div 
+                    <div
                       style={{
                         width: '14px',
                         height: '14px',
@@ -786,7 +786,7 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
                         backgroundColor: '#FFFFFF',
                         boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
                         animation: 'zoomToggleThumb 4s infinite ease-in-out',
-                      }} 
+                      }}
                     />
                   </div>
                 </div>
@@ -819,7 +819,7 @@ export const PermissionsOnboardingFull: React.FC<Props> = ({ isOpen, onDismiss }
                 }}
               >
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))' }}>
-                  <path d="M4.5 3V20.5L9.5 15.5L14 23L17.5 21L13 14L19 13.5L4.5 3Z" fill="black" stroke="white" strokeWidth="2.2" strokeLinejoin="miter"/>
+                  <path d="M4.5 3V20.5L9.5 15.5L14 23L17.5 21L13 14L19 13.5L4.5 3Z" fill="black" stroke="white" strokeWidth="2.2" strokeLinejoin="miter" />
                 </svg>
               </div>
             </div>

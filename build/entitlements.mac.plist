@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <!--
-      Natively — TOP-LEVEL app entitlements (Hardened Runtime, Developer ID, notarized).
+      MeetFloo — TOP-LEVEL app entitlements (Hardened Runtime, Developer ID, notarized).
       Non-sandboxed (no com.apple.security.app-sandbox). Every entitlement below is
       individually justified; nothing speculative is included.
 
@@ -22,7 +22,7 @@
     <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
     <true/>
 
-    <!-- REQUIRED: Natively loads third-party native libraries not signed by our Team ID
+    <!-- REQUIRED: MeetFloo loads third-party native libraries not signed by our Team ID
          (e.g. onnxruntime's libonnxruntime.dylib, better-sqlite3, sqlite-vec, sharp, and
          our Rust native module). Hardened Runtime would otherwise refuse to load them. -->
     <key>com.apple.security.cs.disable-library-validation</key>
@@ -43,7 +43,7 @@
         amfid: ... not valid: AppleMobileFileIntegrityError Code=-413 "No matching profile found"
         kernel AMFI: Code has restricted entitlements, but the validation of its code
           signature failed.  Unsatisfied Entitlements:
-        kernel: proc NNNN: load code signature error 4 for file "Natively"
+        kernel: proc NNNN: load code signature error 4 for file "MeetFloo"
 
       The kernel kills the process before dyld runs, so NOTHING catches this: no crash report is
       written, and `spctl -a`, a strict deep `codesign` verify and `stapler validate` all keep

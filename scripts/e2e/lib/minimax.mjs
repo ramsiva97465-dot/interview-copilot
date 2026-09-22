@@ -1,21 +1,21 @@
 // scripts/e2e/lib/minimax.mjs
 // Thin MiniMax-M3 client for fixture generation. Routes through the LOCAL
-// natively-api /v1/chat (same MiniMax path the app uses) so generation is the
+// MeetFloo-api /v1/chat (same MiniMax path the app uses) so generation is the
 // real backend. Falls back to a direct MiniMax call only if the local server is
-// down. The API key is read from natively-api/.env and NEVER printed/returned.
+// down. The API key is read from MeetFloo-api/.env and NEVER printed/returned.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '../../..');
-const LOCAL_URL = process.env.NATIVELY_API_URL || 'http://localhost:3000';
-const LOCAL_TOKEN = process.env.NATIVELY_E2E_LOCAL_TEST_TOKEN || 'local-test-e2e-token';
+const LOCAL_URL = process.env.MEETFLOO_API_URL || 'http://localhost:3000';
+const LOCAL_TOKEN = process.env.MEETFLOO_E2E_LOCAL_TEST_TOKEN || 'local-test-e2e-token';
 
 function readKey() {
-  const envTxt = fs.readFileSync(path.join(repoRoot, 'natively-api/.env'), 'utf8');
+  const envTxt = fs.readFileSync(path.join(repoRoot, 'MeetFloo-api/.env'), 'utf8');
   const m = envTxt.match(/^MINIMAX_API_KEY=(.+)$/m);
-  if (!m) throw new Error('MINIMAX_API_KEY not found in natively-api/.env');
+  if (!m) throw new Error('MINIMAX_API_KEY not found in MeetFloo-api/.env');
   return m[1].trim().replace(/^["']|["']$/g, '');
 }
 
@@ -24,7 +24,7 @@ export async function chat(system, user, { timeoutMs = 120000 } = {}) {
   try {
     const res = await fetch(`${LOCAL_URL}/v1/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-natively-local-test': LOCAL_TOKEN },
+      headers: { 'Content-Type': 'application/json', 'x-MeetFloo-local-test': LOCAL_TOKEN },
       body: JSON.stringify({ system, messages: [{ role: 'user', content: user }] }),
       signal: AbortSignal.timeout(timeoutMs),
     });
@@ -35,7 +35,7 @@ export async function chat(system, user, { timeoutMs = 120000 } = {}) {
     // fall through to direct on non-2xx
   } catch { /* fall through to direct */ }
   // Direct MiniMax fallback (still real MiniMax-M3).
-  const prov = await import(pathToFileURL(path.join(repoRoot, 'natively-api/lib/minimaxProvider.js')).href);
+  const prov = await import(pathToFileURL(path.join(repoRoot, 'MeetFloo-api/lib/minimaxProvider.js')).href);
   const key = readKey();
   const body = prov.buildMiniMaxBody(prov.MINIMAX_M3_MODEL, [{ role: 'user', content: user }], system, null, { stream: false });
   const res = await fetch(prov.MINIMAX_CHAT_URL, {

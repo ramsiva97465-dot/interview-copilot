@@ -61,7 +61,7 @@ test('modules an extension legitimately needs still resolve', () => {
 });
 
 test('fetch is replaced and socket-flavoured globals are removed', () => {
-  const target = { fetch: 'original', WebSocket: class {}, XMLHttpRequest: class {} };
+  const target = { fetch: 'original', WebSocket: class { }, XMLHttpRequest: class { } };
   const { report } = install({ target });
   assert.equal(typeof target.fetch, 'function');
   assert.notEqual(target.fetch, 'original');
@@ -105,7 +105,7 @@ test('spawn refuses a binary outside the pre-authorised set', () => {
 // Measured both ways: with llama-server off PATH the file exits on its own;
 // with it installed it hangs. So the fixture must be a name that cannot resolve
 // anywhere, and it must never be swapped for something plausible.
-const UNSPAWNABLE = 'natively-test-nonexistent-binary';
+const UNSPAWNABLE = 'MeetFloo-test-nonexistent-binary';
 
 test('an authorised binary spawns, and the Windows .exe suffix is tolerated', () => {
   const shim = createChildProcessShim(new Set(['process.spawn']), [UNSPAWNABLE]);
@@ -113,7 +113,7 @@ test('an authorised binary spawns, and the Windows .exe suffix is tolerated', ()
     const child = shim.spawn(name);
     assert.ok(child, `${name} should be authorised`);
     // ENOENT arrives asynchronously; swallow it so it is not an unhandled error.
-    child.on('error', () => {});
+    child.on('error', () => { });
     // Deliberately NOT calling child.kill(): on a child whose spawn failed,
     // `pid` is undefined and Node signals the CURRENT PROCESS GROUP, which
     // takes down the test runner. Adapter authors hit the same trap.

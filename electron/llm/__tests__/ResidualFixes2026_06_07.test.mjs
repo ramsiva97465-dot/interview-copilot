@@ -14,13 +14,13 @@ const { planAnswer, validateProfileOutput, stripProfileTokensFromCoding } = awai
 );
 const plan = (q) => planAnswer({ question: q, source: 'manual_input', speakerPerspective: 'user' });
 const CODING_PLAN = { answerType: 'dsa_question_answer', outputPerspective: 'assistant_explanation', forbiddenContextLayers: ['resume', 'jd', 'negotiation', 'custom_context', 'reference_files'] };
-const TOKENS = { firstName: 'Evin', projects: ['Natively', 'TalentScope'], companies: ['EstroTech'] };
+const TOKENS = { firstName: 'Evin', projects: ['MeetFloo', 'TalentScope'], companies: ['EstroTech'] };
 
-describe('Pattern 1: "what is Natively built with" → product-about', () => {
+describe('Pattern 1: "what is MeetFloo built with" → product-about', () => {
   for (const q of [
-    'what is natively built with', 'what tech stack is Natively built with',
-    'what is Natively made using', 'what are the technologies behind Natively',
-    'what is the architecture of Natively',
+    'what is MeetFloo built with', 'what tech stack is MeetFloo built with',
+    'what is MeetFloo made using', 'what are the technologies behind MeetFloo',
+    'what is the architecture of MeetFloo',
   ]) {
     test(`"${q}" → project_about/project alias, profile required, no JD/nego`, () => {
       const p = plan(q);
@@ -29,8 +29,8 @@ describe('Pattern 1: "what is Natively built with" → product-about', () => {
       assert.ok(p.forbiddenContextLayers.includes('negotiation'));
     });
   }
-  test('"how did you build Natively" → a project-grounded answer (about-alias)', () => {
-    assert.ok(['project_about_answer', 'project_answer', 'project_followup_answer'].includes(plan('how did you build Natively').answerType));
+  test('"how did you build MeetFloo" → a project-grounded answer (about-alias)', () => {
+    assert.ok(['project_about_answer', 'project_answer', 'project_followup_answer'].includes(plan('how did you build MeetFloo').answerType));
   });
 });
 
@@ -62,8 +62,8 @@ describe('Pattern 2: rate-limiter concept vs design vs experience', () => {
 });
 
 describe('Pattern 3+4: coding-answer profile-token leak validator', () => {
-  test('stray "Natively" in a DSA answer is flagged', () => {
-    const leak = '## Approach\nUse a min-heap.\n```python\ndef kth(a,k): return sorted(a)[-k]\n```\nI used this exact approach in Natively.';
+  test('stray "MeetFloo" in a DSA answer is flagged', () => {
+    const leak = '## Approach\nUse a min-heap.\n```python\ndef kth(a,k): return sorted(a)[-k]\n```\nI used this exact approach in MeetFloo.';
     const r = validateProfileOutput({ answer: leak, plan: CODING_PLAN, profileAvailable: true, candidateDirected: false, profileTokens: TOKENS });
     assert.ok(r.violations.some(v => v.code === 'profile_token_in_coding_answer'));
   });
@@ -73,9 +73,9 @@ describe('Pattern 3+4: coding-answer profile-token leak validator', () => {
     assert.ok(r.violations.some(v => v.code === 'profile_token_in_coding_answer'));
   });
   test('strip removes the offending prose sentence, preserves code', () => {
-    const leak = '## Approach\nUse a min-heap.\n```python\ndef kth(a,k): return sorted(a)[-k]\n```\nI used this exact approach in Natively to rank results.';
-    const stripped = stripProfileTokensFromCoding(leak, ['Evin', 'Natively', 'TalentScope', 'EstroTech']);
-    assert.doesNotMatch(stripped, /natively/i);
+    const leak = '## Approach\nUse a min-heap.\n```python\ndef kth(a,k): return sorted(a)[-k]\n```\nI used this exact approach in MeetFloo to rank results.';
+    const stripped = stripProfileTokensFromCoding(leak, ['Evin', 'MeetFloo', 'TalentScope', 'EstroTech']);
+    assert.doesNotMatch(stripped, /MeetFloo/i);
     assert.match(stripped, /def kth/);
     assert.ok(validateProfileOutput({ answer: stripped, plan: CODING_PLAN, profileAvailable: true, candidateDirected: false, profileTokens: TOKENS }).ok);
   });
@@ -83,8 +83,8 @@ describe('Pattern 3+4: coding-answer profile-token leak validator', () => {
     const clean = '## Approach\nUse a min-heap of size k.\n```python\ndef kth(a,k): return sorted(a)[-k]\n```\nTime: O(n log k).';
     assert.ok(validateProfileOutput({ answer: clean, plan: CODING_PLAN, profileAvailable: true, candidateDirected: false, profileTokens: TOKENS }).ok);
   });
-  test('EXPLICIT invite ("use my Natively project") suppresses the leak flag', () => {
-    const invited = '## Approach\n```py\nx=1\n```\nHere is how I did it in Natively.';
+  test('EXPLICIT invite ("use my MeetFloo project") suppresses the leak flag', () => {
+    const invited = '## Approach\n```py\nx=1\n```\nHere is how I did it in MeetFloo.';
     const r = validateProfileOutput({ answer: invited, plan: CODING_PLAN, profileAvailable: true, candidateDirected: false, profileTokens: TOKENS, profileExplicitlyInvited: true });
     assert.ok(r.ok);
   });
@@ -95,8 +95,8 @@ describe('Pattern 3+4: coding-answer profile-token leak validator', () => {
 });
 
 describe('Residual regression run: additional route gaps closed', () => {
-  test('"write a demo snippet for natively" → source-code evidence (project anchor wins over write-verb)', () => {
-    assert.equal(plan('write a demo snippet for natively, conceptual is fine').answerType, 'source_code_evidence_answer');
+  test('"write a demo snippet for MeetFloo" → source-code evidence (project anchor wins over write-verb)', () => {
+    assert.equal(plan('write a demo snippet for MeetFloo, conceptual is fine').answerType, 'source_code_evidence_answer');
   });
   test('"write a demo snippet for binary search" stays coding (no project anchor)', () => {
     assert.match(plan('write a demo snippet for binary search').answerType, /coding|dsa/);
@@ -112,15 +112,15 @@ describe('Residual regression run: additional route gaps closed', () => {
 describe('Forbidden-answer leak strip covers non-coding types (sales/meeting)', () => {
   const SALES_PLAN = { answerType: 'sales_answer', outputPerspective: 'assistant_explanation', forbiddenContextLayers: ['resume', 'jd', 'negotiation'], profileContextPolicy: 'forbidden' };
   const MEETING_PLAN = { answerType: 'general_meeting_answer', outputPerspective: 'assistant_explanation', forbiddenContextLayers: ['resume', 'jd', 'negotiation'], profileContextPolicy: 'forbidden' };
-  test('"I\'m Natively, an AI assistant…" identity leak in a SALES answer is flagged', () => {
-    const leak = "I'm Natively, an AI assistant. I don't have pricing info.";
+  test('"I\'m MeetFloo, an AI assistant…" identity leak in a SALES answer is flagged', () => {
+    const leak = "I'm MeetFloo, an AI assistant. I don't have pricing info.";
     const r = validateProfileOutput({ answer: leak, plan: SALES_PLAN, profileAvailable: true, candidateDirected: false, profileTokens: TOKENS });
     assert.ok(r.violations.some(v => v.code === 'profile_token_in_coding_answer'));
   });
   test('the identity-leak preamble strips out of a meeting answer', () => {
-    const leak = "I'm Natively, an AI assistant developed by Evin John. The next step is owned by Sarah.";
-    const s = stripProfileTokensFromCoding(leak, ['Evin', 'Natively']);
-    assert.doesNotMatch(s, /natively|AI assistant|Evin/i);
+    const leak = "I'm MeetFloo, an AI assistant developed by Evin John. The next step is owned by Sarah.";
+    const s = stripProfileTokensFromCoding(leak, ['Evin', 'MeetFloo']);
+    assert.doesNotMatch(s, /MeetFloo|AI assistant|Evin/i);
     assert.match(s, /owned by Sarah/);
     assert.ok(validateProfileOutput({ answer: s, plan: MEETING_PLAN, profileAvailable: true, candidateDirected: false, profileTokens: TOKENS }).ok);
   });
@@ -132,41 +132,41 @@ describe('Forbidden-answer leak strip covers non-coding types (sales/meeting)', 
 
 describe('Code-review hardening: strip preserves code fences + collision tokens', () => {
   test('strip keeps a ``` fence at line-start (markdown still renders code)', () => {
-    const leak = 'Use a min-heap.\n\n```python\ndef kth(a,k): return sorted(a)[-k]\n```\n\nI used this exact approach in Natively to rank results.';
-    const s = stripProfileTokensFromCoding(leak, ['Evin', 'Natively']);
+    const leak = 'Use a min-heap.\n\n```python\ndef kth(a,k): return sorted(a)[-k]\n```\n\nI used this exact approach in MeetFloo to rank results.';
+    const s = stripProfileTokensFromCoding(leak, ['Evin', 'MeetFloo']);
     assert.match(s, /(^|\n)```/, 'fence must start at a line');
-    assert.doesNotMatch(s, /natively/i);
+    assert.doesNotMatch(s, /MeetFloo/i);
     assert.match(s, /def kth/);
   });
   test('a profile token inside a CODE COMMENT is stripped, executable code preserved', () => {
-    const leak = '## Approach\nUse a subquery.\n```sql\n-- As implemented in Natively\nSELECT MAX(salary) FROM emp WHERE salary < (SELECT MAX(salary) FROM emp);\n```\nDone.';
-    const s = stripProfileTokensFromCoding(leak, ['Evin', 'Natively']);
-    assert.doesNotMatch(s, /natively/i, 'comment leak must be removed');
+    const leak = '## Approach\nUse a subquery.\n```sql\n-- As implemented in MeetFloo\nSELECT MAX(salary) FROM emp WHERE salary < (SELECT MAX(salary) FROM emp);\n```\nDone.';
+    const s = stripProfileTokensFromCoding(leak, ['Evin', 'MeetFloo']);
+    assert.doesNotMatch(s, /MeetFloo/i, 'comment leak must be removed');
     assert.match(s, /SELECT MAX\(salary\)/, 'executable SQL must be preserved');
     assert.ok(validateProfileOutput({ answer: s, plan: CODING_PLAN, profileAvailable: true, candidateDirected: false, profileTokens: TOKENS }).ok);
   });
-  test('the English adverb "natively" is NOT flagged; the product "Natively" IS', () => {
+  test('the English adverb "MeetFloo" is NOT flagged; the product "MeetFloo" IS', () => {
     for (const clean of [
-      'Python natively supports the heapq module for this.',
-      'The heap runs natively on the JVM, no extra deps.',
-      'natively compiled binaries are faster than interpreted ones.',
+      'Python MeetFloo supports the heapq module for this.',
+      'The heap runs MeetFloo on the JVM, no extra deps.',
+      'MeetFloo compiled binaries are faster than interpreted ones.',
     ]) {
       assert.ok(validateProfileOutput({ answer: clean, plan: CODING_PLAN, profileAvailable: true, candidateDirected: false, profileTokens: TOKENS }).ok, `adverb falsely flagged: ${clean}`);
     }
     for (const leak of [
-      'I built this exact pattern in Natively.',
-      'The `Natively` ranker does this.',
-      'As used in natively for ranking results.',
+      'I built this exact pattern in MeetFloo.',
+      'The `MeetFloo` ranker does this.',
+      'As used in MeetFloo for ranking results.',
     ]) {
       assert.ok(validateProfileOutput({ answer: leak, plan: CODING_PLAN, profileAvailable: true, candidateDirected: false, profileTokens: TOKENS }).violations.some(v => v.code === 'profile_token_in_coding_answer'), `product mention missed: ${leak}`);
     }
   });
-  test('a SQL `salary` COLUMN is not a leak, but a `Natively` inline reference is', () => {
+  test('a SQL `salary` COLUMN is not a leak, but a `MeetFloo` inline reference is', () => {
     const sqlSalary = '```sql\nSELECT MAX(salary) FROM emp WHERE salary < (SELECT MAX(salary) FROM emp);\n```\nReturns the runner-up.';
     assert.ok(validateProfileOutput({ answer: sqlSalary, plan: CODING_PLAN, profileAvailable: true, candidateDirected: false, profileTokens: TOKENS }).ok, 'salary column must be clean');
     const inlineSalary = 'Compute the `salary` delta then sort. O(n log n).';
     assert.ok(validateProfileOutput({ answer: inlineSalary, plan: CODING_PLAN, profileAvailable: true, candidateDirected: false, profileTokens: TOKENS }).ok, 'salary identifier must be clean');
-    const inlineName = 'Use a heap. The `Natively` ranker does exactly this.';
+    const inlineName = 'Use a heap. The `MeetFloo` ranker does exactly this.';
     assert.ok(validateProfileOutput({ answer: inlineName, plan: CODING_PLAN, profileAvailable: true, candidateDirected: false, profileTokens: TOKENS }).violations.some(v => v.code === 'profile_token_in_coding_answer'), 'inline-code product name IS a leak');
   });
   test('a JS comment profile leak is stripped, code preserved', () => {
@@ -186,9 +186,9 @@ describe('Code-review hardening: strip preserves code fences + collision tokens'
     assert.ok(r.ok, `flagged: ${r.violations.map(v => v.code).join(',')}`);
   });
   test('strip removes a full identity-leak preamble from a profile-forbidden (meeting) answer', () => {
-    const leak = "I'm Natively, an AI assistant. I was developed by Evin John. The next step is owned by Sarah.";
-    const s = stripProfileTokensFromCoding(leak, ['Evin', 'Natively']);
-    assert.doesNotMatch(s, /natively|AI assistant|Evin/i);
+    const leak = "I'm MeetFloo, an AI assistant. I was developed by Evin John. The next step is owned by Sarah.";
+    const s = stripProfileTokensFromCoding(leak, ['Evin', 'MeetFloo']);
+    assert.doesNotMatch(s, /MeetFloo|AI assistant|Evin/i);
     assert.match(s, /owned by Sarah/);
   });
 });
@@ -204,14 +204,14 @@ describe('Skill-rating answer-contract (anti-refusal)', () => {
   }
 });
 
-describe('Product "Natively" vs adverb "natively" (planner sanity)', () => {
+describe('Product "MeetFloo" vs adverb "MeetFloo" (planner sanity)', () => {
   // These confirm the routing is unaffected by the validator-side adverb fix; the
   // adverb/product discrimination itself is covered in the validator describe block.
-  test('"how is Natively built" still routes to a product answer', () => {
-    assert.ok(['project_about_answer', 'project_answer', 'project_followup_answer'].includes(plan('how is Natively built').answerType));
+  test('"how is MeetFloo built" still routes to a product answer', () => {
+    assert.ok(['project_about_answer', 'project_answer', 'project_followup_answer'].includes(plan('how is MeetFloo built').answerType));
   });
-  test('"does python natively support threads" is a technical concept, not a product Q', () => {
-    const a = plan('does python natively support threads').answerType;
+  test('"does python MeetFloo support threads" is a technical concept, not a product Q', () => {
+    const a = plan('does python MeetFloo support threads').answerType;
     assert.notEqual(a, 'project_about_answer', `→ ${a}`);
   });
 });

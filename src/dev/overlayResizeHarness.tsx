@@ -18,7 +18,7 @@
 // Default is `opt1,opt2,opt3,opt4`; `?v=before,after` reproduces the first A/B.
 //
 // Every column imports the REAL motion objects and the REAL commit rule from the
-// same modules NativelyInterface.tsx imports, so this compares shipped values
+// same modules MeetFlooInterface.tsx imports, so this compares shipped values
 // rather than a lookalike. The structure mirrors the card that matters: fixed
 // chrome above and below, one elastic viewport between them.
 //

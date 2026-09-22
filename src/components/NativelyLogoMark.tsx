@@ -5,7 +5,7 @@ import React from 'react';
  * Rendered as inline SVG so it inherits `color` (currentColor) and
  * can be styled freely with className.
  */
-export const NativelyLogoMark: React.FC<{
+export const MeetFlooLogoMark: React.FC<{
     size?: number;
     className?: string;
 }> = ({ size = 18, className = '' }) => (

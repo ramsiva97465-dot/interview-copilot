@@ -1,5 +1,5 @@
 /**
- * The shape of GET /v1/usage and GET /v1/plans on the Natively API.
+ * The shape of GET /v1/usage and GET /v1/plans on the MeetFloo API.
  *
  * ONE definition, imported by both the preload bridge and the renderer. The
  * quota type used to be written out twice — once in electron/preload.ts and
@@ -75,7 +75,7 @@ export interface ResearchMeter extends UsageMeter {
   runs_remaining: number | null;
 }
 
-export interface NativelyQuota {
+export interface MeetFlooQuota {
   ai: UsageMeter;
   knowledge: KnowledgeMeter;
   voice: UsageMeter;
@@ -92,7 +92,7 @@ export interface NativelyQuota {
 }
 
 /** One row of the plan catalog, exactly as the server enforces it. */
-export interface NativelyPlanLimits {
+export interface MeetFlooPlanLimits {
   price_usd: number;
   ai_tokens: number;
   transcription_minutes: number;
@@ -103,12 +103,12 @@ export interface NativelyPlanLimits {
   search_requests: number;
 }
 
-export interface NativelyUsageResponse {
+export interface MeetFlooUsageResponse {
   ok: boolean;
   plan?: string;
-  quota?: NativelyQuota;
+  quota?: MeetFlooQuota;
   /** The plan row the server enforced, so the UI needs no copy of the numbers. */
-  limits?: NativelyPlanLimits;
+  limits?: MeetFlooPlanLimits;
   research_credit_usd?: number;
   member_since?: string;
   /** Set when a network failure was covered by serving the last good response. */
@@ -117,10 +117,10 @@ export interface NativelyUsageResponse {
   status?: number;
 }
 
-export interface NativelyPlansResponse {
+export interface MeetFlooPlansResponse {
   ok: boolean;
   currency?: string;
-  plans?: Record<string, NativelyPlanLimits>;
+  plans?: Record<string, MeetFlooPlanLimits>;
   resource_units?: Record<string, string>;
   research_credit_usd?: number;
   error?: string;
@@ -245,7 +245,7 @@ export function formatMeter(m: Pick<UsageMeter, 'used' | 'limit' | 'unit'> | und
  *
  * An unmetered meter reports percent 0 by convention, and averaging a real
  * number against that 0 halves it — an under-report on a usage screen. Mirrors
- * knowledgeMeter in natively-api/lib/resourceUsage.js; it exists here only for
+ * knowledgeMeter in MeetFloo-api/lib/resourceUsage.js; it exists here only for
  * servers that send no `knowledge` block.
  */
 function meanOfMetered(...halves: (UsageMeter | undefined)[]): number {
@@ -254,8 +254,8 @@ function meanOfMetered(...halves: (UsageMeter | undefined)[]): number {
   return metered.reduce((sum, h) => sum + (h.percent ?? 0), 0) / metered.length;
 }
 
-export function normalizeQuota(raw: unknown): NativelyQuota | null {
-  const q = raw as Partial<NativelyQuota> & Record<string, unknown>;
+export function normalizeQuota(raw: unknown): MeetFlooQuota | null {
+  const q = raw as Partial<MeetFlooQuota> & Record<string, unknown>;
   if (!q || typeof q !== 'object') return null;
 
   const fill = (m: unknown, unit: UsageMeter['unit']): UsageMeter | undefined => {
@@ -302,7 +302,7 @@ export function normalizeQuota(raw: unknown): NativelyQuota | null {
   if (!ai && !voice) return null;
 
   return {
-    ...(q as NativelyQuota),
+    ...(q as MeetFlooQuota),
     ai: ai as UsageMeter,
     voice: voice as UsageMeter,
     transcription: (q.transcription as UsageMeter) ?? (voice as UsageMeter),

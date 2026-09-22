@@ -83,7 +83,7 @@ export class DatabaseManager {
         // per-user app-data path. But under `ELECTRON_RUN_AS_NODE=1` (the
         // `test:electron` runner) or before `app` is ready, `app` may be
         // undefined or `app.getPath` may throw — in those contexts fall back
-        // to an explicit override (NATIVELY_TEST_USERDATA) or an OS-temp dir
+        // to an explicit override (MEETFLOO_TEST_USERDATA) or an OS-temp dir
         // so importing a module that lazily constructs DatabaseManager (e.g.
         // ModesManager.getInstance() inside a unit test) degrades gracefully
         // instead of crashing with "Cannot read properties of undefined
@@ -91,33 +91,33 @@ export class DatabaseManager {
         // unaffected — app.getPath succeeds and this fallback never runs.
         let userDataPath: string;
         try {
-            const fromEnv = process.env.NATIVELY_TEST_USERDATA;
+            const fromEnv = process.env.MEETFLOO_TEST_USERDATA;
             if (fromEnv) {
                 userDataPath = fromEnv;
             } else if (app && typeof app.getPath === 'function') {
                 userDataPath = app.getPath('userData');
             } else {
-                userDataPath = path.join(os.tmpdir(), 'natively-no-electron-app');
+                userDataPath = path.join(os.tmpdir(), 'MeetFloo-no-electron-app');
             }
         } catch {
-            userDataPath = path.join(os.tmpdir(), 'natively-no-electron-app');
+            userDataPath = path.join(os.tmpdir(), 'MeetFloo-no-electron-app');
         }
         try { fs.mkdirSync(userDataPath, { recursive: true }); } catch { /* best effort */ }
-        this.dbPath = path.join(userDataPath, 'natively.db');
-        // Auto-migration from legacy data directories (Snapserve.ai / snapserve-ai / natively) to MeetFloo
+        this.dbPath = path.join(userDataPath, 'MeetFloo.db');
+        // Auto-migration from legacy data directories (Snapserve.ai / snapserve-ai / MeetFloo) to MeetFloo
         if (!fs.existsSync(this.dbPath)) {
-            const legacyCandidates = ['Snapserve.ai', 'snapserve-ai', 'natively'];
+            const legacyCandidates = ['Snapserve.ai', 'snapserve-ai', 'MeetFloo'];
             const parentDir = path.dirname(userDataPath);
             for (const leg of legacyCandidates) {
                 const legDir = path.join(parentDir, leg);
-                const legDb = path.join(legDir, 'natively.db');
+                const legDb = path.join(legDir, 'MeetFloo.db');
                 if (fs.existsSync(legDb)) {
                     try {
                         console.log(`[DatabaseManager] Migrating legacy user data from ${legDir} to ${userDataPath}`);
                         fs.copyFileSync(legDb, this.dbPath);
-                        const legWal = path.join(legDir, 'natively.db-wal');
+                        const legWal = path.join(legDir, 'MeetFloo.db-wal');
                         if (fs.existsSync(legWal)) fs.copyFileSync(legWal, this.dbPath + '-wal');
-                        const legShm = path.join(legDir, 'natively.db-shm');
+                        const legShm = path.join(legDir, 'MeetFloo.db-shm');
                         if (fs.existsSync(legShm)) fs.copyFileSync(legShm, this.dbPath + '-shm');
                         const legSettings = path.join(legDir, 'settings.json');
                         const targetSettings = path.join(userDataPath, 'settings.json');
@@ -215,7 +215,7 @@ export class DatabaseManager {
      * unhandledRejection, SIGTERM/SIGINT, render-process-gone, …). But a
      * TRUNCATE checkpoint run from a CRASHING or half-initialized process
      * — or interrupted by the macOS SIGTERM→SIGKILL race — can leave
-     * `natively.db-wal` / `natively.db-shm` half-truncated, which then
+     * `MeetFloo.db-wal` / `MeetFloo.db-shm` half-truncated, which then
      * BLOCKS the next `new Database()` open (SQLITE_BUSY on Windows'
      * mandatory locks, or an unreconcilable WAL on macOS). That converted a
      * one-time crash into a permanent "app never boots again" brick on both
@@ -391,7 +391,7 @@ export class DatabaseManager {
             // because a prior crash left a poisoned WAL sidecar, clear the
             // stale -wal/-shm and retry ONCE. Background: v2.8.1 ran a
             // wal_checkpoint(TRUNCATE) from crash handlers; if that was
-            // interrupted it left natively.db-wal/-shm in a state that made
+            // interrupted it left MeetFloo.db-wal/-shm in a state that made
             // this very open throw (SQLITE_BUSY on Windows' mandatory locks,
             // SQLITE_IOERR/CORRUPT/NOTADB on a torn WAL) — permanently bricking
             // every subsequent launch. The main .db holds the last COMMITTED
@@ -737,8 +737,8 @@ export class DatabaseManager {
         if (version < 8) {
             console.log('[DatabaseManager] Applying migration v7 → v8: Provision per-dimension vec0 tables');
             // Drop the legacy single-dim tables from v3/v4 if they exist and are unusable
-            try { this.db.exec('DROP TABLE IF EXISTS vec_chunks;'); } catch (_) {}
-            try { this.db.exec('DROP TABLE IF EXISTS vec_summaries;'); } catch (_) {}
+            try { this.db.exec('DROP TABLE IF EXISTS vec_chunks;'); } catch (_) { }
+            try { this.db.exec('DROP TABLE IF EXISTS vec_summaries;'); } catch (_) { }
 
             for (const dim of DatabaseManager.KNOWN_DIMS) {
                 this.ensureVecTableForDim(dim);
@@ -753,8 +753,8 @@ export class DatabaseManager {
         if (version < 9) {
             console.log('[DatabaseManager] Applying migration v8 → v9: Ensure per-dimension vec0 tables exist');
             // Drop old single-dim orphan tables if they exist (float[1536] schema)
-            try { this.db.exec('DROP TABLE IF EXISTS vec_chunks;'); } catch (_) {}
-            try { this.db.exec('DROP TABLE IF EXISTS vec_summaries;'); } catch (_) {}
+            try { this.db.exec('DROP TABLE IF EXISTS vec_chunks;'); } catch (_) { }
+            try { this.db.exec('DROP TABLE IF EXISTS vec_summaries;'); } catch (_) { }
 
             let allOk = true;
             for (const dim of DatabaseManager.KNOWN_DIMS) {
@@ -881,9 +881,9 @@ export class DatabaseManager {
                 : null;
             if (modeExists && !existing) {
                 const defaultSections = [
-                    { title: 'Summary',      description: 'High-level summary of the conversation.' },
+                    { title: 'Summary', description: 'High-level summary of the conversation.' },
                     { title: 'Action items', description: 'Tasks and follow-ups identified.' },
-                    { title: 'Key points',   description: 'Important points discussed.' },
+                    { title: 'Key points', description: 'Important points discussed.' },
                 ];
                 const insertSection = this.db.prepare(
                     'INSERT OR IGNORE INTO mode_note_sections (id, mode_id, title, description, sort_order) VALUES (?, ?, ?, ?, ?)'
@@ -900,51 +900,51 @@ export class DatabaseManager {
             console.log('[DatabaseManager] Applying migration v12 → v13: Backfill missing mode note sections');
             const BACKFILL_SECTIONS: Record<string, Array<{ title: string; description: string }>> = {
                 general: [
-                    { title: 'Summary',      description: 'High-level summary of the conversation.' },
+                    { title: 'Summary', description: 'High-level summary of the conversation.' },
                     { title: 'Action items', description: 'Tasks and follow-ups identified.' },
-                    { title: 'Key points',   description: 'Important points discussed.' },
+                    { title: 'Key points', description: 'Important points discussed.' },
                 ],
                 'looking-for-work': [
-                    { title: 'Follow-up actions',       description: 'Next interview steps or additional materials I said I would send if applicable.' },
-                    { title: 'Overview',                description: 'Overview of the interview, the company, and general structure.' },
+                    { title: 'Follow-up actions', description: 'Next interview steps or additional materials I said I would send if applicable.' },
+                    { title: 'Overview', description: 'Overview of the interview, the company, and general structure.' },
                     { title: 'Questions and responses', description: 'All questions asked to me during the interview and answers that gave.' },
-                    { title: 'Areas to improve',        description: 'What I could have done better during the interview.' },
-                    { title: 'Role details',            description: 'Anything discussed about the position, salary expectations, etc.' },
+                    { title: 'Areas to improve', description: 'What I could have done better during the interview.' },
+                    { title: 'Role details', description: 'Anything discussed about the position, salary expectations, etc.' },
                 ],
                 sales: [
-                    { title: 'Action Items',        description: 'All action items that were said I would do after the meeting.' },
-                    { title: 'Outcome',             description: 'Did I close the sale and what was the outcome of the conversation.' },
+                    { title: 'Action Items', description: 'All action items that were said I would do after the meeting.' },
+                    { title: 'Outcome', description: 'Did I close the sale and what was the outcome of the conversation.' },
                     { title: 'Prospect background', description: 'Background and context on who I was selling to.' },
-                    { title: 'Discovery',           description: 'What the prospect said during discovery.' },
-                    { title: 'Product',             description: "How I pitched the product and the prospect's reaction." },
-                    { title: 'Objections',          description: 'Objections from the prospect if there were any.' },
+                    { title: 'Discovery', description: 'What the prospect said during discovery.' },
+                    { title: 'Product', description: "How I pitched the product and the prospect's reaction." },
+                    { title: 'Objections', description: 'Objections from the prospect if there were any.' },
                 ],
                 recruiting: [
-                    { title: 'Action Items',          description: 'All action items that I have to do after the meeting.' },
+                    { title: 'Action Items', description: 'All action items that I have to do after the meeting.' },
                     { title: 'Experience and skills', description: "Candidate's previous work experience and skills discussed." },
-                    { title: 'Quality of responses',  description: 'If there were questions asked, how well and how accurately the candidate answered each question.' },
-                    { title: 'Interest in company',   description: 'What the candidate said about their interest in the company.' },
-                    { title: 'Role expectations',     description: 'Anything discussed about the position, salary expectations, etc.' },
+                    { title: 'Quality of responses', description: 'If there were questions asked, how well and how accurately the candidate answered each question.' },
+                    { title: 'Interest in company', description: 'What the candidate said about their interest in the company.' },
+                    { title: 'Role expectations', description: 'Anything discussed about the position, salary expectations, etc.' },
                 ],
                 'team-meet': [
-                    { title: 'Action Items',           description: 'All action items that were said I would do after the meeting.' },
-                    { title: 'Announcements',          description: 'Any team-wide announcements from the meeting.' },
-                    { title: 'Team updates',           description: "Each team member's progress, accomplishments, and current focus." },
+                    { title: 'Action Items', description: 'All action items that were said I would do after the meeting.' },
+                    { title: 'Announcements', description: 'Any team-wide announcements from the meeting.' },
+                    { title: 'Team updates', description: "Each team member's progress, accomplishments, and current focus." },
                     { title: 'Challenges or blockers', description: 'Any issues or obstacles raised that may affect progress.' },
-                    { title: 'Decisions made',         description: 'Key decisions or agreements reached during the meeting.' },
+                    { title: 'Decisions made', description: 'Key decisions or agreements reached during the meeting.' },
                 ],
                 lecture: [
                     { title: 'Follow-up work', description: 'Follow-up reading, assignments, or tasks to complete.' },
-                    { title: 'Topic',          description: 'Main subject or theme of the lecture.' },
-                    { title: 'Key concepts',   description: 'Core ideas or frameworks covered.' },
-                    { title: 'Content',        description: 'All content from the lecture with incredibly detailed bullet notes.' },
+                    { title: 'Topic', description: 'Main subject or theme of the lecture.' },
+                    { title: 'Key concepts', description: 'Core ideas or frameworks covered.' },
+                    { title: 'Content', description: 'All content from the lecture with incredibly detailed bullet notes.' },
                 ],
                 'technical-interview': [
                     { title: 'Problems covered', description: 'Each problem asked, the approach used, and the outcome.' },
-                    { title: 'Concepts tested',  description: 'Key algorithms, data structures, or system design concepts that came up.' },
-                    { title: 'What went well',   description: 'Approaches or explanations that landed well.' },
-                    { title: 'Areas to study',   description: 'Topics or gaps identified that need more preparation.' },
-                    { title: 'Action items',     description: 'Follow-up steps — e.g. send code, study specific topics, await next round.' },
+                    { title: 'Concepts tested', description: 'Key algorithms, data structures, or system design concepts that came up.' },
+                    { title: 'What went well', description: 'Approaches or explanations that landed well.' },
+                    { title: 'Areas to study', description: 'Topics or gaps identified that need more preparation.' },
+                    { title: 'Action items', description: 'Follow-up steps — e.g. send code, study specific topics, await next round.' },
                 ],
             };
 
@@ -1783,31 +1783,31 @@ export class DatabaseManager {
                 // is null, so the local is genuinely non-null here.
                 const db = this.db;
                 db.transaction(() => {
-                for (const dim of dimsToRebuild) {
-                    db.exec(`DROP TABLE IF EXISTS vec_chunks_${dim};`);
-                    db.exec(`DROP TABLE IF EXISTS vec_summaries_${dim};`);
-                }
-                this.ensuredDims.clear();
-                for (const dim of dimsToRebuild) {
-                    this.ensureVecTableForDim(dim); // now emits distance_metric=cosine
-                    const bytes = dim * 4;
-                    const chunkIns = db.prepare(
-                        `INSERT OR REPLACE INTO vec_chunks_${dim}(chunk_id, embedding) VALUES (?, ?)`
-                    );
-                    for (const row of db.prepare(
-                        `SELECT id, embedding FROM chunks WHERE embedding IS NOT NULL AND length(embedding) = ?`
-                    ).iterate(bytes) as Iterable<any>) {
-                        try { chunkIns.run(BigInt(row.id), row.embedding); rebuilt++; } catch { /* skip unusable row */ }
+                    for (const dim of dimsToRebuild) {
+                        db.exec(`DROP TABLE IF EXISTS vec_chunks_${dim};`);
+                        db.exec(`DROP TABLE IF EXISTS vec_summaries_${dim};`);
                     }
-                    const sumIns = db.prepare(
-                        `INSERT OR REPLACE INTO vec_summaries_${dim}(summary_id, embedding) VALUES (?, ?)`
-                    );
-                    for (const row of db.prepare(
-                        `SELECT id, embedding FROM chunk_summaries WHERE embedding IS NOT NULL AND length(embedding) = ?`
-                    ).iterate(bytes) as Iterable<any>) {
-                        try { sumIns.run(BigInt(row.id), row.embedding); rebuilt++; } catch { /* skip unusable row */ }
+                    this.ensuredDims.clear();
+                    for (const dim of dimsToRebuild) {
+                        this.ensureVecTableForDim(dim); // now emits distance_metric=cosine
+                        const bytes = dim * 4;
+                        const chunkIns = db.prepare(
+                            `INSERT OR REPLACE INTO vec_chunks_${dim}(chunk_id, embedding) VALUES (?, ?)`
+                        );
+                        for (const row of db.prepare(
+                            `SELECT id, embedding FROM chunks WHERE embedding IS NOT NULL AND length(embedding) = ?`
+                        ).iterate(bytes) as Iterable<any>) {
+                            try { chunkIns.run(BigInt(row.id), row.embedding); rebuilt++; } catch { /* skip unusable row */ }
+                        }
+                        const sumIns = db.prepare(
+                            `INSERT OR REPLACE INTO vec_summaries_${dim}(summary_id, embedding) VALUES (?, ?)`
+                        );
+                        for (const row of db.prepare(
+                            `SELECT id, embedding FROM chunk_summaries WHERE embedding IS NOT NULL AND length(embedding) = ?`
+                        ).iterate(bytes) as Iterable<any>) {
+                            try { sumIns.run(BigInt(row.id), row.embedding); rebuilt++; } catch { /* skip unusable row */ }
+                        }
                     }
-                }
                 })();
                 console.log(`[DatabaseManager] v30: rebuilt vec0 indexes with cosine distance (${rebuilt} vectors re-inserted)`);
                 this.db.pragma('user_version = 30');
@@ -3581,7 +3581,7 @@ export class DatabaseManager {
 
         const summaryMarkdown = `# Overview
 
-Natively is a real-time AI meeting assistant designed to help you stay focused, informed, and fast-moving during calls. Get live insights while you speak, instant answers to questions, and structured notes after every meeting.
+MeetFloo is a real-time AI meeting assistant designed to help you stay focused, informed, and fast-moving during calls. Get live insights while you speak, instant answers to questions, and structured notes after every meeting.
 
 # Getting Started
 
@@ -3591,7 +3591,7 @@ Join a scheduled meeting and start directly from the meeting notification.
 
 ### During a Meeting
 - Use the **five quick action buttons** for real-time assistance
-- Show or hide Natively at any time:
+- Show or hide MeetFloo at any time:
   - **Mac**: Cmd + B
   - **Windows**: Ctrl + B
 - Move the widget anywhere on your screen by hovering over the top pill and dragging
@@ -3609,7 +3609,7 @@ Join a scheduled meeting and start directly from the meeting notification.
 - **Smart Note Taking**: Automatically captures key points, action items, and structured summaries.
 - **Summary**: A concise high-level brief of the entire meeting.
 - **Transcript**: Full real-time speech-to-text transcript, available during and after the call.
-- **Usage**: Track your interaction history and see how Natively assisted you.
+- **Usage**: Track your interaction history and see how MeetFloo assisted you.
 
 ## Live Insights
 Click **Live Insights** during a call to view:
@@ -3626,7 +3626,7 @@ Click **Live Insights** during a call to view:
 - **Full Screen Screenshot**: Cmd + H
 - **Selective Screenshot**: Cmd + Shift + H
 
-# Making the Most of Natively
+# Making the Most of MeetFloo
 
 ### Custom Context
 Upload resumes, project briefs, sales scripts, or other documents to tailor responses to your workflow. (coming soon).
@@ -3637,7 +3637,7 @@ Go to **Settings → Language Preferences** to:
 - Enable real-time translation during calls
 
 ### Undetectability
-Unlock the **Undetectability** add-on to keep Natively invisible during screen sharing.
+Unlock the **Undetectability** add-on to keep MeetFloo invisible during screen sharing.
 
 # Interface Basics
 
@@ -3671,7 +3671,7 @@ If you don’t already have one, follow the steps below to create it.
 ## 3. Create a Service Account
 - Navigate to **IAM & Admin → Service Accounts**
 - Click **Create Service Account**
-- **Name**: natively-stt
+- **Name**: MeetFloo-stt
 - **Description**: optional
 
 ## 4. Assign Permissions
@@ -3683,7 +3683,7 @@ If you don’t already have one, follow the steps below to create it.
 - Select **JSON**
 - Download the file
 
-**Once downloaded, return to Settings → Credentials in Natively and select this file to complete setup.**
+**Once downloaded, return to Settings → Credentials in MeetFloo and select this file to complete setup.**
 
 # Free Google Cloud Credit (New Users)
 
@@ -3701,14 +3701,14 @@ The credit can be used for Speech-to-Text and is sufficient for extended testing
 # Support
 
 If you need help with setup or usage, contact us anytime at:
-natively.contact@gmail.com`;
+MeetFloo.contact@gmail.com`;
 
         const demoMeeting: Meeting = {
             id: demoId,
-            title: "Natively Demo & Guide",
+            title: "MeetFloo Demo & Guide",
             date: today.toISOString(),
             duration: "5:00",
-            summary: "Complete guide to using Natively - your real-time AI meeting assistant.",
+            summary: "Complete guide to using MeetFloo - your real-time AI meeting assistant.",
             detailedSummary: {
                 // schemaVersion: 3 unlocks the full V3 notes layout + all four cards.
                 schemaVersion: 3,
@@ -3718,7 +3718,7 @@ natively.contact@gmail.com`;
 
                 // Summary bullets (blue-dot list at the top of the notes).
                 tldr: [
-                    "Natively runs live during calls — real-time answers plus structured notes after.",
+                    "MeetFloo runs live during calls — real-time answers plus structured notes after.",
                     "Five quick actions: What to answer, Clarify, Recap, Follow-up, and Answer.",
                     "Cmd/Ctrl + B hides the widget instantly; screenshots via Cmd + H.",
                 ],
@@ -3731,7 +3731,7 @@ natively.contact@gmail.com`;
                         order: 0,
                         bullets: [
                             { id: 'b1', text: "Click Start Session from the dashboard to begin a call.", confidence: 'high' },
-                            { id: 'b2', text: "Show or hide Natively anytime with Cmd + B (Mac) or Ctrl + B (Windows).", confidence: 'high' },
+                            { id: 'b2', text: "Show or hide MeetFloo anytime with Cmd + B (Mac) or Ctrl + B (Windows).", confidence: 'high' },
                         ],
                     },
                     {
@@ -3786,13 +3786,13 @@ natively.contact@gmail.com`;
                 // Follow-up draft — exercises the copy / regenerate / tone dropdown row.
                 followUpDraft: {
                     type: 'email',
-                    subject: "Getting started with Natively",
-                    body: "Hi there,\n\nThanks for trying Natively! A quick recap: start a session from the dashboard, use the five quick actions during your call, and press Cmd + B to hide the widget anytime. Notes, transcript, and follow-ups are waiting for you after every meeting.\n\nBest,\nThe Natively team",
+                    subject: "Getting started with MeetFloo",
+                    body: "Hi there,\n\nThanks for trying MeetFloo! A quick recap: start a session from the dashboard, use the five quick actions during your call, and press Cmd + B to hide the widget anytime. Notes, transcript, and follow-ups are waiting for you after every meeting.\n\nBest,\nThe MeetFloo team",
                     tone: 'professional',
                 },
             },
             transcript: [
-                { speaker: 'interviewer', text: "Welcome to Natively! Let me show you how it works.", timestamp: 0 },
+                { speaker: 'interviewer', text: "Welcome to MeetFloo! Let me show you how it works.", timestamp: 0 },
                 { speaker: 'user', text: "Thanks! I'm excited to try it out.", timestamp: 5000 },
                 { speaker: 'interviewer', text: "You have 5 quick action buttons. 'What to answer' listens to the conversation and suggests what you should say.", timestamp: 10000 },
                 { speaker: 'user', text: "That sounds helpful for interviews.", timestamp: 18000 },
@@ -3802,13 +3802,13 @@ natively.contact@gmail.com`;
                 { speaker: 'interviewer', text: "'Follow Up Questions' suggests questions you can ask. 'Answer' lets you speak a question and get an instant response.", timestamp: 35000 },
                 { speaker: 'user', text: "Can I take screenshots during calls?", timestamp: 45000 },
                 { speaker: 'interviewer', text: "Yes! Press Cmd+H for full screen or Cmd+Shift+H to select an area. The AI will analyze it and help you.", timestamp: 50000 },
-                { speaker: 'user', text: "How do I hide Natively during screen share?", timestamp: 60000 },
+                { speaker: 'user', text: "How do I hide MeetFloo during screen share?", timestamp: 60000 },
                 { speaker: 'interviewer', text: "Press Cmd+B to toggle visibility anytime. You can also enable undetectable mode in settings.", timestamp: 65000 },
                 { speaker: 'user', text: "This is amazing. What happens after the call?", timestamp: 75000 },
                 { speaker: 'interviewer', text: "You get detailed meeting notes with action items, key points, full transcript, and a log of all AI interactions.", timestamp: 80000 }
             ],
             usage: [
-                { type: 'assist', timestamp: 15000, question: 'What features does Natively have?', answer: 'Natively offers 5 quick action buttons, screenshot analysis, real-time transcription, and comprehensive meeting notes.' },
+                { type: 'assist', timestamp: 15000, question: 'What features does MeetFloo have?', answer: 'MeetFloo offers 5 quick action buttons, screenshot analysis, real-time transcription, and comprehensive meeting notes.' },
                 { type: 'followup', timestamp: 40000, question: 'How do the action buttons work?', answer: 'Each button serves a specific purpose: suggest answers, clarify questions, recap conversations, generate follow-up questions, or get instant voice-to-answer responses.' }
             ],
             isProcessed: true

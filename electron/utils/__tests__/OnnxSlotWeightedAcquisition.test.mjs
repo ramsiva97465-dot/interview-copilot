@@ -17,7 +17,7 @@
 // on a promise that would never resolve until the first channel's meeting
 // ended — never rejecting, never surfacing an error, silently stalling every
 // tick forever. The fix rejects after readExclusiveTimeoutMs() (default
-// 15000ms, overridable via NATIVELY_ONNX_EXCLUSIVE_TIMEOUT_MS) so the
+// 15000ms, overridable via MEETFLOO_ONNX_EXCLUSIVE_TIMEOUT_MS) so the
 // caller's existing error path (LocalWhisperSTT.spawnWorker() -> start()'s
 // .catch() -> emit('error')) can engage instead of hanging forever. Ordinary
 // weight<=cap queuing (embeddings/reranker/intent classifier waiting behind
@@ -41,11 +41,11 @@ const MODULE_URL = pathToFileURL(
 const { acquireOnnxSlot, __resetOnnxGateForTests } = await import(MODULE_URL);
 
 // Pin the cap explicitly so this suite doesn't depend on ambient env state.
-process.env.NATIVELY_ONNX_MAX_CONCURRENT_SESSIONS = '2';
+process.env.MEETFLOO_ONNX_MAX_CONCURRENT_SESSIONS = '2';
 // Shrink the exclusive-mode timeout so the reject-on-timeout tests below run
 // in milliseconds instead of hand-waiting the real 15s default.
 const TEST_EXCLUSIVE_TIMEOUT_MS = 200;
-process.env.NATIVELY_ONNX_EXCLUSIVE_TIMEOUT_MS = String(TEST_EXCLUSIVE_TIMEOUT_MS);
+process.env.MEETFLOO_ONNX_EXCLUSIVE_TIMEOUT_MS = String(TEST_EXCLUSIVE_TIMEOUT_MS);
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

@@ -1,6 +1,6 @@
 // electron/llm/performance/index.ts
 //
-// Provider Performance Profile — the shared evidence layer behind Natively's
+// Provider Performance Profile — the shared evidence layer behind MeetFloo's
 // adaptive deadlines.
 //
 // READ docs/PROVIDER_PERFORMANCE_PROFILE_ARCHITECTURE.md before changing

@@ -5,7 +5,7 @@
  */
 
 export const DIRECT_ASSIST_PROVIDERS = [
-  'natively',
+  'MeetFloo',
   'gemini',
   'openai',
   'claude',
@@ -256,65 +256,65 @@ export interface DirectAssistErrorPayload {
 
 export type DirectAssistStreamEvent =
   | {
-      readonly type: 'start';
-      readonly requestId: string;
-      readonly provider: DirectAssistProvider;
-      readonly model: string;
-      /** Field names dropped by prepareDirectAssistPrompt to fit the context
-       *  window. Safe for the renderer: no user content, just field names. */
-      readonly trimmedFields: readonly string[];
-      /** Field names kept but reduced to fit. Also safe: names only. */
-      readonly shortenedFields: readonly string[];
-    }
+    readonly type: 'start';
+    readonly requestId: string;
+    readonly provider: DirectAssistProvider;
+    readonly model: string;
+    /** Field names dropped by prepareDirectAssistPrompt to fit the context
+     *  window. Safe for the renderer: no user content, just field names. */
+    readonly trimmedFields: readonly string[];
+    /** Field names kept but reduced to fit. Also safe: names only. */
+    readonly shortenedFields: readonly string[];
+  }
   | {
-      readonly type: 'delta';
-      readonly requestId: string;
-      readonly sequence: number;
-      readonly text: string;
-    }
+    readonly type: 'delta';
+    readonly requestId: string;
+    readonly sequence: number;
+    readonly text: string;
+  }
   | {
-      readonly type: 'provider_switch';
-      readonly requestId: string;
-      /** SNAPSHOT of the delta counter, never a slot of its own. A switch can
-       *  only happen pre-commit, so this is always 0 — asserted in the tests as
-       *  a second guard on the commit-point rule. */
-      readonly sequence: number;
-      readonly from: { readonly provider: DirectAssistProvider; readonly model: string };
-      readonly to: { readonly provider: DirectAssistProvider; readonly model: string };
-      /** Why the previous rung was abandoned. Content-free, like every other
-       *  field on this contract. */
-      readonly reason: DirectAssistErrorCode;
-    }
+    readonly type: 'provider_switch';
+    readonly requestId: string;
+    /** SNAPSHOT of the delta counter, never a slot of its own. A switch can
+     *  only happen pre-commit, so this is always 0 — asserted in the tests as
+     *  a second guard on the commit-point rule. */
+    readonly sequence: number;
+    readonly from: { readonly provider: DirectAssistProvider; readonly model: string };
+    readonly to: { readonly provider: DirectAssistProvider; readonly model: string };
+    /** Why the previous rung was abandoned. Content-free, like every other
+     *  field on this contract. */
+    readonly reason: DirectAssistErrorCode;
+  }
   | {
-      readonly type: 'done';
-      readonly requestId: string;
-      readonly sequence: number;
-      readonly provider: DirectAssistProvider;
-      readonly model: string;
-    }
+    readonly type: 'done';
+    readonly requestId: string;
+    readonly sequence: number;
+    readonly provider: DirectAssistProvider;
+    readonly model: string;
+  }
   | {
-      readonly type: 'cancel';
-      readonly requestId: string;
-      readonly sequence: number;
-    }
+    readonly type: 'cancel';
+    readonly requestId: string;
+    readonly sequence: number;
+  }
   | {
-      readonly type: 'error';
-      readonly requestId: string;
-      readonly sequence: number;
-      readonly partial: boolean;
-      readonly error: DirectAssistErrorPayload;
-    };
+    readonly type: 'error';
+    readonly requestId: string;
+    readonly sequence: number;
+    readonly partial: boolean;
+    readonly error: DirectAssistErrorPayload;
+  };
 
 export type DirectAssistTerminalOutcome =
   | {
-      readonly state: 'complete';
-      readonly provider: DirectAssistProvider;
-      readonly model: string;
-      readonly chunks: number;
-    }
+    readonly state: 'complete';
+    readonly provider: DirectAssistProvider;
+    readonly model: string;
+    readonly chunks: number;
+  }
   | { readonly state: 'cancelled'; readonly chunks: number }
   | {
-      readonly state: 'failed';
-      readonly chunks: number;
-      readonly error: DirectAssistErrorPayload;
-    };
+    readonly state: 'failed';
+    readonly chunks: number;
+    readonly error: DirectAssistErrorPayload;
+  };

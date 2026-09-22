@@ -82,26 +82,26 @@ const main = async () => {
   const launchEnv = {
     ...process.env,
     NODE_ENV: 'development',
-    NATIVELY_E2E: '1',
-    NATIVELY_E2E_LOCAL_TEST_TOKEN: process.env.NATIVELY_E2E_LOCAL_TEST_TOKEN || 'local-test',
-    NATIVELY_API_URL: process.env.NATIVELY_API_BASE || 'http://127.0.0.1:3000',
-    NATIVELY_TEST_USERDATA: userDataDir,
-    NATIVELY_E2E_REFERENCE_ROOT: inputRoot,
-    NATIVELY_CONTEXT_OS_BENCHMARK_AUDIT: '1',
-    NATIVELY_CONTEXT_OS_PROMPT_AUDIT: '1',
-    NATIVELY_CONTEXT_OS_PROVIDER_CAPTURE: process.env.CTXOS_BENCHMARK_CAPTURE_RAW_RETRIEVAL === '1' ? '1' : undefined,
-    NATIVELY_CONTEXT_OS: '1',
-    NATIVELY_CONTEXT_OS_MANUAL_CHAT: '1',
-    NATIVELY_CONTEXT_OS_WTA: '1',
-    NATIVELY_CONTEXT_OS_EVIDENCE_PACK: '1',
-    NATIVELY_CONTEXT_OS_MEMORY_SAFETY: '1',
-    NATIVELY_CONTEXT_OS_ENFORCE_CAPABILITIES: '1',
-    NATIVELY_CONTEXT_OS_PROPERTY_VALIDATION: '1',
-    NATIVELY_DOC_GROUNDED_STRICT_ISOLATION: '1',
-    NATIVELY_OKF_KNOWLEDGE_PACKS: '1',
-    NATIVELY_OKF_HYBRID_RETRIEVAL: '1',
-    NATIVELY_RAG_CONFIDENCE_GATE: '1',
-    NATIVELY_RAG_LOCAL_RERANK: '1',
+    MEETFLOO_E2E: '1',
+    MEETFLOO_E2E_LOCAL_TEST_TOKEN: process.env.MEETFLOO_E2E_LOCAL_TEST_TOKEN || 'local-test',
+    MEETFLOO_API_URL: process.env.MEETFLOO_API_BASE || 'http://127.0.0.1:3000',
+    MEETFLOO_TEST_USERDATA: userDataDir,
+    MEETFLOO_E2E_REFERENCE_ROOT: inputRoot,
+    MEETFLOO_CONTEXT_OS_BENCHMARK_AUDIT: '1',
+    MEETFLOO_CONTEXT_OS_PROMPT_AUDIT: '1',
+    MEETFLOO_CONTEXT_OS_PROVIDER_CAPTURE: process.env.CTXOS_BENCHMARK_CAPTURE_RAW_RETRIEVAL === '1' ? '1' : undefined,
+    MEETFLOO_CONTEXT_OS: '1',
+    MEETFLOO_CONTEXT_OS_MANUAL_CHAT: '1',
+    MEETFLOO_CONTEXT_OS_WTA: '1',
+    MEETFLOO_CONTEXT_OS_EVIDENCE_PACK: '1',
+    MEETFLOO_CONTEXT_OS_MEMORY_SAFETY: '1',
+    MEETFLOO_CONTEXT_OS_ENFORCE_CAPABILITIES: '1',
+    MEETFLOO_CONTEXT_OS_PROPERTY_VALIDATION: '1',
+    MEETFLOO_DOC_GROUNDED_STRICT_ISOLATION: '1',
+    MEETFLOO_OKF_KNOWLEDGE_PACKS: '1',
+    MEETFLOO_OKF_HYBRID_RETRIEVAL: '1',
+    MEETFLOO_RAG_CONFIDENCE_GATE: '1',
+    MEETFLOO_RAG_LOCAL_RERANK: '1',
     OLLAMA_URL: 'http://127.0.0.1:1',
   };
   const launchArgs = ['dist-electron/electron/main.js', `--user-data-dir=${userDataDir}`];
@@ -128,7 +128,7 @@ const main = async () => {
       try {
         const win = await page();
         if (!win) throw new Error('Electron renderer unavailable');
-        await win.waitForLoadState('domcontentloaded', { timeout: 5_000 }).catch(() => {});
+        await win.waitForLoadState('domcontentloaded', { timeout: 5_000 }).catch(() => { });
         return await win.evaluate(callback, arg);
       } catch (error) {
         lastError = error;
@@ -182,10 +182,10 @@ const main = async () => {
     throw new Error(`Reference index did not become ready: ${JSON.stringify(statuses)}`);
   }
 
-  // Real provider route: the same Natively selection used in the renderer UI;
+  // Real provider route: the same MeetFloo selection used in the renderer UI;
   // local-test auth lives solely in the E2E launch environment.
-  const providerSet = await raw(async () => (window.electronAPI || window.api).setModel('natively'));
-  if (!providerSet?.success) throw new Error(`setModel(natively) failed: ${providerSet?.error || 'unknown'}`);
+  const providerSet = await raw(async () => (window.electronAPI || window.api).setModel('MeetFloo'));
+  if (!providerSet?.success) throw new Error(`setModel(MeetFloo) failed: ${providerSet?.error || 'unknown'}`);
 
   const askManual = async (question) => {
     let lastError;
@@ -218,7 +218,7 @@ const main = async () => {
   const runMetadata = {
     runId, startedAt: now(), modeId, source: bank.source,
     requestedSplits: [...requestedSplits], casesRequested: cases.length,
-    flags: Object.fromEntries(Object.entries(launchEnv).filter(([key]) => key.startsWith('NATIVELY_CONTEXT_OS') || key.startsWith('NATIVELY_OKF') || key.startsWith('NATIVELY_RAG') || key === 'NATIVELY_DOC_GROUNDED_STRICT_ISOLATION').map(([key, value]) => [key, value])),
+    flags: Object.fromEntries(Object.entries(launchEnv).filter(([key]) => key.startsWith('MEETFLOO_CONTEXT_OS') || key.startsWith('MEETFLOO_OKF') || key.startsWith('MEETFLOO_RAG') || key === 'MEETFLOO_DOC_GROUNDED_STRICT_ISOLATION').map(([key, value]) => [key, value])),
     upload: { id: upload.file.id, pageCount: upload.file.pageCount, extractedPageCount: upload.file.extractedPageCount, binarySha256: upload.file.binarySha256, contentSha256: upload.file.contentSha256 },
     indexStatuses: statuses,
   };
@@ -237,10 +237,10 @@ const main = async () => {
     // ordinary 140-case reports and does not alter runtime retrieval.
     const rawInspection = process.env.CTXOS_BENCHMARK_CAPTURE_RAW_RETRIEVAL === '1'
       ? await invoke('__e2e__:inspect-retrieval', {
-          modeId,
-          query: testCase.question,
-          forceDocumentGrounding: true,
-        })
+        modeId,
+        query: testCase.question,
+        forceDocumentGrounding: true,
+      })
       : null;
     const startedAt = Date.now();
     const response = await askManual(testCase.question);
@@ -319,7 +319,7 @@ const main = async () => {
     resultsSha256: safeHash(fs.readFileSync(resultsPath)),
   };
   writeJson(path.join(outDir, 'summary.json'), summary);
-  await app.close().catch(() => {});
+  await app.close().catch(() => { });
   if (process.env.CTXOS_BENCHMARK_KEEP_USERDATA !== '1') fs.rmSync(userDataDir, { recursive: true, force: true });
   const clean = summary.resultCount === cases.length
     && summary.timedOut === 0

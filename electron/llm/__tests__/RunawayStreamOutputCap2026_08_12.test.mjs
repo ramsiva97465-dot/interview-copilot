@@ -1,6 +1,6 @@
 // electron/llm/__tests__/RunawayStreamOutputCap2026_08_12.test.mjs
 //
-// Live capture 2026-08-12 (what_to_answer, Natively fast-mode):
+// Live capture 2026-08-12 (what_to_answer, MeetFloo fast-mode):
 //
 //   tfft=2084ms  tokens=8047  chars=22871  totalStreamMs=61221
 //   error='ai_unavailable'  message='The operation was aborted due to timeout'
@@ -17,8 +17,8 @@
 // truncated mid-sentence — which is correct, and is why the bound added here is
 // on total CHARACTERS instead.
 //
-// This is defence in depth, NOT the complete fix: streamWithNatively's request
-// body carries no max_tokens, and natively-api's /v1/chat destructures a fixed
+// This is defence in depth, NOT the complete fix: streamWithMeetFloo's request
+// body carries no max_tokens, and MeetFloo-api's /v1/chat destructures a fixed
 // field list that does not include one, so the request still goes out unbounded.
 
 import assert from 'node:assert/strict';
@@ -330,23 +330,23 @@ describe('the cap actually bounds a runaway end-to-end', () => {
 });
 
 describe('the unbounded request is recorded as still open', () => {
-  test('streamWithNatively still sends no max_tokens', () => {
-    // This asserts the CURRENT gap so it stays visible. natively-api's /v1/chat
+  test('streamWithMeetFloo still sends no max_tokens', () => {
+    // This asserts the CURRENT gap so it stays visible. MeetFloo-api's /v1/chat
     // destructures { messages, system, language, images, fast_mode, stream,
     // purpose } and would ignore the field today, so sending it alone would be
     // inert — the complete fix needs a server change.
     //
     // If this test starts FAILING, the bound was added: delete this block and
     // note whether the server honours it.
-    const start = src.indexOf('private async * streamWithNatively(');
-    assert.ok(start > 0, 'could not locate streamWithNatively');
+    const start = src.indexOf('private async * streamWithMeetFloo(');
+    assert.ok(start > 0, 'could not locate streamWithMeetFloo');
     const bodyStart = src.indexOf('const body: Record<string, unknown> = {', start);
     const bodyEnd = src.indexOf('if (imagePaths?.length)', bodyStart);
     const requestBody = src.slice(bodyStart, bodyEnd);
     assert.doesNotMatch(
       requestBody,
       /max_tokens/,
-      'a max_tokens bound was added — verify natively-api reads it, then delete this test',
+      'a max_tokens bound was added — verify MeetFloo-api reads it, then delete this test',
     );
   });
 });

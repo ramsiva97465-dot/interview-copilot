@@ -17,7 +17,7 @@ Examples are taken verbatim from the blind judge's flagged items or from the pip
 ### DeepSeek V4.1 Flash — current config (thinking off)
 - **Invalid JSON → dropped chunks.** 4 of 156 chunk outputs were unparseable.
   - **Cause (REAL-LECT-VL run 2).** The model copied the prompt's `TIME RANGE: 29824680:16 - …` into `"timeRange": {"startMs": 29824680:16, …}`. That value comes from `formatMs()` applied to epoch-ms timestamps.
-  - **Why it dropped the chunk.** The one-shot repair payload re-sends the ~24k-char bad output, which exceeds natively-api's 25,000-char `EXTRACTION_DEEPSEEK_MAX_CHARS`. That routes the repair to Gemini, which was blocked here, so the chunk was dropped. In production, Gemini would have repaired it.
+  - **Why it dropped the chunk.** The one-shot repair payload re-sends the ~24k-char bad output, which exceeds MeetFloo-api's 25,000-char `EXTRACTION_DEEPSEEK_MAX_CHARS`. That routes the repair to Gemini, which was blocked here, so the chunk was dropped. In production, Gemini would have repaired it.
   - **Impact (SALES-DISC-L run 2).** 2 chunks were lost, so that run missed the CFO's $40k approval threshold, the $45→$39 pricing and the "don't phase the rollout" decision. Its fact retention for SALES-DISC-L was 81.6%, versus 95%+ in the other two runs.
 - **Most distractors included** (2.6 per summary), e.g. passing suggestions such as "Mia will handle the card and flowers" written as action items.
 - **Small factual slips**, e.g. INT-M: "offsite around November 16th" (it is the week of Nov 9th).

@@ -147,7 +147,7 @@ describe('T3-minimal — the flag default is environment-invariant', () => {
   });
 
   test('the env kill switch works in both directions', () => {
-    const KEY = 'NATIVELY_WTA_GOVERNANCE_YIELDS_TO_V3';
+    const KEY = 'MEETFLOO_WTA_GOVERNANCE_YIELDS_TO_V3';
     const original = process.env[KEY];
     try {
       process.env[KEY] = '0';

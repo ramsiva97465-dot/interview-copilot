@@ -45,7 +45,7 @@ export function buildInstallPromptText(prompt: InstallPrompt): { message: string
   lines.push(`${prompt.name} ${prompt.version} — by ${prompt.author}`);
   lines.push(prompt.homepage);
   lines.push('');
-  lines.push('This is a community extension. It is not part of Natively and is not reviewed by Natively.');
+  lines.push('This is a community extension. It is not part of MeetFloo and is not reviewed by MeetFloo.');
   lines.push('');
 
   if (prompt.permissions.length > 0) {
@@ -57,7 +57,7 @@ export function buildInstallPromptText(prompt: InstallPrompt): { message: string
   }
 
   if (prompt.highRiskPermissions.length > 0) {
-    lines.push('Some of these give it reach beyond Natively:');
+    lines.push('Some of these give it reach beyond MeetFloo:');
     for (const p of prompt.highRiskPermissions) lines.push(`  • ${p}`);
     lines.push('');
   }
@@ -81,13 +81,13 @@ export function buildInstallPromptText(prompt: InstallPrompt): { message: string
     const known = prompt.models.filter((m) => m.knownUnsupportedReason);
     if (known.length > 0) {
       lines.push('');
-      lines.push('Natively ships these same models and cannot run them:');
+      lines.push('MeetFloo ships these same models and cannot run them:');
       for (const m of known) {
         lines.push(`  • ${m.repo ?? m.key} — ${m.knownUnsupportedReason}`);
       }
       lines.push('');
       lines.push(
-        'This extension brings its own runtime, so it may work where Natively does not. ' +
+        'This extension brings its own runtime, so it may work where MeetFloo does not. ' +
         'If it does not, reranking will silently get worse rather than fail.',
       );
     }
@@ -203,7 +203,7 @@ export function warnAboutKnownUnsupportedModels(
       const known = lookup(model.repo);
       if (!known || known.supported) continue;
       warnings.push(
-        `[extensions] "${record.id}" is enabled and uses ${model.repo}, which Natively ships as ` +
+        `[extensions] "${record.id}" is enabled and uses ${model.repo}, which MeetFloo ships as ` +
         `"${known.catalogId}" and cannot run: ${known.reason ?? 'no reason recorded'} ` +
         'This extension supplies its own runtime, so it may behave differently — but if scores look wrong, this is why.',
       );

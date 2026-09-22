@@ -20,11 +20,11 @@ describe('flag', () => {
     const { isIntelligenceFlagEnabled } = await import(
       pathToFileURL(path.resolve(__dirname, '../../../dist-electron/electron/intelligence/intelligenceFlags.js')).href
     );
-    delete process.env.NATIVELY_QUESTION_LEDGER_SHADOW;
+    delete process.env.MEETFLOO_QUESTION_LEDGER_SHADOW;
     assert.equal(isIntelligenceFlagEnabled('questionLedgerShadow'), false, 'shadow must be opt-in');
     // registry pin: the key is declared with default: false
     const flagsSrc = readFileSync(path.resolve(__dirname, '../../intelligence/intelligenceFlags.ts'), 'utf8');
-    assert.match(flagsSrc, /questionLedgerShadow: \{ env: 'NATIVELY_QUESTION_LEDGER_SHADOW', setting: 'questionLedgerShadowEnabled', default: false \}/);
+    assert.match(flagsSrc, /questionLedgerShadow: \{ env: 'MEETFLOO_QUESTION_LEDGER_SHADOW', setting: 'questionLedgerShadowEnabled', default: false \}/);
   });
 });
 

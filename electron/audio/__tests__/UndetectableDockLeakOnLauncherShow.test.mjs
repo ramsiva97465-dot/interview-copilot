@@ -1,4 +1,4 @@
-// Regression test for the "Natively icon appears in the dock after Stop meeting
+// Regression test for the "MeetFloo icon appears in the dock after Stop meeting
 // (in undetectable mode)" bug.
 //
 // Symptom: with undetectable mode ON, starting a meeting then pressing Stop
@@ -68,7 +68,7 @@ test('switchToLauncher() re-asserts stealth after the activating show', () => {
   );
   assert.ok(
     /process\.platform\s*===\s*['"]darwin['"]/.test(body) &&
-      /getUndetectable\s*\(\s*\)/.test(body),
+    /getUndetectable\s*\(\s*\)/.test(body),
     'BUG: the stealth re-assert in switchToLauncher() must be gated on darwin + getUndetectable() so it is a no-op on Windows/Linux and when the user is not in undetectable mode.',
   );
 });
@@ -119,7 +119,7 @@ test('applyInitialUndetectableState() (startup convergence) still routes through
 // handler shows the launcher DIRECTLY (launcherWin.showInactive()/show()),
 // bypassing switchToLauncher() and therefore the central re-assert. It is
 // reachable in undetectable mode from the renderer (openSettingsTab: keybinds
-// link in NativelyInterface, api tab from the onboarding toaster).
+// link in MeetFlooInterface, api tab from the onboarding toaster).
 //
 // This bypass is now CLOSED with two layers of defense in the undetectable arm,
 // both pinned below:

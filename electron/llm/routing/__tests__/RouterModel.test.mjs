@@ -15,7 +15,7 @@ const repoRoot = path.resolve(__dirname, '../../../..');
 const load = (rel) => import(pathToFileURL(path.join(repoRoot, 'dist-electron/electron', rel)).href);
 
 const { isInteractionRouterEnabled, DEFAULT_ENABLED, INTERACTION_ROUTER_ENV_KEY } =
-  await load('llm/routing/flag.js');
+    await load('llm/routing/flag.js');
 const { buildRouterText } = await load('llm/routing/routerText.js');
 
 describe('the router ships off', () => {
@@ -103,14 +103,14 @@ describe('the encoder text matches what the model was trained on', () => {
 
 describe('the shipped model is the one that was measured', () => {
     test('the exported model directory carries a two-class needs_response', () => {
-        const heads = path.join(repoRoot, 'resources/models/natively/router-minilm-multihead/heads.json');
+        const heads = path.join(repoRoot, 'resources/models/MeetFloo/router-minilm-multihead/heads.json');
         if (!fs.existsSync(heads)) return; // not every checkout downloads models
         const cfg = JSON.parse(fs.readFileSync(heads, 'utf8'));
         assert.deepEqual(Object.keys(cfg.label_maps.needs_response).sort(), ['no', 'yes']);
     });
 
     test('and records which epoch produced it', () => {
-        const heads = path.join(repoRoot, 'resources/models/natively/router-minilm-multihead/heads.json');
+        const heads = path.join(repoRoot, 'resources/models/MeetFloo/router-minilm-multihead/heads.json');
         if (!fs.existsSync(heads)) return;
         const cfg = JSON.parse(fs.readFileSync(heads, 'utf8'));
         assert.ok(cfg.selection?.best_epoch > 0, 'heads.json must record the selected epoch');

@@ -12,7 +12,7 @@
 # Usage:
 #   ./scripts/audit/wta-shadow-start.sh          # label "session"
 #   ./scripts/audit/wta-shadow-start.sh A        # label the run (A/B/C/D…)
-#   NATIVELY_WTA_CLAUSE_COVERAGE_REPAIR=1 ./scripts/audit/wta-shadow-start.sh C
+#   MEETFLOO_WTA_CLAUSE_COVERAGE_REPAIR=1 ./scripts/audit/wta-shadow-start.sh C
 #
 # Env prefixes pass straight through; the flags below only set defaults.
 
@@ -27,18 +27,18 @@ ln -sf "$LOG_FILE" "$LOG_DIR/latest.log"
 ln -sf "$FULL_LOG" "$LOG_DIR/latest-full.log"
 
 # Shadow/trace flags — overridable by prefixing the command with your own values.
-export NATIVELY_QUESTION_LEDGER_SHADOW="${NATIVELY_QUESTION_LEDGER_SHADOW:-1}"
-export NATIVELY_INTELLIGENCE_TRACE="${NATIVELY_INTELLIGENCE_TRACE:-1}"
-export NATIVELY_TRACE_LONGCTX="${NATIVELY_TRACE_LONGCTX:-1}"
+export MEETFLOO_QUESTION_LEDGER_SHADOW="${MEETFLOO_QUESTION_LEDGER_SHADOW:-1}"
+export MEETFLOO_INTELLIGENCE_TRACE="${MEETFLOO_INTELLIGENCE_TRACE:-1}"
+export MEETFLOO_TRACE_LONGCTX="${MEETFLOO_TRACE_LONGCTX:-1}"
 # piTelemetry buffers to an in-memory ring and prints ONLY under this flag —
 # without it wta_clause_coverage / wta_plan_divergence never reach the log
 # (live session A collected zero of both despite the shadow running fine).
-export NATIVELY_PI_TELEMETRY_DEBUG="${NATIVELY_PI_TELEMETRY_DEBUG:-true}"
+export MEETFLOO_PI_TELEMETRY_DEBUG="${MEETFLOO_PI_TELEMETRY_DEBUG:-true}"
 # Log the ANSWER text itself. Session A recorded questions, routing and every
 # context size but not one word of what was actually said — the answer is an
 # event to the renderer and never reaches stdout — so "is it grounded?" could
 # not be answered from the log at all.
-export NATIVELY_TRACE_ANSWERS="${NATIVELY_TRACE_ANSWERS:-1}"
+export MEETFLOO_TRACE_ANSWERS="${MEETFLOO_TRACE_ANSWERS:-1}"
 export MEASURE_LATENCY="${MEASURE_LATENCY:-true}"
 export PI_LATENCY_TRACE="${PI_LATENCY_TRACE:-true}"
 

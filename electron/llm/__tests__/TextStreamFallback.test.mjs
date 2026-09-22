@@ -81,7 +81,7 @@ function neverFirst(id, opts = {}) {
 }
 
 // First token arrives after `delayMs` (real timer), unless the per-attempt signal
-// aborts first. Models a slow-prefill provider like the Natively gateway when its
+// aborts first. Models a slow-prefill provider like the MeetFloo gateway when its
 // server-side chain has fallen back to MiniMax (first token 3.3-7.7s).
 function slowFirst(id, delayMs, tokens, opts = {}) {
   return {
@@ -109,7 +109,7 @@ async function collect(gen) {
 }
 
 function fastHooks(extra = {}) {
-  return { now: () => 1_000_000, random: () => 0, sleep: async () => {}, log: () => {}, warn: () => {}, ...extra };
+  return { now: () => 1_000_000, random: () => 0, sleep: async () => { }, log: () => { }, warn: () => { }, ...extra };
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -139,15 +139,15 @@ describe('DEFAULT_TEXT_FALLBACK_CONFIG', () => {
 describe('runStreamingTextFallback — race semantics', () => {
   test('fastest provider that produces a token wins and streams through', async () => {
     const health = new Map();
-    const natively = okProvider('natively', ['Hello', ' world']);
-    const out = await collect(runStreamingTextFallback([natively], health, DEFAULT_TEXT_FALLBACK_CONFIG, fastHooks()));
+    const MeetFloo = okProvider('MeetFloo', ['Hello', ' world']);
+    const out = await collect(runStreamingTextFallback([MeetFloo], health, DEFAULT_TEXT_FALLBACK_CONFIG, fastHooks()));
     assert.deepEqual(out, ['Hello', ' world']);
-    assert.equal(natively._calls, 1);
+    assert.equal(MeetFloo._calls, 1);
   });
 
   test('a pre-commit error on the primary silently falls over to the next provider', async () => {
     const health = new Map();
-    const primary = throwBeforeFirst('natively', 'fetch failed');
+    const primary = throwBeforeFirst('MeetFloo', 'fetch failed');
     const fallback = okProvider('groq', ['from', ' groq']);
     const out = await collect(runStreamingTextFallback([primary, fallback], health, DEFAULT_TEXT_FALLBACK_CONFIG, fastHooks()));
     assert.deepEqual(out, ['from', ' groq'], 'fallback served, no primary artifact leaked');
@@ -156,28 +156,28 @@ describe('runStreamingTextFallback — race semantics', () => {
 
   test('a stalled primary (no first token) fails over within the TTFT budget', async () => {
     const health = new Map();
-    const stalled = neverFirst('natively');
+    const stalled = neverFirst('MeetFloo');
     const fallback = okProvider('groq', ['ok']);
     // Real timers here (small budget) so the TTFT abort actually fires.
     const cfg = { ...DEFAULT_TEXT_FALLBACK_CONFIG, ttftTimeoutMs: 60, maxAttempts: 1 };
-    const out = await collect(runStreamingTextFallback([stalled, fallback], health, cfg, { log: () => {}, warn: () => {} }));
+    const out = await collect(runStreamingTextFallback([stalled, fallback], health, cfg, { log: () => { }, warn: () => { } }));
     assert.deepEqual(out, ['ok'], 'stalled primary timed out, fallback served');
     assert.equal(stalled._calls, 1);
   });
 
   test('a per-provider ttftTimeoutMs override lets a slow-first-token provider commit (MiniMax fallback regression)', async () => {
-    // The Natively gateway can land on MiniMax (first token 3.3-7.7s) after the
+    // The MeetFloo gateway can land on MiniMax (first token 3.3-7.7s) after the
     // Gemini chain fails. With ONLY the 2.5s default it would be aborted pre-token
     // and fail over to providers that are typically also down. A per-provider
-    // ttftTimeoutMs override (mirrors LLMHelper.ts natively text entry) must let it
+    // ttftTimeoutMs override (mirrors LLMHelper.ts MeetFloo text entry) must let it
     // commit. Small real-timer values stand in for the real seconds.
     const health = new Map();
     // Default budget 60ms; the slow provider's first token lands at 120ms but it
     // carries a 400ms override, so it must NOT be aborted — and must win.
-    const slowNatively = slowFirst('natively', 120, ['minimax answer'], { ttftTimeoutMs: 400 });
+    const slowMeetFloo = slowFirst('MeetFloo', 120, ['minimax answer'], { ttftTimeoutMs: 400 });
     const fallback = okProvider('groq', ['SHOULD-NOT-APPEAR']);
     const cfg = { ...DEFAULT_TEXT_FALLBACK_CONFIG, ttftTimeoutMs: 60, maxAttempts: 1 };
-    const out = await collect(runStreamingTextFallback([slowNatively, fallback], health, cfg, { log: () => {}, warn: () => {} }));
+    const out = await collect(runStreamingTextFallback([slowMeetFloo, fallback], health, cfg, { log: () => { }, warn: () => { } }));
     assert.deepEqual(out, ['minimax answer'], 'override let the slow gateway commit; fallback never served');
     assert.equal(fallback._calls, 0, 'fallback must not open — the override kept the slow provider alive');
   });
@@ -187,16 +187,16 @@ describe('runStreamingTextFallback — race semantics', () => {
     // override, so the 60ms default aborts it and the fallback serves. This is the
     // exact bug the override fixes.
     const health = new Map();
-    const slowNatively = slowFirst('natively', 120, ['minimax answer']); // no override
+    const slowMeetFloo = slowFirst('MeetFloo', 120, ['minimax answer']); // no override
     const fallback = okProvider('groq', ['fallback served']);
     const cfg = { ...DEFAULT_TEXT_FALLBACK_CONFIG, ttftTimeoutMs: 60, maxAttempts: 1 };
-    const out = await collect(runStreamingTextFallback([slowNatively, fallback], health, cfg, { log: () => {}, warn: () => {} }));
+    const out = await collect(runStreamingTextFallback([slowMeetFloo, fallback], health, cfg, { log: () => { }, warn: () => { } }));
     assert.deepEqual(out, ['fallback served'], 'no override → default budget aborted the slow provider');
   });
 
   test('a post-commit failure does NOT switch providers (no duplicate output)', async () => {
     const health = new Map();
-    const committed = throwAfterFirst('natively', ['partial answer'], 'socket hangup');
+    const committed = throwAfterFirst('MeetFloo', ['partial answer'], 'socket hangup');
     const fallback = okProvider('groq', ['SHOULD-NOT-APPEAR']);
     const out = await collect(runStreamingTextFallback([committed, fallback], health, DEFAULT_TEXT_FALLBACK_CONFIG, fastHooks()));
     assert.deepEqual(out, ['partial answer'], 'partial answer kept; no fallback duplicate');
@@ -205,7 +205,7 @@ describe('runStreamingTextFallback — race semantics', () => {
 
   test('exhaustion (all providers fail pre-commit) throws', async () => {
     const health = new Map();
-    const a = throwBeforeFirst('natively', 'fetch failed');
+    const a = throwBeforeFirst('MeetFloo', 'fetch failed');
     const b = throwBeforeFirst('groq', 'fetch failed');
     await assert.rejects(
       () => collect(runStreamingTextFallback([a, b], health, { ...DEFAULT_TEXT_FALLBACK_CONFIG, maxAttempts: 1 }, fastHooks())),
@@ -217,7 +217,7 @@ describe('runStreamingTextFallback — race semantics', () => {
     const health = new Map();
     const ctrl = new AbortController();
     ctrl.abort();
-    const p = okProvider('natively', ['x']);
+    const p = okProvider('MeetFloo', ['x']);
     const out = await collect(runStreamingTextFallback([p], health, DEFAULT_TEXT_FALLBACK_CONFIG, fastHooks(), ctrl.signal));
     assert.deepEqual(out, [], 'aborted before start yields nothing');
   });

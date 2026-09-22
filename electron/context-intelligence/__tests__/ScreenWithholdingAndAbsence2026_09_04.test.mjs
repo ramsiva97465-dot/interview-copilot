@@ -40,7 +40,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-process.env.NATIVELY_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'v3-screenwithhold-'));
+process.env.MEETFLOO_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'v3-screenwithhold-'));
 
 const base = path.resolve(process.cwd(), 'dist-electron/electron/context-intelligence');
 const store = await import(

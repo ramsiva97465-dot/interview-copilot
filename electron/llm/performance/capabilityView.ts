@@ -43,7 +43,7 @@ export function verdictFrom(value: boolean | 'unknown'): CapabilityVerdict {
 }
 
 /**
- * Read the capability facts Natively already knows for one model.
+ * Read the capability facts MeetFloo already knows for one model.
  *
  * `isOllama` is passed through rather than sniffed, matching every existing
  * caller of `getModelCapabilities` — that predicate lives on LLMHelper and this
@@ -53,7 +53,7 @@ export function readCapabilityFacts(modelId: string, isOllama: boolean): Capabil
   try {
     const caps = getModelCapabilities(modelId, isOllama);
     return {
-      // Every provider Natively drives through the deadline driver is a
+      // Every provider MeetFloo drives through the deadline driver is a
       // streaming provider; the non-streaming paths (executeCustomProvider,
       // generateWithCodexCli) never reach this layer.
       streaming: true,
@@ -61,7 +61,7 @@ export function readCapabilityFacts(modelId: string, isOllama: boolean): Capabil
       // names as the single source. Asking it directly rather than trusting the
       // copy is the point of a view.
       vision: isGroqModelId(modelId) ? groqSupportsImages(modelId) : caps.supportsImages,
-      // Natively has no tool-calling or structured-output registry to read, and
+      // MeetFloo has no tool-calling or structured-output registry to read, and
       // inventing one here would be exactly the speculative abstraction Phase 0
       // rule 22 forbids. 'unknown' is the honest value.
       tools: 'unknown',

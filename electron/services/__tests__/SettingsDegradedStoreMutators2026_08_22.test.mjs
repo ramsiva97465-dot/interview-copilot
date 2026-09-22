@@ -33,7 +33,7 @@ require.cache[electronPath] = {
   },
 };
 const { SettingsManager } = require(dist('services/SettingsManager.js'));
-const SLOT = '__nativelySettingsManagerV1__';
+const SLOT = '__MeetFlooSettingsManagerV1__';
 
 // The user's real, populated settings file.
 const ORIGINAL = { screenUnderstandingMode: 'vision_first', contextDebugLevel: 'off', someUserKey: 'keep-me' };
@@ -49,7 +49,7 @@ const diskNow = () => {
   return raw;
 };
 
-after(() => { try { fs.chmodSync(settingsPath, 0o600); fs.rmSync(userData, { recursive: true, force: true }); } catch {} });
+after(() => { try { fs.chmodSync(settingsPath, 0o600); fs.rmSync(userData, { recursive: true, force: true }); } catch { } });
 
 describe('a degraded settings store must refuse the TYPED setters too', () => {
   let sm;

@@ -11,7 +11,7 @@
  * Measured live on both models, using the app's own BRIEF guidance verbatim.
  */
 import fs from 'node:fs';
-const env = fs.readFileSync('/tmp/natively-land-wt/.env', 'utf8');
+const env = fs.readFileSync('/tmp/MeetFloo-land-wt/.env', 'utf8');
 const k = (n) => env.split('\n').find((l) => l.startsWith(n + '=')).split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '');
 const DS = k('DEEPSEEK_API_KEY'), GM = k('GEMINI_API_KEY');
 const GATE = 160;
@@ -20,17 +20,17 @@ const GATE = 160;
 const SYS = `You are helping a candidate answer live in an interview. Speak in first person.
 Length: 25-40 words, about 15 seconds — a tight, direct answer: lead with the point and stop.`;
 
-async function ds(u){const r=await fetch('https://api.deepseek.com/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${DS}`},body:JSON.stringify({model:'deepseek-v4-flash',temperature:0,max_tokens:2000,messages:[{role:'system',content:SYS},{role:'user',content:u}]})});const c=(await r.json()).choices[0];return c.finish_reason==='length'?null:(c.message.content??'').trim();}
-async function gm(u){const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${GM}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:SYS}]},contents:[{role:'user',parts:[{text:u}]}],generationConfig:{temperature:0,maxOutputTokens:2000}})});const c=(await r.json()).candidates?.[0];if(!c||c.finishReason==='MAX_TOKENS')return null;return ((c.content?.parts??[]).map(p=>p.text??'').join('')).trim();}
+async function ds(u) { const r = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${DS}` }, body: JSON.stringify({ model: 'deepseek-v4-flash', temperature: 0, max_tokens: 2000, messages: [{ role: 'system', content: SYS }, { role: 'user', content: u }] }) }); const c = (await r.json()).choices[0]; return c.finish_reason === 'length' ? null : (c.message.content ?? '').trim(); }
+async function gm(u) { const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${GM}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ systemInstruction: { parts: [{ text: SYS }] }, contents: [{ role: 'user', parts: [{ text: u }] }], generationConfig: { temperature: 0, maxOutputTokens: 2000 } }) }); const c = (await r.json()).candidates?.[0]; if (!c || c.finishReason === 'MAX_TOKENS') return null; return ((c.content?.parts ?? []).map(p => p.text ?? '').join('')).trim(); }
 
 // Question shapes the app itself routes to BRIEF: yes/no, factual lookup, definition.
 const QS = [
-  ['yes/no',      'Do you have experience with Kubernetes?'],
-  ['yes/no',      'Did you lead that migration yourself?'],
-  ['factual',     'How many engineers were on your team?'],
-  ['factual',     'Which database did you use?'],
-  ['definition',  'What is a hash map?'],
-  ['definition',  'What is idempotency?'],
+  ['yes/no', 'Do you have experience with Kubernetes?'],
+  ['yes/no', 'Did you lead that migration yourself?'],
+  ['factual', 'How many engineers were on your team?'],
+  ['factual', 'Which database did you use?'],
+  ['definition', 'What is a hash map?'],
+  ['definition', 'What is idempotency?'],
 ];
 
 for (const [mname, fn] of [['deepseek-v4-flash', ds], ['gemini-3.1-flash-lite', gm]]) {

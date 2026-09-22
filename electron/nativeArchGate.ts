@@ -38,13 +38,13 @@
   // showing a fatal modal + app.exit(1) BEFORE any window exists, which
   // permanently locks the user out of boot with no in-app recovery. A
   // packaging or `file`-classification regression is exactly the kind of
-  // thing that has bricked a shipped build before. NATIVELY_SKIP_ARCH_GATE=1
+  // thing that has bricked a shipped build before. MEETFLOO_SKIP_ARCH_GATE=1
   // disables the gate entirely so a false positive can never trap a user;
   // worst case without the gate is a clear dlopen error later, not a silent
   // lockout. (The gate remains ON by default — this is a support-desk
   // "run this and reopen" lever, not a normal-operation flag.)
-  if (process.env.NATIVELY_SKIP_ARCH_GATE === '1') {
-    try { console.warn('[nativeArch] NATIVELY_SKIP_ARCH_GATE=1 — boot arch gate DISABLED'); } catch { /* best-effort */ }
+  if (process.env.MEETFLOO_SKIP_ARCH_GATE === '1') {
+    try { console.warn('[nativeArch] MEETFLOO_SKIP_ARCH_GATE=1 — boot arch gate DISABLED'); } catch { /* best-effort */ }
     return;
   }
 
@@ -96,7 +96,7 @@
    * Detect a packaged build WITHOUT requiring the Electron `app` object
    * (the gate may run before electron is safe to load). The two signals:
    *
-   *   1. Electron sets `process.resourcesPath` to `…/Natively.app/Contents/Resources`
+   *   1. Electron sets `process.resourcesPath` to `…/MeetFloo.app/Contents/Resources`
    *      when the bundle is packaged. In dev it's `undefined` or points
    *      at the running `electron` executable's Resources dir.
    *   2. `process.defaultApp === true` is set when Electron is invoked
@@ -110,7 +110,7 @@
     const rp = (process as any).resourcesPath as string | undefined;
     if (typeof rp !== 'string') return false;
     if ((process as any).defaultApp === true) return false;
-    // Real packaged apps: resourcesPath ends in /Natively.app/Contents/Resources.
+    // Real packaged apps: resourcesPath ends in /MeetFloo.app/Contents/Resources.
     // The `.app` substring is a robust heuristic — there's no `.app` segment
     // in any Electron dev tree path.
     return rp.includes('.app/');
@@ -140,7 +140,7 @@
       // showErrorBox is modal and blocks until the user clicks OK.
       dialog.showErrorBox(
         packaged
-          ? 'Natively was built for a different chip — please reinstall'
+          ? 'MeetFloo was built for a different chip — please reinstall'
           : 'Native modules are wrong architecture — run this command to fix:',
         detail,
       );
@@ -167,19 +167,19 @@
     if (result.ok || result.skipped) return;
     const detail = packaged
       ? `Detected: ${result.hardware}\n` +
-        `Built:    ${result.mismatches.map((m: any) => m.actual).join(', ')}\n\n` +
-        `${result.fix}\n\n` +
-        `Mismatched files:\n` +
-        result.mismatches.map((m: any) => `  - ${m.path} (built ${m.actual}, need ${m.expected})`).join('\n')
+      `Built:    ${result.mismatches.map((m: any) => m.actual).join(', ')}\n\n` +
+      `${result.fix}\n\n` +
+      `Mismatched files:\n` +
+      result.mismatches.map((m: any) => `  - ${m.path} (built ${m.actual}, need ${m.expected})`).join('\n')
       : `Detected: ${result.hardware}\n` +
-        `Built:    ${result.mismatches.map((m: any) => m.actual).join(', ')}\n\n` +
-        `The compiled binaries were built under Rosetta and will not load under the ` +
-        `native Electron runtime. The local database, meeting history, and modes ` +
-        `will not work until rebuilt.\n\n` +
-        `Fix (copy and paste into a terminal):\n\n` +
-        `  ${result.fix}\n\n` +
-        `Mismatched files:\n` +
-        result.mismatches.map((m: any) => `  - ${m.path} (built ${m.actual}, need ${m.expected})`).join('\n');
+      `Built:    ${result.mismatches.map((m: any) => m.actual).join(', ')}\n\n` +
+      `The compiled binaries were built under Rosetta and will not load under the ` +
+      `native Electron runtime. The local database, meeting history, and modes ` +
+      `will not work until rebuilt.\n\n` +
+      `Fix (copy and paste into a terminal):\n\n` +
+      `  ${result.fix}\n\n` +
+      `Mismatched files:\n` +
+      result.mismatches.map((m: any) => `  - ${m.path} (built ${m.actual}, need ${m.expected})`).join('\n');
     throw new Error(`${packaged ? '[nativeArch:packaged]' : '[nativeArch]'} Architecture mismatch:\n` + detail);
   } catch (e: any) {
     if (e instanceof Error && /^\[nativeArch(?::packaged)?\]/.test(e.message)) {
@@ -195,4 +195,4 @@
   }
 })();
 
-export {};
+export { };

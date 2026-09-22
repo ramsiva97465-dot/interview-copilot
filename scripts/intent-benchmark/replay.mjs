@@ -16,7 +16,7 @@
 //      improvement. The gate shows both counts.
 //
 //   3. It knows the suite has an inherited red baseline. Four service tests
-//      fail at campaign base 330717e5 (docs/natively-router-test-baseline.md).
+//      fail at campaign base 330717e5 (docs/MeetFloo-router-test-baseline.md).
 //      A gate calibrated against "zero failures" would either be permanently
 //      red or be silenced, and a silenced gate is worse than none.
 

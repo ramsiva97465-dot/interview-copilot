@@ -1,7 +1,7 @@
-// Semantic-retrieval repair — REAL NATIVELY BACKEND flag matrix (ON vs OFF).
+// Semantic-retrieval repair — REAL MEETFLOO BACKEND flag matrix (ON vs OFF).
 //
-// Drives the PRODUCTION path a paying user hits: model='natively' →
-// POST https://api.natively.software/v1/chat → server-chosen model
+// Drives the PRODUCTION path a paying user hits: model='MeetFloo' →
+// POST https://api.MeetFloo.software/v1/chat → server-chosen model
 // (flashModelPicker), through this session's shipped defaults and their kill
 // switches:
 //
@@ -23,7 +23,7 @@
 //
 // Run:
 //   npm run build:electron
-//   ./node_modules/.bin/electron scripts/e2e-semantic-repair-natively-backend.js
+//   ./node_modules/.bin/electron scripts/e2e-semantic-repair-MeetFloo-backend.js
 
 'use strict';
 
@@ -40,20 +40,20 @@ for (const line of fs.readFileSync(path.join(repoRoot, '.env'), 'utf8').split('\
   const m = /^([A-Z0-9_]+)=(.*)$/.exec(line.trim());
   if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '');
 }
-const NATIVELY_KEY = process.env.NATIVELY_API_KEY || '';
+const MEETFLOO_KEY = process.env.MEETFLOO_API_KEY || '';
 const GEMINI_KEY = process.env.GEMINI_API_KEY || '';
-if (!NATIVELY_KEY) { console.error('[e2e-nat] FATAL: NATIVELY_API_KEY missing from .env'); process.exit(1); }
-console.log(`[e2e-nat] keys: natively=present gemini=${GEMINI_KEY ? 'present' : 'absent'}`);
+if (!MEETFLOO_KEY) { console.error('[e2e-nat] FATAL: MEETFLOO_API_KEY missing from .env'); process.exit(1); }
+console.log(`[e2e-nat] keys: MeetFloo=present gemini=${GEMINI_KEY ? 'present' : 'absent'}`);
 
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-e2e-natbackend-'));
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-e2e-natbackend-'));
 app.setPath('userData', tmpUserData);
 
 const KILL_ALL = () => {
-  process.env.NATIVELY_SEMANTIC_ADMISSION_GATE = 'off';
+  process.env.MEETFLOO_SEMANTIC_ADMISSION_GATE = 'off';
   process.env.PROFILE_GROUNDING_V2_JDFIT_COVERAGE = 'off';
 };
 const DEFAULTS_ON = () => {
-  delete process.env.NATIVELY_SEMANTIC_ADMISSION_GATE;
+  delete process.env.MEETFLOO_SEMANTIC_ADMISSION_GATE;
   delete process.env.PROFILE_GROUNDING_V2_JDFIT_COVERAGE;
 };
 
@@ -111,8 +111,8 @@ async function main() {
   const { buildUserSelectedSourceContract } = require(path.join(distRoot, 'services/modeSourceContract.js'));
 
   const llmHelper = new LLMHelper(GEMINI_KEY || undefined);
-  llmHelper.setNativelyKey(NATIVELY_KEY);
-  llmHelper.setModel('natively');
+  llmHelper.setMeetFlooKey(MEETFLOO_KEY);
+  llmHelper.setModel('MeetFloo');
   const serverModels = new Set();
   const noteModel = () => { const m = llmHelper.getLastProviderModel && llmHelper.getLastProviderModel(); if (m) serverModels.add(m); };
 
@@ -128,7 +128,7 @@ async function main() {
 
   // ── M2: doc-grounded × flag states ────────────────────────────────────────
   const mm = ModesManager.getInstance();
-  for (const m of mm.getModes()) { if (/seminar/i.test(m.name)) { try { mm.deleteMode(m.id); } catch (_) {} } }
+  for (const m of mm.getModes()) { if (/seminar/i.test(m.name)) { try { mm.deleteMode(m.id); } catch (_) { } } }
   const mode = mm.createMode({ name: 'Seminar Presentation Assistant (E2E-nat)', templateType: 'general' });
   mm.updateMode(mode.id, {
     customContext: CUSTOM_PROMPT,
@@ -183,11 +183,11 @@ async function main() {
   }];
   const makeOrch = () => {
     const db = {
-      initializeSchema() {}, getDocumentByType(t) { return t === 'resume' ? RESUME : t === 'job_description' ? JD : null; },
+      initializeSchema() { }, getDocumentByType(t) { return t === 'resume' ? RESUME : t === 'job_description' ? JD : null; },
       getAllNodes() { return NODES; }, getNodeCount() { return 1; }, getIntro() { return null; },
       getGapAnalysis() { return null; }, getNegotiationScript() { return null; }, getMockQuestions() { return null; },
-      getCultureMappings() { return null; }, updateDocumentStructuredData() {}, getNodesNeedingReembed() { return []; },
-      updateNodeEmbedding() {},
+      getCultureMappings() { return null; }, updateDocumentStructuredData() { }, getNodesNeedingReembed() { return []; },
+      updateNodeEmbedding() { },
     };
     const o = new KnowledgeOrchestrator(db);
     o.setKnowledgeMode(true);
@@ -230,12 +230,12 @@ async function main() {
     totalFail += fail;
   }
   for (const f of results.failures) console.log(`  - [${f.section}] ${f.name} ${f.detail || ''}`);
-  try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch (_) { }
   process.exit(totalFail === 0 ? 0 : 1);
 }
 
 main().catch((err) => {
   console.error('[e2e-nat] FATAL:', err);
-  try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(tmpUserData, { recursive: true, force: true }); } catch (_) { }
   process.exit(2);
 });

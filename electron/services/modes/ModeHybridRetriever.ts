@@ -121,10 +121,10 @@ export type ModeReferenceIndexStatus = 'pending' | 'indexing' | 'ready' | 'faile
  * must be marked OCR_REQUIRED, never READY/PARTIAL.
  */
 export function isPlaceholderOnlyContent(content: string): boolean {
-  const s = String(content ?? '');
-  if (!/\[Page \d+\]/.test(s)) return false;
-  const stripped = s.replace(/\[Page \d+\]/g, '').replace(/\s+/g, '');
-  return stripped.length < 40;
+    const s = String(content ?? '');
+    if (!/\[Page \d+\]/.test(s)) return false;
+    const stripped = s.replace(/\[Page \d+\]/g, '').replace(/\s+/g, '');
+    return stripped.length < 40;
 }
 
 const DEFAULT_TOKEN_BUDGET = 1800;
@@ -136,14 +136,14 @@ const CHUNK_OVERLAP = 30;
 // (e.g. a 14k-row CSV → hundreds of chunks) doesn't exceed the pipeline's 30s
 // per-call embed timeout and lose all progress. 100 aligns with the Gemini
 // batchEmbedContents request cap.
-const MODE_INDEX_EMBED_BATCH = Number(process.env.NATIVELY_MODE_INDEX_EMBED_BATCH) || 100;
+const MODE_INDEX_EMBED_BATCH = Number(process.env.MEETFLOO_MODE_INDEX_EMBED_BATCH) || 100;
 /**
  * Most chunks a single live query may embed ephemerally (chunks with no vector
  * in the active space). Sized for "a file was uploaded a moment ago and its
  * background index has not landed" — never for "the whole corpus changed
  * space". See performHybridRetrieval for the crash this bounds.
  */
-export const QUERY_EPHEMERAL_EMBED_MAX = Number(process.env.NATIVELY_QUERY_EPHEMERAL_EMBED_MAX) || 24;
+export const QUERY_EPHEMERAL_EMBED_MAX = Number(process.env.MEETFLOO_QUERY_EPHEMERAL_EMBED_MAX) || 24;
 
 /**
  * F22 — the LOCAL ONNX embedder needs a much smaller indexing batch.
@@ -165,7 +165,7 @@ export const QUERY_EPHEMERAL_EMBED_MAX = Number(process.env.NATIVELY_QUERY_EPHEM
  * specific to in-process inference, not a batching problem in general.
  */
 const MODE_INDEX_EMBED_BATCH_LOCAL =
-  Number(process.env.NATIVELY_MODE_INDEX_EMBED_BATCH_LOCAL) || 16;
+    Number(process.env.MEETFLOO_MODE_INDEX_EMBED_BATCH_LOCAL) || 16;
 
 /**
  * Character budget for ONE embedding request (GAP-3).
@@ -190,7 +190,7 @@ const MODE_INDEX_EMBED_BATCH_LOCAL =
  * over a million characters in one request).
  */
 const MODE_INDEX_EMBED_BATCH_CHARS =
-  Number(process.env.NATIVELY_MODE_INDEX_EMBED_BATCH_CHARS) || 120_000;
+    Number(process.env.MEETFLOO_MODE_INDEX_EMBED_BATCH_CHARS) || 120_000;
 
 /**
  * How many files may be embedding at once, process-wide (GAP-4).
@@ -207,11 +207,11 @@ const MODE_INDEX_EMBED_BATCH_CHARS =
  * query path, which is the latency a user actually feels.
  */
 const MODE_INDEX_MAX_CONCURRENT_FILES =
-  Number(process.env.NATIVELY_MODE_INDEX_MAX_CONCURRENT_FILES) || 2;
+    Number(process.env.MEETFLOO_MODE_INDEX_MAX_CONCURRENT_FILES) || 2;
 
 /** Bounded retry for a sub-batch the SERVER said is worth retrying. */
 const MODE_INDEX_BATCH_RETRIES =
-  Number(process.env.NATIVELY_MODE_INDEX_BATCH_RETRIES) || 2;
+    Number(process.env.MEETFLOO_MODE_INDEX_BATCH_RETRIES) || 2;
 const MODE_INDEX_RETRY_CAP_MS = 20_000;
 
 /**
@@ -221,24 +221,24 @@ const MODE_INDEX_RETRY_CAP_MS = 20_000;
  * pure, so it should be verifiable without a database or a provider.
  */
 export function planEmbedBatches(chunks: string[], maxItems: number, maxChars: number): string[][] {
-  const batches: string[][] = [];
-  let current: string[] = [];
-  let chars = 0;
-  for (const c of chunks) {
-    const len = c.length;
-    // A single chunk over the budget still goes out ALONE rather than being cut:
-    // the server truncates at its own per-input cap and reports it, and silently
-    // splitting a semantic unit here would undo the chunker's whole purpose.
-    if (current.length > 0 && (current.length >= maxItems || chars + len > maxChars)) {
-      batches.push(current);
-      current = [];
-      chars = 0;
+    const batches: string[][] = [];
+    let current: string[] = [];
+    let chars = 0;
+    for (const c of chunks) {
+        const len = c.length;
+        // A single chunk over the budget still goes out ALONE rather than being cut:
+        // the server truncates at its own per-input cap and reports it, and silently
+        // splitting a semantic unit here would undo the chunker's whole purpose.
+        if (current.length > 0 && (current.length >= maxItems || chars + len > maxChars)) {
+            batches.push(current);
+            current = [];
+            chars = 0;
+        }
+        current.push(c);
+        chars += len;
     }
-    current.push(c);
-    chars += len;
-  }
-  if (current.length > 0) batches.push(current);
-  return batches;
+    if (current.length > 0) batches.push(current);
+    return batches;
 }
 
 /**
@@ -247,19 +247,19 @@ export function planEmbedBatches(chunks: string[], maxItems: number, maxChars: n
  * dependency for eight lines would be worse.
  */
 class IndexConcurrencyGate {
-  private active = 0;
-  private waiters: Array<() => void> = [];
-  constructor(private readonly limit: number) {}
-  async acquire(): Promise<void> {
-    if (this.active < this.limit) { this.active++; return; }
-    await new Promise<void>((resolve) => this.waiters.push(resolve));
-    this.active++;
-  }
-  release(): void {
-    this.active = Math.max(0, this.active - 1);
-    const next = this.waiters.shift();
-    if (next) next();
-  }
+    private active = 0;
+    private waiters: Array<() => void> = [];
+    constructor(private readonly limit: number) { }
+    async acquire(): Promise<void> {
+        if (this.active < this.limit) { this.active++; return; }
+        await new Promise<void>((resolve) => this.waiters.push(resolve));
+        this.active++;
+    }
+    release(): void {
+        this.active = Math.max(0, this.active - 1);
+        const next = this.waiters.shift();
+        if (next) next();
+    }
 }
 const indexGate = new IndexConcurrencyGate(MODE_INDEX_MAX_CONCURRENT_FILES);
 const MIN_COMBINED_SCORE = 0.15;
@@ -323,7 +323,7 @@ const CONF_MIN_QUERY_TOKENS = 3;     // ignore trivially short queries for the "
 const RERANK_BATCH_SIZE = 6;
 
 function keylessManualRetrievalUsesLexical(): boolean {
-    const raw = String(process.env.NATIVELY_KEYLESS_LEXICAL_MANUAL_RETRIEVAL || '').trim().toLowerCase();
+    const raw = String(process.env.MEETFLOO_KEYLESS_LEXICAL_MANUAL_RETRIEVAL || '').trim().toLowerCase();
     if (['0', 'false', 'off', 'disabled', 'no'].includes(raw)) return false;
     return true;
 }
@@ -749,7 +749,7 @@ export class ModeHybridRetriever {
             const configuredBatch = activeProvider === 'local'
                 ? MODE_INDEX_EMBED_BATCH_LOCAL
                 : MODE_INDEX_EMBED_BATCH;
-            // Never exceed the provider's own per-request ceiling. The Natively
+            // Never exceed the provider's own per-request ceiling. The MeetFloo
             // transport caps at 32 (the server refuses more) and SPLITS anything
             // larger into sequential round trips — all of which then share the
             // pipeline's single 30s deadline, and all of which are discarded
@@ -1141,11 +1141,11 @@ export class ModeHybridRetriever {
                     candidateCount: props.candidateCount,
                     queryTokenCount: props.queryTokenCount,
                     errorClass: props.errorClass,
-                    // Optional test-run marker. Tests set NATIVELY_TELEMETRY_TEST_RUN_ID
+                    // Optional test-run marker. Tests set MEETFLOO_TELEMETRY_TEST_RUN_ID
                     // to filter events emitted by their specific run, isolating
                     // from any parallel test or stale JSONL line. Production
                     // leaves this unset.
-                    testRunId: process.env.NATIVELY_TELEMETRY_TEST_RUN_ID || undefined,
+                    testRunId: process.env.MEETFLOO_TELEMETRY_TEST_RUN_ID || undefined,
                 },
             });
         } catch {
@@ -1264,7 +1264,7 @@ export class ModeHybridRetriever {
                     candidateCount: conf.candidateCount,
                     queryTokenCount: conf.queryTokenCount,
                     usedFallback: conf.usedFallback,
-                    testRunId: process.env.NATIVELY_TELEMETRY_TEST_RUN_ID || undefined,
+                    testRunId: process.env.MEETFLOO_TELEMETRY_TEST_RUN_ID || undefined,
                 },
             });
         } catch {
@@ -1303,7 +1303,7 @@ export class ModeHybridRetriever {
                     candidateCount: props.candidateCount,
                     queryTokenCount: props.queryTokenCount,
                     errorClass: props.errorClass,
-                    testRunId: process.env.NATIVELY_TELEMETRY_TEST_RUN_ID || undefined,
+                    testRunId: process.env.MEETFLOO_TELEMETRY_TEST_RUN_ID || undefined,
                 },
             });
         } catch {
@@ -1474,8 +1474,8 @@ export class ModeHybridRetriever {
 
         const usingLexicalForLocalManualQuery = this.shouldUseLexicalForLocalManualQuery(hasTranscript);
 
-        const h4StageTrace = process.env.NATIVELY_E2E === '1'
-            && process.env.NATIVELY_H4_STAGE_TRACE === '1';
+        const h4StageTrace = process.env.MEETFLOO_E2E === '1'
+            && process.env.MEETFLOO_H4_STAGE_TRACE === '1';
         const h4StartedAt = Date.now();
         const markH4HybridStage = (stage: string, details: Record<string, unknown> = {}) => {
             if (h4StageTrace) console.log('[TRACE:H4-HYBRID]', JSON.stringify({ stage, atMs: Date.now() - h4StartedAt, ...details }));
@@ -2532,7 +2532,7 @@ export class ModeHybridRetriever {
         // not the one holding the specific fact (a normative clause / a particular
         // data row / an equation), so one extra per file materially improves recall
         // without blowing topK. Cheap: at most (#files * PER_FILE_FLOOR) reserved slots.
-        const PER_FILE_FLOOR = Number(process.env.NATIVELY_RETRIEVAL_PER_FILE_FLOOR) || 2;
+        const PER_FILE_FLOOR = Number(process.env.MEETFLOO_RETRIEVAL_PER_FILE_FLOOR) || 2;
         if (guaranteePerFile) {
             // ROUND-ROBIN, not global order (deep-test D3, 2026-08-01): walking
             // `sorted` globally let a large file's chunks consume the token
@@ -2571,7 +2571,7 @@ export class ModeHybridRetriever {
             const m = c.text.match(/^\[Section\s+([\d.]+)/);
             return m ? m[1] : `__chunk_${c.sourceId}_${c.chunkIndex}`;
         };
-        const SECTION_CAP = Number(process.env.NATIVELY_RETRIEVAL_SECTION_CAP) || 4;
+        const SECTION_CAP = Number(process.env.MEETFLOO_RETRIEVAL_SECTION_CAP) || 4;
         {
             const perSection = new Map<string, number>();
             for (const c of sorted) {

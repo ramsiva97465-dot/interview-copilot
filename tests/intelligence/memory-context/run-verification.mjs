@@ -33,12 +33,12 @@ const { GROUPS, MEETING_TRANSCRIPT } = await import('./dataset.mjs');
 // Force conversation/meeting flags ON for the verification (the runner is the gate that
 // turns them on to PROVE they work — production stays default-OFF). Set BEFORE requiring
 // the flag module so the env is read fresh.
-process.env.NATIVELY_CONVERSATION_MEMORY_V2 = 'true';
-process.env.NATIVELY_MEETING_MEMORY_V2 = 'true';
-process.env.NATIVELY_PROFILE_TREE_V2 = 'true';
-process.env.NATIVELY_GLOBAL_SEARCH_V2 = 'true';
-process.env.NATIVELY_IN_MEETING_SEARCH_V2 = 'true';
-process.env.NATIVELY_INTELLIGENCE_ATTRIBUTION = 'true';
+process.env.MEETFLOO_CONVERSATION_MEMORY_V2 = 'true';
+process.env.MEETFLOO_MEETING_MEMORY_V2 = 'true';
+process.env.MEETFLOO_PROFILE_TREE_V2 = 'true';
+process.env.MEETFLOO_GLOBAL_SEARCH_V2 = 'true';
+process.env.MEETFLOO_IN_MEETING_SEARCH_V2 = 'true';
+process.env.MEETFLOO_INTELLIGENCE_ATTRIBUTION = 'true';
 
 const llm = require(path.join(DIST, 'llm', 'index.js'));
 const { ConversationMemoryService } = require(path.join(DIST, 'intelligence', 'ConversationMemoryService.js'));
@@ -230,7 +230,7 @@ function score(item, res) {
   if (e.providerFree) ok('provider_free', res.providerFree === true || res.via === 'profile_fast_path');
   if (e.firstPerson && res.answer) ok('first_person', /\b(I|I'm|I’m|My|I've|I’ve)\b/.test(res.answer));
   if (e.noSecondPerson && res.answer) ok('no_second_person', !/^You have|\bYour experience\b/i.test(res.answer));
-  if (e.noAssistantLeak && res.answer) ok('no_assistant_leak', !/I'?m Natively|I am Natively|an AI assistant/i.test(res.answer));
+  if (e.noAssistantLeak && res.answer) ok('no_assistant_leak', !/I'?m MeetFloo|I am MeetFloo|an AI assistant/i.test(res.answer));
   if (e.answerType) ok(`answer_type=${e.answerType}`, a.answer_type === e.answerType);
   if (e.profileGrounded) ok('profile_grounded', a.structured_resume_used || a.profile_tree_fast_path_used || a.hybrid_rag_used);
   if (e.profileForbidden) ok('profile_forbidden', !a.structured_resume_used && !a.profile_tree_fast_path_used);
@@ -338,7 +338,7 @@ async function main() {
 
   console.log(`\n[verify:memory-context] total=${total} pass=${pass} fail=${fail} provider_unavailable=${providerUnavail} verifiablePassRate=${summary.verifiablePassRate}`);
   console.log(`[verify:memory-context] wrote ${path.relative(REPO_ROOT, path.join(OUT_DIR, 'verification-results.json'))}`);
-  try { harness?.cleanup?.(); } catch {}
+  try { harness?.cleanup?.(); } catch { }
   // Exit non-zero only on a HARD fail (attribution wrong); provider_unavailable is honest.
   process.exit(fail > 0 ? 1 : 0);
 }

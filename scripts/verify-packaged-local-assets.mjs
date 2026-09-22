@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Fail-loud validation that Natively's REQUIRED packaged assets are present so a
+// Fail-loud validation that MeetFloo's REQUIRED packaged assets are present so a
 // clean machine with no Ollama, no API keys, no internet, and no dev repo can:
 //   - launch the app
 //   - run local diagnostics
@@ -163,7 +163,7 @@ function checkFile(root, rel, label) {
     return;
   }
   let size = 0;
-  try { size = fs.statSync(full).size; } catch {}
+  try { size = fs.statSync(full).size; } catch { }
   if (size === 0) errors.push(`Empty ${label} (0 bytes): ${full}`);
 }
 
@@ -262,17 +262,17 @@ function verifyPackaged(appArg, platformArg) {
   // is ever unwired, the app still builds and ships, and the failure surfaces
   // only at runtime as a spawn ENOENT the moment a user picks Apple Speech.
   if (platform === 'darwin') {
-    const helper = path.join(resources, 'apple-speech', 'natively-apple-speech');
+    const helper = path.join(resources, 'apple-speech', 'MeetFloo-apple-speech');
     if (!exists(helper)) {
       errors.push(
-        'Missing Apple Speech helper: Resources/apple-speech/natively-apple-speech ' +
+        'Missing Apple Speech helper: Resources/apple-speech/MeetFloo-apple-speech ' +
         '(scripts/after-pack.cjs should have compiled it during afterPack).',
       );
     } else {
       try {
         fs.accessSync(helper, fs.constants.X_OK);
       } catch {
-        errors.push('Apple Speech helper is not executable: Resources/apple-speech/natively-apple-speech');
+        errors.push('Apple Speech helper is not executable: Resources/apple-speech/MeetFloo-apple-speech');
       }
     }
   }

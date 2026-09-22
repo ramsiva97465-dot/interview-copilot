@@ -7,6 +7,6 @@
 **Production deadlines.** Measured against the deadlines in the code today:
 - **Current DeepSeek:** never breached one.
 - **DeepSeek thinking:** breached in 29/33 runs, mostly the 10 s cap on non-extraction calls (polish/follow-up/title) and the 45 s extraction cap.
-- **Every Luna level:** breached in every run. Most breaches are the server-wide undici `headersTimeout: 30 s`: OpenAI's non-streaming Responses API sends headers only when the response is complete, while DeepSeek sends headers in ~300 ms. As deployed, Natively would silently replace most Luna calls with Gemini, so adopting Luna would also require streaming or new deadlines.
+- **Every Luna level:** breached in every run. Most breaches are the server-wide undici `headersTimeout: 30 s`: OpenAI's non-streaming Responses API sends headers only when the response is complete, while DeepSeek sends headers in ~300 ms. As deployed, MeetFloo would silently replace most Luna calls with Gemini, so adopting Luna would also require streaming or new deadlines.
 
 **TTFT** does not exist on this non-streaming path, so it is reported as N/A rather than approximated.

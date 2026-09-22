@@ -12,7 +12,7 @@
 //
 // This script therefore asserts the things that can ONLY be checked here:
 //   1. app.getPath('userData') resolves, and the answer-policy store round-trips
-//      through the REAL userData directory with no NATIVELY_TEST_USERDATA
+//      through the REAL userData directory with no MEETFLOO_TEST_USERDATA
 //      override;
 //   2. a stored choice is honoured by buildV3Prompt on the very next turn
 //      (the "read per turn" promise both call sites make);
@@ -51,9 +51,9 @@ app.whenReady().then(async () => {
   console.log(`[electron-smoke] platform=${process.platform} arch=${process.arch} electron=${process.versions.electron}`);
 
   // (1) The real userData path — the thing plain node cannot exercise.
-  //     Deliberately NOT setting NATIVELY_TEST_USERDATA: the point is to prove
+  //     Deliberately NOT setting MEETFLOO_TEST_USERDATA: the point is to prove
   //     the electron branch of settingsPath()/resolveDir() works.
-  delete process.env.NATIVELY_TEST_USERDATA;
+  delete process.env.MEETFLOO_TEST_USERDATA;
   const userData = app.getPath('userData');
   ok(typeof userData === 'string' && userData.length > 0, 'app.getPath("userData") resolves', userData);
   ok(path.isAbsolute(userData), 'userData is an absolute path', userData);

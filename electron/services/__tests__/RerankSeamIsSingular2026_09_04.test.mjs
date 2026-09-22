@@ -1,7 +1,7 @@
 /**
  * There is exactly ONE rerank seam, and it stays that way.
  *
- * Natively now has four things that can rerank — the bundled ONNX
+ * MeetFloo now has four things that can rerank — the bundled ONNX
  * cross-encoder, the GGUF runtime, the hosted OpenRouter/Jina providers, and an
  * installed extension. They are alternatives at a single point, not a pipeline:
  * `ModeHybridRetriever.maybeRerankCandidates` resolves ONE of them and runs it

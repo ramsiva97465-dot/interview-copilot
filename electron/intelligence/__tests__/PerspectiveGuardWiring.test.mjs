@@ -1,7 +1,7 @@
 // node:test — Phase 3 wiring verification: ProfileTreeService.getCandidatePerspectiveGuard
 // (the mode-based "candidate perspective" guard that WIDENS the manual-chat candidate
 // sanitizer trigger in ipcHandlers.ts `gemini-chat-stream`, behind profile_tree_v2_enabled
-// / NATIVELY_PROFILE_TREE_V2, default OFF).
+// / MEETFLOO_PROFILE_TREE_V2, default OFF).
 //
 // The live wiring (electron/ipcHandlers.ts ~line 1218) is:
 //   let _perspectiveExpectsCandidate = false;
@@ -31,10 +31,10 @@ import assert from 'node:assert/strict';
 import { ProfileTreeService } from '../../../dist-electron/electron/intelligence/ProfileTreeService.js';
 import { sanitizeCandidateAnswer } from '../../../dist-electron/electron/llm/ProfileOutputValidator.js';
 
-const NATIVELY_LEAK = /\bi'?m natively\b|\bas an ai assistant\b/i;
+const MEETFLOO_LEAK = /\bi'?m MeetFloo\b|\bas an ai assistant\b/i;
 
 // The candidate-identity asks that, in a candidate-voice mode, MUST be answered in the
-// candidate's voice — never "I'm Natively". These are intentionally NOT in the
+// candidate's voice — never "I'm MeetFloo". These are intentionally NOT in the
 // ASSISTANT_IDENTITY_PATTERNS list (which is reserved for genuine app questions).
 const IDENTITY_QUERIES = [
   'introduce yourself',
@@ -46,7 +46,7 @@ const IDENTITY_QUERIES = [
 // Genuine questions ABOUT the app/assistant — here the assistant identity is the CORRECT
 // answer, so the guard must NOT force candidate voice (else the app could not answer them).
 const APP_IDENTITY_QUERIES = [
-  'what is Natively?',
+  'what is MeetFloo?',
   'are you an AI?',
   'what model are you?',
   'who built you?',
@@ -168,19 +168,19 @@ describe('Phase 3 safety — widening the trigger never over-strips a clean answ
 
   // The wiring is sound BECAUSE the sanitizer still removes a genuine leak when one exists —
   // this is the gap the mode guard widens the trigger to catch (a candidate-identity ask
-  // misclassified to a non-candidate answerType that tail-leaks "I'm Natively").
+  // misclassified to a non-candidate answerType that tail-leaks "I'm MeetFloo").
   test('a genuine assistant-meta tail IS stripped while the valid content survives', () => {
-    const leaky = "I'm a Senior ML Engineer at Acme AI with five years of experience. I'm Natively, an AI assistant, so I can't share personal experiences.";
+    const leaky = "I'm a Senior ML Engineer at Acme AI with five years of experience. I'm MeetFloo, an AI assistant, so I can't share personal experiences.";
     const s = sanitizeCandidateAnswer(leaky);
     assert.equal(s.repaired, true, 'the meta tail must be stripped');
     assert.equal(s.needsFallback, false, 'the valid lead survives, so no fallback needed');
     assert.match(s.text, /Senior ML Engineer at Acme AI/, 'valid content is preserved');
-    assert.doesNotMatch(s.text, NATIVELY_LEAK, 'the "I\'m Natively / AI assistant" leak is gone');
+    assert.doesNotMatch(s.text, MEETFLOO_LEAK, 'the "I\'m MeetFloo / AI assistant" leak is gone');
   });
 
   // An app-identity answer would NEVER reach this strip in the live path because the guard
   // returns assistantIdentityWouldLeak === false for app questions (so the trigger is not
-  // widened for them). Belt-and-suspenders: even if it did, a plain "I'm Natively, an AI
+  // widened for them). Belt-and-suspenders: even if it did, a plain "I'm MeetFloo, an AI
   // assistant..." answer is correctly recognised as all-meta → needsFallback, never shipped
   // as a half-stripped fragment. This documents the boundary; the GUARD is what protects app
   // answers, not the sanitizer.

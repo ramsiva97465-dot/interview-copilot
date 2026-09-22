@@ -28,7 +28,7 @@
 // WHY THIS IS NOT `flag.ts` ITSELF
 // `flag.ts` is the V3 pipeline switch: off means the legacy engine. These are
 // narrower — each one reverts a single decision inside a V3 that stays on. A
-// caller that wants everything back at once still has NATIVELY_CONTEXT_INTELLIGENCE_V3=0.
+// caller that wants everything back at once still has MEETFLOO_CONTEXT_INTELLIGENCE_V3=0.
 //
 // See docs/retrieval-handoff/03-FIX-PLAN.md
 
@@ -59,37 +59,37 @@ export interface RetrievalFlagSpec {
 export const RETRIEVAL_FLAGS = {
   /** T2 — `sync`/`standup`/`candidate` matched as bare nouns and misrouted the turn. */
   classifierTokenFraming: {
-    env: 'NATIVELY_RETRIEVAL_CLASSIFIER_TOKEN_FRAMING',
+    env: 'MEETFLOO_RETRIEVAL_CLASSIFIER_TOKEN_FRAMING',
     default: true,
     why: 'RC2: bare `sync`/`standup` claimed the transcript and bare `candidate` claimed identity',
   },
   /** T1 — a user's own reference file may evidence their skill/employment claims. */
   referenceFilesEvidenceUserClaims: {
-    env: 'NATIVELY_RETRIEVAL_REFERENCE_FILES_EVIDENCE_USER_CLAIMS',
+    env: 'MEETFLOO_RETRIEVAL_REFERENCE_FILES_EVIDENCE_USER_CLAIMS',
     default: true,
     why: 'RC1: REFERENCE_FILE was authoritative for no USER_* claim, so every second-person question lost the file',
   },
   /** T5 — a bare follow-up regains the source pools its referent's own turn used. */
   followUpSourceContinuity: {
-    env: 'NATIVELY_RETRIEVAL_FOLLOWUP_SOURCE_CONTINUITY',
+    env: 'MEETFLOO_RETRIEVAL_FOLLOWUP_SOURCE_CONTINUITY',
     default: true,
     why: 'RC3: the unclaimed-retrieval fallback excluded identity pools from resolved follow-ups too',
   },
   /** T6 — combining ports preserves each port's slot guarantees instead of re-sorting. */
   portCombinationPreservesSlots: {
-    env: 'NATIVELY_RETRIEVAL_PORT_COMBINATION_PRESERVES_SLOTS',
+    env: 'MEETFLOO_RETRIEVAL_PORT_COMBINATION_PRESERVES_SLOTS',
     default: true,
     why: 'RC5: a global score sort across ports discarded the status partition, per-type round-robin and per-document interleave, and compared incomparable score scales',
   },
   /** Interview-prep modes honour an EXPLICIT reference-files switch (2026-08-29). */
   interviewPrepHonorsReferenceSwitch: {
-    env: 'NATIVELY_RETRIEVAL_INTERVIEW_PREP_HONORS_REFERENCE_SWITCH',
+    env: 'MEETFLOO_RETRIEVAL_INTERVIEW_PREP_HONORS_REFERENCE_SWITCH',
     default: true,
     why: 'RC4 remainder: T8 made reference files REACHABLE in technical-interview, but buildUserSourceContract pinned defaultOwner=profile, so forceDocumentGrounding stayed off even when the user ticked the switch',
   },
   /** T7 — referent resolution compares the turn's scope before reusing a topic. */
   referentScopeCheck: {
-    env: 'NATIVELY_RETRIEVAL_REFERENT_SCOPE_CHECK',
+    env: 'MEETFLOO_RETRIEVAL_REFERENT_SCOPE_CHECK',
     default: true,
     why: 'RC6: resolveReference never compared state.scopeId, so the first turn after a scope change used a stale topic',
   },

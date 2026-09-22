@@ -17,14 +17,14 @@ import { _electron as electron } from '@playwright/test';
 import fs from 'node:fs';
 
 const dotenv = Object.fromEntries(
-  fs.readFileSync('/tmp/natively-land-wt/.env', 'utf8').split('\n')
+  fs.readFileSync('/tmp/MeetFloo-land-wt/.env', 'utf8').split('\n')
     .filter((l) => /^[A-Z0-9_]+=/.test(l))
     .map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1).trim().replace(/^["']|["']$/g, '')]),
 );
 const env = {
   ...process.env, ...dotenv,
-  NATIVELY_E2E: '1', NODE_ENV: 'development',
-  NATIVELY_DEV_BYPASS_SCREEN_TCC: '1', NATIVELY_E2E_LOCAL_TEST_TOKEN: 'local-test',
+  MEETFLOO_E2E: '1', NODE_ENV: 'development',
+  MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1', MEETFLOO_E2E_LOCAL_TEST_TOKEN: 'local-test',
   OLLAMA_URL: 'http://127.0.0.1:11499',      // the fake, lingering provider
 };
 
@@ -36,16 +36,16 @@ const CANNED = [
 
 const app = await electron.launch({ args: ['dist-electron/electron/main.js'], env, timeout: 90000 });
 await app.firstWindow({ timeout: 45000 });
-await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => {});
+await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => { });
 const RAW = async (fn, arg) => {
   for (let a = 0; a < 5; a++) {
-    try { const w = app.windows()[0] || await app.firstWindow(); await w.waitForLoadState('domcontentloaded').catch(() => {}); return await w.evaluate(fn, arg); }
+    try { const w = app.windows()[0] || await app.firstWindow(); await w.waitForLoadState('domcontentloaded').catch(() => { }); return await w.evaluate(fn, arg); }
     catch (e) { if (a === 4) throw e; await new Promise((r) => setTimeout(r, 1800)); }
   }
 };
 const R = (ch, ...a) => RAW(async ({ ch, a }) => (window.electronAPI || window.api).e2eInvoke(ch, ...a), { ch, a });
 
-await R('__e2e__:enable-pro').catch(() => {});
+await R('__e2e__:enable-pro').catch(() => { });
 const setup = await RAW(async () => {
   const api = window.electronAPI || window.api;
   const out = {};
@@ -80,5 +80,5 @@ console.log(`canned substitution shown   : ${gotCanned}`);
 console.log(gotCanned && !gotReal
   ? '\nRESULT: CONFIRMED — the real app DISCARDED a complete short answer and showed a canned line.'
   : gotReal ? '\nRESULT: NOT REPRODUCED — the app delivered the short answer.'
-            : '\nRESULT: INCONCLUSIVE — neither the real answer nor a canned line was observed.');
+    : '\nRESULT: INCONCLUSIVE — neither the real answer nor a canned line was observed.');
 await app.close();

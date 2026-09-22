@@ -11,7 +11,7 @@
 //
 // The LLM seam is the real LLMHelper.generateMeetingSummary on a prototype instance:
 //   rung 0 custom provider  -> none configured
-//   rung 1 Natively API     -> REAL generateWithNatively -> local natively-api (e2e auth)
+//   rung 1 MeetFloo API     -> REAL generateWithMeetFloo -> local MeetFloo-api (e2e auth)
 //   rungs 2+ (Codex, Antigravity, Groq, Gemini, Ollama) -> disabled AND recorded; any
 //            attempt marks the run CONTAMINATED.
 // Only deadlines are changed (lifted; production values recorded per call).
@@ -27,10 +27,10 @@ const job = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 const ROOT = path.resolve(__dirname, '../..');
 const BENCH_TIMEOUT_MS = job.electron_timeout_ms;
 
-// Must be set before the bundle loads (NATIVELY_API_URL is read at module init).
-process.env.NATIVELY_API_URL = `http://127.0.0.1:${job.port}`;
-process.env.NATIVELY_E2E = '1';
-process.env.NATIVELY_E2E_LOCAL_TEST_TOKEN = job.local_test_token;
+// Must be set before the bundle loads (MEETFLOO_API_URL is read at module init).
+process.env.MEETFLOO_API_URL = `http://127.0.0.1:${job.port}`;
+process.env.MEETFLOO_E2E = '1';
+process.env.MEETFLOO_E2E_LOCAL_TEST_TOKEN = job.local_test_token;
 
 // Long-timeout global dispatcher for the harness->local-server hop (Node fetch defaults
 // to a 300s headers timeout, which would cut slow configs off inside the harness).
@@ -49,7 +49,7 @@ const origFetch = globalThis.fetch;
 globalThis.fetch = async function (input, init = {}) {
   const url = typeof input === 'string' ? input : (input?.url || String(input));
   const ctx = als.getStore() || {};
-  const isLocal = url.startsWith(process.env.NATIVELY_API_URL);
+  const isLocal = url.startsWith(process.env.MEETFLOO_API_URL);
   const hdrs = init.headers || {};
   const reqId = hdrs['X-Request-Id'] || hdrs['x-request-id'] || null;
   const rec = { call_id: ctx.callId ?? null, url_path: isLocal ? new URL(url).pathname : '[external]', req_id: reqId, t_start_ms: rel() };
@@ -81,7 +81,7 @@ globalThis.fetch = async function (input, init = {}) {
 };
 
 // Capture the pipeline's own diagnostic warnings (polish rejections, V3 failures, fallbacks).
-const WATCH_RE = /SummaryPolisher|MeetingContextAssembler|Natively API summary failed|Codex|Antigravity|Groq|Gemini|Ollama|FollowUp|title|Title|fallback|Fallback/;
+const WATCH_RE = /SummaryPolisher|MeetingContextAssembler|MeetFloo API summary failed|Codex|Antigravity|Groq|Gemini|Ollama|FollowUp|title|Title|fallback|Fallback/;
 for (const level of ['log', 'warn', 'error']) {
   const orig = console[level].bind(console);
   console[level] = (...args) => {
@@ -112,11 +112,11 @@ function makeHelper() {
   const h = Object.create(P);
   Object.assign(h, {
     customProvider: null, activeCurlProvider: null, groqFastTextMode: false,
-    // Placeholder so generateWithNatively skips the CredentialsManager lazy-load (needs electron.app).
-    // Auth header is still the e2e local-test header, which generateWithNatively checks FIRST.
-    nativelyKey: 'bench-placeholder-not-a-key',
+    // Placeholder so generateWithMeetFloo skips the CredentialsManager lazy-load (needs electron.app).
+    // Auth header is still the e2e local-test header, which generateWithMeetFloo checks FIRST.
+    MeetFlooKey: 'bench-placeholder-not-a-key',
     aiResponseLanguage: 'auto',            // LLMHelper field default
-    currentModelId: 'natively', useOllama: false, groqClient: null, client: null,
+    currentModelId: 'MeetFloo', useOllama: false, groqClient: null, client: null,
     isLocalOnlyMode: false, codexCliConfig: { enabled: false, timeoutMs: 0 },
   });
   // No settings store in the harness -> production defaults: no provider switched off,
@@ -134,10 +134,10 @@ function makeHelper() {
     if (c) (c.production_outer_timeouts ||= []).push({ name, ms });
     return P.withTimeout.call(this, promise, BENCH_TIMEOUT_MS, name);
   };
-  h.generateWithNatively = function (userMessage, systemPrompt, imagePaths, opts) {
+  h.generateWithMeetFloo = function (userMessage, systemPrompt, imagePaths, opts) {
     const c = calls.find(x => x.call_id === (als.getStore() || {}).callId);
     if (c) c.production_fetch_timeout_ms = opts?.timeoutMs ?? 8000;
-    return P.generateWithNatively.call(this, userMessage, systemPrompt, imagePaths, { ...(opts || {}), timeoutMs: BENCH_TIMEOUT_MS });
+    return P.generateWithMeetFloo.call(this, userMessage, systemPrompt, imagePaths, { ...(opts || {}), timeoutMs: BENCH_TIMEOUT_MS });
   };
   let nextCall = 0;
   h.generateMeetingSummary = function (systemPrompt, context, groqSystemPrompt, opts) {

@@ -18,7 +18,7 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 
 // Must be set before DatabaseManager is first required — it resolves its path
 // once, in the constructor.
-process.env.NATIVELY_TEST_USERDATA ??= fs.mkdtempSync(path.join(os.tmpdir(), 'screenshot-store-'));
+process.env.MEETFLOO_TEST_USERDATA ??= fs.mkdtempSync(path.join(os.tmpdir(), 'screenshot-store-'));
 
 const { DatabaseManager } = require(path.join(root, 'dist-electron/electron/db/DatabaseManager.js'));
 const store = require(path.join(root, 'dist-electron/electron/services/screen/ScreenshotDescriptionStore.js'));

@@ -1,11 +1,11 @@
 // Regression test for the "app hangs / crashes the system right after entering
-// the Natively API key or Pro license" bug (2026-06-05).
+// the MeetFloo API key or Pro license" bug (2026-06-05).
 //
-// ROOT CAUSE: saving a Natively API key fired up to TWO audio-pipeline rebuilds
+// ROOT CAUSE: saving a MeetFloo API key fired up to TWO audio-pipeline rebuilds
 // nearly simultaneously:
-//   1. main-process `set-natively-api-key` handler auto-promotes the STT
-//      provider to 'natively' and calls `reconfigureSttProvider()`.
-//   2. the renderer's `handleSave` then ALSO fired `setSttProvider('natively')`,
+//   1. main-process `set-MeetFloo-api-key` handler auto-promotes the STT
+//      provider to 'MeetFloo' and calls `reconfigureSttProvider()`.
+//   2. the renderer's `handleSave` then ALSO fired `setSttProvider('MeetFloo')`,
 //      whose handler calls `reconfigureSttProvider()` a second time.
 // `reconfigureSttProvider` tears down and reconstructs the native captures
 // (SystemAudioCapture / MicrophoneCapture → CoreAudio / ScreenCaptureKit /
@@ -33,7 +33,7 @@ const root = path.resolve(__dirname, '../../..');
 const mainSrc = fs.readFileSync(path.join(root, 'electron/main.ts'), 'utf8');
 const ipcSrc = fs.readFileSync(path.join(root, 'electron/ipcHandlers.ts'), 'utf8');
 const settingsSrc = fs.readFileSync(
-  path.join(root, 'src/components/settings/NativelyApiSettings.tsx'),
+  path.join(root, 'src/components/settings/MeetFlooApiSettings.tsx'),
   'utf8',
 );
 
@@ -43,8 +43,8 @@ describe('Fix #1: reconfigureSttProvider is serialized (source contract)', () =>
       mainSrc,
       /_sttReconfigureChain\s*:\s*Promise<void>/,
       'BUG: `_sttReconfigureChain` serialization field is gone. Without it, concurrent ' +
-        'reconfigureSttProvider calls re-enter the native teardown/rebuild in parallel — ' +
-        'the exact race that crashed/hung the app after a key save.',
+      'reconfigureSttProvider calls re-enter the native teardown/rebuild in parallel — ' +
+      'the exact race that crashed/hung the app after a key save.',
     );
   });
 
@@ -57,21 +57,21 @@ describe('Fix #1: reconfigureSttProvider is serialized (source contract)', () =>
       pubBody,
       /_sttReconfigureChain/,
       'BUG: public reconfigureSttProvider no longer references _sttReconfigureChain — ' +
-        'serialization was removed and concurrent calls can race again.',
+      'serialization was removed and concurrent calls can race again.',
     );
     assert.match(
       pubBody,
       /_doReconfigureSttProvider\s*\(/,
       'BUG: public reconfigureSttProvider must delegate the real work to ' +
-        '_doReconfigureSttProvider (the serialized critical section).',
+      '_doReconfigureSttProvider (the serialized critical section).',
     );
     // The teardown/rebuild must NOT be inlined in the public method — that
     // would mean it runs unserialized.
     assert.ok(
       !/public async reconfigureSttProvider[\s\S]{0,1200}setupSystemAudioPipeline/.test(mainSrc),
       'BUG: setupSystemAudioPipeline is called directly inside the PUBLIC ' +
-        'reconfigureSttProvider — the native rebuild must live in the serialized ' +
-        '_doReconfigureSttProvider instead.',
+      'reconfigureSttProvider — the native rebuild must live in the serialized ' +
+      '_doReconfigureSttProvider instead.',
     );
   });
 
@@ -157,38 +157,38 @@ describe('Fix #1: serialization semantics (behavioral)', () => {
 describe('Fix #2: renderer no longer double-fires; server compensates the UI refresh', () => {
   it('handleSave does not call setSttProvider/setDefaultModel after saving the key', () => {
     const start = settingsSrc.indexOf('const handleSave');
-    assert.ok(start >= 0, 'handleSave must exist in NativelyApiSettings.tsx');
+    assert.ok(start >= 0, 'handleSave must exist in MeetFlooApiSettings.tsx');
     const end = settingsSrc.indexOf('const handleClear', start);
     const handleSaveBody = settingsSrc.slice(start, end > start ? end : start + 1500);
     // Match the actual IPC CALL form (`electronAPI?.setSttProvider`), not bare
     // mentions — the explanatory comment legitimately names the removed calls.
     assert.ok(
       !/electronAPI\s*\?\.\s*setSttProvider/.test(handleSaveBody),
-      'BUG: handleSave fires electronAPI.setSttProvider again after set-natively-api-key. The main ' +
-        'process already promotes + reconfigures STT server-side; the redundant call races a SECOND ' +
-        'audio-pipeline rebuild — the crash/hang this whole fix removes.',
+      'BUG: handleSave fires electronAPI.setSttProvider again after set-MeetFloo-api-key. The main ' +
+      'process already promotes + reconfigures STT server-side; the redundant call races a SECOND ' +
+      'audio-pipeline rebuild — the crash/hang this whole fix removes.',
     );
     assert.ok(
       !/electronAPI\s*\?\.\s*setDefaultModel/.test(handleSaveBody),
-      'BUG: handleSave fires electronAPI.setDefaultModel again after set-natively-api-key. The main ' +
-        'process already syncs the default model server-side; the redundant call is unnecessary work.',
+      'BUG: handleSave fires electronAPI.setDefaultModel again after set-MeetFloo-api-key. The main ' +
+      'process already syncs the default model server-side; the redundant call is unnecessary work.',
     );
   });
 
-  it("set-natively-api-key broadcasts 'credentials-changed' so the SettingsOverlay STT dropdown refreshes", () => {
+  it("set-MeetFloo-api-key broadcasts 'credentials-changed' so the SettingsOverlay STT dropdown refreshes", () => {
     // The SettingsOverlay STT dropdown re-reads credentials ONLY on the
     // 'credentials-changed' event. Removing the renderer's setSttProvider call
     // (above) deleted the transitive source of that event for this flow, so the
     // handler must now emit it directly — otherwise the dropdown shows a stale
     // provider after a key save/clear.
-    const start = ipcSrc.indexOf("safeHandle('set-natively-api-key'");
-    assert.ok(start >= 0, 'set-natively-api-key handler must exist');
-    // Anchored on whatever handler follows set-natively-api-key, so the slice
-    // is that handler and nothing else. It was 'get-natively-pricing' until
+    const start = ipcSrc.indexOf("safeHandle('set-MeetFloo-api-key'");
+    assert.ok(start >= 0, 'set-MeetFloo-api-key handler must exist');
+    // Anchored on whatever handler follows set-MeetFloo-api-key, so the slice
+    // is that handler and nothing else. It was 'get-MeetFloo-pricing' until
     // that handler was deleted (its /v1/pricing route never existed); an
     // indexOf that misses falls back to a 4000-char window, which would have
     // kept these assertions green while silently testing a different region.
-    const end = ipcSrc.indexOf("safeHandle('get-natively-plans'", start);
+    const end = ipcSrc.indexOf("safeHandle('get-MeetFloo-plans'", start);
     const handlerBody = ipcSrc.slice(start, end > start ? end : start + 4000);
     // Accept either the direct call or the shared broadcastCredentialsChanged()
     // helper it was later refactored into — assert the helper itself really
@@ -202,14 +202,14 @@ describe('Fix #2: renderer no longer double-fires; server compensates the UI ref
         helperBody,
         /send\(\s*['"]credentials-changed['"]\s*\)/,
         "BUG: broadcastCredentialsChanged no longer sends 'credentials-changed'. The Settings STT " +
-          'dropdown will show a stale provider after the Natively key is saved or cleared.',
+        'dropdown will show a stale provider after the MeetFloo key is saved or cleared.',
       );
     } else {
       assert.match(
         handlerBody,
         /send\(\s*['"]credentials-changed['"]\s*\)/,
-        "BUG: set-natively-api-key no longer broadcasts 'credentials-changed'. The Settings STT " +
-          'dropdown will show a stale provider after the Natively key is saved or cleared.',
+        "BUG: set-MeetFloo-api-key no longer broadcasts 'credentials-changed'. The Settings STT " +
+        'dropdown will show a stale provider after the MeetFloo key is saved or cleared.',
       );
     }
   });
@@ -217,14 +217,14 @@ describe('Fix #2: renderer no longer double-fires; server compensates the UI ref
 
 describe('Fix #3: Pro license activation stays awaited inline (no detached billing race)', () => {
   it('activateWithApiKey is awaited inline, not detached in a fire-and-forget IIFE', () => {
-    const start = ipcSrc.indexOf("safeHandle('set-natively-api-key'");
-    assert.ok(start >= 0, 'set-natively-api-key handler must exist');
-    // Anchored on whatever handler follows set-natively-api-key, so the slice
-    // is that handler and nothing else. It was 'get-natively-pricing' until
+    const start = ipcSrc.indexOf("safeHandle('set-MeetFloo-api-key'");
+    assert.ok(start >= 0, 'set-MeetFloo-api-key handler must exist');
+    // Anchored on whatever handler follows set-MeetFloo-api-key, so the slice
+    // is that handler and nothing else. It was 'get-MeetFloo-pricing' until
     // that handler was deleted (its /v1/pricing route never existed); an
     // indexOf that misses falls back to a 4000-char window, which would have
     // kept these assertions green while silently testing a different region.
-    const end = ipcSrc.indexOf("safeHandle('get-natively-plans'", start);
+    const end = ipcSrc.indexOf("safeHandle('get-MeetFloo-plans'", start);
     const handlerBody = ipcSrc.slice(start, end > start ? end : start + 4000);
 
     // The inline await is the backpressure that serializes rapid set→clear:
@@ -240,8 +240,8 @@ describe('Fix #3: Pro license activation stays awaited inline (no detached billi
     assert.ok(
       !/void\s*\(async\s*\(\s*\)\s*=>/.test(handlerBody),
       'BUG: the license activation was detached into a fire-and-forget IIFE. That removes the ' +
-        'renderer backpressure and opens a set→clear ordering race (Pro left active with no key). ' +
-        'Keep it awaited inline; the crash fix is handled by reconfigureSttProvider serialization.',
+      'renderer backpressure and opens a set→clear ordering race (Pro left active with no key). ' +
+      'Keep it awaited inline; the crash fix is handled by reconfigureSttProvider serialization.',
     );
   });
 });

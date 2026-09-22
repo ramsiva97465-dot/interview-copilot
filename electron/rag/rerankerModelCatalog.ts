@@ -139,7 +139,7 @@ export const RERANKER_MODEL_CATALOG: LocalRerankerModel[] = [
   //    on the reranker Core already ships. dtype q8 => onnx/model_quantized.onnx.
   // NOTE: Xenova/ms-marco-MiniLM-L-6-v2 is deliberately NOT listed here.
   //
-  // It is the model Natively BUNDLES (see BUILT_IN_RERANKER below and
+  // It is the model MeetFloo BUNDLES (see BUILT_IN_RERANKER below and
   // DEFAULT_RERANKER_MODEL in rag/LocalReranker.ts), so offering it as a
   // download would ask the user to fetch 24MB they already have — and worse,
   // selecting it would register as an EXPLICIT choice, which flips reranking
@@ -421,7 +421,7 @@ export function findCatalogModel(id: string): LocalRerankerModel | null {
 }
 
 /**
- * The reranker that ships with Natively. Not installable; not removable.
+ * The reranker that ships with MeetFloo. Not installable; not removable.
  *
  * Named bge-reranker-base until 2026-09-04, when that model was removed from
  * the app entirely — it measured WORSE than no reranker at all (MRR 0.7558

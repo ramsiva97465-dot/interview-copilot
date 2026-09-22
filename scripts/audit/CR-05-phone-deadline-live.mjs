@@ -1,7 +1,7 @@
 /**
  * CR-05 live verification with REAL DeepSeek API calls.
  *
- * F-301 raised the first-useful deadline on the natively-api route because the
+ * F-301 raised the first-useful deadline on the MeetFloo-api route because the
  * SERVER runs a sequential cascade and only cuts over to the next provider at
  * AI_TTFT_BUDGET_MS (10s) — aborting at the 7s provider cap tears the HTTP
  * request down BEFORE that rescue. F-301 fixed one of two call sites; the
@@ -18,7 +18,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const root = '/tmp/natively-land-wt';
+const root = '/tmp/MeetFloo-land-wt';
 const env = Object.fromEntries(
   fs.readFileSync(path.join(root, '.env'), 'utf8').split('\n')
     .filter((l) => /^[A-Z0-9_]+=/.test(l))
@@ -29,18 +29,20 @@ if (!KEY) { console.error('DEEPSEEK_API_KEY missing from .env — stopping (camp
 
 const dl = await import(pathToFileURL(path.join(root, 'dist-electron/electron/llm/liveDeadlines.js')).href);
 const { raceStreamWithDeadline, firstUsefulDeadlineMs,
-        LIVE_TOTAL_HARD_TIMEOUT_MS, LIVE_LOCAL_FIRST_USEFUL_TIMEOUT_MS,
-        LIVE_PROVIDER_FIRST_USEFUL_HARD_TIMEOUT_MS } = dl;
+  LIVE_TOTAL_HARD_TIMEOUT_MS, LIVE_LOCAL_FIRST_USEFUL_TIMEOUT_MS,
+  LIVE_PROVIDER_FIRST_USEFUL_HARD_TIMEOUT_MS } = dl;
 
-const CASCADE_CUTOVER_MS = 10_000;   // natively-api AI_TTFT_BUDGET_MS
+const CASCADE_CUTOVER_MS = 10_000;   // MeetFloo-api AI_TTFT_BUDGET_MS
 
 /** Real streaming call to DeepSeek; yields only assistant CONTENT tokens. */
 async function* deepseekStream(prompt) {
   const res = await fetch('https://api.deepseek.com/chat/completions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'deepseek-v4-flash', stream: true, max_tokens: 16000,
-      messages: [{ role: 'user', content: prompt }] }),
+    body: JSON.stringify({
+      model: 'deepseek-v4-flash', stream: true, max_tokens: 16000,
+      messages: [{ role: 'user', content: prompt }]
+    }),
   });
   if (!res.ok) throw new Error(`DeepSeek ${res.status}: ${await res.text()}`);
   const reader = res.body.getReader(); const dec = new TextDecoder();
@@ -98,22 +100,22 @@ async function runAt(deadlineMs, label) {
 }
 
 console.log('deadlines the phone path resolves to:');
-const preFix  = firstUsefulDeadlineMs('general_meeting_answer');                 // both flags defaulted — the bug
+const preFix = firstUsefulDeadlineMs('general_meeting_answer');                 // both flags defaulted — the bug
 const cascade = firstUsefulDeadlineMs('general_meeting_answer', false, true);
-const local   = firstUsefulDeadlineMs('general_meeting_answer', true, false);
+const local = firstUsefulDeadlineMs('general_meeting_answer', true, false);
 console.log(`  no flags (pre-fix): ${preFix}   cascade: ${cascade}   local: ${local}\n`);
 
 console.log(`real DeepSeek stream, first token withheld to ${CASCADE_CUTOVER_MS}ms (cascade cutover):`);
-const a = await runAt(preFix,  'pre-fix phone (no flags)');
+const a = await runAt(preFix, 'pre-fix phone (no flags)');
 const b = await runAt(cascade, 'post-fix, viaServerCascade');
-const c = await runAt(local,   'post-fix, local model');
+const c = await runAt(local, 'post-fix, local model');
 
 const checks = [
-  ['pre-fix 7s deadline LOSES the turn',            a.delivered === false],
-  ['cascade deadline DELIVERS the real answer',     b.delivered === true],
-  ['local deadline DELIVERS the real answer',       c.delivered === true],
-  ['cascade budget outlasts the 10s cutover',       cascade > CASCADE_CUTOVER_MS],
-  ['pre-fix budget aborts BEFORE the cutover',      preFix < CASCADE_CUTOVER_MS],
+  ['pre-fix 7s deadline LOSES the turn', a.delivered === false],
+  ['cascade deadline DELIVERS the real answer', b.delivered === true],
+  ['local deadline DELIVERS the real answer', c.delivered === true],
+  ['cascade budget outlasts the 10s cutover', cascade > CASCADE_CUTOVER_MS],
+  ['pre-fix budget aborts BEFORE the cutover', preFix < CASCADE_CUTOVER_MS],
   ['the delivered text is genuinely from DeepSeek', /quick|pivot|partition|log/i.test(b.full)],
 ];
 let bad = 0;

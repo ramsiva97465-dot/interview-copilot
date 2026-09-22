@@ -26,7 +26,7 @@ interface CatalogModel {
 }
 
 interface CatalogProvider {
-    id: 'natively' | 'ollama' | 'custom' | 'openrouter' | 'voyage' | 'openai' | 'gemini' | 'local';
+    id: 'MeetFloo' | 'ollama' | 'custom' | 'openrouter' | 'voyage' | 'openai' | 'gemini' | 'local';
     name: string;
     cloud: boolean;
     managed?: boolean;
@@ -342,7 +342,7 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
                 setStoredKeys({
                     gemini: !!creds.hasGeminiKey,
                     openai: !!creds.hasOpenaiKey,
-                    natively: !!creds.hasNativelyKey,
+                    MeetFloo: !!creds.hasMeetFlooKey,
                 });
             }
         } catch { /* best-effort */ }
@@ -379,7 +379,7 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
                 setDownloadProgress(progressMap);
                 setDownloadingSet(downloading);
             }
-        }).catch(() => {});
+        }).catch(() => { });
 
         const unsub = window.electronAPI.onLocalEmbeddingDownloadState?.((data) => {
             const { modelId, status, progress, error } = data;
@@ -1207,7 +1207,7 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
                                 </button>
                             )}
 
-                    {/* Dimensions — between Test and the model list, and RENDERED
+                            {/* Dimensions — between Test and the model list, and RENDERED
                         WHENEVER THE PROVIDER SUPPORTS WIDTHS rather than only while
                         it is the active one. It used to disappear the moment you
                         switched provider, so the row's controls moved under the
@@ -1218,81 +1218,81 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
                         the custom endpoint and the bundled model have a width fixed
                         by the model itself (we measure it), so a picker there would
                         be a control that cannot do anything. */}
-                    {hasWidthPicker && (() => {
-                        // The model this width would apply to: the active one when
-                        // this provider is active, otherwise the one that would be
-                        // picked if you chose this provider now.
-                        const target =
-                            (isActiveProvider && active.model
-                                ? p.models.find(m => m.id === active.model)
-                                : undefined)
-                            ?? p.models.find(m => m.recommended)
-                            ?? p.models[0];
+                            {hasWidthPicker && (() => {
+                                // The model this width would apply to: the active one when
+                                // this provider is active, otherwise the one that would be
+                                // picked if you chose this provider now.
+                                const target =
+                                    (isActiveProvider && active.model
+                                        ? p.models.find(m => m.id === active.model)
+                                        : undefined)
+                                    ?? p.models.find(m => m.recommended)
+                                    ?? p.models[0];
 
-                        const widths = target?.supportedDimensions;
-                        // ada-002 takes no `dimensions` parameter at all, so offering
-                        // one option would imply a choice that does not exist.
-                        const fixedWidth = !!target && (!widths || widths.length < 2);
+                                const widths = target?.supportedDimensions;
+                                // ada-002 takes no `dimensions` parameter at all, so offering
+                                // one option would imply a choice that does not exist.
+                                const fixedWidth = !!target && (!widths || widths.length < 2);
 
-                        // Width is a property OF THE MODEL, so it may only show the
-                        // live value when `target` really is the model in use.
-                        // Keying it on isActiveProvider alone showed the active
-                        // model's width against a DIFFERENT model whenever the
-                        // active one was missing from this list (a stale id, or a
-                        // refresh that no longer returns it) — the target then fell
-                        // back to the recommended model while the number did not.
-                        const showsActiveModel = isActiveProvider && !!target && target.id === active.model;
-                        const current = (showsActiveModel && active.dimensions)
-                            ? active.dimensions
-                            : (target?.dimensions ?? 0);
+                                // Width is a property OF THE MODEL, so it may only show the
+                                // live value when `target` really is the model in use.
+                                // Keying it on isActiveProvider alone showed the active
+                                // model's width against a DIFFERENT model whenever the
+                                // active one was missing from this list (a stale id, or a
+                                // refresh that no longer returns it) — the target then fell
+                                // back to the recommended model while the number did not.
+                                const showsActiveModel = isActiveProvider && !!target && target.id === active.model;
+                                const current = (showsActiveModel && active.dimensions)
+                                    ? active.dimensions
+                                    : (target?.dimensions ?? 0);
 
-                        // "Fixed" and "not known yet" are different states and must
-                        // not share a message. OpenRouter's listing carries no
-                        // dimension data, so an unrecognised model there has an
-                        // UNKNOWN width — it is measured when you select it — while
-                        // ada-002 or voyage-code-4 are genuinely fixed.
-                        const widthUnknown = !!target && !widths && current === 0;
-                        const hint = !p.available
-                            ? t('Add a key to change the width.')
-                            : !target
-                                ? t('Pick a model first.')
-                                : widthUnknown
-                                    ? t('Width is measured when you select this model.')
-                                    : fixedWidth
-                                        ? t('This model has a fixed output width.')
-                                        : undefined;
+                                // "Fixed" and "not known yet" are different states and must
+                                // not share a message. OpenRouter's listing carries no
+                                // dimension data, so an unrecognised model there has an
+                                // UNKNOWN width — it is measured when you select it — while
+                                // ada-002 or voyage-code-4 are genuinely fixed.
+                                const widthUnknown = !!target && !widths && current === 0;
+                                const hint = !p.available
+                                    ? t('Add a key to change the width.')
+                                    : !target
+                                        ? t('Pick a model first.')
+                                        : widthUnknown
+                                            ? t('Width is measured when you select this model.')
+                                            : fixedWidth
+                                                ? t('This model has a fixed output width.')
+                                                : undefined;
 
-                        return (
-                            // EmbeddingModelSelect, not AipSelect: the shared one
-                            // opens an IN-FLOW .aip-reveal (grid-rows 0fr->1fr), so
-                            // expanding it pushed the card taller and shoved the
-                            // rows below it down. This one floats the menu
-                            // (.aip-float + absolute top-full), which is why the
-                            // Active Model card does not move when you open it.
-                            <EmbeddingModelSelect
-                                // Names the model, because the number alone is
-                                // ambiguous: when this provider is not the active
-                                // one the models list reads "None selected", so
-                                // nothing else on the row says which model this
-                                // width belongs to.
-                                ariaLabel={target ? `${t('Output width for')} ${target.label || target.id}` : t('Output width')}
-                                title={hint}
-                                // Narrow: it holds "3072d", not a model name.
-                                containerClassName="relative shrink-0 w-[104px]"
-                                value={current ? String(current) : ''}
-                                options={(fixedWidth || !widths ? (current ? [current] : []) : widths)
-                                    .map(d => ({ id: String(d), name: `${d}d` }))}
-                                // Short: the control is 104px and holds a value
-                                // like '3072d'. 'Dimensions' truncated to 'Dimens…'.
-                                placeholder={t('Width')}
-                                disabled={!!pending || !p.available || !!p.managed || fixedWidth || !target}
-                                // Changing the width selects this provider and model
-                                // at that width — the same act as picking a row in
-                                // the list, and it re-indexes for the same reason.
-                                onChange={(d) => { if (target) void select(p.id, target.id, Number(d)); }}
-                            />
-                        );
-                    })()}
+                                return (
+                                    // EmbeddingModelSelect, not AipSelect: the shared one
+                                    // opens an IN-FLOW .aip-reveal (grid-rows 0fr->1fr), so
+                                    // expanding it pushed the card taller and shoved the
+                                    // rows below it down. This one floats the menu
+                                    // (.aip-float + absolute top-full), which is why the
+                                    // Active Model card does not move when you open it.
+                                    <EmbeddingModelSelect
+                                        // Names the model, because the number alone is
+                                        // ambiguous: when this provider is not the active
+                                        // one the models list reads "None selected", so
+                                        // nothing else on the row says which model this
+                                        // width belongs to.
+                                        ariaLabel={target ? `${t('Output width for')} ${target.label || target.id}` : t('Output width')}
+                                        title={hint}
+                                        // Narrow: it holds "3072d", not a model name.
+                                        containerClassName="relative shrink-0 w-[104px]"
+                                        value={current ? String(current) : ''}
+                                        options={(fixedWidth || !widths ? (current ? [current] : []) : widths)
+                                            .map(d => ({ id: String(d), name: `${d}d` }))}
+                                        // Short: the control is 104px and holds a value
+                                        // like '3072d'. 'Dimensions' truncated to 'Dimens…'.
+                                        placeholder={t('Width')}
+                                        disabled={!!pending || !p.available || !!p.managed || fixedWidth || !target}
+                                        // Changing the width selects this provider and model
+                                        // at that width — the same act as picking a row in
+                                        // the list, and it re-indexes for the same reason.
+                                        onChange={(d) => { if (target) void select(p.id, target.id, Number(d)); }}
+                                    />
+                                );
+                            })()}
 
                             {p.models.length > 0 && (
                                 <AipModelList

@@ -80,10 +80,10 @@ const distDir = (() => {
   try {
     execFileSync(process.execPath, [
       // lib/tsc.js, not bin/tsc: bin/tsc is EXTENSIONLESS and contains `import`,
-    // and Node only treats an extensionless entry as ESM from >=22.7 (module
-    // detection). lib/tsc.js is a real .js under "type": "module", so it is ESM
-    // on every Node version. This repo declares no `engines` floor.
-    path.join('node_modules', 'typescript7', 'lib', 'tsc.js'),
+      // and Node only treats an extensionless entry as ESM from >=22.7 (module
+      // detection). lib/tsc.js is a real .js under "type": "module", so it is ESM
+      // on every Node version. This repo declares no `engines` floor.
+      path.join('node_modules', 'typescript7', 'lib', 'tsc.js'),
       '-p', path.join('electron', 'tsconfig.emit.json'),
       '--outDir', target,
     ], { cwd: repoRoot, stdio: 'pipe' });
@@ -117,11 +117,11 @@ const electronStub = {
   app: {
     isReady: () => true,
     getPath: name => (name === 'userData' ? tmpUserData : os.tmpdir()),
-    getName: () => 'natively-test',
+    getName: () => 'MeetFloo-test',
     getVersion: () => '0.0.0-test',
   },
   shell: { openPath: async () => '' },
-  ipcMain: { on: () => {}, handle: () => {}, removeAllListeners: () => {} },
+  ipcMain: { on: () => { }, handle: () => { }, removeAllListeners: () => { } },
   BrowserWindow: { getAllWindows: () => [] },
 };
 const electronStubModule = new Module('electron');
@@ -132,7 +132,7 @@ try { cjsRequire.cache[cjsRequire.resolve('electron')] = electronStubModule; } c
 
 // --- Force the Context-OS evidence-pack flag ON by env, deterministic
 // regardless of NODE_ENV/dev-context defaults ------------------------------
-process.env.NATIVELY_CONTEXT_OS_EVIDENCE_PACK = '1';
+process.env.MEETFLOO_CONTEXT_OS_EVIDENCE_PACK = '1';
 
 // --- Fake EvidenceResolver module, pre-seeded into the require cache -------
 // Resolved via the SAME on-disk path LLMHelper.ts's

@@ -61,7 +61,7 @@ function doExport() {
     'WRONG_AXES', 'CORRECTION', 'COMMENT',
   ];
   const lines = [
-    '# Natively interaction-router dataset, hand check',
+    '# MeetFloo interaction-router dataset, hand check',
     `# ${sample.length} rows sampled from ${rows.length} (${(SAMPLE_SHARE * 100).toFixed(0)}%).`,
     '#',
     '# HOW TO FILL THIS IN',
@@ -79,7 +79,7 @@ function doExport() {
     '#   needs_response is now just yes/no. "optional" is gone; it had become a',
     '#     bin for the user thinking aloud on their own mic, which is "no".',
     '#',
-    '# The one that matters most is needs_response. "no" means Natively should',
+    '# The one that matters most is needs_response. "no" means MeetFloo should',
     '# stay silent: backchannels, the other party thinking aloud, your own voice',
     '# on your own mic, admin chatter.',
     '#',

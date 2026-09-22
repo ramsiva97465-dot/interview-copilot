@@ -27,7 +27,7 @@ function connected() {
   const streams = [];
   const stt = new NvidiaNimStreamingSTT('test-key', 'nemotron-asr-streaming', () => {
     const s = new EventEmitter();
-    s.write = () => {}; s.end = () => {}; s.cancel = () => {};
+    s.write = () => { }; s.end = () => { }; s.cancel = () => { };
     streams.push(s);
     return s;
   });
@@ -78,23 +78,23 @@ test('an empty final still endpoints — the utterance ended even with no words'
   stt.stop();
 });
 
-// ── NativelyProSTT: speaker labels when the relay sends them ─────────────
+// ── MeetFlooProSTT: speaker labels when the relay sends them ─────────────
 // The app's primary speaker separation is physical (mic vs system audio).
 // This covers the case separation cannot reach — several voices inside the
 // meeting-audio channel — and only activates if the relay forwards a tag.
 
-test('NativelyProSTT surfaces a relay speaker tag as speakerId, in every shape the relay might use', () => {
-  const { NativelyProSTT } = require(path.join(distDir, 'NativelyProSTT.js'));
-  const stt = Object.create(NativelyProSTT.prototype);
+test('MeetFlooProSTT surfaces a relay speaker tag as speakerId, in every shape the relay might use', () => {
+  const { MeetFlooProSTT } = require(path.join(distDir, 'MeetFlooProSTT.js'));
+  const stt = Object.create(MeetFlooProSTT.prototype);
   // The parsing is a pure expression over the message; exercise it directly in
   // the same shapes the relay could plausibly send.
   const idOf = (msg) => typeof msg.speaker === 'string' ? msg.speaker
     : typeof msg.speaker === 'number' ? `speaker_${msg.speaker}`
-    : typeof msg.speaker_id === 'string' ? msg.speaker_id
-    : undefined;
+      : typeof msg.speaker_id === 'string' ? msg.speaker_id
+        : undefined;
   assert.equal(idOf({ text: 'hi', speaker: 'speaker_2' }), 'speaker_2');
   assert.equal(idOf({ text: 'hi', speaker: 2 }), 'speaker_2');
   assert.equal(idOf({ text: 'hi', speaker_id: 'speaker_3' }), 'speaker_3');
   assert.equal(idOf({ text: 'hi' }), undefined, 'no tag from a relay that does not diarize');
-  assert.ok(stt instanceof NativelyProSTT);
+  assert.ok(stt instanceof MeetFlooProSTT);
 });

@@ -1,10 +1,10 @@
-// Regression tests for the "Input device 'NativelySystemAudioTap' not found"
+// Regression tests for the "Input device 'MeetFlooSystemAudioTap' not found"
 // meeting failure (2026-08-26, v2.8.7 production).
 //
 // Chain: speaker/core_audio.rs builds a PRIVATE CoreAudio aggregate named
-// NativelySystemAudioTap to capture system audio. "Private" hides it from other
+// MeetFlooSystemAudioTap to capture system audio. "Private" hides it from other
 // processes, NOT from ours — cpal's host.input_devices() enumerates it inside
-// the Natively main process while the tap is live, so it appeared in the
+// the MeetFloo main process while the tap is live, so it appeared in the
 // microphone dropdown and could be persisted as preferredInputDeviceId. The mic
 // channel starts BEFORE the tap is created, so every later meeting resolved a
 // device that did not exist, and Rust's resolve_input_device() hard-errors with
@@ -37,7 +37,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DEVICES_WITH_TAP = [
   { id: 'default', name: 'Default Microphone' },
   { id: 'iPhone Microphone', name: 'iPhone Microphone' },
-  { id: 'NativelySystemAudioTap', name: 'NativelySystemAudioTap' },
+  { id: 'MeetFlooSystemAudioTap', name: 'MeetFlooSystemAudioTap' },
   { id: 'MacBook Air Microphone', name: 'MacBook Air Microphone' },
 ];
 
@@ -52,7 +52,7 @@ test('the system-audio tap is never offered as a selectable microphone', () => {
   assert.deepEqual(
     selectable.map(d => d.id),
     ['default', 'iPhone Microphone', 'MacBook Air Microphone'],
-    'BUG: NativelySystemAudioTap is back in the mic picker. Selecting it poisons ' +
+    'BUG: MeetFlooSystemAudioTap is back in the mic picker. Selecting it poisons ' +
     'preferredInputDeviceId and breaks every subsequent meeting.',
   );
 });
@@ -65,9 +65,9 @@ test('filtering keeps real devices untouched and tolerates junk input', () => {
 });
 
 test('isInternalCaptureDevice matches case and dash variants, not real mics', () => {
-  assert.equal(isInternalCaptureDevice('NativelySystemAudioTap'), true);
-  assert.equal(isInternalCaptureDevice('nativelysystemaudiotap'), true);
-  assert.equal(isInternalCaptureDevice('  NativelySystemAudioTap  '), true);
+  assert.equal(isInternalCaptureDevice('MeetFlooSystemAudioTap'), true);
+  assert.equal(isInternalCaptureDevice('MeetFloosystemaudiotap'), true);
+  assert.equal(isInternalCaptureDevice('  MeetFlooSystemAudioTap  '), true);
   assert.equal(isInternalCaptureDevice('MacBook Air Microphone'), false);
   assert.equal(isInternalCaptureDevice(''), false);
   assert.equal(isInternalCaptureDevice(null), false);
@@ -77,7 +77,7 @@ test('isInternalCaptureDevice matches case and dash variants, not real mics', ()
 test('a stored tap id resolves as MISSING so callers fall back to default', () => {
   // This is the production failure: the preference survives, but the tap is not
   // in the list at mic-start time because it has not been created yet.
-  const resolution = resolveRequestedInputDevice('NativelySystemAudioTap', DEVICES_WITHOUT_TAP);
+  const resolution = resolveRequestedInputDevice('MeetFlooSystemAudioTap', DEVICES_WITHOUT_TAP);
   assert.equal(resolution.status, 'missing');
   assert.deepEqual(resolution.available, ['iPhone Microphone', 'MacBook Air Microphone']);
 });
@@ -137,7 +137,7 @@ test('the tap is filtered out of the OUTPUT list too', () => {
   // Probed: while a tap runs, getOutputDevices() returns the aggregate AHEAD of
   // the real speaker, so it is the first thing the speaker picker offers.
   const outputs = [
-    { id: 'NativelySystemAudioTap', name: 'NativelySystemAudioTap' },
+    { id: 'MeetFlooSystemAudioTap', name: 'MeetFlooSystemAudioTap' },
     { id: 'BuiltInSpeakerDevice', name: 'MacBook Air Speakers' },
   ];
   assert.deepEqual(

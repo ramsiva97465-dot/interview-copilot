@@ -287,7 +287,7 @@ describe('V2 shadow pipeline — (e) never throws on empty/odd input', () => {
 
 describe('V2 shadow pipeline — trace recording (the observe-only sink the shadow uses)', () => {
   // The shadow forwards each inclusion row to shadowTrace.noteContext and commits.
-  // beginTrace returns a NO-OP unless NATIVELY_INTELLIGENCE_TRACE is on, so we drive
+  // beginTrace returns a NO-OP unless MEETFLOO_INTELLIGENCE_TRACE is on, so we drive
   // both states and prove (1) it never throws, (2) when trace IS on the report is
   // faithfully recorded with trust + included + reason markers (content-free).
   beforeEach(() => {
@@ -295,7 +295,7 @@ describe('V2 shadow pipeline — trace recording (the observe-only sink the shad
   });
 
   test('forwarding the inclusion report to a NO-OP trace (flag off) never throws and records nothing', () => {
-    delete process.env.NATIVELY_INTELLIGENCE_TRACE;
+    delete process.env.MEETFLOO_INTELLIGENCE_TRACE;
     const inputs = buildShadowInputs({
       finalPromptOverride: 'SYSTEM: rules.',
       effectiveCandidateProfile: 'I am Alice.',
@@ -315,7 +315,7 @@ describe('V2 shadow pipeline — trace recording (the observe-only sink the shad
   });
 
   test('with trace flag ON the inclusion report is recorded content-free (markers only)', () => {
-    process.env.NATIVELY_INTELLIGENCE_TRACE = '1';
+    process.env.MEETFLOO_INTELLIGENCE_TRACE = '1';
     try {
       const inputs = buildShadowInputs({
         finalPromptOverride: 'SYSTEM: secret system rules.',
@@ -357,7 +357,7 @@ describe('V2 shadow pipeline — trace recording (the observe-only sink the shad
       // The query itself is stored as a hash, not raw.
       assert.doesNotMatch(serialized, /introduce yourself/, 'raw query never stored in the trace');
     } finally {
-      delete process.env.NATIVELY_INTELLIGENCE_TRACE;
+      delete process.env.MEETFLOO_INTELLIGENCE_TRACE;
     }
   });
 });

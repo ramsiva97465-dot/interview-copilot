@@ -99,7 +99,7 @@ describe('nativeArch parity (cjs ↔ esm)', () => {
     const cjs = require('../nativeArch.cjs');
     return import('../nativeArch.mjs').then((esm) => {
       const rel = 'node_modules/better-sqlite3/build/Release/better_sqlite3.node';
-      const fakeResources = '/Applications/Natively.app/Contents/Resources';
+      const fakeResources = '/Applications/MeetFloo.app/Contents/Resources';
       const c = cjs.resolveTargetPath(rel, { resourcesPath: fakeResources });
       const e = esm.resolveTargetPath(rel, { resourcesPath: fakeResources });
       assert.equal(c, e, `cjs=${c} esm=${e}`);

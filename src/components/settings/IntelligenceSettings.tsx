@@ -30,7 +30,7 @@ import { LiquidGlassBadge } from '../../ui-components/LiquidGlassBadge';
 //                  their own setup card above (privacy + external server), not the flag list.
 //   • 'dev'      → user-meaningful diagnostics only. Shadow/observe-only experiments do NOT
 //                  belong here — a switch whose best outcome is "no effect" is noise; leave
-//                  those to their NATIVELY_* env vars.
+//                  those to their MEETFLOO_* env vars.
 //
 // Why not promote profileTreeV2 / answerDiversityGuard / meetingMemoryV2 / etc. into 'core'?
 // They're default-OFF in the registry and not yet eval-promoted — the master must only
@@ -56,7 +56,7 @@ const FLAG_META: Record<string, { label: string; desc: string; group: string; ti
   // adaptiveConnectTimeout) are deliberately absent: they are bounded so that ON is
   // safer than or equal to today's behaviour, so a switch whose best outcome is
   // "no visible change" would be noise — exactly what this map's header rules out.
-  calibration: { label: 'Measure provider speed directly', desc: 'Lets the "Run calibration" button send a few small test requests to measure large-context speed. These use your API key. Off, Natively still learns from your normal answers — this only adds direct measurement.', group: 'Provider performance', tier: 'advanced' },
+  calibration: { label: 'Measure provider speed directly', desc: 'Lets the "Run calibration" button send a few small test requests to measure large-context speed. These use your API key. Off, MeetFloo still learns from your normal answers — this only adds direct measurement.', group: 'Provider performance', tier: 'advanced' },
   capabilityProbe: { label: 'Check image support directly', desc: 'Lets calibration send one tiny image to confirm your model accepts images, instead of relying on its published capabilities. Uses your API key once.', group: 'Provider performance', tier: 'advanced' },
   adaptiveImageQuality: { label: 'Shrink screenshots when the provider is slow', desc: 'Sends screenshots at a lower resolution when your provider is measured to be too slow to answer in time. Trades image detail for a usable answer. Code screenshots are never shrunk.', group: 'Provider performance', tier: 'advanced' },
   // ── Advanced: real opt-in tradeoffs (cost / scope / niche) → inside "Customize" ──────
@@ -77,7 +77,7 @@ const FLAG_META: Record<string, { label: string; desc: string; group: string; ti
   // promptAssemblerV2 / intelligenceOsEnabled / durableMemoryWindow) was removed
   // 2026-08-05: they are shadow-only, reserved, or no longer gate anything, so their best
   // case for a user was "no effect" and their worst case was a misleading promise. They
-  // remain flippable via their NATIVELY_* env vars for internal testing.
+  // remain flippable via their MEETFLOO_* env vars for internal testing.
   trace: { label: 'Diagnostics trace', desc: 'Records a per-answer routing trace (no transcript content). For troubleshooting only.', group: 'Developer options', tier: 'dev' },
 };
 
@@ -117,11 +117,11 @@ type DetectedProvider = 'gemini' | 'openai' | 'claude' | 'deepseek' | 'groq' | '
 // must match `providerTable.key` byte-for-byte — a typo here is a silent failure mode.
 type ProviderEnvHint = { env: string; label: string; snippetLabel: string };
 const PROVIDER_ENV_HINTS: Record<Exclude<DetectedProvider, 'litellm' | 'other'>, ProviderEnvHint> = {
-  gemini:   { env: 'GEMINI_API_KEY',    label: 'Gemini',            snippetLabel: 'Gemini:' },
-  openai:   { env: 'OPENAI_API_KEY',    label: 'OpenAI',            snippetLabel: 'OpenAI:' },
-  claude:   { env: 'ANTHROPIC_API_KEY', label: 'Claude (Anthropic)', snippetLabel: 'Claude:' },
-  deepseek: { env: 'DEEPSEEK_API_KEY',  label: 'DeepSeek',          snippetLabel: 'DeepSeek:' },
-  groq:     { env: 'GROQ_API_KEY',      label: 'Groq',              snippetLabel: 'Groq:' },
+  gemini: { env: 'GEMINI_API_KEY', label: 'Gemini', snippetLabel: 'Gemini:' },
+  openai: { env: 'OPENAI_API_KEY', label: 'OpenAI', snippetLabel: 'OpenAI:' },
+  claude: { env: 'ANTHROPIC_API_KEY', label: 'Claude (Anthropic)', snippetLabel: 'Claude:' },
+  deepseek: { env: 'DEEPSEEK_API_KEY', label: 'DeepSeek', snippetLabel: 'DeepSeek:' },
+  groq: { env: 'GROQ_API_KEY', label: 'Groq', snippetLabel: 'Groq:' },
 };
 
 interface FlagRow { key: string; enabled: boolean; setting: string; env: string; default: boolean }
@@ -260,18 +260,17 @@ const ContextDebugSection: React.FC = () => {
             disabled={busy || envForced}
             onClick={() => void setLevel(lvl)}
             aria-pressed={cfg.level === lvl}
-            className={`rounded-md border px-2.5 py-1 text-[11px] font-medium capitalize transition-colors ${
-              cfg.level === lvl
-                ? 'border-transparent bg-accent-primary text-white'
-                : 'border-border-subtle bg-bg-input text-text-secondary hover:text-text-primary'
-            } ${busy || envForced ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+            className={`rounded-md border px-2.5 py-1 text-[11px] font-medium capitalize transition-colors ${cfg.level === lvl
+              ? 'border-transparent bg-accent-primary text-white'
+              : 'border-border-subtle bg-bg-input text-text-secondary hover:text-text-primary'
+              } ${busy || envForced ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           >
             {t(lvl)}
           </button>
         ))}
         {envForced ? (
           <span className="ml-1 text-[10px] text-amber-400">
-            {t('Set by NATIVELY_CONTEXT_DEBUG — the environment variable overrides this setting.')}
+            {t('Set by MEETFLOO_CONTEXT_DEBUG — the environment variable overrides this setting.')}
           </span>
         ) : null}
       </div>
@@ -533,11 +532,11 @@ export const IntelligenceSettings: React.FC = () => {
     try {
       const c = await window.electronAPI.getStoredCredentials?.();
       if (!c) return;
-      if (c.hasGeminiKey)   return setDetectedProvider('gemini');
-      if (c.hasOpenaiKey)   return setDetectedProvider('openai');
-      if (c.hasClaudeKey)   return setDetectedProvider('claude');
+      if (c.hasGeminiKey) return setDetectedProvider('gemini');
+      if (c.hasOpenaiKey) return setDetectedProvider('openai');
+      if (c.hasClaudeKey) return setDetectedProvider('claude');
       if (c.hasDeepseekKey) return setDetectedProvider('deepseek');
-      if (c.hasGroqKey)     return setDetectedProvider('groq');
+      if (c.hasGroqKey) return setDetectedProvider('groq');
       // No direct provider key, but the user has configured a LiteLLM gateway. Render the
       // LiteLLM-specific branch instead of dumping the 5-block fallback — the gateway is
       // already wired and the launcher reads LITELLM_BASE_URL.
@@ -669,7 +668,7 @@ export const IntelligenceSettings: React.FC = () => {
       // (docGroundedStrictIsolation, contextOsEnabled, promptSystemV2). A user could
       // silently disable document-grounding isolation or revert every prompt to the
       // legacy constants by flipping a row labelled only `docGroundedStrictIsolation`.
-      // Internal flags are still settable via their NATIVELY_* env vars; adding a
+      // Internal flags are still settable via their MEETFLOO_* env vars; adding a
       // FLAG_META entry is now the deliberate act that makes one user-facing.
       if (!meta) continue;
       const tier: FlagTier = meta.tier;
@@ -734,7 +733,7 @@ export const IntelligenceSettings: React.FC = () => {
     try { window.electronAPI.openExternal?.(url); } catch { /* noop */ }
   }, []);
 
-  // A flag is forced by env when a NATIVELY_* env var is set — we can't tell the raw env
+  // A flag is forced by env when a MEETFLOO_* env var is set — we can't tell the raw env
   // value from the renderer, but the get payload's `setting` is the SettingsManager key;
   // when present we allow toggling. (Env-forced detection is best-effort: if a future
   // payload exposes an `envForced` field, honor it; for now toggles are always enabled.)
@@ -794,80 +793,80 @@ export const IntelligenceSettings: React.FC = () => {
               ) : (
                 // LOCAL FLOW — 3 steps. Step 3 is fully automatic when the companion is installed.
                 <>
-              <li>
-                <span className="font-medium text-text-primary">{t('1. Install the companion app.')}</span> {t('In your Terminal, run:')}
-                <CopyBlock text="pip install hindsight-all" />
-                <span className="mt-1 block">{t('Requires Python 3.11 or later.')}</span>
-              </li>
-              <li>
-                <span className="font-medium text-text-primary">{t('2. Start it.')}</span>{' '}
-                {t('From the Natively project folder, run the bundled launcher and keep it running while you use the app:')}
-                <CopyBlock text="bash scripts/hindsight-start.sh" />
-                <span className="mt-1.5 block">
-                  {t('Starts the embedded memory server on port 8888.')}
-                </span>
-                <span className="mt-1 block">
-                  <span className="font-medium text-text-primary">{t('If you start it from inside Natively')}</span> {t('(autoStart toggle ON below), your AI provider key from the AI Providers screen is forwarded to the server automatically — nothing else to do.')}
-                </span>
-                <span className="mt-1 block">
-                  <span className="font-medium text-text-primary">{t('If you run the script yourself')}</span> {t('in a Terminal, also export your AI provider key so the server can use it (the script reads your shell environment, not the app’s stored credentials):')}
-                </span>
-                {detectedProvider && detectedProvider !== 'other' && detectedProvider !== 'litellm' ? (
-                  // Auto-detected: show the env-var snippet that matches the user's
-                  // configured AI provider. Prevents the "wrong env var name → silent
-                  // failure" footgun. The label tells them which provider this is for.
-                  <>
-                    <CopyBlock
-                      text={`export ${PROVIDER_ENV_HINTS[detectedProvider].env}=your-key-here`}
-                      label={PROVIDER_ENV_HINTS[detectedProvider].snippetLabel}
-                    />
-                    <span className="mt-1 block text-text-tertiary">
-                      {t('We detected your AI Providers key for')} <span className="font-medium">{PROVIDER_ENV_HINTS[detectedProvider].label}</span> {t('— the env var name above is the one the launcher reads.')}
+                  <li>
+                    <span className="font-medium text-text-primary">{t('1. Install the companion app.')}</span> {t('In your Terminal, run:')}
+                    <CopyBlock text="pip install hindsight-all" />
+                    <span className="mt-1 block">{t('Requires Python 3.11 or later.')}</span>
+                  </li>
+                  <li>
+                    <span className="font-medium text-text-primary">{t('2. Start it.')}</span>{' '}
+                    {t('From the MeetFloo project folder, run the bundled launcher and keep it running while you use the app:')}
+                    <CopyBlock text="bash scripts/hindsight-start.sh" />
+                    <span className="mt-1.5 block">
+                      {t('Starts the embedded memory server on port 8888.')}
                     </span>
-                  </>
-                ) : detectedProvider === 'litellm' ? (
-                  // User is routing through their own LiteLLM gateway (a base URL is set in
-                  // AI Providers, no direct provider key). Render a single LiteLLM-specific
-                  // snippet instead of the 5-block fallback — the gateway is already
-                  // configured and the launcher reads LITELLM_BASE_URL.
-                  <>
-                    <CopyBlock
-                      text="export LITELLM_BASE_URL=your-gateway-url"
-                      label="LiteLLM gateway:"
-                    />
-                    <span className="mt-1 block text-text-tertiary">
-                      {t('We detected a LiteLLM gateway URL in AI Providers. The launcher forwards it automatically when started from inside Natively; if you run the script yourself, also export the URL above.')}
+                    <span className="mt-1 block">
+                      <span className="font-medium text-text-primary">{t('If you start it from inside MeetFloo')}</span> {t('(autoStart toggle ON below), your AI provider key from the AI Providers screen is forwarded to the server automatically — nothing else to do.')}
                     </span>
-                  </>
-                ) : detectedProvider === 'other' ? (
-                  // No provider configured yet (or unrecognized) — render every supported
-                  // env var name as its own copyable block so the user can pick the right
-                  // one for whatever key they save. Each is a one-click copy.
-                  <>
-                    <span className="mt-1 block text-text-tertiary">
-                      {t('No AI provider key is configured yet. Save one in the AI Providers screen, then copy the matching line below:')}
+                    <span className="mt-1 block">
+                      <span className="font-medium text-text-primary">{t('If you run the script yourself')}</span> {t('in a Terminal, also export your AI provider key so the server can use it (the script reads your shell environment, not the app’s stored credentials):')}
                     </span>
-                    <div className="mt-1.5 space-y-1.5 rounded-lg border border-border-subtle bg-bg-main/40 p-2.5">
-                      <div className="px-1 text-[10px] font-medium uppercase tracking-wide text-text-tertiary">{t('Pick the one that matches your key')}</div>
-                      {(Object.keys(PROVIDER_ENV_HINTS) as Array<keyof typeof PROVIDER_ENV_HINTS>).map((k) => (
+                    {detectedProvider && detectedProvider !== 'other' && detectedProvider !== 'litellm' ? (
+                      // Auto-detected: show the env-var snippet that matches the user's
+                      // configured AI provider. Prevents the "wrong env var name → silent
+                      // failure" footgun. The label tells them which provider this is for.
+                      <>
                         <CopyBlock
-                          key={k}
-                          text={`export ${PROVIDER_ENV_HINTS[k].env}=your-key-here`}
-                          label={PROVIDER_ENV_HINTS[k].snippetLabel}
+                          text={`export ${PROVIDER_ENV_HINTS[detectedProvider].env}=your-key-here`}
+                          label={PROVIDER_ENV_HINTS[detectedProvider].snippetLabel}
                         />
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  // Still loading (detectedProvider === null). Show a neutral placeholder so
-                  // the panel doesn't pop in empty; replaced on the next render once the
-                  // credentials IPC resolves.
-                  <CopyBlock text="export GEMINI_API_KEY=your-key-here" label={t("Loading provider…")} />
-                )}
-              </li>
-              <li>
-                <span className="font-medium text-text-primary">{t('3. Paste the address below')}</span> {t('(the local default is already filled in). The app connects automatically — no Apply needed.')}
-              </li>
+                        <span className="mt-1 block text-text-tertiary">
+                          {t('We detected your AI Providers key for')} <span className="font-medium">{PROVIDER_ENV_HINTS[detectedProvider].label}</span> {t('— the env var name above is the one the launcher reads.')}
+                        </span>
+                      </>
+                    ) : detectedProvider === 'litellm' ? (
+                      // User is routing through their own LiteLLM gateway (a base URL is set in
+                      // AI Providers, no direct provider key). Render a single LiteLLM-specific
+                      // snippet instead of the 5-block fallback — the gateway is already
+                      // configured and the launcher reads LITELLM_BASE_URL.
+                      <>
+                        <CopyBlock
+                          text="export LITELLM_BASE_URL=your-gateway-url"
+                          label="LiteLLM gateway:"
+                        />
+                        <span className="mt-1 block text-text-tertiary">
+                          {t('We detected a LiteLLM gateway URL in AI Providers. The launcher forwards it automatically when started from inside MeetFloo; if you run the script yourself, also export the URL above.')}
+                        </span>
+                      </>
+                    ) : detectedProvider === 'other' ? (
+                      // No provider configured yet (or unrecognized) — render every supported
+                      // env var name as its own copyable block so the user can pick the right
+                      // one for whatever key they save. Each is a one-click copy.
+                      <>
+                        <span className="mt-1 block text-text-tertiary">
+                          {t('No AI provider key is configured yet. Save one in the AI Providers screen, then copy the matching line below:')}
+                        </span>
+                        <div className="mt-1.5 space-y-1.5 rounded-lg border border-border-subtle bg-bg-main/40 p-2.5">
+                          <div className="px-1 text-[10px] font-medium uppercase tracking-wide text-text-tertiary">{t('Pick the one that matches your key')}</div>
+                          {(Object.keys(PROVIDER_ENV_HINTS) as Array<keyof typeof PROVIDER_ENV_HINTS>).map((k) => (
+                            <CopyBlock
+                              key={k}
+                              text={`export ${PROVIDER_ENV_HINTS[k].env}=your-key-here`}
+                              label={PROVIDER_ENV_HINTS[k].snippetLabel}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      // Still loading (detectedProvider === null). Show a neutral placeholder so
+                      // the panel doesn't pop in empty; replaced on the next render once the
+                      // credentials IPC resolves.
+                      <CopyBlock text="export GEMINI_API_KEY=your-key-here" label={t("Loading provider…")} />
+                    )}
+                  </li>
+                  <li>
+                    <span className="font-medium text-text-primary">{t('3. Paste the address below')}</span> {t('(the local default is already filled in). The app connects automatically — no Apply needed.')}
+                  </li>
                 </>
               )}
             </ol>
@@ -897,29 +896,29 @@ export const IntelligenceSettings: React.FC = () => {
                 Hidden entirely for local mode to reduce noise — the user only sees it when
                 they've typed a non-localhost URL. */}
             {(cfg?.mode === 'cloud' || baseUrl && !baseUrl.includes('localhost') && !baseUrl.startsWith('http://127.')) && (
-            <label className="block space-y-1">
-              <span className="text-[10px] font-medium uppercase tracking-wide text-text-secondary">
-                {t('Hindsight Cloud account key')} <span className="normal-case text-text-tertiary">{t('(not your AI key)')}</span>
-                {cfg?.hasApiKey ? t(' — saved, leave blank to keep') : ''}
-              </span>
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => { setApiKey(e.target.value); scheduleAutoSave(); }}
-                placeholder={cfg?.hasApiKey ? t('••••••••  saved') : t('Required for Hindsight Cloud')}
-                className="w-full rounded-lg border border-border-subtle bg-bg-input px-3 py-2 text-xs text-text-primary transition-colors focus:outline-none focus:border-accent-primary"
-              />
-              <span className="block text-[11px] leading-relaxed text-text-secondary">
-                {t('Required for Hindsight Cloud. Your AI provider key stays on this device and is used separately.')}
-              </span>
-            </label>
+              <label className="block space-y-1">
+                <span className="text-[10px] font-medium uppercase tracking-wide text-text-secondary">
+                  {t('Hindsight Cloud account key')} <span className="normal-case text-text-tertiary">{t('(not your AI key)')}</span>
+                  {cfg?.hasApiKey ? t(' — saved, leave blank to keep') : ''}
+                </span>
+                <input
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => { setApiKey(e.target.value); scheduleAutoSave(); }}
+                  placeholder={cfg?.hasApiKey ? t('••••••••  saved') : t('Required for Hindsight Cloud')}
+                  className="w-full rounded-lg border border-border-subtle bg-bg-input px-3 py-2 text-xs text-text-primary transition-colors focus:outline-none focus:border-accent-primary"
+                />
+                <span className="block text-[11px] leading-relaxed text-text-secondary">
+                  {t('Required for Hindsight Cloud. Your AI provider key stays on this device and is used separately.')}
+                </span>
+              </label>
             )}
 
             <label className="flex items-center justify-between gap-3">
               <span className="text-xs text-text-primary">
                 {t('Start memory server automatically at launch')}
                 <span className="mt-0.5 block text-[11px] leading-relaxed text-text-secondary">
-                  {t('When ON and the companion is installed, Natively starts it for you at launch and forwards your AI provider key automatically. Turn OFF to manage the server yourself.')}
+                  {t('When ON and the companion is installed, MeetFloo starts it for you at launch and forwards your AI provider key automatically. Turn OFF to manage the server yourself.')}
                 </span>
               </span>
               <SettingsToggle
@@ -960,7 +959,7 @@ export const IntelligenceSettings: React.FC = () => {
                 >
                   <AlertTriangle size={13} className="mt-0.5 shrink-0 text-amber-400" />
                   <span>
-                    {t('You just saved a new')} <span className="font-medium">{restartHint.provider}</span> {t('key, but the running Hindsight server still has the old one. Quit and relaunch Natively, or toggle autoStart off and on to restart the server.')}
+                    {t('You just saved a new')} <span className="font-medium">{restartHint.provider}</span> {t('key, but the running Hindsight server still has the old one. Quit and relaunch MeetFloo, or toggle autoStart off and on to restart the server.')}
                   </span>
                 </motion.div>
               ) : null}
@@ -1152,7 +1151,7 @@ export const IntelligenceSettings: React.FC = () => {
         <TryResult out={tryOut} />
       </section>
 
-      {/* What Natively has learned about each provider's speed, and what it does
+      {/* What MeetFloo has learned about each provider's speed, and what it does
           with it. Lives here rather than in AI Providers because it is a
           DIAGNOSTIC read-out, not configuration — there is nothing to set. */}
       <section className="space-y-3 border-t border-border-subtle pt-6">

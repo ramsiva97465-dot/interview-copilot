@@ -42,7 +42,7 @@ export const LIVE_FIRST_USEFUL_BUDGET_MS = {
  * The history below explains the 3500 -> 7000 move and still governs the floor.
  *
  * 7000ms, NOT 3500ms. MiniMax (the strong fallback when the Gemini chain is down —
- * see natively-api lib/minimaxProvider.js) has a 4-6s first-token latency; a 3500ms
+ * see MeetFloo-api lib/minimaxProvider.js) has a 4-6s first-token latency; a 3500ms
  * cap aborted every MiniMax stream before it produced a token, so the fallback could
  * never serve a live answer. Raising the cap is near-free on healthy responses: this
  * deadline only FIRES when a provider is genuinely slow to first-token — a healthy
@@ -104,9 +104,9 @@ export function isCompleteShortAnswer(text: string): boolean {
  * Sits above the 7s first-useful cap so a MiniMax stream about to deliver at
  * ~6.5s isn't guillotined by this ceiling.
  *
- * MUST ALSO STAY ABOVE natively-api's AI_TTFT_BUDGET_MS (10s), and this is the
- * binding constraint. A Natively-key user's chat goes to
- * `${NATIVELY_API_URL}/v1/chat` (LLMHelper.ts), where the server runs a
+ * MUST ALSO STAY ABOVE MeetFloo-api's AI_TTFT_BUDGET_MS (10s), and this is the
+ * binding constraint. A MeetFloo-key user's chat goes to
+ * `${MEETFLOO_API_URL}/v1/chat` (LLMHelper.ts), where the server runs a
  * SEQUENTIAL provider cascade (Gemini Flash -> MiniMax-M3 -> Gemini Pro) and
  * cuts over to the next provider when one is slow to first token. That cutover
  * is the thing that actually RESCUES a slow turn — the client, by contrast, can
@@ -127,10 +127,10 @@ export function isCompleteShortAnswer(text: string): boolean {
 export const LIVE_TOTAL_HARD_TIMEOUT_MS = 13000;
 /**
  * VISION counterpart to LIVE_TOTAL_HARD_TIMEOUT_MS: the ceiling for an
- * image-bearing turn served by a provider OTHER than the natively cascade.
+ * image-bearing turn served by a provider OTHER than the MeetFloo cascade.
  *
  * 13000 is not a general-purpose number. Its derivation — read the comment
- * above — is "the natively-api server's 10s cutover + 3s for the next leg".
+ * above — is "the MeetFloo-api server's 10s cutover + 3s for the next leg".
  * A user whose selected model is their own OpenRouter/LiteLLM/Gemini key never
  * touches that server, so on their turns 13000 is an arbitrary bound applied
  * for a reason that does not hold, and it was truncating the vision layer's own
@@ -139,7 +139,7 @@ export const LIVE_TOTAL_HARD_TIMEOUT_MS = 13000;
  * the vision call site scales FLASH_TTFT_MS/PRO_TTFT_MS up from 20s with image
  * count. Every one of those was dead: the outer 13s always fired first.
  *
- * Measured through the real app (natively_debug (3).log, one meeting, 33 vision
+ * Measured through the real app (MeetFloo_debug (3).log, one meeting, 33 vision
  * turns on a Custom/OpenRouter provider): 26 answers delivered with TTFT p50
  * 5.6s and a maximum of 11.6s; the remaining 7 (21%) were aborted at the 13.0s
  * ceiling and replaced with "The model did not produce an answer in time…". A
@@ -160,14 +160,14 @@ export const LIVE_VISION_TOTAL_HARD_TIMEOUT_MS = 20000;
  * Provider, a cURL provider, a LiteLLM gateway, an NVIDIA NIM endpoint.
  *
  * Same argument as the vision ceiling above, applied to the text path. 13000 is
- * "the natively-api server's 10s cutover + 3s"; a user on their own endpoint
+ * "the MeetFloo-api server's 10s cutover + 3s"; a user on their own endpoint
  * never reaches that server, so on their turns 13000 is a bound imported from a
  * mechanism that is not in the request path. The number that IS in the path is
  * whatever their gateway does — a LiteLLM proxy fronting a slow upstream, a
  * self-hosted NIM cold-starting a container, an OpenRouter model queueing — and
  * none of it is observable from here.
  *
- * 15000 buys those routes ~2s over the natively ceiling. It is deliberately
+ * 15000 buys those routes ~2s over the MeetFloo ceiling. It is deliberately
  * BELOW the 20s vision ceiling and not merged with it: vision is sized off a
  * measured 11.6s tail on image turns (see above), and a text turn on the same
  * provider has no image encode or multimodal prefill to pay for.
@@ -247,7 +247,7 @@ export function userEndpointBudgetMs(observed?: ObservedLatency | null): number 
  * Claude, OpenAI, DeepSeek — on the user's own key or ours.
  *
  * These are well-known endpoints with sub-second healthy first-token latency,
- * and, unlike the natively route, nothing behind them can rescue a slow turn.
+ * and, unlike the MeetFloo route, nothing behind them can rescue a slow turn.
  * Waiting 13s to conclude that a direct Gemini call is not coming back spends
  * 13s of the user's meeting to reach a fallback that was available at 8. Equal
  * to LIVE_PROVIDER_FIRST_USEFUL_HARD_TIMEOUT_MS by construction: on a route with
@@ -448,10 +448,10 @@ export const BENCHMARK_PER_QUESTION_HARD_TIMEOUT_MS = 30000;
  * ~8000). An answer that reaches this has stopped being an answer.
  *
  * DEFENCE IN DEPTH, NOT THE FIX. The real fix is an output bound on the
- * request: streamWithNatively's body sends { messages, stream, fast_mode,
+ * request: streamWithMeetFloo's body sends { messages, stream, fast_mode,
  * system, language, images } and no max_tokens — it is the ONLY provider in
  * LLMHelper that does not bound output (DeepSeek, LiteLLM, Claude, Gemini and
- * Groq all do). Adding it needs a natively-api change too, because /v1/chat
+ * Groq all do). Adding it needs a MeetFloo-api change too, because /v1/chat
  * destructures a fixed field list and would silently ignore the field today.
  */
 export const MAX_STREAM_OUTPUT_CHARS = 16000;
@@ -516,7 +516,7 @@ const COMPLEX_TYPES = new Set<AnswerType>([
  * caller passes llmHelper.isUsingOllama(). Checked FIRST, so a local rung is never
  * re-classified by another flag. Defaults false (cloud) for back-compat.
  *
- * `viaServerCascade`: llmHelper.isUsingNativelyServerCascade().
+ * `viaServerCascade`: llmHelper.isUsingMeetFlooServerCascade().
  * `isUserEndpoint`: llmHelper.isUsingUserEndpoint() — Custom / cURL / LiteLLM /
  * NVIDIA NIM. Both default false, so an un-updated caller still gets the previous
  * default-route behaviour.
@@ -538,7 +538,7 @@ export function firstUsefulDeadlineMs(
   observedUserEndpointLatency?: ObservedLatency | null,
 ): number {
   if (isLocal) return LIVE_LOCAL_FIRST_USEFUL_TIMEOUT_MS;
-  // F-301: on the natively-api route the SERVER runs a sequential cascade and
+  // F-301: on the MeetFloo-api route the SERVER runs a sequential cascade and
   // cuts over to the next provider at AI_TTFT_BUDGET_MS (10s). Aborting at the
   // 7s provider cap tore down the HTTP request 3s BEFORE that rescue could
   // happen, so the user got "The model did not produce an answer in time" on a
@@ -551,7 +551,7 @@ export function firstUsefulDeadlineMs(
   // budget here as it does from totalHardTimeoutMs(). These two functions answer
   // the same question for two surfaces — WTA reads the ceiling, manual chat reads
   // this — and every time they have been allowed to disagree, one surface has
-  // silently inherited a bound written for the other. That is how the natively
+  // silently inherited a bound written for the other. That is how the MeetFloo
   // ceiling came to govern vision turns, and how this cap governed manual chat
   // while WTA used a different one.
   if (isUserEndpoint) return userEndpointBudgetMs(observedUserEndpointLatency);
@@ -569,7 +569,7 @@ export function firstUsefulDeadlineMs(
  * FIVE cases and each one exists for a documented reason (see the constants
  * above, and the table in the body). Inline it was two cases and a comment,
  * which is how the vision budget came to be truncated silently for every user
- * not on the natively cascade — and how the natively cascade's own number came
+ * not on the MeetFloo cascade — and how the MeetFloo cascade's own number came
  * to govern direct provider calls that have no cascade behind them.
  *
  * Returns the same value as {@link firstUsefulDeadlineMs} for every route except
@@ -581,7 +581,7 @@ export function totalHardTimeoutMs(opts: {
   isLocal?: boolean;
   /** The turn carries a screenshot, so it is served by the vision chain. */
   isVisionTurn?: boolean;
-  /** Routed through natively-api, whose own cutover LIVE_TOTAL_HARD_TIMEOUT_MS encodes. */
+  /** Routed through MeetFloo-api, whose own cutover LIVE_TOTAL_HARD_TIMEOUT_MS encodes. */
   viaServerCascade?: boolean;
   /** A provider the user pointed at us: Custom / cURL / LiteLLM / NVIDIA NIM. */
   isUserEndpoint?: boolean;
@@ -598,7 +598,7 @@ export function totalHardTimeoutMs(opts: {
   //
   //   local            30000  cold weight load precedes the first token
   //   vision           20000  image encode + multimodal prefill (measured 11.6s tail)
-  //   server cascade   13000  natively-api's 10s provider cutover + 3s
+  //   server cascade   13000  MeetFloo-api's 10s provider cutover + 3s
   //   user endpoint    15000  a gateway we have not measured YET — adaptive once
   //                           we have, between 8000 and 20000 (see
   //                           userEndpointBudgetMs)
@@ -772,7 +772,7 @@ export async function raceStreamWithDeadline(opts: {
         speculative: isSpeculative,
       });
     } catch { /* measurement must never break a turn */ }
-    try { const p = iterator.return?.(undefined); if (p && typeof (p as any).then === 'function') (p as Promise<unknown>).catch(() => {}); } catch { /* already closed */ }
+    try { const p = iterator.return?.(undefined); if (p && typeof (p as any).then === 'function') (p as Promise<unknown>).catch(() => { }); } catch { /* already closed */ }
   };
   try {
     // eslint-disable-next-line no-constant-condition

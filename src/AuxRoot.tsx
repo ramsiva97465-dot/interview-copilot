@@ -2,9 +2,9 @@
  * Renderer root for the LIGHT windows — the overlay pill, the resize toggle,
  * and the cropper.
  *
- * WHY THIS EXISTS. Every Natively window loads the same index.html with a
+ * WHY THIS EXISTS. Every MeetFloo window loads the same index.html with a
  * different `?window=` param, and every one of them used to mount `App`. `App`
- * statically imports NativelyInterface, which pulls react-markdown,
+ * statically imports MeetFlooInterface, which pulls react-markdown,
  * react-syntax-highlighter and KaTeX — so the 36px resize toggle evaluated the
  * entire application bundle to render thirty DOM nodes.
  *

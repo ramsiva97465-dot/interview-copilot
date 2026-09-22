@@ -34,8 +34,8 @@ import path from 'node:path';
 import Module, { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
-const USER_DATA = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-license-present-'));
-process.env.NATIVELY_TEST_USERDATA = USER_DATA;
+const USER_DATA = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-license-present-'));
+process.env.MEETFLOO_TEST_USERDATA = USER_DATA;
 
 const LICENSE_PATH = path.join(USER_DATA, 'license.enc');
 
@@ -85,7 +85,7 @@ function writeLicense(provider, hwid, extra = {}) {
 /** Cold app launch. Both singleton handles must be cleared — getInstance()
  *  falls back to the static when the globalThis anchor is gone. */
 function freshManager() {
-  delete globalThis.__nativelyLicenseManagerV1__;
+  delete globalThis.__MeetFlooLicenseManagerV1__;
   LicenseManager.instance = undefined;
   return LicenseManager.getInstance();
 }
@@ -129,7 +129,7 @@ describe('native module present: this device owns the license', () => {
     writeLicense('gumroad', THIS_DEVICE_HWID);
     const before = fs.readFileSync(LICENSE_PATH);
 
-    const result = await freshManager().activateWithApiKey('natively_sk_other');
+    const result = await freshManager().activateWithApiKey('MeetFloo_sk_other');
 
     assert.equal(result.skipped, true);
     assert.equal(result.error, undefined, 'a benign skip must not surface an error to the user');
@@ -161,7 +161,7 @@ describe('native module present: the license belongs to ANOTHER device', () => {
       json: async () => ({ ok: true, has_pro: true, plan: 'ultra' }),
     });
 
-    const result = await freshManager().activateWithApiKey('natively_sk_mine');
+    const result = await freshManager().activateWithApiKey('MeetFloo_sk_mine');
 
     assert.notEqual(result.skipped, true, 'a proven-foreign license must not block activation');
     assert.equal(result.success, true);
@@ -169,7 +169,7 @@ describe('native module present: the license belongs to ANOTHER device', () => {
     const stored = JSON.parse(
       fs.readFileSync(LICENSE_PATH, 'utf8').replace(/^ENC:/, ''),
     );
-    assert.equal(stored.provider, 'natively_api', 'the foreign license should have been replaced');
+    assert.equal(stored.provider, 'MeetFloo_api', 'the foreign license should have been replaced');
   });
 
   test('a foreign legacy license (no provider field) is also released', async () => {
@@ -181,7 +181,7 @@ describe('native module present: the license belongs to ANOTHER device', () => {
       json: async () => ({ ok: true, has_pro: true, plan: 'pro' }),
     });
 
-    const result = await freshManager().activateWithApiKey('natively_sk_mine');
+    const result = await freshManager().activateWithApiKey('MeetFloo_sk_mine');
     assert.notEqual(result.skipped, true);
   });
 });
@@ -294,7 +294,7 @@ describe('native module present: replacing one perpetual license with another', 
     writeLicense('dodo', THIS_DEVICE_HWID, { key: 'DODO-OLD', instanceId: 'lki_old' });
     const before = fs.readFileSync(LICENSE_PATH);
 
-    const result = await freshManager().storeLicense('natively_sk_x', 'natively_api', undefined, 'ultra');
+    const result = await freshManager().storeLicense('MeetFloo_sk_x', 'MeetFloo_api', undefined, 'ultra');
 
     assert.equal(result.success, false);
     assert.equal(result.skipped, true);
@@ -311,7 +311,7 @@ describe('native module present: what a benign skip reports', () => {
     // result must say what happened: Pro is already on, the key was not applied.
     writeLicense('gumroad', THIS_DEVICE_HWID);
 
-    const result = await freshManager().activateLicense('natively_sk_never_validated');
+    const result = await freshManager().activateLicense('MeetFloo_sk_never_validated');
 
     assert.equal(result.success, false, 'an unvalidated key must not report success');
     assert.match(result.error, /already active/i);
@@ -331,7 +331,7 @@ describe('native module present: what a benign skip reports', () => {
     const mgr = freshManager();
     mgr.cachedPremium = false; // as a revocation would leave it
 
-    const result = await mgr.activateWithApiKey('natively_sk_x');
+    const result = await mgr.activateWithApiKey('MeetFloo_sk_x');
 
     assert.equal(result.skipped, true, 'precondition: the guard must fire');
     assert.equal(mgr.cachedPremium, false, 'the guard resurrected a withheld verdict');
@@ -343,7 +343,7 @@ describe('native module present: what a benign skip reports', () => {
     // unlink is best-effort — on Windows the lock that failed the rename can fail
     // it too. A leftover .tmp is a complete, safeStorage-decryptable license, so a
     // revoked user could rename one file and be Pro again.
-    writeLicense('natively_api', THIS_DEVICE_HWID, { plan: 'ultra' });
+    writeLicense('MeetFloo_api', THIS_DEVICE_HWID, { plan: 'ultra' });
     fs.writeFileSync(LICENSE_PATH + '.tmp', fs.readFileSync(LICENSE_PATH));
 
     const mgr = freshManager();

@@ -75,7 +75,7 @@ rather than leaving a reader to infer it.
 +quota it used. It never records **what** the operation was about. No prompt text, answer
 +text, résumé or job-description content, meeting transcript, document content, clipboard
 +content, keystroke, or screenshot is written to it, and neither is any provider API key:
-+your Natively key appears only as a one-way hash that cannot be reversed into the key.
++your MeetFloo key appears only as a one-way hash that cannot be reversed into the key.
 ```
 
 ### 2.3 §9 — make the erasure answer specific
@@ -101,8 +101,8 @@ actually happens. Replace the Erasure bullet:
 
 ## 3. What this diff deliberately does not claim
 
-* It does **not** say Natively can see what BYOK features a customer ran. It cannot —
-  when a customer supplies their own provider key, Natively executes nothing and meters
+* It does **not** say MeetFloo can see what BYOK features a customer ran. It cannot —
+  when a customer supplies their own provider key, MeetFloo executes nothing and meters
   nothing (architecture doc §5).
 * It does **not** introduce any third-party marketing analytics. The ledger is
   first-party and is not wired to any analytics sink.

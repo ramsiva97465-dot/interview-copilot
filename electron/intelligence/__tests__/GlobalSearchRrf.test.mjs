@@ -16,7 +16,7 @@ import assert from 'node:assert/strict';
 import { SearchOrchestrator } from '../../../dist-electron/electron/intelligence/SearchOrchestrator.js';
 
 const svc = new SearchOrchestrator();
-const FLAG = 'NATIVELY_RAG_RRF_FUSION';
+const FLAG = 'MEETFLOO_RAG_RRF_FUSION';
 
 function cand(over) {
   return { meetingId: 'm', title: 'T', date: 1e13, mode: 'sales', snippet: 's', source: 'lexical', score: 0.5, userId: 'alice', ...over };

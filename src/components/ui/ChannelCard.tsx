@@ -30,7 +30,7 @@ const providerLabel = (provider?: string): string => {
         azure: 'Azure',
         ibmwatson: 'IBM Watson',
         soniox: 'Soniox',
-        natively: 'MeetFloo Pro',
+        MeetFloo: 'MeetFloo Pro',
     };
     return labels[provider.toLowerCase()] || provider;
 };
@@ -57,51 +57,46 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
     // lost it."
     const icon = status === 'failed' ? iconFailed
         : status === 'reconnecting' || status === 'awaiting-audio' ? iconReconnecting
-        : iconConnected;
+            : iconConnected;
 
     const statusLabel = status === 'connected' ? 'Operational'
         : status === 'awaiting-audio' ? 'Listening for audio…'
-        : status === 'reconnecting' ? 'Reconnecting...'
-        : 'Error';
+            : status === 'reconnecting' ? 'Reconnecting...'
+                : 'Error';
     const label = providerLabel(provider);
 
     return (
-        <div className={`relative rounded-xl transition-all duration-300 ${
-            status === 'failed'
+        <div className={`relative rounded-xl transition-all duration-300 ${status === 'failed'
                 ? 'bg-gradient-to-br from-red-500/8 to-red-500/3 border border-red-500/15'
                 : status === 'reconnecting'
                     ? 'bg-gradient-to-br from-amber-500/8 to-amber-500/3 border border-amber-500/15'
                     : 'bg-gradient-to-br from-sky-500/4 to-sky-500/2 border border-sky-500/10'
-        }`}>
+            }`}>
             {/* Status indicator line */}
-            <div className={`absolute top-0 left-3 right-3 h-px ${
-                status === 'failed' ? 'bg-gradient-to-r from-red-500/40 to-transparent' :
-                status === 'reconnecting' ? 'bg-gradient-to-r from-amber-500/40 to-transparent' :
-                'bg-gradient-to-r from-sky-500/40 to-transparent'
-            }`} />
+            <div className={`absolute top-0 left-3 right-3 h-px ${status === 'failed' ? 'bg-gradient-to-r from-red-500/40 to-transparent' :
+                    status === 'reconnecting' ? 'bg-gradient-to-r from-amber-500/40 to-transparent' :
+                        'bg-gradient-to-r from-sky-500/40 to-transparent'
+                }`} />
 
             <div className="p-3.5 space-y-2.5">
                 {/* Header */}
                 <div className="flex items-center gap-2">
-                    <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${
-                        status === 'failed' ? 'bg-red-500/15' :
-                        status === 'reconnecting' ? 'bg-amber-500/15' :
-                        'bg-sky-500/10'
-                    }`}>
-                        <div className={`w-4 h-4 ${
-                            status === 'failed' ? 'text-red-400' :
-                            status === 'reconnecting' ? 'text-amber-400 animate-spin' :
-                            'text-sky-400'
+                    <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${status === 'failed' ? 'bg-red-500/15' :
+                            status === 'reconnecting' ? 'bg-amber-500/15' :
+                                'bg-sky-500/10'
                         }`}>
+                        <div className={`w-4 h-4 ${status === 'failed' ? 'text-red-400' :
+                                status === 'reconnecting' ? 'text-amber-400 animate-spin' :
+                                    'text-sky-400'
+                            }`}>
                             {icon}
                         </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className={`text-[11px] font-semibold ${
-                            status === 'failed' ? 'text-red-400/90' :
-                            status === 'reconnecting' ? 'text-amber-400/90' :
-                            'overlay-text-primary'
-                        }`}>
+                        <p className={`text-[11px] font-semibold ${status === 'failed' ? 'text-red-400/90' :
+                                status === 'reconnecting' ? 'text-amber-400/90' :
+                                    'overlay-text-primary'
+                            }`}>
                             {name}
                         </p>
                         <p className="text-[10px] overlay-text-muted truncate">

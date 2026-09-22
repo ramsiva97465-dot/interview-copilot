@@ -25,14 +25,14 @@ on:
   #
   # Do not use `submodules: true` here. Both gitlinks are registered, but this
   # build needs only the private `premium` dependency; fetching it explicitly
-  # avoids an unrelated natively-api checkout and lets us provide the separate
+  # avoids an unrelated MeetFloo-api checkout and lets us provide the separate
   # repository credential only to the command that needs it.
   schedule:
     - cron: '0 9 * * 1' # Every Monday at 09:00 UTC
 
 jobs:
   electron-entry-smoke:
-    # Natively ships on macOS AND Windows, so shared build/test behavior must be
+    # MeetFloo ships on macOS AND Windows, so shared build/test behavior must be
     # proven on both. A macOS-only job cannot catch Windows-specific breakage in
     # package scripts: npm runs them through cmd.exe there, which has no POSIX
     # subshells, no `VAR=value cmd` prefixes, no `${VAR:-default}`, and does not
@@ -58,7 +58,7 @@ jobs:
           # build needs only `premium`, which is private and requires a token
           # with access to that separate repository. The explicit step below is
           # path-limited to the build dependency and supplies that credential.
-          # It avoids fetching the unrelated natively-api checkout on every leg.
+          # It avoids fetching the unrelated MeetFloo-api checkout on every leg.
           #
           # persist-credentials keeps the checkout token in .git/config so the
           # submodule clone can reuse the header rewrite configured below.
@@ -350,8 +350,8 @@ jobs:
 
   api-smoke:
     # Runs weekly (Monday 09:00 UTC, see the schedule trigger above) and on
-    # demand via workflow_dispatch. Requires secrets: NATIVELY_API_KEY (or
-    # NATIVELY_TRIAL_TOKEN) set in repo. Without credentials the suite is
+    # demand via workflow_dispatch. Requires secrets: MEETFLOO_API_KEY (or
+    # MEETFLOO_TRIAL_TOKEN) set in repo. Without credentials the suite is
     # skipped cleanly via the env gate.
     name: API Smoke (weekly)
     runs-on: macos-latest
@@ -362,11 +362,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           # NOT `submodules: true`. The tree carries TWO gitlinks — `premium` and
-          # `natively-api` — but .gitmodules only describes `premium`.
+          # `MeetFloo-api` — but .gitmodules only describes `premium`.
           # `submodules: true` runs `git submodule update --init --recursive`,
           # which aborts on the undescribed one:
           #
-          #   fatal: No url found for submodule path 'natively-api' in .gitmodules
+          #   fatal: No url found for submodule path 'MeetFloo-api' in .gitmodules
           #
           # and it aborts BEFORE cloning `premium`, so the checkout would fail
           # while still leaving the directory empty. The explicit step below is
@@ -376,7 +376,7 @@ jobs:
           # submodule clone can reuse the header rewrite configured below.
           persist-credentials: true
 
-      # `premium` is a PRIVATE submodule (Natively-AI-assistant/natively-premium)
+      # `premium` is a PRIVATE submodule (MeetFloo-AI-assistant/MeetFloo-premium)
       # that both build steps genuinely need: electron/tsconfig.premium-check.json includes
       # ../premium/electron/**/*.ts, and esbuild bundles require('../premium/…')
       # calls. Without it every run dies at the first typecheck with
@@ -451,7 +451,7 @@ jobs:
       - name: Run API smoke tests
         run: npm run test:api-smoke
         env:
-          RUN_NATIVELY_API_E2E: ${{ secrets.RUN_NATIVELY_API_E2E }}
-          NATIVELY_API_KEY: ${{ secrets.NATIVELY_API_KEY }}
-          NATIVELY_TRIAL_TOKEN: ${{ secrets.NATIVELY_TRIAL_TOKEN }}
-          NATIVELY_API_BASE: ${{ secrets.NATIVELY_API_BASE }}
+          RUN_MEETFLOO_API_E2E: ${{ secrets.RUN_MEETFLOO_API_E2E }}
+          MEETFLOO_API_KEY: ${{ secrets.MEETFLOO_API_KEY }}
+          MEETFLOO_TRIAL_TOKEN: ${{ secrets.MEETFLOO_TRIAL_TOKEN }}
+          MEETFLOO_API_BASE: ${{ secrets.MEETFLOO_API_BASE }}

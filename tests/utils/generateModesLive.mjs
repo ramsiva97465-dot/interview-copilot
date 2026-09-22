@@ -1,16 +1,16 @@
 // tests/utils/generateModesLive.mjs
 //
 // Phase 2 live generator: drives all 10 mission briefs through the REAL
-// ModeGenerator pipeline, whose LLM call hits the locally-running natively-api
-// backend (MiniMax-M3 via NATIVELY_FORCE_PRIMARY_GEN=minimax + local-test auth).
+// ModeGenerator pipeline, whose LLM call hits the locally-running MeetFloo-api
+// backend (MiniMax-M3 via MEETFLOO_FORCE_PRIMARY_GEN=minimax + local-test auth).
 //
 // This is NOT a unit test — it makes real network calls to real MiniMax. It
 // writes the 10 generated modes + a validation report to
 // test-results/modes-autopilot/generated-modes/.
 //
 // Env:
-//   NATIVELY_API_BASE          (default http://localhost:3000)
-//   NATIVELY_LOCAL_TEST_TOKEN  (default local-test) — matches server bypass
+//   MEETFLOO_API_BASE          (default http://localhost:3000)
+//   MEETFLOO_LOCAL_TEST_TOKEN  (default local-test) — matches server bypass
 //   MODEGEN_OUT_DIR            (default test-results/modes-autopilot/generated-modes)
 //
 // Usage:
@@ -29,8 +29,8 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(__dirname, '../..');
-const API_BASE = process.env.NATIVELY_API_BASE || 'http://localhost:3000';
-const LOCAL_TOKEN = process.env.NATIVELY_LOCAL_TEST_TOKEN || 'local-test';
+const API_BASE = process.env.MEETFLOO_API_BASE || 'http://localhost:3000';
+const LOCAL_TOKEN = process.env.MEETFLOO_LOCAL_TEST_TOKEN || 'local-test';
 const OUT_DIR = process.env.MODEGEN_OUT_DIR || path.join(REPO, 'test-results/modes-autopilot/generated-modes');
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -41,7 +41,7 @@ async function backendComplete(system, user) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-natively-local-test': LOCAL_TOKEN,
+      'x-MeetFloo-local-test': LOCAL_TOKEN,
     },
     body: JSON.stringify({
       system,
@@ -101,7 +101,7 @@ async function main() {
       );
       console.log(
         `[gen] ${brief.key.padEnd(20)} ok=${rec.ok} attempts=${attempts} model=${lastModel} ` +
-          `grounded=${draft.documentGrounded}(req=${brief.requiresGrounding}) len=${rec.customContextLength} ${rec.durationMs}ms`,
+        `grounded=${draft.documentGrounded}(req=${brief.requiresGrounding}) len=${rec.customContextLength} ${rec.durationMs}ms`,
       );
     } catch (e) {
       const rec = {

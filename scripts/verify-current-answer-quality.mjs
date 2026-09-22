@@ -51,7 +51,7 @@ const TRANSCRIPT_LECTURE = [
 
 const PROBES = {
   H1_H2_tech: { surface: 'manual', questions: ['What is Redis?', 'What is JWT?', 'What is CORS?', 'Explain REST API in simple terms.', 'Explain database indexing.', 'Explain caching strategies.', 'Explain the JavaScript event loop.', 'Explain rate limiting.', 'What is CAP theorem?', 'What is Kafka?'] },
-  H3_sales: { surface: 'manual', questions: ['What is Natively?', 'What does your product do?', 'Who is this for?', 'What problem do you solve?', 'Give me the elevator pitch.', 'What is Natively built with?', 'What platforms does it support?', 'Why should I pay when ChatGPT exists?', 'How is Natively different from Cluely?', 'Your product is expensive.'] },
+  H3_sales: { surface: 'manual', questions: ['What is MeetFloo?', 'What does your product do?', 'Who is this for?', 'What problem do you solve?', 'Give me the elevator pitch.', 'What is MeetFloo built with?', 'What platforms does it support?', 'Why should I pay when ChatGPT exists?', 'How is MeetFloo different from Cluely?', 'Your product is expensive.'] },
   H4_teammeet: { surface: 'what_to_answer', transcript: TRANSCRIPT_TEAM, questions: ['What are the action items?', 'What was decided?', 'Who is the owner?', 'What is the deadline?', 'Summarize the meeting.', 'What are the next steps?', 'Recap this meeting.'] },
   H5_lecture: { surface: 'what_to_answer', transcript: TRANSCRIPT_LECTURE, questions: ['Summarize this lecture.', 'What are the key concepts?', 'Explain this slide.', 'What is the main idea?', 'Define the key terms.', 'What should I remember from this?'] },
   H6_profile: { surface: 'manual', questions: ['Introduce yourself.', 'Tell me about yourself.', 'What is your current role?', 'How many years of experience do you have?', 'What companies have you worked at?', 'What is your strongest match for this role?', 'What gap do I have?', 'Why should we hire you?'] },
@@ -61,7 +61,7 @@ const PROBES = {
 
 // ── speakability / quality analyzers (deterministic, content-free) ──
 const PROFILE_TERMS = /\b(B\.?Tech|CUSAT|EstroTech|Aetherbot|TalentScope|PriceX|RedisMart)\b/i;
-const SELF_ID = /\bI(?:'m| am)\s+Natively\b|\bI(?:'m| am)\s+an?\s+AI\s+assistant\b|developed by\s+Evin/i;
+const SELF_ID = /\bI(?:'m| am)\s+MeetFloo\b|\bI(?:'m| am)\s+an?\s+AI\s+assistant\b|developed by\s+Evin/i;
 const LAZY = /\b(could you (please )?(repeat|rephrase|clarify)|can you repeat|i didn'?t (catch|hear|get)|want to make sure i (address|understand)|repeat that)\b/i;
 const MISSING_CTX_OK = /\bdon'?t have (enough|any)\b.*\b(context|meeting|lecture|transcript|captured)\b/i;
 const RESUME_DUMP = /(—\s*(Developed|Built|Led|Implemented|Designed|Engineered))|(;\s*[A-Z][a-z]+.*(Engineer|Developer|Intern).*;)|^\s*[-*•].*(Developed|Built|Led|Implemented)/m;
@@ -98,10 +98,10 @@ async function driveOne(h, mmClient, q, surface, transcript) {
     let question = q;
     if (isWTA && transcript) {
       const turns = transcript.concat([{ speaker: 'Speaker', text: q }]).map((t, i) => ({ role: /interviewer|speaker|professor|customer/i.test(t.speaker) ? 'interviewer' : 'candidate', text: t.text, timestamp: i * 1000 }));
-      try { const ex = h.extractLatestQuestion(turns); if (ex?.latestQuestion) question = ex.latestQuestion; } catch {}
+      try { const ex = h.extractLatestQuestion(turns); if (ex?.latestQuestion) question = ex.latestQuestion; } catch { }
       plan = h.planAnswer({ question, source, speakerPerspective });
       let candidateProfile = '';
-      try { const k = await Promise.race([h.orchestrator.processQuestion(question), sleep(8000).then(() => null)]); if (k && k.factualRecall === true && !k.liveNegotiationResponse) { if (k.contextBlock) candidateProfile = k.contextBlock; else if (k.introResponse) candidateProfile = `<candidate_identity_fact>\n${k.introResponse}\n</candidate_identity_fact>`; } } catch {}
+      try { const k = await Promise.race([h.orchestrator.processQuestion(question), sleep(8000).then(() => null)]); if (k && k.factualRecall === true && !k.liveNegotiationResponse) { if (k.contextBlock) candidateProfile = k.contextBlock; else if (k.introResponse) candidateProfile = `<candidate_identity_fact>\n${k.introResponse}\n</candidate_identity_fact>`; } } catch { }
       const stream = h.whatToAnswerLLM.generateStream(question, undefined, undefined, undefined, undefined, undefined, undefined, candidateProfile || undefined, plan);
       await h.raceStreamWithDeadline({ stream, firstUsefulDeadlineMs: 30000, isUsefulYet: () => answer.length > 0, shouldAbort: () => ac.signal.aborted, onToken: (p) => { answer += String(p || ''); } });
     } else {
@@ -111,7 +111,7 @@ async function driveOne(h, mmClient, q, surface, transcript) {
       const isSafety = plan.answerType === 'ethical_usage_answer';
       if (!isCoding && h.isBareFollowUp && h.isBareFollowUp(question)) { answer = h.buildContextFreeClarification('manual'); usedFastPath = true; }
       if (!usedFastPath && !isCoding && !isContract && !h.isAssistantIdentityQuestion(question)) {
-        try { const fp = h.buildManualProfileBackendAnswer({ question, orchestrator: h.orchestrator, source: 'manual_input' }); if (fp?.route?.answer) { answer = String(fp.route.answer); usedFastPath = true; } } catch {}
+        try { const fp = h.buildManualProfileBackendAnswer({ question, orchestrator: h.orchestrator, source: 'manual_input' }); if (fp?.route?.answer) { answer = String(fp.route.answer); usedFastPath = true; } } catch { }
       }
       if (!usedFastPath) {
         let context = (isCoding || isContract) ? h.formatAnswerPlanForPrompt(plan, false) : undefined;
@@ -119,7 +119,7 @@ async function driveOne(h, mmClient, q, surface, transcript) {
         const stream = h.llmHelper.streamChat(question, undefined, context, h.CHAT_MODE_PROMPT, isCoding || isSafety, isCoding || isSafety, [], ac.signal, h.llmHelper.thinkingBudgetForAnswerType(isCoding), { answerType: plan.answerType, forbiddenContextLayers: plan.forbiddenContextLayers || [] });
         await h.raceStreamWithDeadline({ stream, firstUsefulDeadlineMs: 30000, isUsefulYet: () => answer.length > 0, shouldAbort: () => ac.signal.aborted, onToken: (p) => { answer += String(p || ''); } });
         // apply the SAME post-gen guards the live path applies (current code)
-        if (h.CANDIDATE_VOICE_ANSWER_TYPES?.has(plan.answerType) && h.sanitizeCandidateAnswer) { const s = h.sanitizeCandidateAnswer(answer); if (s.repaired && !s.needsFallback) answer = s.text; else if (s.needsFallback) { try { const fb = h.buildManualProfileBackendAnswer({ question, orchestrator: h.orchestrator, source: 'manual_input' }); if (fb?.route?.answer) answer = fb.route.answer; } catch {} } }
+        if (h.CANDIDATE_VOICE_ANSWER_TYPES?.has(plan.answerType) && h.sanitizeCandidateAnswer) { const s = h.sanitizeCandidateAnswer(answer); if (s.repaired && !s.needsFallback) answer = s.text; else if (s.needsFallback) { try { const fb = h.buildManualProfileBackendAnswer({ question, orchestrator: h.orchestrator, source: 'manual_input' }); if (fb?.route?.answer) answer = fb.route.answer; } catch { } } }
         if (h.ASSISTANT_VOICE_ANSWER_TYPES?.has(plan.answerType) && h.detectAssistantVoiceMisfire) { const m = h.detectAssistantVoiceMisfire(answer); if (m.isMisfire) answer = (plan.answerType === 'general_meeting_answer' || plan.answerType === 'lecture_answer') ? "I don't have enough context from the conversation to answer that yet." : plan.answerType === 'sales_answer' ? "I don't have enough context on that yet — could you share a bit more?" : 'Could you give me a bit more to go on?'; }
       }
     }
@@ -138,10 +138,10 @@ async function main() {
 
   const h = H.createHarness({ provider: 'auto' });
   h.llmHelper.groqClient = mm;
-  try { h.llmHelper.setModel('qwen/qwen3.6-27b'); } catch {}
-  try { h.llmHelper.setGroqFastTextMode(false); } catch {}
-  try { h.llmHelper.client = null; h.llmHelper.openaiClient = null; h.llmHelper.claudeClient = null; h.llmHelper.deepseekClient = null; } catch {}
-  try { const rl = h.llmHelper.rateLimiters; if (rl?.groq) { rl.groq.maxTokens = 100000; rl.groq.tokens = 100000; rl.groq.refillRatePerSecond = 1000; } } catch {}
+  try { h.llmHelper.setModel('qwen/qwen3.6-27b'); } catch { }
+  try { h.llmHelper.setGroqFastTextMode(false); } catch { }
+  try { h.llmHelper.client = null; h.llmHelper.openaiClient = null; h.llmHelper.claudeClient = null; h.llmHelper.deepseekClient = null; } catch { }
+  try { const rl = h.llmHelper.rateLimiters; if (rl?.groq) { rl.groq.maxTokens = 100000; rl.groq.tokens = 100000; rl.groq.refillRatePerSecond = 1000; } } catch { }
 
   const results = {};
   for (const [hyp, spec] of Object.entries(PROBES)) {

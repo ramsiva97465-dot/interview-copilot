@@ -21,7 +21,7 @@
 //
 // Do NOT fold this back into ./tsconfig.json: that would re-impose `strict` on
 // the submodule, which is the 20-finding follow-up (a) that belongs in
-// natively-premium, not here.
+// MeetFloo-premium, not here.
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {

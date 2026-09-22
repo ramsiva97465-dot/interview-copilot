@@ -64,8 +64,8 @@ describe('EmbeddingPipeline config state-awareness', () => {
     // Added with the managed-embedding provider: the trial SENTINEL key is
     // identical across trials, so without the token comparison a brand-new trial
     // reads as "unchanged" and the dead token is kept.
-    assert.match(block, /prev\.nativelyApiKey[^\n]+!==[^\n]+next\.nativelyApiKey/, 'nativelyApiKey must be compared');
-    assert.match(block, /prev\.nativelyTrialToken[^\n]+!==[^\n]+next\.nativelyTrialToken/, 'nativelyTrialToken must be compared');
+    assert.match(block, /prev\.MeetFlooApiKey[^\n]+!==[^\n]+next\.MeetFlooApiKey/, 'MeetFlooApiKey must be compared');
+    assert.match(block, /prev\.MeetFlooTrialToken[^\n]+!==[^\n]+next\.MeetFlooTrialToken/, 'MeetFlooTrialToken must be compared');
   });
 
   test('the pipeline delegates to the shared comparator rather than keeping a second copy', () => {
@@ -111,8 +111,8 @@ describe('EmbeddingProviderResolver explicit key-management policy', () => {
   // `explicitKeyManagement: keys.…` — which pinned the very hand-listing that
   // was the bug. RAGManagerConfig re-declared six embedding fields by name and
   // the constructor re-listed the same six into `initialize()`, so everything
-  // `buildEmbeddingConfig()` produces beyond those six (nativelyApiKey,
-  // nativelyTrialToken, nativelyApiUrl, ollamaEmbeddingModel/Dims, the
+  // `buildEmbeddingConfig()` produces beyond those six (MeetFlooApiKey,
+  // MeetFlooTrialToken, MeetFlooApiUrl, ollamaEmbeddingModel/Dims, the
   // embeddingMode/embeddingProvider choice) was silently dropped on a normal
   // app start. A test that required the hand-list could only ever hold that in
   // place.

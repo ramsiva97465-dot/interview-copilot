@@ -1,13 +1,13 @@
 # DeepSeek model-id migration regression (2026-09-17)
 
-Conversations: INT-M, SALES-S, TEAM-M, TECH-DISC-L · 3 runs each · same pipeline bundle, prompts, corpus and deadline overrides as the main benchmark. Only natively-api's `DEEPSEEK_MODEL` differs.
+Conversations: INT-M, SALES-S, TEAM-M, TECH-DISC-L · 3 runs each · same pipeline bundle, prompts, corpus and deadline overrides as the main benchmark. Only MeetFloo-api's `DEEPSEEK_MODEL` differs.
 
 | Metric | Before: `deepseek-v4-flash` (ds-flash-prod, 2026-09-16) | After: `deepseek-flash` (ds-flash-migrated, 2026-09-16/17) |
 |---|---|---|
 | Runs / summaries produced | 12 / 12 | 12 / 12 |
 | Model-call errors · dropped chunks · blocked Gemini fallbacks | 0 · 0 · 0 | 0 · 0 · 0 |
 | Production deadline breaches (calls) | 0 | 0 |
-| Model id sent by natively-api | deepseek-v4-flash | deepseek-flash |
+| Model id sent by MeetFloo-api | deepseek-v4-flash | deepseek-flash |
 | Model reported by DeepSeek | deepseek-flash | deepseek-flash |
 | `thinking` sent · reasoning tokens | {"type":"disabled"} · 0 | {"type":"disabled"} · 0 |
 | All verification checks pass | true | true |
@@ -32,5 +32,5 @@ Conversations: INT-M, SALES-S, TEAM-M, TECH-DISC-L · 3 runs each · same pipeli
 - DeepSeek documents `deepseek-v4-flash` as a retired alias served by DeepSeek-V4.1-Flash, and both arms report `deepseek-flash` as the answering model, so differences here are run-to-run sampling noise (no temperature is set on either side), not a model change.
 - Anchor retention, unsupported numbers and superseded-value leaks are deterministic text checks, applied identically to both arms. They are coarser than the judge: the superseded-value check counts any occurrence of a number unique to a correction's initial value, so it over-counts (a "9" elsewhere in the summary matches). Use them for before/after deltas only.
 - Hallucinated non-numeric content, speaker attribution and decision correctness were not checked: they need the LLM judge, whose Gemini key has no prepaid credits.
-- A Gemini Flash-Lite arm was not run for the same reason (the key returns 429 RESOURCE_EXHAUSTED), and because Flash-Lite is not the summary generator in natively-api: it is only the fallback leg after DeepSeek.
+- A Gemini Flash-Lite arm was not run for the same reason (the key returns 429 RESOURCE_EXHAUSTED), and because Flash-Lite is not the summary generator in MeetFloo-api: it is only the fallback leg after DeepSeek.
 - Both arms ran in the DeepSeek off-peak window (before: 2026-09-16 20:04-20:48 UTC; after: 23:34-23:37 UTC), from the same machine.

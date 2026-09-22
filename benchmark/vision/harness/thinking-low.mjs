@@ -20,7 +20,7 @@ import { scoreAnswer } from './scoring.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(HERE, '../../..')
-const API = path.join(ROOT, 'natively-api')
+const API = path.join(ROOT, 'MeetFloo-api')
 const { buildDeepSeekBody, DEEPSEEK_CHAT_URL, parseDeepSeekStreamLine } = await import(path.join(API, 'lib/deepseekProvider.js'))
 const { normalizeImages } = await import(path.join(API, 'lib/imageNormalizer.js'))
 
@@ -30,7 +30,7 @@ const SHOTS = path.resolve(arg('--shots', path.join(HERE, '../shots')))
 const OUT = path.resolve(arg('--out', path.join(HERE, '../results/thinking-low.json')))
 const KEY = Object.fromEntries(fs.readFileSync(path.join(API, '.env'), 'utf8').split('\n').filter((l) => /^[A-Z0-9_]+=/.test(l))
   .map((l) => { const i = l.indexOf('='); return [l.slice(0, i), l.slice(i + 1).trim().replace(/^["']|["']$/g, '')] })).DEEPSEEK_API_KEY
-const SYSTEM = 'You are Natively, a screen-analysis assistant. Answer only from the screenshot, tersely, one numbered line per question. If a value is not legible, say UNKNOWN rather than guessing.'
+const SYSTEM = 'You are MeetFloo, a screen-analysis assistant. Answer only from the screenshot, tersely, one numbered line per question. If a value is not legible, say UNKNOWN rather than guessing.'
 
 const cache = new Map()
 async function shot(id) {

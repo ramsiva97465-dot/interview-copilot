@@ -1,4 +1,4 @@
-# Natively Usage Ledger & Operational Telemetry — Architecture
+# MeetFloo Usage Ledger & Operational Telemetry — Architecture
 
 > Status: Campaign 1 (server foundation). Kept in sync with the implementation.
 > Companion file: `docs/usage-ledger-progress.md` (where the work stands).
@@ -8,7 +8,7 @@
 
 ## 1. The question this system answers
 
-> "What actually happened when this specific Natively license was active?"
+> "What actually happened when this specific MeetFloo license was active?"
 
 And, just as importantly, **how confident we are in each part of that answer.** A record
 that cannot say where it came from is not evidence; it is a number. Every row in this
@@ -29,7 +29,7 @@ provider API keys are stored anywhere in it. See §9.
 
 ## 2. What already existed (and why the design bends around it)
 
-The original plan assumed a greenfield ledger. It is not greenfield. `natively-api`
+The original plan assumed a greenfield ledger. It is not greenfield. `MeetFloo-api`
 already ships a **billable-operation ledger**, merged and flag-gated:
 
 | Artefact | What it is |
@@ -114,16 +114,16 @@ system, and it is never dropped, defaulted, or inferred at read time.
 
 | `source` | Trust | Means | Written by |
 |---|---|---|---|
-| `metered` | Highest | Server observed and metered an operation Natively itself executed. | `usage_events`, via the unified view |
-| `license_activity` | High for *"the app was running and the license was valid"*, **zero** for *"feature X ran"* | An authenticated Natively client called Natively. | `/v1/pro/verify`, `/v1/usage` (Campaign 1, Phase 3) |
+| `metered` | Highest | Server observed and metered an operation MeetFloo itself executed. | `usage_events`, via the unified view |
+| `license_activity` | High for *"the app was running and the license was valid"*, **zero** for *"feature X ran"* | An authenticated MeetFloo client called MeetFloo. | `/v1/pro/verify`, `/v1/usage` (Campaign 1, Phase 3) |
 | `client_reported` | Low — corroborating only | The desktop app says a local/BYOK feature executed. | `POST /v1/usage/audit` (Campaign 2) |
 | `historical_import` | Reconstructed | Derived from pre-existing logs/tables. | Backfill (Campaign 3) |
 | `system` | N/A — not user activity | Internally generated lifecycle/administrative events. | Dodo webhook hook, reports |
 
 ### The BYOK problem, stated honestly
 
-Natively's backend meters what Natively executes. When a customer supplies their own
-provider key, **Natively executes nothing and can meter nothing.** There is no server-side
+MeetFloo's backend meters what MeetFloo executes. When a customer supplies their own
+provider key, **MeetFloo executes nothing and can meter nothing.** There is no server-side
 observation to be had. The two available signals are:
 
 * **B1 `license_activity`** — the authenticated app contacted us. Proves the app ran and
@@ -168,7 +168,7 @@ the **Dodo HMAC signature** verified before any processing, plus the existing
 
 ```
                     ┌─────────────────────────────────────────────┐
-  Natively-routed   │  billAI / billSearch / billSTTSeconds       │
+  MeetFloo-routed   │  billAI / billSearch / billSTTSeconds       │
   AI / search / STT │      ↓ (after the deduction actually lands) │
                     │  recordUsage → buffer → 5s batch → PG       │──▶ usage_events
                     └─────────────────────────────────────────────┘        │  metered
@@ -201,7 +201,7 @@ failure is an observability problem; it is never allowed to become a product out
 
 | Data | Retention | Rationale |
 |---|---|---|
-| `license_usage_events` | **8 years** from event date | Natively is an Indian private limited company. Companies Act 2013 record-keeping is 8 years; GST records are 72 months from annual-return filing. The ledger doubles as billing-dispute evidence (card-network chargeback windows are ~120 days, far shorter, so the statutory window governs). 8 years covers all of them. |
+| `license_usage_events` | **8 years** from event date | MeetFloo is an Indian private limited company. Companies Act 2013 record-keeping is 8 years; GST records are 72 months from annual-return filing. The ledger doubles as billing-dispute evidence (card-network chargeback windows are ~120 days, far shorter, so the statutory window governs). 8 years covers all of them. |
 | `usage_events` | **8 years** (raised from the 400-day recommendation) | Same reason. It is now the `metered` layer of a financial record; it cannot expire before the record it belongs to. |
 | Operational telemetry (Layer B) | **45 days** | Debugging horizon. Not evidence. |
 | Client outbox (delivered) | 7 days after ACK | Local disk hygiene. |
@@ -301,7 +301,7 @@ switches. A test asserts a telemetry event can never appear in the evidence ledg
 
 ## 14. The client outbox, as built (Campaign 2)
 
-`usage_outbox` in the app's existing SQLite database (`natively.db`, `user_version` 27) —
+`usage_outbox` in the app's existing SQLite database (`MeetFloo.db`, `user_version` 27) —
 not a new persistence engine. The event is written to disk **before** any network attempt, so
 it survives network loss, restart, sleep/wake, OS restart and a crash mid-flush.
 

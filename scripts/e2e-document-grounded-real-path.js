@@ -5,7 +5,7 @@
 //
 //   real ModesManager + ModeContextRetriever (real chunking/retrieval)
 //   → real LLMHelper.streamChat with CHAT_MODE_PROMPT
-//   → model = natively  →  POST https://api.natively.software/v1/chat
+//   → model = MeetFloo  →  POST https://api.MeetFloo.software/v1/chat
 //   → server-chosen serverModel = gemini-3.1-flash-lite
 //   → real SSE stream parse
 //
@@ -16,7 +16,7 @@
 //
 // Run:
 //   npm run build:electron
-//   RUN_NATIVELY_API_E2E=1 NATIVELY_API_KEY=<key> \
+//   RUN_MEETFLOO_API_E2E=1 MEETFLOO_API_KEY=<key> \
 //     ./node_modules/.bin/electron scripts/e2e-document-grounded-real-path.js
 //
 // The key value is never logged.
@@ -31,15 +31,15 @@ const { app } = require('electron');
 const repoRoot = path.resolve(__dirname, '..');
 const distRoot = path.join(repoRoot, 'dist-electron', 'electron');
 
-const KEY = process.env.NATIVELY_API_KEY || '';
-if (process.env.RUN_NATIVELY_API_E2E !== '1' || !KEY) {
-  console.log('[e2e] SKIP — set RUN_NATIVELY_API_E2E=1 + NATIVELY_API_KEY to run the real-backend E2E');
+const KEY = process.env.MEETFLOO_API_KEY || '';
+if (process.env.RUN_MEETFLOO_API_E2E !== '1' || !KEY) {
+  console.log('[e2e] SKIP — set RUN_MEETFLOO_API_E2E=1 + MEETFLOO_API_KEY to run the real-backend E2E');
   process.exit(0);
 }
 
 // Point userData at a throwaway dir BEFORE app is ready so the real DB is
-// created in isolation (never touches the user's live natively.db).
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-e2e-'));
+// created in isolation (never touches the user's live MeetFloo.db).
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-e2e-'));
 app.setPath('userData', tmpUserData);
 
 const CUSTOM_PROMPT = [
@@ -115,8 +115,8 @@ async function main() {
   console.log('[e2e] documentGroundedCustomModeActive = true ✓');
 
   const llmHelper = new LLMHelper();
-  llmHelper.setNativelyKey(KEY);
-  llmHelper.setModel('natively');
+  llmHelper.setMeetFlooKey(KEY);
+  llmHelper.setModel('MeetFloo');
 
   let pass = 0, fail = 0;
   const serverModels = new Set();

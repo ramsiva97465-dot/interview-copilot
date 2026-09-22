@@ -34,9 +34,9 @@ const { QUESTIONS } = await import('./humanized-answers-dataset.mjs');
 
 // Force the intelligence flags ON so the humanizer + conversation memory run (production
 // is default-OFF; the verify runner is the gate that proves they work).
-process.env.NATIVELY_CONVERSATION_MEMORY_V2 = 'true';
-process.env.NATIVELY_ANSWER_DIVERSITY_GUARD = 'true';
-process.env.NATIVELY_PROFILE_TREE_V2 = 'true';
+process.env.MEETFLOO_CONVERSATION_MEMORY_V2 = 'true';
+process.env.MEETFLOO_ANSWER_DIVERSITY_GUARD = 'true';
+process.env.MEETFLOO_PROFILE_TREE_V2 = 'true';
 
 const llm = require(path.join(DIST, 'llm', 'index.js'));
 const {
@@ -135,7 +135,7 @@ function scoreAnswer(item, answer, providerUnavailable) {
   if (e.noCode && textReady) ok('no_code_block', !/```/.test(answer));
   if (e.sixSection && textReady) ok('has_coding_headings', /##\s*Approach/i.test(answer) && /##\s*Complexity/i.test(answer));
   if (e.codingContinuation) ok('detected_coding_continuation', isCodingContinuation(item.q));
-  if (e.assistantIdentity && textReady) ok('assistant_identity', /Natively|Evin John|AI assistant|can't share/i.test(answer));
+  if (e.assistantIdentity && textReady) ok('assistant_identity', /MeetFloo|Evin John|AI assistant|can't share/i.test(answer));
 
   return { metrics: m, checks };
 }
@@ -300,7 +300,7 @@ fs.writeFileSync(path.join(OUT_DIR, 'humanization-summary.md'), summary);
 
 console.log('\n' + summary);
 
-try { harness?.cleanup?.(); } catch {}
+try { harness?.cleanup?.(); } catch { }
 
 // Exit non-zero only on a real style failure with the provider available (not on
 // provider-unavailable, which is an environment gap, not a code failure).

@@ -42,7 +42,7 @@ AI/ML: PyTorch, LangChain, RAG
 Tools: Git, Docker, Figma
 
 EXPERIENCE
-Founder at Natively (2024-01 - Present)
+Founder at MeetFloo (2024-01 - Present)
 - Built a real-time meeting copilot used by thousands.
 - Designed the multi-provider STT and LLM fallback chain.
 Software Engineer Intern at Aetherbot AI (2023-05 - 2023-08)
@@ -80,8 +80,8 @@ describe('heuristicResumeExtract', () => {
 
   test('extracts experience entries with role and company', () => {
     assert.ok(r.experience.length >= 1);
-    const founder = r.experience.find((e) => /natively/i.test(e.company) || /founder/i.test(e.role));
-    assert.ok(founder, 'should find the Natively / Founder entry');
+    const founder = r.experience.find((e) => /MeetFloo/i.test(e.company) || /founder/i.test(e.role));
+    assert.ok(founder, 'should find the MeetFloo / Founder entry');
   });
 
   test('extracts project names', () => {
@@ -421,10 +421,10 @@ describe('heuristicResumeExtract — projects section robustness', () => {
     const r = heuristicResumeExtract('Pat Lee\n\nPROJECTS\n────────────────────\npq-tap: A PostgreSQL connection pool testing harness.\n\nEXPERIENCE\nEngineer at Acme (2020 - 2023)\n');
     assert.equal(r.projects.length, 1, 'the divider must not become its own entry');
     assert.match(r.projects[0].name, /pq-tap/);
-  
-  test('a column-formatted title strips the multi-space metadata tail ("Name    Open source · dates")', () => {
-    const r = heuristicResumeExtract('Pat Lee\n\nPROJECTS\npq-tap                                        Open source \u00b7 2021 \u2013 Present\nA plug-and-back-pressure testing harness for PostgreSQL connection pools.\n\nEXPERIENCE\nEngineer at Acme (2020 - 2023)\n');
-    assert.equal(r.projects[0].name, 'pq-tap', 'name must not include the tag/date metadata tail');
+
+    test('a column-formatted title strips the multi-space metadata tail ("Name    Open source · dates")', () => {
+      const r = heuristicResumeExtract('Pat Lee\n\nPROJECTS\npq-tap                                        Open source \u00b7 2021 \u2013 Present\nA plug-and-back-pressure testing harness for PostgreSQL connection pools.\n\nEXPERIENCE\nEngineer at Acme (2020 - 2023)\n');
+      assert.equal(r.projects[0].name, 'pq-tap', 'name must not include the tag/date metadata tail');
+    });
   });
-});
 });

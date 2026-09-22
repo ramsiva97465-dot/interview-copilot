@@ -9,7 +9,7 @@
  *    lazy `require()` (it has to be — esbuild gives every electron file its own
  *    bundle, so a top-level import would inline a second copy of the singleton).
  *  - The unit tests could not: they inject their own readers.
- *  - The end-to-end runs could not: they set NATIVELY_RERANKER_MODEL, which is
+ *  - The end-to-end runs could not: they set MEETFLOO_RERANKER_MODEL, which is
  *    read BEFORE the settings lookup, so the broken path never executed.
  *
  * And every one of those call sites was wrapped in a try/catch that failed

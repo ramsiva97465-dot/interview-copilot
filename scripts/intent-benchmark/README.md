@@ -22,7 +22,7 @@ __tests__/              contract tests for the schema and the realism gate
 
 ### Balanced generation, production-weighted reporting
 
-The corpus is generated BALANCED across modes and categories, not weighted to the production distribution measured in `docs/natively-router-production-priors-2026-09.md`.
+The corpus is generated BALANCED across modes and categories, not weighted to the production distribution measured in `docs/MeetFloo-router-production-priors-2026-09.md`.
 
 The reason is that the two weightings answer different questions and only one of them can be baked into a corpus. Production weighting measures what ships today. Balanced weighting measures what a model could learn. If the corpus were production weighted, `follow_up` would get about three rows out of 1,500 and the held-out split would contain none, because that label fires on 0.2% of real turns. A per label F1 computed on zero examples is not a number.
 

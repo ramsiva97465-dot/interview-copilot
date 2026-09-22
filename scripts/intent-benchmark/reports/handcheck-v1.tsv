@@ -1,4 +1,4 @@
-# Natively interaction-router dataset, hand check
+# MeetFloo interaction-router dataset, hand check
 # 399 rows sampled from 2008 (20%).
 #
 # HOW TO FILL THIS IN
@@ -8,7 +8,7 @@
 # Leave WRONG_AXES empty when the row is fine. That is the common case and
 # an empty cell counts as agreement.
 #
-# The one that matters most is needs_response. "no" means Natively should
+# The one that matters most is needs_response. "no" means MeetFloo should
 # stay silent: backchannels, the other party thinking aloud, your own voice
 # on your own mic, admin chatter.
 #

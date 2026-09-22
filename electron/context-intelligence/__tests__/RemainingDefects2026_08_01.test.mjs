@@ -1,4 +1,4 @@
-// Deep-run 2 (2026-08-01, natively_debug(1).log — 151 verbose turns):
+// Deep-run 2 (2026-08-01, MeetFloo_debug(1).log — 151 verbose turns):
 // regression suite for the remaining Context Intelligence defects.
 //
 // Every failing question below is taken verbatim from a failing

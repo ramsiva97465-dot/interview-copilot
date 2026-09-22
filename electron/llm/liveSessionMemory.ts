@@ -13,7 +13,7 @@
 // unit tests (LiveSessionMemory2026_06_07c) pin this.
 //
 // Pure logic over the data the caller already has — no I/O, no LLM. Privacy: logs
-// (when NATIVELY_SESSION_MEMORY_DEBUG=true) are MARKER-ONLY (kinds + counts), never
+// (when MEETFLOO_SESSION_MEMORY_DEBUG=true) are MARKER-ONLY (kinds + counts), never
 // raw entity/transcript content.
 
 import { SessionMemory, type MemoryMode } from './SessionMemory';

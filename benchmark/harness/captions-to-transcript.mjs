@@ -1,6 +1,6 @@
 // Real public lecture captions (YouTube json3, human-authored English captions) ->
 // (a) benchmark/transcripts/src/<ID>.txt  (numbered-line format used for fact sheets)
-// (b) benchmark/transcripts/<ID>.segments.json  (Natively TranscriptSegment[] with REAL timing)
+// (b) benchmark/transcripts/<ID>.segments.json  (MeetFloo TranscriptSegment[] with REAL timing)
 // Segmentation approximates STT finalization: caption events are merged and split at
 // sentence boundaries (max ~45 words). Captions carry no diarization, so every line is the
 // system-audio channel speaker_1 (lecturer; audience Q&A is also on speaker_1).
@@ -15,8 +15,8 @@ for (const ev of j.events || []) {
   const text = ev.segs.map(s => s.utf8).join('').replace(/\n/g, ' ')
   for (const w of text.split(/\s+/).filter(Boolean)) words.push({ w: w.replace(/^>>+/, '').trim(), t: ev.tStartMs + (ev.dDurationMs || 0) })
 }
-const ACRONYMS = new Set(['FDA','NIH','HIV','AIDS','US','USA','DNA','RNA','IRB','IRBS','CDC','PHD','MD','OK','TV','UK','NCI','HHS','OHRP','CFR','IPPCR','ICH','GCP','WHO','II','III','IV','COX','KAPLAN','MEIER'])
-// Broadcast captions are ALL CAPS; Natively STT emits normal casing. Sentence-case the text,
+const ACRONYMS = new Set(['FDA', 'NIH', 'HIV', 'AIDS', 'US', 'USA', 'DNA', 'RNA', 'IRB', 'IRBS', 'CDC', 'PHD', 'MD', 'OK', 'TV', 'UK', 'NCI', 'HHS', 'OHRP', 'CFR', 'IPPCR', 'ICH', 'GCP', 'WHO', 'II', 'III', 'IV', 'COX', 'KAPLAN', 'MEIER'])
+// Broadcast captions are ALL CAPS; MeetFloo STT emits normal casing. Sentence-case the text,
 // keep a small acronym list upper, restore standalone "I". Proper nouns become lowercase
 // (documented limitation of this source).
 let sentenceStart = true
@@ -24,8 +24,8 @@ for (const x of words) {
   const core = x.w.replace(/[^A-Za-z']/g, '')
   let w = x.w
   if (/[A-Z]/.test(w) && w === w.toUpperCase()) {
-    if (ACRONYMS.has(core.toUpperCase()) && !['KAPLAN','MEIER','COX'].includes(core.toUpperCase())) w = w
-    else if (['KAPLAN','MEIER','COX'].includes(core.toUpperCase())) w = w.charAt(0) + w.slice(1).toLowerCase()
+    if (ACRONYMS.has(core.toUpperCase()) && !['KAPLAN', 'MEIER', 'COX'].includes(core.toUpperCase())) w = w
+    else if (['KAPLAN', 'MEIER', 'COX'].includes(core.toUpperCase())) w = w.charAt(0) + w.slice(1).toLowerCase()
     else if (/^I('|$)/.test(core) && core.length <= 3 && /^I('M|'LL|'VE|'D)?$/.test(core)) w = w.charAt(0) + w.slice(1).toLowerCase()
     else { w = w.toLowerCase(); if (sentenceStart) w = w.replace(/[a-z]/, c => c.toUpperCase()) }
   }

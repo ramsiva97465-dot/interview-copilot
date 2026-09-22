@@ -1,7 +1,7 @@
-// tests/intelligence/e2e/NativelyIntelligence100Questions.test.mjs
+// tests/intelligence/e2e/MeetFlooIntelligence100Questions.test.mjs
 //
 // ============================================================================
-//  NATIVELY INTELLIGENCE OS — 100-QUESTION END-TO-END VERIFICATION SUITE
+//  MEETFLOO INTELLIGENCE OS — 100-QUESTION END-TO-END VERIFICATION SUITE
 // ============================================================================
 //
 // GOAL (verification spec, 2026-06-13): prove whether the Intelligence OS
@@ -11,7 +11,7 @@
 // HOW EACH CATEGORY IS DRIVEN (and the limitation, stated honestly):
 //   A. Profile identity (15)   → REAL manual answer path: planAnswer →
 //      buildManualProfileBackendAnswer (deterministic fast path) → LLMHelper.streamChat
-//      (real provider) against a SAFE COPY of the real natively.db. This is the EXACT
+//      (real provider) against a SAFE COPY of the real MeetFloo.db. This is the EXACT
 //      path electron/ipcHandlers.ts `gemini-chat-stream` runs (reuses harness.cjs +
 //      the logic in run_profile_intelligence_benchmark.ts).
 //   B. JD fit (10)             → same REAL manual path.
@@ -48,7 +48,7 @@
 //     → recall []. We record hindsight_used=false + the honest reason and PASS only on the
 //     correct DEGRADED behavior (empty, no leak, no break) — never on a faked recall.
 //
-// Run: node --test tests/intelligence/e2e/NativelyIntelligence100Questions.test.mjs
+// Run: node --test tests/intelligence/e2e/MeetFlooIntelligence100Questions.test.mjs
 
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -74,14 +74,14 @@ const DIST = path.join(REPO_ROOT, 'dist-electron');
 // every flag check (intelligenceFlags.ts has no cache), so setting these before requiring
 // the compiled modules is sufficient and stable.
 const ENABLED_FLAGS = {
-  NATIVELY_CONVERSATION_MEMORY_V2: '1',
-  NATIVELY_MEETING_MEMORY_V2: '1',
-  NATIVELY_GLOBAL_SEARCH_V2: '1',
-  NATIVELY_IN_MEETING_SEARCH_V2: '1',
-  NATIVELY_LECTURE_INTELLIGENCE_V2: '1',
-  NATIVELY_DIAGRAM_INTELLIGENCE: '1',
-  NATIVELY_ANSWER_DIVERSITY_GUARD: '1',
-  NATIVELY_HINDSIGHT_MEMORY: '1',
+  MEETFLOO_CONVERSATION_MEMORY_V2: '1',
+  MEETFLOO_MEETING_MEMORY_V2: '1',
+  MEETFLOO_GLOBAL_SEARCH_V2: '1',
+  MEETFLOO_IN_MEETING_SEARCH_V2: '1',
+  MEETFLOO_LECTURE_INTELLIGENCE_V2: '1',
+  MEETFLOO_DIAGRAM_INTELLIGENCE: '1',
+  MEETFLOO_ANSWER_DIVERSITY_GUARD: '1',
+  MEETFLOO_HINDSIGHT_MEMORY: '1',
 };
 for (const [k, v] of Object.entries(ENABLED_FLAGS)) process.env[k] = v;
 
@@ -177,7 +177,7 @@ before(async () => {
 
 after(() => {
   try { harness?.cleanup?.(); } catch { /* noop */ }
-  const outPath = path.join(REPO_ROOT, 'natively-intelligence-e2e-results.json');
+  const outPath = path.join(REPO_ROOT, 'MeetFloo-intelligence-e2e-results.json');
   const byCat = {};
   for (const r of RESULTS) {
     byCat[r.category] = byCat[r.category] || { total: 0, pass: 0, harnessLimited: 0, productFail: 0 };
@@ -391,7 +391,7 @@ for (const q of QUESTIONS.filter((x) => x.category === 'A' || x.category === 'B'
     let pass = false; let reason = null;
     if (!realDbLoaded) reason = 'real profile DB not loaded — cannot verify candidate grounding';
     else if (!text) reason = r.error ? `empty answer (provider error: ${r.error})` : 'empty answer';
-    else if (scan.nativelyIdentityLeak) reason = 'WRONG IDENTITY — answer claims to be Natively/an AI assistant on a candidate question';
+    else if (scan.MeetFlooIdentityLeak) reason = 'WRONG IDENTITY — answer claims to be MeetFloo/an AI assistant on a candidate question';
     else if (scan.falseRefusal) reason = 'false refusal — claimed no info though profile exists';
     else if (q.expectedVoice === 'first_person_candidate' && scan.deliveredVoice === 'second_person_user')
       reason = 'WRONG PERSPECTIVE — answered ABOUT the candidate ("You have…") instead of AS the candidate ("I have…")';
@@ -431,7 +431,7 @@ for (const q of QUESTIONS.filter((x) => x.category === 'C')) {
       reason = 'NOT VERIFIED — harness limitation: WTA generateStream mode-context retrieval requires sqlite-vec/vec0 (not loadable under the node:sqlite ABI shim headless). The GUI uses real better-sqlite3 + sqlite-vec. Verify these in a real GUI run.';
     }
     else if (!text) reason = r.error ? `empty answer (provider error: ${r.error})` : 'empty answer (WTA produced no token)';
-    else if (scan.nativelyIdentityLeak) reason = 'WRONG IDENTITY — "I\'m Natively" in live copilot';
+    else if (scan.MeetFlooIdentityLeak) reason = 'WRONG IDENTITY — "I\'m MeetFloo" in live copilot';
     else if (stalled) reason = 'CLARIFICATION STALL — copilot asked to repeat instead of answering a concrete interview question';
     else if (q.profileShouldBeUsed === false && scan.profileLeak) reason = 'profile leak — candidate facts dumped into a technical WTA answer';
     else if (q.profileShouldBeUsed && scan.falseRefusal) reason = 'false refusal on a grounded WTA question';

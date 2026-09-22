@@ -62,11 +62,11 @@ export function categorizeSttError(rawError: string): SttErrorCategory {
         };
     }
 
-    // 3. Trial expired — NativelyPro fatal code
+    // 3. Trial expired — MeetFlooPro fatal code
     if (lower.includes('trial_expired')) {
         return {
             title: 'Trial Expired',
-            body: 'Your Natively Pro trial has ended. Upgrade your plan to continue using STT.',
+            body: 'Your MeetFloo Pro trial has ended. Upgrade your plan to continue using STT.',
             category: 'auth',
         };
     }
@@ -149,7 +149,7 @@ export function categorizeSttError(rawError: string): SttErrorCategory {
         };
     }
 
-    // 10. Session conflict (NativelyPro specific)
+    // 10. Session conflict (MeetFlooPro specific)
     if (lower.includes('concurrent_session_blocked')) {
         return {
             title: 'Session Conflict',

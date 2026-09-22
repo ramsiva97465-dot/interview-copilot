@@ -6,8 +6,8 @@
 //
 // Root cause: THREE layers each treated 'English' as "no instruction":
 //   1. LLMHelper.buildLanguageInstructionSuffix()  -> `return ""` for English
-//   2. LLMHelper generateWithNatively/streamWithNatively -> omitted body.language
-//   3. natively-api injectLanguagePrompt()         -> no-op for English
+//   2. LLMHelper generateWithMeetFloo/streamWithMeetFloo -> omitted body.language
+//   3. MeetFloo-api injectLanguagePrompt()         -> no-op for English
 // and NO base system prompt states a response language (grepped
 // HARD_/GROQ_/CLAUDE_/OPENAI_SYSTEM_PROMPT + resolveV2SystemPrompt), so nothing
 // backstopped the omission. With zero directives the model simply mirrors the

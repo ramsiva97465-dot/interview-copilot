@@ -4,7 +4,7 @@
 //
 //  1. FOUR hand-rolled AppAPIConfig assembly sites (main.ts x2, ipcHandlers.ts
 //     x2) already drifted before this change — `geminiKeys` was passed at only
-//     one of them. A newly added field inherits that drift, so the Natively key
+//     one of them. A newly added field inherits that drift, so the MeetFloo key
 //     would reach the resolver from some entry points and not others.
 //
 //  2. _isConfigChanged is a hand-maintained field-by-field comparison. A field
@@ -23,15 +23,15 @@ const modPath = path.resolve(__dirname, '../../../dist-electron/electron/rag/emb
 const { embeddingConfigFrom, embeddingConfigChanged, resolveEmbeddingCredentials } = await import(pathToFileURL(modPath).href);
 
 describe('embeddingConfigFrom', () => {
-  test('carries the Natively key through to the resolver config', () => {
-    const cfg = embeddingConfigFrom({ nativelyApiKey: 'nk_live_1' });
-    assert.equal(cfg.nativelyApiKey, 'nk_live_1');
+  test('carries the MeetFloo key through to the resolver config', () => {
+    const cfg = embeddingConfigFrom({ MeetFlooApiKey: 'nk_live_1' });
+    assert.equal(cfg.MeetFlooApiKey, 'nk_live_1');
   });
 
   test('pairs the trial sentinel with its token, which is the real credential', () => {
-    const cfg = embeddingConfigFrom({ nativelyApiKey: '__trial__', trialToken: 'natively_trial_9' });
-    assert.equal(cfg.nativelyApiKey, '__trial__');
-    assert.equal(cfg.nativelyTrialToken, 'natively_trial_9');
+    const cfg = embeddingConfigFrom({ MeetFlooApiKey: '__trial__', trialToken: 'MeetFloo_trial_9' });
+    assert.equal(cfg.MeetFlooApiKey, '__trial__');
+    assert.equal(cfg.MeetFlooTrialToken, 'MeetFloo_trial_9');
   });
 
   test('still carries every field the previous call sites passed', () => {
@@ -52,44 +52,44 @@ describe('embeddingConfigFrom', () => {
   });
 
   test('blank credentials become undefined, so a cleared key really removes its provider', () => {
-    const cfg = embeddingConfigFrom({ nativelyApiKey: '   ', openaiKey: '' });
-    assert.equal(cfg.nativelyApiKey, undefined);
+    const cfg = embeddingConfigFrom({ MeetFlooApiKey: '   ', openaiKey: '' });
+    assert.equal(cfg.MeetFlooApiKey, undefined);
     assert.equal(cfg.openaiKey, undefined);
   });
 });
 
 describe('embeddingConfigChanged', () => {
-  const base = { nativelyApiKey: 'nk_1', openaiKey: 'sk-1', ollamaUrl: 'http://localhost:11434' };
+  const base = { MeetFlooApiKey: 'nk_1', openaiKey: 'sk-1', ollamaUrl: 'http://localhost:11434' };
 
   test('identical config is not a change (initialize stays idempotent)', () => {
     assert.equal(embeddingConfigChanged(base, { ...base }), false);
   });
 
-  test('adding a Natively key is a change', () => {
-    assert.equal(embeddingConfigChanged({ openaiKey: 'sk-1' }, { openaiKey: 'sk-1', nativelyApiKey: 'nk_1' }), true);
+  test('adding a MeetFloo key is a change', () => {
+    assert.equal(embeddingConfigChanged({ openaiKey: 'sk-1' }, { openaiKey: 'sk-1', MeetFlooApiKey: 'nk_1' }), true);
   });
 
-  test('REMOVING a Natively key is a change, so the provider is actually dropped', () => {
+  test('REMOVING a MeetFloo key is a change, so the provider is actually dropped', () => {
     // Removals matter as much as additions: a cleared key that does not
     // re-resolve leaves the old provider alive until restart, and the UI then
     // lies about which provider is active.
-    assert.equal(embeddingConfigChanged(base, { ...base, nativelyApiKey: undefined }), true);
+    assert.equal(embeddingConfigChanged(base, { ...base, MeetFlooApiKey: undefined }), true);
   });
 
-  test('swapping one Natively key for another is a change', () => {
-    assert.equal(embeddingConfigChanged(base, { ...base, nativelyApiKey: 'nk_2' }), true);
+  test('swapping one MeetFloo key for another is a change', () => {
+    assert.equal(embeddingConfigChanged(base, { ...base, MeetFlooApiKey: 'nk_2' }), true);
   });
 
   test('a trial token change is a change (the sentinel key never varies)', () => {
-    // nativelyApiKey stays '__trial__' across trials, so comparing the key alone
+    // MeetFlooApiKey stays '__trial__' across trials, so comparing the key alone
     // would treat a brand-new trial as "unchanged" and keep the dead token.
-    const a = { nativelyApiKey: '__trial__', nativelyTrialToken: 't1' };
-    const b = { nativelyApiKey: '__trial__', nativelyTrialToken: 't2' };
+    const a = { MeetFlooApiKey: '__trial__', MeetFlooTrialToken: 't1' };
+    const b = { MeetFlooApiKey: '__trial__', MeetFlooTrialToken: 't2' };
     assert.equal(embeddingConfigChanged(a, b), true);
   });
 
   test('whitespace-only differences are not a change', () => {
-    assert.equal(embeddingConfigChanged(base, { ...base, nativelyApiKey: ' nk_1 ' }), false);
+    assert.equal(embeddingConfigChanged(base, { ...base, MeetFlooApiKey: ' nk_1 ' }), false);
   });
 
   test('the pre-existing fields are still compared', () => {
@@ -145,7 +145,7 @@ describe('explicit key clearing', () => {
     const store = {
       getGeminiApiKey: () => 'STORED_GEMINI',
       getOpenaiApiKey: () => 'STORED_OPENAI',
-      getNativelyApiKey: () => undefined,
+      getMeetFlooApiKey: () => undefined,
       getTrialToken: () => undefined,
     };
 
@@ -158,23 +158,23 @@ describe('explicit key clearing', () => {
     assert.equal(untouched.geminiKey, 'STORED_GEMINI', 'no override means read the store');
   });
 
-  test('a Natively key is read from the store when not overridden', () => {
+  test('a MeetFloo key is read from the store when not overridden', () => {
     const cfg = resolveEmbeddingCredentials({}, {
       getGeminiApiKey: () => undefined,
       getOpenaiApiKey: () => undefined,
-      getNativelyApiKey: () => 'nk_from_store',
+      getMeetFlooApiKey: () => 'nk_from_store',
     });
-    assert.equal(cfg.nativelyApiKey, 'nk_from_store');
+    assert.equal(cfg.MeetFlooApiKey, 'nk_from_store');
   });
 
   test('a trial sentinel pulls the trial token from the store', () => {
     const cfg = resolveEmbeddingCredentials({}, {
       getGeminiApiKey: () => undefined,
       getOpenaiApiKey: () => undefined,
-      getNativelyApiKey: () => '__trial__',
-      getTrialToken: () => 'natively_trial_from_store',
+      getMeetFlooApiKey: () => '__trial__',
+      getTrialToken: () => 'MeetFloo_trial_from_store',
     });
-    assert.equal(cfg.nativelyTrialToken, 'natively_trial_from_store');
+    assert.equal(cfg.MeetFlooTrialToken, 'MeetFloo_trial_from_store');
   });
 });
 
@@ -208,11 +208,11 @@ describe('Ollama embedding model settings', () => {
 describe('an explicit provider switch re-initializes', () => {
   // The other half of the "clicking does nothing" bug: even with the resolver
   // honouring the choice, EmbeddingPipeline.initialize() short-circuits when the
-  // config compares equal. Switching Natively -> Built-in changes no model and
+  // config compares equal. Switching MeetFloo -> Built-in changes no model and
   // no width, so without these fields the comparator saw NOTHING different and
   // skipped re-resolution entirely.
   test('switching provider is a change even when model and width do not move', () => {
-    const a = { embeddingMode: 'manual', embeddingProvider: 'natively' };
+    const a = { embeddingMode: 'manual', embeddingProvider: 'MeetFloo' };
     const b = { embeddingMode: 'manual', embeddingProvider: 'local' };
     assert.equal(embeddingConfigChanged(a, b), true);
   });
@@ -231,9 +231,9 @@ describe('an explicit provider switch re-initializes', () => {
   });
 
   test('the builder carries the choice for EVERY provider, including the hint-less ones', () => {
-    // natively and local have no model/dims hints to map, which is exactly why
+    // MeetFloo and local have no model/dims hints to map, which is exactly why
     // they were dropped before — the choice itself has to travel.
-    for (const provider of ['natively', 'local', 'ollama', 'openai', 'gemini', 'custom']) {
+    for (const provider of ['MeetFloo', 'local', 'ollama', 'openai', 'gemini', 'custom']) {
       const cfg = embeddingConfigFrom({ embeddingMode: 'manual', embeddingProvider: provider });
       assert.equal(cfg.embeddingProvider, provider, `${provider} choice must reach the resolver`);
       assert.equal(cfg.embeddingMode, 'manual');

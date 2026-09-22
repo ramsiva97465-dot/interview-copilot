@@ -10,7 +10,7 @@
  *   - flags OFF → generateForProfile no-ops (skipped_flag_off), zero rows
  *
  * MUST run under the Electron test runner (native better-sqlite3 ABI):
- *   ELECTRON_RUN_AS_NODE=1 NATIVELY_TEST_USERDATA=<tmp> ./node_modules/.bin/electron --test <this file>
+ *   ELECTRON_RUN_AS_NODE=1 MEETFLOO_TEST_USERDATA=<tmp> ./node_modules/.bin/electron --test <this file>
  * The npm script wrapper `test:electron` / a dedicated runner sets these; a bare
  * `node --test` will skip (guarded below) rather than crash on the native ABI.
  *
@@ -36,17 +36,17 @@ const distRoot = path.join(repoRoot, 'dist-electron', 'electron');
 const isElectronRuntime = Boolean(process.versions?.electron) || process.env.ELECTRON_RUN_AS_NODE === '1';
 
 // Provide a writable userdata dir so DatabaseManager's app.getPath fallback works.
-if (!process.env.NATIVELY_TEST_USERDATA) {
-  process.env.NATIVELY_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'okf-profile-db-'));
+if (!process.env.MEETFLOO_TEST_USERDATA) {
+  process.env.MEETFLOO_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'okf-profile-db-'));
 }
-process.env.NATIVELY_OKF_PROFILE_PACKS = '1';
+process.env.MEETFLOO_OKF_PROFILE_PACKS = '1';
 
 async function load(rel) {
   return import(pathToFileURL(path.join(distRoot, rel)).href);
 }
 
 test('Phase1-DB: profile pack persists, reads back, is pii, isolated from user modes, and deletes', { skip: !isElectronRuntime && !process.env.FORCE_DB_TEST }, async () => {
-  process.env.NATIVELY_OKF_PROFILE_PACKS = '1'; // re-assert (resilient to concurrent flag-off test)
+  process.env.MEETFLOO_OKF_PROFILE_PACKS = '1'; // re-assert (resilient to concurrent flag-off test)
   const { DatabaseManager } = await load('db/DatabaseManager.js');
   const dbm = DatabaseManager.getInstance();
   // Force schema init / migrations.
@@ -97,6 +97,6 @@ test('Phase1-DB: profile pack persists, reads back, is pii, isolated from user m
 });
 
 // The flags-OFF no-op assertion (which must flip the shared
-// NATIVELY_OKF_PROFILE_PACKS env) lives in OkfProfilePhase2FlagOff.test.mjs — kept
+// MEETFLOO_OKF_PROFILE_PACKS env) lives in OkfProfilePhase2FlagOff.test.mjs — kept
 // out of this file for the same concurrency reason described in
 // OkfProfilePhase2Retrieval.test.mjs.

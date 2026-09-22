@@ -87,14 +87,14 @@ test('WhatToAnswerLLM does not append active mode context to system prompt overr
 
 // 'intent answer shapes require grounding ...' removed 2026-09-05: the Answer Shape
 // table it pinned was deleted with the intent classifier. On the default V3 path
-// its text never reached a dispatched prompt. docs/natively-router-final-answer-2026-09-05.md
+// its text never reached a dispatched prompt. docs/MeetFloo-router-final-answer-2026-09-05.md
 
 test('WhatToAnswerLLM sends mode context only through user content at runtime (LEGACY path, pinned via kill-switch)', async () => {
   // Prompt System v2 was promoted to default ON (2026-08-02). This test pins
   // the LEGACY assembly invariant (mode suffix on the system prompt, untrusted
   // retrieval only in user content), so it runs with the kill-switch set. The
   // sibling test below asserts the SAME security property under the v2 regime.
-  process.env.NATIVELY_PROMPT_SYSTEM_V2 = '0';
+  process.env.MEETFLOO_PROMPT_SYSTEM_V2 = '0';
   const { WhatToAnswerLLM } = require(distWhatToAnswerPath);
   const trustedSuffix = 'TRUSTED_MODE_SUFFIX_SENTINEL';
   const untrustedContext = 'UNTRUSTED_REFERENCE_CONTEXT_SENTINEL';
@@ -138,7 +138,7 @@ test('WhatToAnswerLLM sends mode context only through user content at runtime (L
   assert.match(message, /<transcript trust_level="untrusted">/);
   assert.match(systemPromptOverride, /TRUSTED_MODE_SUFFIX_SENTINEL/);
   assert.doesNotMatch(systemPromptOverride, /UNTRUSTED_REFERENCE_CONTEXT_SENTINEL/);
-  delete process.env.NATIVELY_PROMPT_SYSTEM_V2;
+  delete process.env.MEETFLOO_PROMPT_SYSTEM_V2;
 });
 
 test('WhatToAnswerLLM v2 regime: untrusted retrieval stays OUT of the system prompt (default-on path)', async () => {
@@ -147,7 +147,7 @@ test('WhatToAnswerLLM v2 regime: untrusted retrieval stays OUT of the system pro
   // mode contract (the legacy suffix is deliberately NOT appended — v2
   // carries the mode itself), and untrusted retrieved context reaches the
   // provider only through user content.
-  delete process.env.NATIVELY_PROMPT_SYSTEM_V2;
+  delete process.env.MEETFLOO_PROMPT_SYSTEM_V2;
   const { WhatToAnswerLLM } = require(distWhatToAnswerPath);
   const untrustedContext = 'UNTRUSTED_REFERENCE_CONTEXT_SENTINEL';
   const calls = [];
@@ -258,7 +258,7 @@ test('WhatToAnswerLLM sends dynamic action prompt instruction as user content', 
 test('WhatToAnswerLLM assembles prior responses and screen context as user content, and no intent block', async () => {
   const { WhatToAnswerLLM } = require(distWhatToAnswerPath);
   const calls = [];
-  const imagePaths = ['/tmp/natively-screen.png'];
+  const imagePaths = ['/tmp/MeetFloo-screen.png'];
 
   const llmHelper = {
     getCapabilities: () => ({ outputBudgetTokens: 2000, supportsImages: true }),
@@ -337,7 +337,7 @@ test('WhatToAnswerLLM delegates attached images to streamChat (vision fallback o
   // NEW CONTRACT: WhatToAnswerLLM no longer gates on the selected model's vision
   // capability. Every image-bearing request is handed to streamChat, whose
   // unified streaming vision fallback chain (OpenAI → Claude → Gemini → Groq →
-  // Natively → local) picks a vision-capable provider, retries, and degrades
+  // MeetFloo → local) picks a vision-capable provider, retries, and degrades
   // gracefully. The premature "switch to a vision model" refusal is gone — that
   // dead-ended screenshots whenever the picked model couldn't see images.
   const { WhatToAnswerLLM } = require(distWhatToAnswerPath);

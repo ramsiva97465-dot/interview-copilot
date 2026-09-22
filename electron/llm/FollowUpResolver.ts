@@ -5,7 +5,7 @@
 // answerable question + the answer type it should inherit from the prior turn.
 //
 // The transcript extractor already resolves demonstrative follow-ups that name a
-// topic ("how is IT developed?" → project "Natively"). This resolver covers the
+// topic ("how is IT developed?" → project "MeetFloo"). This resolver covers the
 // HARDER bare fragments that carry almost no signal on their own and MUST inherit
 // the prior question's subject/answer-type to route correctly — otherwise they
 // fall through to general_meeting/unknown and (worse) can pull the wrong context.
@@ -144,7 +144,7 @@ export function isSameSessionFollowUp(question: string): boolean {
 
 /**
  * A safe, mode-appropriate clarification for a bare follow-up with NO resolvable
- * prior context. NEVER says "I'm Natively / an AI assistant", never dumps profile,
+ * prior context. NEVER says "I'm MeetFloo / an AI assistant", never dumps profile,
  * never refuses — it asks for the missing topic. Deterministic; no LLM.
  */
 export function buildContextFreeClarification(surface?: FollowUpSurface): string {
@@ -230,7 +230,7 @@ function prevWasCoding(ctx: FollowUpContext): boolean {
 }
 function prevWasProject(ctx: FollowUpContext): boolean {
   return ctx.previousAnswerType === 'project_answer' || ctx.previousAnswerType === 'project_followup_answer'
-    || !!ctx.lastEntity || /\bproject|built|developed|natively\b/.test(lc(ctx.previousQuestion));
+    || !!ctx.lastEntity || /\bproject|built|developed|MeetFloo\b/.test(lc(ctx.previousQuestion));
 }
 function prevWasJdFit(ctx: FollowUpContext): boolean {
   return ctx.previousAnswerType === 'jd_fit_answer' || /\bfit|hire|role|why (?:this|you)|data analyst\b/.test(lc(ctx.previousQuestion));
@@ -487,7 +487,7 @@ export function resolveFollowUp(ctx: FollowUpContext): ResolvedFollowUp {
   //    behavioral turn — continues the behavioral story (self-improvement).
   if (/^how (?:are|do) (?:you|i) (?:improv|work|address|fix|develop|get better)\w*\b/.test(q)
     && (ctx.previousAnswerType === 'behavioral_interview_answer'
-        || /\b(weakness|struggle|challenge|difficult|conflict|fail)\b/.test(lc(ctx.previousQuestion)))) {
+      || /\b(weakness|struggle|challenge|difficult|conflict|fail)\b/.test(lc(ctx.previousQuestion)))) {
     return {
       resolvedQuestion: `How are you improving on that?`,
       resolvedAnswerType: 'behavioral_interview_answer',

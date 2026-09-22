@@ -4,22 +4,22 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 // Own userData dir so the E2E instance gets its OWN single-instance lock and
-// never collides with a real Natively app the user may be running.
-const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-e2e-udd-'));
+// never collides with a real MeetFloo app the user may be running.
+const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-e2e-udd-'));
 const LOCAL_TOKEN = 'local-test-e2e-token';
 
 const app = await electron.launch({
   args: ['dist-electron/electron/main.js', `--user-data-dir=${userDataDir}`],
   env: {
     ...process.env,
-    NATIVELY_E2E: '1',
-    NATIVELY_API_URL: 'http://localhost:3000',
-    NATIVELY_E2E_LOCAL_TEST_TOKEN: LOCAL_TOKEN,
-    NATIVELY_TEST_USERDATA: userDataDir,
+    MEETFLOO_E2E: '1',
+    MEETFLOO_API_URL: 'http://localhost:3000',
+    MEETFLOO_E2E_LOCAL_TEST_TOKEN: LOCAL_TOKEN,
+    MEETFLOO_TEST_USERDATA: userDataDir,
     NODE_ENV: 'test',
-    NATIVELY_DEV_BYPASS_SCREEN_TCC: '1',
-    NATIVELY_OKF_PROFILE_PACKS: '1',
-    NATIVELY_OKF_PROFILE_HYBRID_RETRIEVAL: '1',
+    MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1',
+    MEETFLOO_OKF_PROFILE_PACKS: '1',
+    MEETFLOO_OKF_PROFILE_HYBRID_RETRIEVAL: '1',
   },
   timeout: 60000,
 });

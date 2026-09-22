@@ -28,7 +28,7 @@ function method(name) {
 
 test('the readiness deadline is a documented, env-overridable constant in a sane band', () => {
   assert.match(source, /const WORKER_READY_TIMEOUT_MS = \(\(\) => \{/);
-  assert.match(source, /process\.env\.NATIVELY_LOCAL_STT_READY_TIMEOUT_MS/);
+  assert.match(source, /process\.env\.MEETFLOO_LOCAL_STT_READY_TIMEOUT_MS/);
   const def = source.match(/: 120_000;/);
   assert.ok(def, 'default must stay 120s: model loads are legitimately slow on first run, but a meeting cannot wait forever');
 });

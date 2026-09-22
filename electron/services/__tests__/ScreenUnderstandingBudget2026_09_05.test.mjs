@@ -4,10 +4,10 @@
 // cancellation, so a single unresponsive provider decided how long the user
 // waited before their answer even started.
 //
-// From natively_debug (3).log (v2.8.8, 33 screenshot turns): 31 of 33 turns —
+// From MeetFloo_debug (3).log (v2.8.8, 33 screenshot turns): 31 of 33 turns —
 // 100% of the non-cached ones — logged
 //
-//     [NativelyAPI] JSON pre-response failure … timeoutMs:8000 durationMs:8009
+//     [MeetFlooAPI] JSON pre-response failure … timeoutMs:8000 durationMs:8009
 //
 // and `generate-what-to-say` awaits this whole thing before opening the answer
 // stream, so that was 8.0s of dead latency on every turn, ~4.1 minutes across
@@ -18,7 +18,7 @@
 //  1. VisionProviderRegistry's hand-off into LLMHelper DROPPED both the chain's
 //     AbortSignal and its budget, so `perProviderTimeoutMs` (12s) was inert and
 //     whatever inner deadline the provider method happened to hold became the
-//     real one — for the Natively rung, an 8s default written for cheap TEXT
+//     real one — for the MeetFloo rung, an 8s default written for cheap TEXT
 //     calls, whose own comment says it is "far too short" for a dense
 //     extraction.
 //  2. `totalDeadlineMs` was checked only BETWEEN rungs, so it could not bound a
@@ -97,7 +97,7 @@ describe('the vision chain hands its budget and cancellation to the provider', (
 
   test('a provider that is DEAF to the signal and never resolves is still cut off at the budget', async () => {
     // The sibling test below listens for abort and rejects itself, which is
-    // cooperative: every runVisionRequest provider except Natively ignores the
+    // cooperative: every runVisionRequest provider except MeetFloo ignores the
     // signal entirely, so this is the shape that matters. Before 2026-09-06 the
     // chain awaited invoke() with nothing racing it and this hung until the
     // provider's own timeout, or forever.
@@ -235,14 +235,14 @@ describe('the pre-pass budget is a named, bounded constant', () => {
     // importing rather than skipping — the constant is the contract this test
     // exists to pin.
     const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'sur-budget-userdata-'));
-    process.env.NATIVELY_TEST_USER_DATA = tmp;
+    process.env.MEETFLOO_TEST_USER_DATA = tmp;
     const cjs = createRequire(path.join(root, 'package.json'));
     const stub = new Module('electron');
     stub.exports = {
-      app: { isReady: () => true, getPath: (n) => (n === 'userData' ? tmp : os.tmpdir()), getName: () => 'natively-test', getVersion: () => '0.0.0-test', isPackaged: false },
+      app: { isReady: () => true, getPath: (n) => (n === 'userData' ? tmp : os.tmpdir()), getName: () => 'MeetFloo-test', getVersion: () => '0.0.0-test', isPackaged: false },
       shell: { openPath: async () => '' },
       safeStorage: { isEncryptionAvailable: () => false },
-      ipcMain: { on: () => {}, handle: () => {}, removeAllListeners: () => {} },
+      ipcMain: { on: () => { }, handle: () => { }, removeAllListeners: () => { } },
       BrowserWindow: { getAllWindows: () => [] },
       desktopCapturer: { getSources: async () => [] },
     };

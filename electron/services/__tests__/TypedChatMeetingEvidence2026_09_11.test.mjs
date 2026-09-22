@@ -182,7 +182,7 @@ describe('debug-inject-transcript feeds the JIT live indexer too (A1, final revi
 });
 
 describe('renderer typed chat', () => {
-  const ui = read('src/components/NativelyInterface.tsx');
+  const ui = read('src/components/MeetFlooInterface.tsx');
   const submit = between(ui, 'const handleManualSubmit = async () => {', '// Refresh the latest-handler ref on every render');
   test('typed submit goes straight to streamGeminiChat with the conversation context — no RAG pre-flight', () => {
     assert.doesNotMatch(submit, /ragQueryLive/);

@@ -16,13 +16,13 @@
 // no mocked styling, no re-implemented markup.
 
 // Realistic fixture: Ollama running with three embedders, an OpenAI key present,
-// no Gemini key, no Natively key, MiniLM currently active.
+// no Gemini key, no MeetFloo key, MiniLM currently active.
 const CATALOG = {
     providers: [
         {
-            id: 'natively', name: 'Natively', cloud: true, managed: true,
+            id: 'MeetFloo', name: 'MeetFloo', cloud: true, managed: true,
             available: true,
-            models: [{ id: 'gemini-embedding-2', label: 'gemini-embedding-2', dimensions: 3072, dimensionsVerified: true, recommended: true, note: 'Managed by Natively. Nothing to configure.' }],
+            models: [{ id: 'gemini-embedding-2', label: 'gemini-embedding-2', dimensions: 3072, dimensionsVerified: true, recommended: true, note: 'Managed by MeetFloo. Nothing to configure.' }],
         },
         {
             id: 'ollama', name: 'Ollama', cloud: false, available: true,
@@ -78,7 +78,7 @@ const CATALOG = {
         {
             id: 'local', name: 'Built-in', cloud: false, available: true,
             models: [
-                { id: 'Xenova/all-MiniLM-L6-v2', label: 'MiniLM', dimensions: 384, dimensionsVerified: true, lightweight: true, note: 'Bundled with Natively. Small and fast; weaker retrieval on large projects.' },
+                { id: 'Xenova/all-MiniLM-L6-v2', label: 'MiniLM', dimensions: 384, dimensionsVerified: true, lightweight: true, note: 'Bundled with MeetFloo. Small and fast; weaker retrieval on large projects.' },
                 { id: 'nomic-embed-text', label: 'nomic-embed-text', dimensions: 768, dimensionsVerified: true, note: 'Pulled automatically when Ollama is available.' },
             ],
         },
@@ -121,5 +121,5 @@ export const EMBEDDING_SETTINGS_API = {
     setEmbeddingOpenRouterKey: async () => ({ success: true, models: [], count: 0 }),
     setEmbeddingCustomEndpoint: async () => ({ success: true, endpoint: 'http://localhost:1234/v1', models: [], reachable: true }),
     platform: 'darwin',
-    openExternal: () => {},
+    openExternal: () => { },
 };

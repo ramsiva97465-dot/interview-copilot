@@ -20,7 +20,7 @@
 // WHY IT LIVES UNDER electron/ AND NOT src/lib (2026-09-04): this is
 // main-process policy that the renderer happens to consume, and the renderer
 // already reaches the other way for exactly that reason — see
-// NativelyInterface importing '../../electron/utils/rollingTranscriptState.ts'.
+// MeetFlooInterface importing '../../electron/utils/rollingTranscriptState.ts'.
 //
 // The first cut put it in src/lib, which broke a test nothing else catches:
 // EvidenceResolverWiringIdentity emits an UNBUNDLED tree with tsc
@@ -108,7 +108,7 @@ export function explainMissingPlaceholder(json: ParsedCurlSurface): string {
 
   return inForm || inParams
     ? 'Put the prompt in a JSON body. Custom providers send the URL, headers and -d body — '
-      + 'a placeholder in a -F form field or a ?query= parameter is never sent.'
+    + 'a placeholder in a -F form field or a ?query= parameter is never sent.'
     : "Your request body isn't valid JSON, so the prompt placeholder was dropped. "
-      + 'Check the quoting in -d — placeholders must sit inside quotes, e.g. "{{TEXT}}".';
+    + 'Check the quoting in -d — placeholders must sit inside quotes, e.g. "{{TEXT}}".';
 }

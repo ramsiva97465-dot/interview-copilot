@@ -38,8 +38,8 @@ function makeElectronStub(tmpUserData) {
         for (const h of handlers[event] || []) h(...args);
       },
     },
-    BrowserWindow: class {},
-    WebContents: class {},
+    BrowserWindow: class { },
+    WebContents: class { },
     utilityProcess: {},
   };
   return { electron, handlers, webContents };
@@ -50,7 +50,7 @@ function makeElectronStub(tmpUserData) {
 // Mirrors electron/utils/lifecycleTracker.ts so we can test the contract in
 // bare-node. KEEP IN SYNC if the source module changes.
 
-function makeTracker({ tmpUserData, handlers, consoleLog = () => {} }) {
+function makeTracker({ tmpUserData, handlers, consoleLog = () => { } }) {
   let marker = {
     pid: process.pid,
     startedAt: new Date().toISOString(),
@@ -187,7 +187,7 @@ test('installBeforeReady writes marker to tmpdir fallback when userData throws',
   fake.installBeforeReady();
   fake.setQuitReason('os-signal', { reason: 'SIGTERM-equivalent' });
   // Marker file should exist in tmpdir, NOT in userData.
-  const expected = path.join(tmp, `natively-lifecycle-${process.pid}.json`);
+  const expected = path.join(tmp, `MeetFloo-lifecycle-${process.pid}.json`);
   assert.ok(fs.existsSync(expected), `expected tmpdir marker at ${expected}`);
   const parsed = JSON.parse(fs.readFileSync(expected, 'utf8'));
   assert.equal(parsed.quitReason, 'os-signal');
@@ -205,7 +205,7 @@ test('installBeforeReady prefers userData when getUserData works', () => {
   fake.setQuitReason('os-signal');
   // Marker should land in userData, NOT in tmpdir.
   assert.ok(fs.existsSync(path.join(userDataDir, 'lifecycle-marker.json')));
-  assert.ok(!fs.existsSync(path.join(tmp, `natively-lifecycle-${process.pid}.json`)));
+  assert.ok(!fs.existsSync(path.join(tmp, `MeetFloo-lifecycle-${process.pid}.json`)));
   fs.rmSync(tmp, { recursive: true, force: true });
 });
 
@@ -225,7 +225,7 @@ function LifecycleTrackerLike({ tmp, getUserData }) {
     try {
       file = path.join(getUserData(), 'lifecycle-marker.json');
     } catch {
-      file = path.join(tmp, `natively-lifecycle-${process.pid}.json`);
+      file = path.join(tmp, `MeetFloo-lifecycle-${process.pid}.json`);
     }
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, JSON.stringify(marker, null, 2));

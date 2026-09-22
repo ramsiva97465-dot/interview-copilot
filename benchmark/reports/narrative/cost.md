@@ -9,7 +9,7 @@ Luna `none` is not cheaper than `low`: Luna low produced slightly *less* output 
 **Assumptions.**
 - List prices only (no batch discounts, no negotiated rates).
 - Cold cache (every meeting unique).
-- DeepSeek peak/off-peak weighted by hours, assuming uniform traffic. Natively's real traffic shape would move the DeepSeek number between $0.027 (all off-peak) and $0.054 (all peak).
+- DeepSeek peak/off-peak weighted by hours, assuming uniform traffic. MeetFloo's real traffic shape would move the DeepSeek number between $0.027 (all off-peak) and $0.054 (all peak).
 - Luna `cache_write_tokens` are billed as normal input.
 
 **As billed in this benchmark**, with cache hits and all runs in DeepSeek off-peak hours: $0.024 per summary for the current config.

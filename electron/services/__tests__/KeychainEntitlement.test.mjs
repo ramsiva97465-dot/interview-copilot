@@ -56,12 +56,12 @@ test('no provisioning profile is configured, matching the entitlement set we sig
     're-evaluate keychain-access-groups and update this test together with it');
 });
 
-test('the signed build still bakes nativelySigned for the auto-update path', () => {
+test('the signed build still bakes MeetFlooSigned for the auto-update path', () => {
   // keychainGroupEntitled was removed alongside the entitlement (it existed only to prove the
-  // entitlement shipped). nativelySigned is unrelated and must survive.
+  // entitlement shipped). MeetFlooSigned is unrelated and must survive.
   const builder = fs.readFileSync(BUILDER, 'utf8');
-  assert.ok(builder.includes('nativelySigned'),
-    'electron-builder.signed.cjs must keep nativelySigned in extraMetadata');
+  assert.ok(builder.includes('MeetFlooSigned'),
+    'electron-builder.signed.cjs must keep MeetFlooSigned in extraMetadata');
   // Match a real property assignment, not the word appearing in the explanatory comment
   // that replaced it — a substring check here would fail on its own documentation.
   assert.ok(!/^\s*keychainGroupEntitled\s*:/m.test(builder),

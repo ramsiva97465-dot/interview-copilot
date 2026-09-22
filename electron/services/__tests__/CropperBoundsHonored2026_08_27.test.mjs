@@ -1,5 +1,5 @@
 // Regression tests for the 2026-08-27 win32 cropper-misplacement report
-// (user log: Natively 2.8.7, win32, mixed-DPI multi-monitor).
+// (user log: MeetFloo 2.8.7, win32, mixed-DPI multi-monitor).
 //
 // The log showed createWindow() asking for {x:0, y:-442, w:3627, h:1509} and
 // getBounds() immediately returning {x:569, y:-83, w:3628, h:1510} — the
@@ -42,8 +42,8 @@ const CLAMPED = { x: 569, y: -83, width: 3628, height: 1510 };
 
 let displays = MIXED_DPI_DISPLAYS;
 const fakeElectron = {
-  app: { isPackaged: false, getAppPath: () => '/tmp', on: () => {}, removeListener: () => {} },
-  ipcMain: { on: () => {}, removeListener: () => {} },
+  app: { isPackaged: false, getAppPath: () => '/tmp', on: () => { }, removeListener: () => { } },
+  ipcMain: { on: () => { }, removeListener: () => { } },
   screen: {
     getAllDisplays: () => displays,
     getPrimaryDisplay: () => displays[0],
@@ -142,13 +142,13 @@ function makeWindow({ clampTo = null, initial } = {}) {
     isDestroyed: () => false,
     getBounds() { return { ...this.bounds }; },
     setBounds(b) { this.bounds = clampTo ? { ...clampTo } : { ...b }; },
-    webContents: { send: () => {} },
-    setContentProtection: () => {},
-    setOpacity: () => {},
-    show: () => {},
-    hide: () => {},
-    focus: () => {},
-    destroy: () => {},
+    webContents: { send: () => { } },
+    setContentProtection: () => { },
+    setOpacity: () => { },
+    show: () => { },
+    hide: () => { },
+    focus: () => { },
+    destroy: () => { },
   };
 }
 

@@ -264,9 +264,9 @@ export function verifyAll(repoRoot = process.cwd(), opts = {}) {
  * reinstall the DMG that matches their Mac's CPU.
  */
 const PACKAGED_REINSTALL_MESSAGE =
-  'This copy of Natively was built for a different chip than your Mac.\n' +
+  'This copy of MeetFloo was built for a different chip than your Mac.\n' +
   'Please download the correct version and reinstall:\n\n' +
-  '  https://github.com/Natively-AI-assistant/natively-cluely-ai-assistant/releases/latest\n\n' +
+  '  https://github.com/MeetFloo-AI-assistant/MeetFloo-cluely-ai-assistant/releases/latest\n\n' +
   '  • Apple Silicon (M1–M4): the arm64 DMG\n' +
   '  • Intel Macs:            the standard DMG\n\n' +
   'Your data is safe — reinstalling over the current app keeps meeting\n' +
@@ -278,16 +278,16 @@ const PACKAGED_REINSTALL_MESSAGE =
  * installer on a 64-bit machine.
  */
 const PACKAGED_REINSTALL_MESSAGE_WINDOWS =
-  'This copy of Natively was built for a different processor architecture\n' +
+  'This copy of MeetFloo was built for a different processor architecture\n' +
   'than this PC. Please download the correct installer and reinstall:\n\n' +
-  '  https://github.com/Natively-AI-assistant/natively-cluely-ai-assistant/releases/latest\n\n' +
+  '  https://github.com/MeetFloo-AI-assistant/MeetFloo-cluely-ai-assistant/releases/latest\n\n' +
   'Your data is safe — reinstalling over the current app keeps meeting\n' +
   'history and settings.';
 
 /**
  * The single command the user (or our dialog) should suggest.
  * Always wraps in `arch -arm64` on macOS so the toolchain itself runs
- * natively, not under Rosetta.
+ * MeetFloo, not under Rosetta.
  *
  * In packaged mode (`opts.packaged === true`), end-users cannot rebuild
  * from a terminal — return a reinstall-the-DMG message instead.

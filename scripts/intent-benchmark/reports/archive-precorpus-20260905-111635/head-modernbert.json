@@ -6,7 +6,7 @@
     "sizeOnDiskMB": 0,
     "runtime": "onnx",
     "ortBinding": "onnxruntime-node",
-    "modelId": "resources/models/natively/router-modernbert-multihead",
+    "modelId": "resources/models/MeetFloo/router-modernbert-multihead",
     "forwardPassesPerRow": 1,
     "loadMs": 365,
     "split": "holdout",

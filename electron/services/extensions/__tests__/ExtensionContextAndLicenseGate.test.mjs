@@ -32,7 +32,7 @@ const { processSingleton, resetProcessSingleton } = require(path.join(base, 'sin
 const APP_VERSION = '2.8.8';
 
 function tmpRoot() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-ext-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-ext-'));
   return dir;
 }
 
@@ -66,8 +66,8 @@ function manifest(root) {
     type: 'reranker',
     entrypoint: 'dist/index.js',
     author: 'community',
-    homepage: 'https://github.com/example/natively-jina-reranker',
-    engines: { natively: '>=2.8.0' },
+    homepage: 'https://github.com/example/MeetFloo-jina-reranker',
+    engines: { MeetFloo: '>=2.8.0' },
     permissions: ['filesystem.models', 'process.spawn', 'network.localhost'],
     allowedBinaries: ['llama-server'],
     models: [ncModel()],
@@ -105,7 +105,7 @@ test('ExtensionContext exposes exactly modelDir, logger, config and the extensio
 
   const installed = await manager.install({
     manifestJson: manifest(root),
-    source: 'github:example/natively-jina-reranker@v1.0.0',
+    source: 'github:example/MeetFloo-jina-reranker@v1.0.0',
     payloadDir: payload,
   });
   assert.equal(installed.ok, true, installed.ok ? '' : installed.errors.join('; '));
@@ -208,7 +208,7 @@ test('a download is refused before it starts when the licence is unacknowledged'
   const root = tmpRoot();
   const { modelStore } = makeManager(root);
   await assert.rejects(
-    () => modelStore.download('jina-reranker', ncModel(), () => {}, new AbortController().signal),
+    () => modelStore.download('jina-reranker', ncModel(), () => { }, new AbortController().signal),
     /requires acknowledgement/,
   );
 });
@@ -262,7 +262,7 @@ test('a confirmer that throws is a refusal, not consent', async () => {
   const manager = new ExtensionManager({
     registry, modelStore, appVersion: APP_VERSION,
     confirmInstall: async () => { throw new Error('dialog blew up'); },
-    logger: { debug() {}, info() {}, warn() {}, error() {} },
+    logger: { debug() { }, info() { }, warn() { }, error() { } },
     rootOverride: root,
   });
   const payload = path.join(root, 'payload');
@@ -382,7 +382,7 @@ test('singletons are anchored per process, not per esbuild bundle', () => {
   assert.equal(processSingleton(key, () => ({ id: 3 })).id, 3);
 
   // And it really is on globalThis, which is what survives bundle duplication.
-  assert.ok(globalThis.__nativelyExtensionSingletons__ instanceof Map);
+  assert.ok(globalThis.__MeetFlooExtensionSingletons__ instanceof Map);
   resetProcessSingleton(key);
 });
 
@@ -403,9 +403,9 @@ test('a disabled extension is never loaded, even when load() is called directly'
     modelStore: new ModelStore({ ledger: new LicenseLedger(path.join(root, 'licenses.json')), rootOverride: root }),
     appVersion: APP_VERSION,
     confirmInstall: async () => true,
-    logger: { debug() {}, info() {}, warn() {}, error() {} },
+    logger: { debug() { }, info() { }, warn() { }, error() { } },
     rootOverride: root,
-    createHost: () => { created = true; return { start: async () => {}, stop: async () => {}, rerank: async () => [] }; },
+    createHost: () => { created = true; return { start: async () => { }, stop: async () => { }, rerank: async () => [] }; },
   });
 
   assert.equal(await withSpy.load('jina-reranker'), null);

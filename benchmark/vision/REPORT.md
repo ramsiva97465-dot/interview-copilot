@@ -1,8 +1,8 @@
 # Screenshot benchmark: DeepSeek V4.1 Flash vs Gemini 3.8 Flash
 
-**Question:** is `deepseek-flash` good enough to become Natively's screenshot **primary**, with Gemini 3.8 Flash demoted to fallback?
+**Question:** is `deepseek-flash` good enough to become MeetFloo's screenshot **primary**, with Gemini 3.8 Flash demoted to fallback?
 
-**Answer: no — keep 3.8-flash primary.** Run three times across two days: DeepSeek 467/490 checks (95.3%) and 106/126 answers fully correct, Gemini **490/490 (100%)**, every answer clean. DeepSeek is 2.2× faster and 4.4× cheaper and it ties Gemini on the hardest tiers, but it is the only one of the two that gets anything wrong, and two of its failures are near-systematic on exactly the screens Natively's users photograph: an IDE at small zoom, and a chart read.
+**Answer: no — keep 3.8-flash primary.** Run three times across two days: DeepSeek 467/490 checks (95.3%) and 106/126 answers fully correct, Gemini **490/490 (100%)**, every answer clean. DeepSeek is 2.2× faster and 4.4× cheaper and it ties Gemini on the hardest tiers, but it is the only one of the two that gets anything wrong, and two of its failures are near-systematic on exactly the screens MeetFloo's users photograph: an IDE at small zoom, and a chart read.
 
 ## How it runs
 
@@ -103,7 +103,7 @@ Two conclusions:
 
 ## Verdict
 
-- **Keep `gemini-3.8-flash` as the screenshot primary.** Perfect across 90 calls and two days, against a rival that misreads a small code line in 4 of 5 attempts. "My IDE is on screen, help me" is the main Natively screenshot case, usually at a small font, and a confidently wrong identifier is worse than an answer 1.2s later.
+- **Keep `gemini-3.8-flash` as the screenshot primary.** Perfect across 90 calls and two days, against a rival that misreads a small code line in 4 of 5 attempts. "My IDE is on screen, help me" is the main MeetFloo screenshot case, usually at a small font, and a confidently wrong identifier is worse than an answer 1.2s later.
 - **Keep `deepseek-flash` as the fallback** (3.8-flash → MiniMax-M3 → deepseek-flash → Pro). Fast, cheap, never failed a call, and it covers the outage mode where the Gemini pool is exhausted — which took screenshots down entirely on 2026-09-17.
 - **If first-paint latency becomes the complaint**, the honest trade is: DeepSeek paints ~1.15s sooner (832ms vs 1,985ms p50) and finishes ~0.5s sooner, in exchange for roughly 1 answer in 6 containing at least one wrong detail (106/126 clean vs 126/126).
 - **There is no middle setting.** Thinking at its lowest effort fixes the counting and chart errors but not the small-text misread, and pushes first paint to 4.5s — worse than Gemini, for accuracy that is still short of it.
@@ -111,9 +111,9 @@ Two conclusions:
 ## Caveats
 
 - 490 checks per model over two days. Twenty-three DeepSeek failures is a small sample, but the two big ones repeat 4-of-5, which is a pattern rather than noise. Gemini's 100% means "did not miss on this set", not "cannot miss".
-- The main comparison runs DeepSeek with thinking **disabled**, Natively's production setting; the thinking-on arm above is a probe on one run (36 calls), not a shipped configuration.
+- The main comparison runs DeepSeek with thinking **disabled**, MeetFloo's production setting; the thinking-on arm above is a probe on one run (36 calls), not a shipped configuration.
 - TTFT was measured separately (18 streamed calls per provider) and on a different sample of screenshots than the ladder.
-- Gemini was billed to the repo-root key; `natively-api`'s own Gemini key is out of prepaid credits. Same model, same request shape.
+- Gemini was billed to the repo-root key; `MeetFloo-api`'s own Gemini key is out of prepaid credits. Same model, same request shape.
 - Five of twelve screenshots are rendered rather than photographed, used where exact ground truth was required. The seven real ones carry the tasks closest to real usage.
 - **Three scoring bugs were found and fixed**, all of which had inflated DeepSeek:
   1. a stale Hacker News score (the page changed between captures);

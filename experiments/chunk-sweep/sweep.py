@@ -36,7 +36,7 @@ GEMINI_KEY = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"
 DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY")
 GEN_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 # text-embedding-004 was retired (404 as of 2026-08); gemini-embedding-2 is the
-# live embedding model on this key (also what Natively production defaults to).
+# live embedding model on this key (also what MeetFloo production defaults to).
 EMBED_MODEL = "gemini-embedding-2"
 EMBED_DIMS = 768
 GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta"

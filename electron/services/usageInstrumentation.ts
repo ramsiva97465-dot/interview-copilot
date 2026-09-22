@@ -31,7 +31,7 @@
 import { randomUUID } from 'node:crypto';
 import { usageOutbox, type UsageEventInput } from './UsageOutbox';
 
-/** Normalized product features. Must match FEATURES in natively-api/lib/licenseLedger.js. */
+/** Normalized product features. Must match FEATURES in MeetFloo-api/lib/licenseLedger.js. */
 export const FEATURE = {
     MEETING_COPILOT: 'meeting_copilot',
     TECHNICAL_INTERVIEW: 'technical_interview',
@@ -108,11 +108,11 @@ export function classifyFailure(err: unknown): { failure_origin: string; failure
     if (msg.includes('permission') || msg.includes('denied')) {
         return { failure_origin: 'permission', failure_code: 'PERMISSION_DENIED' };
     }
-    // The default is `natively` + RUNTIME_ERROR, not `unknown`. An error we
+    // The default is `MeetFloo` + RUNTIME_ERROR, not `unknown`. An error we
     // failed to categorise happened inside our own code until proven otherwise,
     // and a dispute report must never imply a provider was at fault when the
     // truth is that we could not tell.
-    return { failure_origin: 'natively', failure_code: 'RUNTIME_ERROR' };
+    return { failure_origin: 'MeetFloo', failure_code: 'RUNTIME_ERROR' };
 }
 
 export interface FeatureTracker {
@@ -211,36 +211,36 @@ export function trackFeature(feature: FeatureName, opts?: { sessionId?: string; 
  * their own predicate.
  */
 export async function runTracked<T>(
-  feature: FeatureName,
-  fn: () => Promise<T>,
-  opts?: {
-    failedIf?: (result: T) => boolean;
-    sessionId?: string;
-    metadata?: Record<string, string | number | boolean>;
-  },
+    feature: FeatureName,
+    fn: () => Promise<T>,
+    opts?: {
+        failedIf?: (result: T) => boolean;
+        sessionId?: string;
+        metadata?: Record<string, string | number | boolean>;
+    },
 ): Promise<T> {
-  const tracker = trackFeature(feature, { sessionId: opts?.sessionId, metadata: opts?.metadata });
-  try {
-    const result = await fn();
-    // Default: a truthy `error` field means the handler failed while returning
-    // normally. Recording that as a completion would imply delivered service.
-    const failed = opts?.failedIf
-      ? safeBool(() => opts.failedIf!(result))
-      : safeBool(() => !!(result as any)?.error);
-    if (failed) tracker.failed(new Error('handler_reported_failure'));
-    else tracker.completed();
-    return result;
-  } catch (err) {
-    tracker.failed(err);
-    // Rethrow unchanged. Instrumentation observes; it never alters control flow,
-    // and a handler's contract with the renderer must not depend on it.
-    throw err;
-  }
+    const tracker = trackFeature(feature, { sessionId: opts?.sessionId, metadata: opts?.metadata });
+    try {
+        const result = await fn();
+        // Default: a truthy `error` field means the handler failed while returning
+        // normally. Recording that as a completion would imply delivered service.
+        const failed = opts?.failedIf
+            ? safeBool(() => opts.failedIf!(result))
+            : safeBool(() => !!(result as any)?.error);
+        if (failed) tracker.failed(new Error('handler_reported_failure'));
+        else tracker.completed();
+        return result;
+    } catch (err) {
+        tracker.failed(err);
+        // Rethrow unchanged. Instrumentation observes; it never alters control flow,
+        // and a handler's contract with the renderer must not depend on it.
+        throw err;
+    }
 }
 
 /** A predicate that throws must not decide the outcome — treat it as "not failed". */
 function safeBool(fn: () => boolean): boolean {
-  try { return !!fn(); } catch { return false; }
+    try { return !!fn(); } catch { return false; }
 }
 
 /** Application lifecycle (§5). Emitted once per launch. */

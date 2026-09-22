@@ -66,10 +66,10 @@ const distDir = (() => {
   try {
     execFileSync(process.execPath, [
       // lib/tsc.js, not bin/tsc: bin/tsc is EXTENSIONLESS and contains `import`,
-    // and Node only treats an extensionless entry as ESM from >=22.7 (module
-    // detection). lib/tsc.js is a real .js under "type": "module", so it is ESM
-    // on every Node version. This repo declares no `engines` floor.
-    path.join('node_modules', 'typescript7', 'lib', 'tsc.js'),
+      // and Node only treats an extensionless entry as ESM from >=22.7 (module
+      // detection). lib/tsc.js is a real .js under "type": "module", so it is ESM
+      // on every Node version. This repo declares no `engines` floor.
+      path.join('node_modules', 'typescript7', 'lib', 'tsc.js'),
       '-p', path.join('electron', 'tsconfig.emit.json'),
       '--outDir', target,
     ], { cwd: repoRoot, stdio: 'pipe' });
@@ -99,11 +99,11 @@ const electronStub = {
   app: {
     isReady: () => true,
     getPath: name => (name === 'userData' ? tmpUserData : os.tmpdir()),
-    getName: () => 'natively-test',
+    getName: () => 'MeetFloo-test',
     getVersion: () => '0.0.0-test',
   },
   shell: { openPath: async () => '' },
-  ipcMain: { on: () => {}, handle: () => {}, removeAllListeners: () => {} },
+  ipcMain: { on: () => { }, handle: () => { }, removeAllListeners: () => { } },
   BrowserWindow: { getAllWindows: () => [] },
 };
 
@@ -203,7 +203,7 @@ function buildOrchestratorStub(opts = {}) {
   return {
     isKnowledgeMode: () => true,
     feedForDepthScoring: msg => feedCalls.push(msg),
-    feedInterviewerUtterance: () => {},
+    feedInterviewerUtterance: () => { },
     processQuestion: async () => ({
       liveNegotiationResponse: opts.payload ?? PAYLOAD_SENTINEL,
     }),
@@ -372,8 +372,8 @@ test('chatWithGemini: handler is NOT invoked when active mode is technical-inter
 function buildIntroOrchestratorStub() {
   return {
     isKnowledgeMode: () => true,
-    feedForDepthScoring: () => {},
-    feedInterviewerUtterance: () => {},
+    feedForDepthScoring: () => { },
+    feedInterviewerUtterance: () => { },
     processQuestion: async () => ({
       isIntroQuestion: true,
       introResponse: 'CANNED_INTRO_RESPONSE_SENTINEL',
@@ -384,8 +384,8 @@ function buildIntroOrchestratorStub() {
 function buildInjectionOrchestratorStub() {
   return {
     isKnowledgeMode: () => true,
-    feedForDepthScoring: () => {},
-    feedInterviewerUtterance: () => {},
+    feedForDepthScoring: () => { },
+    feedInterviewerUtterance: () => { },
     processQuestion: async () => ({
       systemPromptInjection: 'PREMIUM_PROMPT_SENTINEL',
       contextBlock: 'PREMIUM_CONTEXT_SENTINEL',
@@ -788,8 +788,8 @@ test('streamChat: premium prompt injection STILL FIRES in looking-for-work (regr
   const helper = buildHelper();
   helper.setKnowledgeOrchestrator({
     isKnowledgeMode: () => true,
-    feedForDepthScoring: () => {},
-    feedInterviewerUtterance: () => {},
+    feedForDepthScoring: () => { },
+    feedInterviewerUtterance: () => { },
     processQuestion: async () => ({
       liveNegotiationResponse: PAYLOAD_SENTINEL,
       systemPromptInjection: 'PREMIUM_PROMPT_SENTINEL',

@@ -8,7 +8,7 @@
  *   hotkey / popup button
  *        -> ensure pairing exists
  *        -> chrome.scripting.executeScript(content-script.js) into the active tab
- *        -> chrome.tabs.sendMessage('natively:extract')  (token NEVER crosses this)
+ *        -> chrome.tabs.sendMessage('MeetFloo:extract')  (token NEVER crosses this)
  *        -> postDomToDesktop({ port, token }, cleanText)
  *        -> classify 200/400/401/413/429/refused and report to the popup
  */
@@ -35,7 +35,7 @@ export interface Pairing {
 export type DomPostOutcome =
   | { kind: 'success' }
   | { kind: 'unauthorized' } // 401 — token rotated/invalid -> user must re-pair
-  | { kind: 'no-session' } // 409 — Natively running but no active session/overlay
+  | { kind: 'no-session' } // 409 — MeetFloo running but no active session/overlay
   | { kind: 'bad-request' } // 400
   | { kind: 'too-large' } // 413
   | { kind: 'rate-limited' } // 429
@@ -109,8 +109,8 @@ export async function postDomToDesktop(
     case 401:
       return { kind: 'unauthorized' };
     case 409:
-      // Natively is running and paired, but no active session/overlay to receive
-      // the context. The user must start a Natively session, then capture again.
+      // MeetFloo is running and paired, but no active session/overlay to receive
+      // the context. The user must start a MeetFloo session, then capture again.
       return { kind: 'no-session' };
     case 413:
       return { kind: 'too-large' };
@@ -323,7 +323,7 @@ async function extractFromTab(tabId: number): Promise<ExtractedTab> {
     target: { tabId },
     files: ['content-script.js'],
   });
-  const response = (await chrome.tabs.sendMessage(tabId, { type: 'natively:extract' })) as
+  const response = (await chrome.tabs.sendMessage(tabId, { type: 'MeetFloo:extract' })) as
     | { ok: true; result: { text: string; source?: string; title?: string; pageType?: string; firstLine?: string } }
     | { ok: false; error: string }
     | undefined;
@@ -409,7 +409,7 @@ async function recordLastActive(tab: chrome.tabs.Tab): Promise<void> {
 
 /**
  * Resolve the tab to capture. CRITICAL for the desktop-pull flow: when the
- * Natively hotkey fires, Chrome is NOT the focused OS app, so `currentWindow`
+ * MeetFloo hotkey fires, Chrome is NOT the focused OS app, so `currentWindow`
  * (the window the service worker belongs to — none) is unreliable. We prefer the
  * continuously-tracked last-active tab ("the page I was on before I switched to
  * the overlay"), then fall through to live queries of the last-focused window —
@@ -526,7 +526,7 @@ interface SmartExtractOpts {
 async function smartExtractFromTab(tabId: number, opts: SmartExtractOpts): Promise<SmartExtractResult> {
   await chrome.scripting.executeScript({ target: { tabId }, files: ['content-script.js'] });
   const response = (await chrome.tabs.sendMessage(tabId, {
-    type: 'natively:smart-extract',
+    type: 'MeetFloo:smart-extract',
     contextId: opts.contextId,
     capturedAt: opts.capturedAt,
     mode: opts.mode,
@@ -731,7 +731,7 @@ async function connectionStatus(): Promise<DomPostOutcome | { kind: 'unpaired' }
 // Desktop → extension WebSocket (v2 capture trigger).
 //
 // The desktop pushes `capture-dom`/`list-tabs` over the same PhoneMirror /ws the
-// phone uses. This lets a NATIVELY global hotkey trigger capture from any focused
+// phone uses. This lets a MEETFLOO global hotkey trigger capture from any focused
 // app — the old chrome.commands hotkey only fired while Chrome was frontmost.
 //
 // MV3 lifecycle: the service worker is killed when idle, which would tear down the
@@ -754,7 +754,7 @@ function wsSend(obj: unknown): void {
 }
 
 /** Manifest default_title — restored when a grant nudge is cleared. */
-const DEFAULT_ACTION_TITLE = 'Natively — capture this page';
+const DEFAULT_ACTION_TITLE = 'MeetFloo — capture this page';
 
 /**
  * Pure: the toolbar-badge nudge for a failed DESKTOP-PUSH capture, or null when
@@ -767,7 +767,7 @@ export function badgeForCaptureOutcome(kind: string): { text: string; title: str
   if (kind === 'needs-host-permission') {
     return {
       text: '!',
-      title: 'Natively needs access to this site — click, then press Capture once to grant it.',
+      title: 'MeetFloo needs access to this site — click, then press Capture once to grant it.',
     };
   }
   return null;
@@ -902,7 +902,7 @@ async function ensureWsConnected(): Promise<void> {
       setTimeout(() => { void ensureWsConnected(); }, wsBackoffMs);
       wsBackoffMs = Math.min(wsBackoffMs * 2, WS_BACKOFF_MAX);
     };
-    sock.onerror = () => { try { sock.close(); } catch (_) {} };
+    sock.onerror = () => { try { sock.close(); } catch (_) { } };
   } catch (_) {
     wsConnecting = false;
   }
@@ -933,117 +933,117 @@ const hasChrome = typeof globalThis !== 'undefined' &&
   !!chrome?.runtime?.onMessage;
 
 if (hasChrome) {
-chrome.runtime.onMessage.addListener((msg: PopupMessage, _sender, sendResponse) => {
-  // These come from the popup (the extension's own context), never from a page.
-  (async () => {
-    switch (msg?.type) {
-      case 'pair': {
-        const r = await pairFromString(msg.value);
-        if (r.kind === 'success') void ensureWsConnected();
-        sendResponse(r);
-        return;
+  chrome.runtime.onMessage.addListener((msg: PopupMessage, _sender, sendResponse) => {
+    // These come from the popup (the extension's own context), never from a page.
+    (async () => {
+      switch (msg?.type) {
+        case 'pair': {
+          const r = await pairFromString(msg.value);
+          if (r.kind === 'success') void ensureWsConnected();
+          sendResponse(r);
+          return;
+        }
+        case 'autopair': {
+          const r = await autoPair();
+          if (r.kind === 'paired') void ensureWsConnected();
+          sendResponse(r);
+          return;
+        }
+        case 'capture': {
+          const report = await captureActiveTab();
+          if (report.outcome.kind === 'success') clearGrantNudge();
+          sendResponse(report);
+          return;
+        }
+        case 'grant-host': {
+          // The popup asks for ONE origin after a capture came back
+          // needs-host-permission. chrome.permissions.request must run inside a
+          // user gesture; the popup's click handler is that gesture, and the
+          // gesture survives this round-trip because the popup awaits us.
+          const origin = typeof msg.value === 'string' ? msg.value : '';
+          const granted = await requestOriginPermission(chrome.permissions, origin);
+          if ((granted as { granted?: boolean })?.granted) clearGrantNudge();
+          sendResponse(granted);
+          return;
+        }
+        case 'grant-all-sites': {
+          // One-time "Allow on all sites": a single prompt covering the broad
+          // optional_host_permissions patterns, so the desktop hotkey works on
+          // any site without per-site grants. Gesture comes from the popup click.
+          const r = await requestAllSitesPermission(chrome.permissions);
+          if (r.granted) clearGrantNudge();
+          sendResponse(r);
+          return;
+        }
+        case 'all-sites-status':
+          sendResponse({ granted: await hasAllSitesPermission(chrome.permissions) });
+          return;
+        case 'status':
+          sendResponse(await connectionStatus());
+          return;
+        case 'ws-status':
+          // Ensure we're attempting a connection, then report live WS state so the
+          // popup can show "capture-ready" vs merely "paired".
+          void ensureWsConnected();
+          sendResponse({ open: wsIsOpen() });
+          return;
+        case 'unpair':
+          await clearPairing();
+          sendResponse({ kind: 'success' });
+          return;
+        default:
+          return;
       }
-      case 'autopair': {
-        const r = await autoPair();
-        if (r.kind === 'paired') void ensureWsConnected();
-        sendResponse(r);
-        return;
-      }
-      case 'capture': {
-        const report = await captureActiveTab();
-        if (report.outcome.kind === 'success') clearGrantNudge();
-        sendResponse(report);
-        return;
-      }
-      case 'grant-host': {
-        // The popup asks for ONE origin after a capture came back
-        // needs-host-permission. chrome.permissions.request must run inside a
-        // user gesture; the popup's click handler is that gesture, and the
-        // gesture survives this round-trip because the popup awaits us.
-        const origin = typeof msg.value === 'string' ? msg.value : '';
-        const granted = await requestOriginPermission(chrome.permissions, origin);
-        if ((granted as { granted?: boolean })?.granted) clearGrantNudge();
-        sendResponse(granted);
-        return;
-      }
-      case 'grant-all-sites': {
-        // One-time "Allow on all sites": a single prompt covering the broad
-        // optional_host_permissions patterns, so the desktop hotkey works on
-        // any site without per-site grants. Gesture comes from the popup click.
-        const r = await requestAllSitesPermission(chrome.permissions);
-        if (r.granted) clearGrantNudge();
-        sendResponse(r);
-        return;
-      }
-      case 'all-sites-status':
-        sendResponse({ granted: await hasAllSitesPermission(chrome.permissions) });
-        return;
-      case 'status':
-        sendResponse(await connectionStatus());
-        return;
-      case 'ws-status':
-        // Ensure we're attempting a connection, then report live WS state so the
-        // popup can show "capture-ready" vs merely "paired".
-        void ensureWsConnected();
-        sendResponse({ open: wsIsOpen() });
-        return;
-      case 'unpair':
-        await clearPairing();
-        sendResponse({ kind: 'success' });
-        return;
-      default:
-        return;
+    })();
+    return true; // async sendResponse
+  });
+
+  // NOTE: the old chrome.commands `capture-page` hotkey was removed in v2 — it only
+  // fired while Chrome was the focused OS app, so it never worked while the user was
+  // looking at the MeetFloo overlay. Capture is now triggered by a MEETFLOO global
+  // hotkey → desktop pushes `capture-dom` over /ws → handleCaptureDom (above).
+
+  // MV3 keep-alive: a periodic alarm wakes the SW and re-ensures the WS is open so
+  // the desktop can push capture commands. 25s is under Chrome's ~30s idle kill.
+  // Listeners are registered SYNCHRONOUSLY at top level (MV3 requirement) so they
+  // fire on the wake-up event that loaded the worker.
+  try { chrome.alarms.create('MeetFloo-ws-keepalive', { periodInMinutes: 0.5 }); } catch (_) { }
+  chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === 'MeetFloo-ws-keepalive') void ensureWsConnected();
+  });
+  chrome.runtime.onStartup.addListener(() => { void ensureWsConnected(); });
+  chrome.runtime.onInstalled.addListener(() => { void ensureWsConnected(); });
+
+  // Wake-on-browser-interaction: these fire whenever the user touches Chrome, which
+  // is exactly the moment right before they'd trigger a capture. Each wakes a dead
+  // service worker AND re-ensures the WS is open, so by the time the user presses the
+  // MeetFloo hotkey the capture channel is already live — closing the MV3 idle-death
+  // gap that otherwise makes the first capture fall back to a screenshot.
+  // They ALSO record the last-active tab (so capture picks "the page I was on") and
+  // signal browser activity to the desktop (so it arbitrates between multiple
+  // browsers — most-recently-active wins).
+  chrome.tabs.onActivated.addListener(({ tabId }) => {
+    void ensureWsConnected();
+    chrome.tabs.get(tabId).then((t) => recordLastActive(t)).catch(() => { });
+  });
+  chrome.tabs.onUpdated.addListener((_id, info, tab) => {
+    if (info.status === 'complete' || info.url) {
+      void ensureWsConnected();
+      if (tab?.active) void recordLastActive(tab);
     }
-  })();
-  return true; // async sendResponse
-});
+  });
+  chrome.windows.onFocusChanged.addListener((winId) => {
+    if (winId !== chrome.windows.WINDOW_ID_NONE) {
+      void ensureWsConnected();
+      wsSend({ type: 'active', ts: Date.now() }); // desktop multi-browser arbitration
+      chrome.tabs.query({ active: true, windowId: winId })
+        .then((tabs) => { if (tabs[0]) void recordLastActive(tabs[0]); })
+        .catch(() => { });
+    }
+  });
+  chrome.action.onClicked.addListener(() => { void ensureWsConnected(); });
 
-// NOTE: the old chrome.commands `capture-page` hotkey was removed in v2 — it only
-// fired while Chrome was the focused OS app, so it never worked while the user was
-// looking at the Natively overlay. Capture is now triggered by a NATIVELY global
-// hotkey → desktop pushes `capture-dom` over /ws → handleCaptureDom (above).
-
-// MV3 keep-alive: a periodic alarm wakes the SW and re-ensures the WS is open so
-// the desktop can push capture commands. 25s is under Chrome's ~30s idle kill.
-// Listeners are registered SYNCHRONOUSLY at top level (MV3 requirement) so they
-// fire on the wake-up event that loaded the worker.
-try { chrome.alarms.create('natively-ws-keepalive', { periodInMinutes: 0.5 }); } catch (_) {}
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'natively-ws-keepalive') void ensureWsConnected();
-});
-chrome.runtime.onStartup.addListener(() => { void ensureWsConnected(); });
-chrome.runtime.onInstalled.addListener(() => { void ensureWsConnected(); });
-
-// Wake-on-browser-interaction: these fire whenever the user touches Chrome, which
-// is exactly the moment right before they'd trigger a capture. Each wakes a dead
-// service worker AND re-ensures the WS is open, so by the time the user presses the
-// Natively hotkey the capture channel is already live — closing the MV3 idle-death
-// gap that otherwise makes the first capture fall back to a screenshot.
-// They ALSO record the last-active tab (so capture picks "the page I was on") and
-// signal browser activity to the desktop (so it arbitrates between multiple
-// browsers — most-recently-active wins).
-chrome.tabs.onActivated.addListener(({ tabId }) => {
+  // Also attempt a connection as soon as the worker loads (covers the common case
+  // where the worker was just spun up by any event).
   void ensureWsConnected();
-  chrome.tabs.get(tabId).then((t) => recordLastActive(t)).catch(() => {});
-});
-chrome.tabs.onUpdated.addListener((_id, info, tab) => {
-  if (info.status === 'complete' || info.url) {
-    void ensureWsConnected();
-    if (tab?.active) void recordLastActive(tab);
-  }
-});
-chrome.windows.onFocusChanged.addListener((winId) => {
-  if (winId !== chrome.windows.WINDOW_ID_NONE) {
-    void ensureWsConnected();
-    wsSend({ type: 'active', ts: Date.now() }); // desktop multi-browser arbitration
-    chrome.tabs.query({ active: true, windowId: winId })
-      .then((tabs) => { if (tabs[0]) void recordLastActive(tabs[0]); })
-      .catch(() => {});
-  }
-});
-chrome.action.onClicked.addListener(() => { void ensureWsConnected(); });
-
-// Also attempt a connection as soon as the worker loads (covers the common case
-// where the worker was just spun up by any event).
-void ensureWsConnected();
 }

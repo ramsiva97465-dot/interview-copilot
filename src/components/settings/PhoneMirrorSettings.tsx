@@ -276,7 +276,7 @@ export const PhoneMirrorSettings: React.FC = () => {
 
   // "Connect browser extension" — arm the 60s one-click pairing window on the
   // desktop, then run a local countdown so the user knows how long they have to
-  // click "Connect to Natively" in the extension popup.
+  // click "Connect to MeetFloo" in the extension popup.
   const onArmExtension = useCallback(async () => {
     setArmError(null);
     try {
@@ -785,50 +785,49 @@ const CtxToggle: React.FC<{
 }> = ({ label, desc, checked, onChange, icon, experimental, comingSoon }) => {
   const toggleInit = useToggleInit();
   return (
-  <div className={`flex items-start justify-between gap-3 ${comingSoon ? 'opacity-55' : ''}`}>
-    <div className="flex items-start gap-2.5 min-w-0">
-      {icon && (
-        <div
-          className="flex-shrink-0 mt-0.5 w-6 h-6 rounded-md bg-bg-main border border-border-subtle grid place-items-center"
-          aria-hidden="true"
-        >
-          {icon}
+    <div className={`flex items-start justify-between gap-3 ${comingSoon ? 'opacity-55' : ''}`}>
+      <div className="flex items-start gap-2.5 min-w-0">
+        {icon && (
+          <div
+            className="flex-shrink-0 mt-0.5 w-6 h-6 rounded-md bg-bg-main border border-border-subtle grid place-items-center"
+            aria-hidden="true"
+          >
+            {icon}
+          </div>
+        )}
+        <div className="min-w-0">
+          <div className="text-text-primary text-sm flex items-center gap-2">
+            {label}
+            {experimental && (
+              <span className="inline-flex items-center rounded-full bg-amber-500/10 px-1 py-px text-[8px] font-semibold uppercase tracking-[0.05em] text-amber-400/90">
+                Experimental
+              </span>
+            )}
+            {comingSoon && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.08em] bg-text-secondary/15 text-text-secondary border border-border-subtle">
+                Coming soon
+              </span>
+            )}
+          </div>
+          <div className="text-text-secondary text-xs mt-0.5 leading-snug">{desc}</div>
         </div>
-      )}
-      <div className="min-w-0">
-        <div className="text-text-primary text-sm flex items-center gap-2">
-          {label}
-          {experimental && (
-            <span className="inline-flex items-center rounded-full bg-amber-500/10 px-1 py-px text-[8px] font-semibold uppercase tracking-[0.05em] text-amber-400/90">
-              Experimental
-            </span>
-          )}
-          {comingSoon && (
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.08em] bg-text-secondary/15 text-text-secondary border border-border-subtle">
-              Coming soon
-            </span>
-          )}
-        </div>
-        <div className="text-text-secondary text-xs mt-0.5 leading-snug">{desc}</div>
       </div>
+      <button
+        type="button"
+        role="switch"
+        data-on={String(comingSoon ? false : checked)}
+        aria-checked={comingSoon ? false : checked}
+        aria-label={label}
+        disabled={comingSoon}
+        onClick={comingSoon ? undefined : () => { toggleInit.arm(); onChange(); }}
+        /* p-0.5/`t-toggle-tight` are vestigial — geometry is the shared
+           .t-toggle rule's literal 88x40 shape at zoom:0.6 (t-toggle-lg,
+           index.css), not padding-derived. */
+        className={`t-toggle t-toggle-lg t-toggle-tight flex-shrink-0 mt-0.5 inline-flex h-6 w-11 items-center rounded-full p-0.5 focus:outline-none focus:ring-2 focus:ring-accent-focus ${comingSoon ? 'cursor-not-allowed bg-bg-item-active' : checked ? 'bg-accent-primary' : 'bg-bg-item-active'
+          } ${toggleInit.className}`}
+      >
+        <span className="t-toggle-thumb" aria-hidden="true" />
+      </button>
     </div>
-    <button
-      type="button"
-      role="switch"
-      data-on={String(comingSoon ? false : checked)}
-      aria-checked={comingSoon ? false : checked}
-      aria-label={label}
-      disabled={comingSoon}
-      onClick={comingSoon ? undefined : () => { toggleInit.arm(); onChange(); }}
-      /* p-0.5/`t-toggle-tight` are vestigial — geometry is the shared
-         .t-toggle rule's literal 88x40 shape at zoom:0.6 (t-toggle-lg,
-         index.css), not padding-derived. */
-      className={`t-toggle t-toggle-lg t-toggle-tight flex-shrink-0 mt-0.5 inline-flex h-6 w-11 items-center rounded-full p-0.5 focus:outline-none focus:ring-2 focus:ring-accent-focus ${
-        comingSoon ? 'cursor-not-allowed bg-bg-item-active' : checked ? 'bg-accent-primary' : 'bg-bg-item-active'
-      } ${toggleInit.className}`}
-    >
-      <span className="t-toggle-thumb" aria-hidden="true" />
-    </button>
-  </div>
   );
 };

@@ -9,7 +9,7 @@
  *   1. NO NETWORK ROUTE (2026-08-27) — the notary host is unreachable.
  *   2. NO USABLE CREDENTIAL (2026-09-08) — a build got all the way through
  *      Developer-ID signing and then died in afterSign with
- *      "No Keychain password item found for profile: natively-notary".
+ *      "No Keychain password item found for profile: MeetFloo-notary".
  *
  * Both now fail here instead, in seconds, with the fix in the message.
  *
@@ -23,7 +23,7 @@
  * stops the build. A timeout, a blip, or any unrecognised Apple error warns and
  * proceeds — a preflight that blocks a working build is worse than no preflight.
  *
- * Escape hatch: NATIVELY_SKIP_NOTARY_PREFLIGHT=1 (or NATIVELY_SKIP_NOTARIZE=1).
+ * Escape hatch: MEETFLOO_SKIP_NOTARY_PREFLIGHT=1 (or MEETFLOO_SKIP_NOTARIZE=1).
  * No-op on non-darwin: nothing outside macOS notarizes, and `xcrun` is macOS-only,
  * so neither check ever runs on Windows.
  */
@@ -46,10 +46,10 @@ const {
   if (!reachable.ok) {
     console.error(
       `[preflight-notary] FATAL: cannot reach ${NOTARY_HOST}:443 after ${reachable.attempts} attempt(s) ` +
-        `(${reachable.detail}).\n` +
-        '  Notarization would fail ~10 minutes from now, after compiling, packing and signing —\n' +
-        '  so this stops before any of that work is spent.\n' +
-        '  Fix your connection and re-run, or set NATIVELY_SKIP_NOTARY_PREFLIGHT=1 to build anyway.'
+      `(${reachable.detail}).\n` +
+      '  Notarization would fail ~10 minutes from now, after compiling, packing and signing —\n' +
+      '  so this stops before any of that work is spent.\n' +
+      '  Fix your connection and re-run, or set MEETFLOO_SKIP_NOTARY_PREFLIGHT=1 to build anyway.'
     );
     process.exit(1);
   }
@@ -61,9 +61,9 @@ const {
   if (!creds.ok) {
     console.error(
       `[preflight-notary] FATAL: ${creds.summary}\n` +
-        '  This is the credential the afterSign hook will use, so notarization would fail ~20 minutes\n' +
-        '  from now — after compiling, packing and Developer-ID signing have all succeeded.\n' +
-        (creds.remedy || '')
+      '  This is the credential the afterSign hook will use, so notarization would fail ~20 minutes\n' +
+      '  from now — after compiling, packing and Developer-ID signing have all succeeded.\n' +
+      (creds.remedy || '')
     );
     process.exit(1);
   }

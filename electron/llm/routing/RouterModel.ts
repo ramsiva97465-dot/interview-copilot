@@ -27,7 +27,7 @@ import type { LocalWorkerStatus } from '../../utils/workerStatus';
 import { isInteractionRouterEnabled } from './flag';
 import type { NeedsResponse, DialogueAct, RouterPrediction } from './IntentFrame';
 
-export const ROUTER_MODEL_ID = 'natively/router-minilm-multihead';
+export const ROUTER_MODEL_ID = 'MeetFloo/router-minilm-multihead';
 
 /** Session creation is about 140ms measured; this is the ceiling for it. */
 const LOAD_TIMEOUT_MS = 5000;
@@ -79,10 +79,10 @@ export class RouterModel {
    * dist-electron launch each produce.
    */
   private modelDir(): string {
-    const leaf = path.join('natively', 'router-minilm-multihead');
+    const leaf = path.join('MeetFloo', 'router-minilm-multihead');
     const probe = path.join(leaf, 'heads.json');
     const candidates: string[] = [];
-    if (process.env.NATIVELY_LOCAL_MODELS_PATH) candidates.push(process.env.NATIVELY_LOCAL_MODELS_PATH);
+    if (process.env.MEETFLOO_LOCAL_MODELS_PATH) candidates.push(process.env.MEETFLOO_LOCAL_MODELS_PATH);
     if (process.resourcesPath) candidates.push(path.join(process.resourcesPath, 'models'));
     // `app` is absent under ELECTRON_RUN_AS_NODE and in a plain node test, so
     // it is reached for defensively rather than imported at module scope.
@@ -301,7 +301,7 @@ export class RouterModel {
     this.loaded = false;
     const w = this.worker;
     this.worker = null;
-    // terminate() can fire mid-run and abort the process, which Natively has
+    // terminate() can fire mid-run and abort the process, which MeetFloo has
     // already hit once. Detaching the listeners first means a late message from
     // a dying worker cannot reach a disposed host.
     w?.removeAllListeners();

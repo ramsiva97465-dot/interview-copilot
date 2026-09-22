@@ -271,7 +271,7 @@ function matchesRequestedField(question: string, text: string, requestedProperty
 }
 
 export class EvidenceResolver {
-  constructor(private readonly deps: EvidenceResolverDeps) {}
+  constructor(private readonly deps: EvidenceResolverDeps) { }
 
   async resolve(request: EvidenceResolutionRequest): Promise<EvidenceResolutionResult> {
     const { sourceContract, question, requestedProperty } = request;
@@ -367,8 +367,8 @@ export class EvidenceResolver {
   ): EvidenceResolutionResult | null {
     const { question, sourceContract, requestedProperty, turnId } = request;
     const classification = this.deps.classifyQuestion(question);
-    const h4StageTrace = process.env.NATIVELY_E2E === '1'
-      && process.env.NATIVELY_H4_STAGE_TRACE === '1';
+    const h4StageTrace = process.env.MEETFLOO_E2E === '1'
+      && process.env.MEETFLOO_H4_STAGE_TRACE === '1';
     const markH4OkfStage = (stage: string, details: Record<string, unknown> = {}) => {
       if (h4StageTrace) console.log('[TRACE:H4-OKF]', JSON.stringify({ stage, ...details }));
     };
@@ -493,10 +493,10 @@ export class EvidenceResolver {
         const entities = classification.targetEntities || [];
         const covered = entities.length > 0
           ? items.some((it) => {
-              const words = new Set(contentTokens(it.text));
-              if (!salient.some((term) => words.has(term))) return false;
-              return entities.some((entity) => supportsEntity(it, entity));
-            })
+            const words = new Set(contentTokens(it.text));
+            if (!salient.some((term) => words.has(term))) return false;
+            return entities.some((entity) => supportsEntity(it, entity));
+          })
           : salient.some((term) => items.some((it) => contentTokens(it.text).includes(term)));
         if (!covered) return null;
       }
@@ -524,8 +524,8 @@ export class EvidenceResolver {
     const { question, turnId, requestedProperty, transcript, followUpReferentHint, relaxed } = request;
 
     let result: Awaited<ReturnType<HybridRetrieverLike['retrieveHybrid']>>;
-    const h4StageTrace = process.env.NATIVELY_E2E === '1'
-      && process.env.NATIVELY_H4_STAGE_TRACE === '1';
+    const h4StageTrace = process.env.MEETFLOO_E2E === '1'
+      && process.env.MEETFLOO_H4_STAGE_TRACE === '1';
     const h4StartedAt = Date.now();
     const markH4ResolverStage = (stage: string, details: Record<string, unknown> = {}) => {
       if (h4StageTrace) console.log('[TRACE:H4-RESOLVER]', JSON.stringify({ stage, atMs: Date.now() - h4StartedAt, ...details }));
@@ -668,16 +668,16 @@ export class EvidenceResolver {
     });
     const selectedItems = initialSufficiency.answerable
       ? selectSmallestSufficientEvidence({
-          items: factual,
-          requestedProperty,
-          answerShape: sourceContract.answerShape,
-          targetEntities: classification.targetEntities,
-          // Property-aware ranking (Priority 2): the distinctive (non-entity,
-          // non-stopword) query terms let selection prefer the chunk that
-          // actually carries the answer value over a merely topical chunk with a
-          // higher raw retrieval score.
-          distinctiveTerms: distinctiveQueryTerms(request.question, classification.targetEntities),
-        })
+        items: factual,
+        requestedProperty,
+        answerShape: sourceContract.answerShape,
+        targetEntities: classification.targetEntities,
+        // Property-aware ranking (Priority 2): the distinctive (non-entity,
+        // non-stopword) query terms let selection prefer the chunk that
+        // actually carries the answer value over a merely topical chunk with a
+        // higher raw retrieval score.
+        distinctiveTerms: distinctiveQueryTerms(request.question, classification.targetEntities),
+      })
       : factual;
     const selectedIds = new Set(selectedItems.map((item) => item.evidenceId));
     const excludedItems = factual.filter((item) => !selectedIds.has(item.evidenceId));

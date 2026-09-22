@@ -13,7 +13,7 @@
  *   build is byte-for-byte unchanged, and real signing/notarization is explicit.
  *
  * SIGNING + NOTARIZATION (electron-builder built-in, electron-builder 26):
- *   - identity        : Developer ID Application (auto-discovered, or NATIVELY_SIGN_IDENTITY/CSC_NAME)
+ *   - identity        : Developer ID Application (auto-discovered, or MEETFLOO_SIGN_IDENTITY/CSC_NAME)
  *   - hardenedRuntime : true  (REQUIRED for notarization)
  *   - entitlements    : build/entitlements.mac.plist (top-level)
  *   - entitlementsInherit : build/entitlements.mac.inherit.plist (helpers)
@@ -23,12 +23,12 @@
  *
  * DMG: electron-builder's own DMG-creation corrupts the embedded app signature
  *   (Apple notary log: "The signature of the binary is invalid" on the inner
- *   Natively executable). So we build ONLY the `zip` target with electron-builder
+ *   MeetFloo executable). So we build ONLY the `zip` target with electron-builder
  *   (zip preserves signatures + is the auto-updater artifact), and the
  *   afterAllArtifactBuild hook rebuilds the styled DMGs from the pristine signed
  *   .app via create-dmg, then notarizes + staples them. See scripts/afterAllArtifactBuild.cjs.
  *
- *   Notarization credentials use the macOS keychain profile `natively-notary`
+ *   Notarization credentials use the macOS keychain profile `MeetFloo-notary`
  *   (created via `xcrun notarytool store-credentials`). No plaintext Apple password
  *   lives in source — the secret is in the keychain; only the profile NAME and the
  *   (non-secret) Team ID are referenced here. electron-builder's getNotarizeOptions
@@ -39,7 +39,7 @@
 
 // Signal so the ad-hoc afterPack signer (scripts/ad-hoc-sign.js) STANDS DOWN — we want
 // electron-builder's real Developer ID signature, not an ad-hoc one over the top.
-process.env.NATIVELY_PRODUCTION_SIGN = '1';
+process.env.MEETFLOO_PRODUCTION_SIGN = '1';
 
 // Default to the user's stored notarytool keychain profile + Team ID. These are NOT
 // secrets (the profile name is a label; the Team ID is embedded in every signed binary).
@@ -56,7 +56,7 @@ const base = require('./package.json').build;
 // Identity resolution: explicit env override → else auto-discover the single
 // "Developer ID Application" cert from the login keychain (undefined = auto-discover).
 const signIdentity =
-  process.env.NATIVELY_SIGN_IDENTITY || process.env.CSC_NAME || undefined;
+  process.env.MEETFLOO_SIGN_IDENTITY || process.env.CSC_NAME || undefined;
 
 module.exports = {
   ...base,
@@ -67,7 +67,7 @@ module.exports = {
   // false there and the manual download-fallback path is used instead.
   extraMetadata: {
     ...(base.extraMetadata || {}),
-    nativelySigned: true,
+    MeetFlooSigned: true,
     // NOTE: `keychainGroupEntitled` used to be baked here to prove the
     // keychain-access-groups entitlement shipped. That entitlement was removed on
     // 2026-08-19 — it is restricted/profile-requiring and, with no embedded

@@ -1,23 +1,23 @@
-# Natively Page Context — companion browser extension
+# MeetFloo Page Context — companion browser extension
 
 A minimal, privacy-correct Manifest V3 extension that sends the **active tab's
-readable content** to your local Natively desktop app, **once, on demand**. It
+readable content** to your local MeetFloo desktop app, **once, on demand**. It
 never runs in the background, never auto-captures, and only ever talks to your
 own machine over loopback.
 
-It is part of the [Natively](../) monorepo and is licensed under the
-**Natively Personal Use Source License v1.0**, same as the desktop app. Source
-lives in this directory (`natively-browser/`).
+It is part of the [MeetFloo](../) monorepo and is licensed under the
+**MeetFloo Personal Use Source License v1.0**, same as the desktop app. Source
+lives in this directory (`MeetFloo-browser/`).
 
 ## How it works
 
-Capture is triggered from the **Natively desktop app** (a global hotkey that works
-from any focused app — including while you're looking at the Natively overlay, not
+Capture is triggered from the **MeetFloo desktop app** (a global hotkey that works
+from any focused app — including while you're looking at the MeetFloo overlay, not
 the browser). The desktop pushes a "capture" command to the extension over a
 loopback WebSocket; the extension grabs the active tab and posts the content back:
 
 ```
-Natively desktop hotkey (default ⌘/Ctrl+Shift+Y, owned by the desktop app)
+MeetFloo desktop hotkey (default ⌘/Ctrl+Shift+Y, owned by the desktop app)
    → desktop pushes {capture-dom} over  ws://127.0.0.1:<port>/ws?t=<token>
    → service worker picks the right tab and injects the content-script (on demand)
    → content-script runs Mozilla Readability → clean title + text + verbatim code
@@ -55,7 +55,7 @@ when a capture is triggered.
 ## Build
 
 ```bash
-cd natively-browser
+cd MeetFloo-browser
 npm install
 npm run build       # → dist/  (esbuild, same toolchain as the desktop app)
 ```
@@ -72,16 +72,16 @@ npm test            # compiles pure modules to dist-test/ then runs node --test
 1. `npm run build`
 2. Open `chrome://extensions`
 3. Toggle **Developer mode** (top right)
-4. Click **Load unpacked** → select `natively-browser/dist`
+4. Click **Load unpacked** → select `MeetFloo-browser/dist`
 5. The extension ID will be **`macjecgdfliikhplbbdbpljomcigjnjg`** (pinned, see below).
 
 ## Pair (once — the token is persisted, so you don't re-pair every launch)
 
 **One-click (recommended):**
-1. In Natively desktop: **Settings → Phone Mirror** → enable, then in the
+1. In MeetFloo desktop: **Settings → Phone Mirror** → enable, then in the
    **Browser Extension** card click **Connect browser extension** (opens a 60s
    window).
-2. Click the extension's toolbar icon → **Connect to Natively**. Done — a green
+2. Click the extension's toolbar icon → **Connect to MeetFloo**. Done — a green
    dot ("Connected — capture ready") means the capture WebSocket is live.
 
 **Manual fallback:** in the same desktop card, copy the `port:token` string, then
@@ -93,9 +93,9 @@ changes. You only re-pair if you click **Rotate token** in Settings.
 
 ## Capture
 
-- **From the desktop (primary):** press the Natively capture hotkey
-  (**`⌘/Ctrl+Shift+Y`** by default, configurable in Natively's keybindings). This
-  works from any focused app — including the Natively overlay. If the browser
+- **From the desktop (primary):** press the MeetFloo capture hotkey
+  (**`⌘/Ctrl+Shift+Y`** by default, configurable in MeetFloo's keybindings). This
+  works from any focused app — including the MeetFloo overlay. If the browser
   isn't reachable, the desktop takes a screenshot instead.
 - **From the popup:** click the toolbar icon → **Capture this page** (works while
   Chrome is focused).
@@ -106,8 +106,8 @@ consumes it on the next "What to say".
 ## Re-pairing / troubleshooting
 
 - **"Pairing expired"** (amber dot): you clicked **Rotate token** in Settings (the
-  deliberate security reset). Re-pair via **Connect to Natively**.
-- **"Open Natively and enable Phone Mirror"** (red dot): Phone Mirror is off. The
+  deliberate security reset). Re-pair via **Connect to MeetFloo**.
+- **"Open MeetFloo and enable Phone Mirror"** (red dot): Phone Mirror is off. The
   port is auto-discovered (`4123..4134`), so a port change alone does **not**
   require re-pairing — just make sure Phone Mirror is running.
 - **Capture falls back to a screenshot** even on a web page: the service worker may
@@ -127,7 +127,7 @@ also-stable ID: `lmhgnkbjnelmciecjkleaomjpejcgaln`. The desktop `/pair` endpoint
 `/dom` uses the looser structural `[a-p]{32}` origin check. CORS responses are only
 readable by the exact requesting origin — a different extension, even one that
 obtained the token, can't read replies cross-origin. Contributors building from
-source with yet another unpacked ID can override via the `NATIVELY_DOM_EXTENSION_ID`
+source with yet another unpacked ID can override via the `MEETFLOO_DOM_EXTENSION_ID`
 env var.
 
 The `key` was generated from a 2048-bit RSA keypair:
@@ -152,7 +152,7 @@ Store / self-hosted distribution. Regenerate it and update the manifest `key`
 
 ## License
 
-Licensed under the [Natively Personal Use Source License v1.0](../LICENSE).
+Licensed under the [MeetFloo Personal Use Source License v1.0](../LICENSE).
 Bundles [Mozilla Readability](https://github.com/mozilla/readability) (MIT); its
 license attribution is emitted to `dist/content-script.js.LEGAL.txt` by the
 build.

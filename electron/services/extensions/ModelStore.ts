@@ -11,7 +11,7 @@
  * user asked for it, either by confirming a download or by pointing at a file
  * they already had.
  *
- * Downloads land in `~/.natively/models/<extension-id>/`, one directory per
+ * Downloads land in `~/.MeetFloo/models/<extension-id>/`, one directory per
  * extension, which is also the only directory `filesystem.models` admits.
  */
 

@@ -27,8 +27,8 @@ const MAX_CHARS = 300
 // ─── Spring presets ────────────────────────────────────────────────────────
 // Defined once at module level so they are never recreated on render.
 
-const SPRING_SNAPPY    = { type: "spring" as const, stiffness: 380, damping: 32 }
-const SPRING_BOUNCY    = { type: "spring" as const, stiffness: 550, damping: 22 }
+const SPRING_SNAPPY = { type: "spring" as const, stiffness: 380, damping: 32 }
+const SPRING_BOUNCY = { type: "spring" as const, stiffness: 550, damping: 22 }
 const SPRING_CELEBRATE = { type: "spring" as const, stiffness: 520, damping: 20 }
 
 // Editorial ease. Entering/exiting content uses this rather than a spring so
@@ -291,14 +291,14 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
     }
 
     // Shared by both attribution buttons. Save credits the review under
-    // `name`; Keep anonymous credits it as "Anonymous Natively user" — either
+    // `name`; Keep anonymous credits it as "Anonymous MeetFloo user" — either
     // way the review becomes public, only the byline differs.
     const submitTestimonial = async (credited: boolean) => {
         if (!reviewId) {
             // No id came back from the create call, so there is nothing to
             // attribute. The rating itself WAS recorded, so go to the receipt
             // rather than failing — but flag it, because otherwise the receipt
-            // claims "Published as Anonymous Natively user" when in fact
+            // claims "Published as Anonymous MeetFloo user" when in fact
             // can_use_publicly is still false and nothing will be published.
             setAttributionSkipped(true)
             setStep("thanks")
@@ -362,104 +362,104 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
     return (
         <AnimatePresence>
             {isOpen && (
-            <motion.div
-                key="backdrop"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={rt(reduced, { duration: 0.2 })}
-                onClick={() => !busy && dismissLaterAndClose()}
-                className="review-modal-backdrop"
-            />
+                <motion.div
+                    key="backdrop"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={rt(reduced, { duration: 0.2 })}
+                    onClick={() => !busy && dismissLaterAndClose()}
+                    className="review-modal-backdrop"
+                />
             )}
             {isOpen && (
-            <motion.div
-                key="container"
-                initial={{ opacity: 0, transform: reduced ? "none" : "translateY(10px) scale(0.985)" }}
-                animate={{ opacity: 1, transform: "translateY(0px) scale(1)" }}
-                exit={{ opacity: 0, transform: reduced ? "none" : "translateY(6px) scale(0.99)" }}
-                transition={rt(reduced, SPRING_SNAPPY)}
-                className="review-modal-viewport"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby={titleId}
-            >
                 <motion.div
-                    initial={false}
-                    style={cardStyle}
-                    className="review-modal-shell"
+                    key="container"
+                    initial={{ opacity: 0, transform: reduced ? "none" : "translateY(10px) scale(0.985)" }}
+                    animate={{ opacity: 1, transform: "translateY(0px) scale(1)" }}
+                    exit={{ opacity: 0, transform: reduced ? "none" : "translateY(6px) scale(0.99)" }}
+                    transition={rt(reduced, SPRING_SNAPPY)}
+                    className="review-modal-viewport"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby={titleId}
                 >
-                    <div className="review-modal-ambient" aria-hidden />
-
-                    <button
-                        type="button"
-                        onClick={dismissLaterAndClose}
-                        disabled={busy}
-                        aria-label="Close"
-                        className="review-close"
+                    <motion.div
+                        initial={false}
+                        style={cardStyle}
+                        className="review-modal-shell"
                     >
-                        <X size={16} strokeWidth={1.6} />
-                    </button>
+                        <div className="review-modal-ambient" aria-hidden />
 
-                    <div ref={measureRef} className="review-modal-measure">
-                        <AnimatePresence mode="wait">
-                            {step === "review" && (
-                                <StepReview
-                                    key="review"
-                                    rating={rating}
-                                    shownRating={shownRating}
-                                    ratingWord={ratingWord}
-                                    setRating={setRating}
-                                    setHoverRating={setHoverRating}
-                                    text={text}
-                                    setText={setText}
-                                    maxChars={MAX_CHARS}
-                                    submitting={submitting}
-                                    error={submitError}
-                                    onSubmit={handleSubmitReview}
-                                    onDismissLater={dismissLaterAndClose}
-                                    onDismissForever={dismissForeverAndClose}
-                                    textareaRef={textareaRef}
-                                    suppressStarFocusPreview={suppressStarFocusPreview}
-                                    reduced={reduced}
-                                />
-                            )}
-                            {step === "testimonial" && (
-                                <StepTestimonial
-                                    key="testimonial"
-                                    rating={rating}
-                                    name={name}
-                                    setName={setName}
-                                    prefillName={prefillName}
-                                    namePrefillSuggested={namePrefillSuggested}
-                                    onAcceptNamePrefill={() => {
-                                        if (prefillName) {
-                                            setName(prefillName.trim())
-                                            setNamePrefillUsed(true)
-                                        }
-                                    }}
-                                    busy={testimonialBusy}
-                                    action={testimonialAction}
-                                    error={testimonialError}
-                                    onSave={handleSaveTestimonial}
-                                    onKeepAnonymous={handleKeepAnonymous}
-                                    onDecline={handleDeclineTestimonial}
-                                    reduced={reduced}
-                                />
-                            )}
-                            {step === "thanks" && (
-                                <StepThanks
-                                    key="thanks"
-                                    displayNamePublicly={displayNamePublicly}
-                                    name={name}
-                                    attributionSkipped={attributionSkipped}
-                                    reduced={reduced}
-                                />
-                            )}
-                        </AnimatePresence>
-                    </div>
+                        <button
+                            type="button"
+                            onClick={dismissLaterAndClose}
+                            disabled={busy}
+                            aria-label="Close"
+                            className="review-close"
+                        >
+                            <X size={16} strokeWidth={1.6} />
+                        </button>
+
+                        <div ref={measureRef} className="review-modal-measure">
+                            <AnimatePresence mode="wait">
+                                {step === "review" && (
+                                    <StepReview
+                                        key="review"
+                                        rating={rating}
+                                        shownRating={shownRating}
+                                        ratingWord={ratingWord}
+                                        setRating={setRating}
+                                        setHoverRating={setHoverRating}
+                                        text={text}
+                                        setText={setText}
+                                        maxChars={MAX_CHARS}
+                                        submitting={submitting}
+                                        error={submitError}
+                                        onSubmit={handleSubmitReview}
+                                        onDismissLater={dismissLaterAndClose}
+                                        onDismissForever={dismissForeverAndClose}
+                                        textareaRef={textareaRef}
+                                        suppressStarFocusPreview={suppressStarFocusPreview}
+                                        reduced={reduced}
+                                    />
+                                )}
+                                {step === "testimonial" && (
+                                    <StepTestimonial
+                                        key="testimonial"
+                                        rating={rating}
+                                        name={name}
+                                        setName={setName}
+                                        prefillName={prefillName}
+                                        namePrefillSuggested={namePrefillSuggested}
+                                        onAcceptNamePrefill={() => {
+                                            if (prefillName) {
+                                                setName(prefillName.trim())
+                                                setNamePrefillUsed(true)
+                                            }
+                                        }}
+                                        busy={testimonialBusy}
+                                        action={testimonialAction}
+                                        error={testimonialError}
+                                        onSave={handleSaveTestimonial}
+                                        onKeepAnonymous={handleKeepAnonymous}
+                                        onDecline={handleDeclineTestimonial}
+                                        reduced={reduced}
+                                    />
+                                )}
+                                {step === "thanks" && (
+                                    <StepThanks
+                                        key="thanks"
+                                        displayNamePublicly={displayNamePublicly}
+                                        name={name}
+                                        attributionSkipped={attributionSkipped}
+                                        reduced={reduced}
+                                    />
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </motion.div>
                 </motion.div>
-            </motion.div>
             )}
         </AnimatePresence>
     )

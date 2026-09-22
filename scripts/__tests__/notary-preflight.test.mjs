@@ -30,14 +30,14 @@ describe('decidePreflight', () => {
   });
 
   test('respects its own escape hatch, for packaging while offline', () => {
-    const d = decidePreflight({ platform: 'darwin', env: { NATIVELY_SKIP_NOTARY_PREFLIGHT: '1' } });
+    const d = decidePreflight({ platform: 'darwin', env: { MEETFLOO_SKIP_NOTARY_PREFLIGHT: '1' } });
     assert.equal(d.run, false);
   });
 
-  test('respects NATIVELY_SKIP_NOTARIZE — a build that will not notarize must not be blocked', () => {
+  test('respects MEETFLOO_SKIP_NOTARIZE — a build that will not notarize must not be blocked', () => {
     // Otherwise an unreachable notary would fail a build that never intended to
     // contact it, which is strictly worse than the problem being solved.
-    const d = decidePreflight({ platform: 'darwin', env: { NATIVELY_SKIP_NOTARIZE: '1' } });
+    const d = decidePreflight({ platform: 'darwin', env: { MEETFLOO_SKIP_NOTARIZE: '1' } });
     assert.equal(d.run, false);
   });
 });
@@ -47,7 +47,7 @@ describe('checkNotaryReachable', () => {
   const deadProbe = async () => ({ ok: false, detail: 'ENETUNREACH' });
 
   test('passes on the first attempt when the host answers', async () => {
-    const r = await checkNotaryReachable({ probe: okProbe, sleep: async () => {} });
+    const r = await checkNotaryReachable({ probe: okProbe, sleep: async () => { } });
     assert.deepEqual({ ok: r.ok, attempts: r.attempts }, { ok: true, attempts: 1 });
   });
 
@@ -56,13 +56,13 @@ describe('checkNotaryReachable', () => {
     // that would have worked, which is worse than letting it proceed and fail later.
     let n = 0;
     const flaky = async () => (++n === 1 ? { ok: false, detail: 'ETIMEDOUT' } : { ok: true, detail: 'connected' });
-    const r = await checkNotaryReachable({ probe: flaky, sleep: async () => {} });
+    const r = await checkNotaryReachable({ probe: flaky, sleep: async () => { } });
     assert.equal(r.ok, true);
     assert.equal(r.attempts, 2);
   });
 
   test('a genuinely dead network fails, carrying the reason', async () => {
-    const r = await checkNotaryReachable({ probe: deadProbe, sleep: async () => {}, attempts: 2 });
+    const r = await checkNotaryReachable({ probe: deadProbe, sleep: async () => { }, attempts: 2 });
     assert.equal(r.ok, false);
     assert.equal(r.attempts, 2);
     assert.equal(r.detail, 'ENETUNREACH');
@@ -77,13 +77,13 @@ describe('checkNotaryReachable', () => {
     await checkNotaryReachable({
       host: 'example.invalid', port: 8443, timeoutMs: 1234, attempts: 1,
       probe: async (args) => { seen.push(args); return { ok: true }; },
-      sleep: async () => {},
+      sleep: async () => { },
     });
     assert.deepEqual(seen, [{ host: 'example.invalid', port: 8443, timeoutMs: 1234 }]);
   });
 
   test('a probe that resolves nothing is treated as unreachable, not as success', async () => {
-    const r = await checkNotaryReachable({ probe: async () => undefined, sleep: async () => {}, attempts: 1 });
+    const r = await checkNotaryReachable({ probe: async () => undefined, sleep: async () => { }, attempts: 1 });
     assert.equal(r.ok, false);
   });
 });
@@ -93,7 +93,7 @@ describe('checkNotaryReachable', () => {
 //
 // WHY: a signed build compiled, packed and Developer-ID-signed for ~20 minutes and
 // then died in afterSign with "No Keychain password item found for profile:
-// natively-notary". Reachability was green the whole time; the credential was never
+// MeetFloo-notary". Reachability was green the whole time; the credential was never
 // looked at. These tests inject the probe, so nothing here shells out or notarizes.
 // ---------------------------------------------------------------------------
 
@@ -113,7 +113,7 @@ function recordingProbe(result) {
 const OK = { ok: true, output: 'Successfully received submission history.' };
 const NO_ITEM = {
   ok: false,
-  output: 'Error: No Keychain password item found for profile: natively-notary\nRun \'notarytool store-credentials\'…',
+  output: 'Error: No Keychain password item found for profile: MeetFloo-notary\nRun \'notarytool store-credentials\'…',
 };
 
 describe('checkCredentials — keychain profile', () => {
@@ -131,7 +131,7 @@ describe('checkCredentials — keychain profile', () => {
     assert.equal(r.ok, false);
     // The message has to carry the fix, not just the diagnosis.
     assert.match(r.remedy, /notarytool store-credentials/);
-    assert.match(r.remedy, /NATIVELY_SKIP_NOTARY_PREFLIGHT=1/);
+    assert.match(r.remedy, /MEETFLOO_SKIP_NOTARY_PREFLIGHT=1/);
   });
 
   test('a credential Apple rejects is decided too — 401 / auth failures fail', async () => {

@@ -58,7 +58,7 @@ const CANONICAL_STT_RATE: u32 = 16000;
 
 /// Convert an i16 slice to little-endian bytes.
 ///
-/// All targets supported by Natively (macOS x64/arm64, Windows x64, Linux x64)
+/// All targets supported by MeetFloo (macOS x64/arm64, Windows x64, Linux x64)
 /// are little-endian, so `i16` in memory IS the little-endian byte
 /// representation. `bytemuck::cast_slice` produces a `&[u8]` view of the same
 /// memory in O(1) with no per-sample work; we then `to_vec` once into the

@@ -7,7 +7,7 @@ const nativeModulePath = path.join(__dirname, '..', 'native-module');
 // Suffix marking a moved-aside artifact the developer still needs. The stale
 // sweep skips these; everything else matching '.node.stale-' is swept freely.
 const RESCUE_MARKER = '.rescue-last-good';
-const buildAllMacTargets = process.env.NATIVELY_BUILD_ALL_MAC_ARCHES === '1';
+const buildAllMacTargets = process.env.MEETFLOO_BUILD_ALL_MAC_ARCHES === '1';
 
 // Ensure Cargo binary directory (~/.cargo/bin) is in PATH if cargo is installed there
 const cargoBinDir = path.join(os.homedir(), '.cargo', 'bin');
@@ -45,7 +45,7 @@ function getClangLibPath() {
     const resourceDir = execSync('clang -print-resource-dir', { encoding: 'utf8' }).trim();
     const candidate = path.join(resourceDir, 'lib', 'darwin');
     if (fs.existsSync(candidate)) return candidate;
-  } catch {}
+  } catch { }
 
   // Fallback: scan Xcode.app toolchain (original behaviour)
   try {
@@ -54,7 +54,7 @@ function getClangLibPath() {
     if (versions.length > 0) {
       return path.join(clangBase, versions[versions.length - 1], 'lib', 'darwin');
     }
-  } catch {}
+  } catch { }
 
   return null;
 }
@@ -77,8 +77,8 @@ function fixMacOSDylibPaths(nodeFilePath) {
 
       // Skip system frameworks and @-prefixed paths (already relative)
       if (dylibPath.startsWith('/System/') ||
-          dylibPath.startsWith('/usr/lib/') ||
-          dylibPath.startsWith('@')) {
+        dylibPath.startsWith('/usr/lib/') ||
+        dylibPath.startsWith('@')) {
         continue;
       }
 
@@ -160,7 +160,7 @@ if (os.platform() === 'darwin') {
 
   // Windows only: unblock the artifact copy when the app is running.
   //
-  // Windows locks a loaded DLL against being written or deleted, so if Natively
+  // Windows locks a loaded DLL against being written or deleted, so if MeetFloo
   // (or an electron dev instance) has the .node loaded, `napi build` dies at the
   // very end with an opaque "Internal Error: Failed to copy artifact" — after a
   // successful compile, which makes it look like a Rust failure. It is not; it
@@ -205,7 +205,7 @@ if (os.platform() === 'darwin') {
       } catch (err) {
         console.warn(
           `Warning: could not move the previous ${artifact} aside (${err.code || err.message}).\n` +
-            '         If the build fails with "Failed to copy artifact", close Natively and retry.'
+          '         If the build fails with "Failed to copy artifact", close MeetFloo and retry.'
         );
         continue;
       }
@@ -241,7 +241,7 @@ if (os.platform() === 'darwin') {
         console.warn(`Build failed; restored the previous ${artifact}.`);
       } catch (restoreErr) {
         // The rename back failed (usually: the DLL is mapped by a running
-        // Natively). Mark the copy as a rescue file so the sweep at the top of
+        // MeetFloo). Mark the copy as a rescue file so the sweep at the top of
         // the NEXT run leaves it alone — otherwise this message would point the
         // developer at a path that the next build deletes before they get to it.
         // Keep the '.node.stale-' segment so the file still looks like what it
@@ -259,9 +259,9 @@ if (os.platform() === 'darwin') {
         }
         console.error(
           `Build failed AND the previous ${artifact} could not be restored ` +
-            `(${restoreErr.code || restoreErr.message}).\n` +
-            `         The last-good binary is at:\n           ${rescuePath}\n` +
-            `         Close Natively and rename it back to ${artifact} to recover.`
+          `(${restoreErr.code || restoreErr.message}).\n` +
+          `         The last-good binary is at:\n           ${rescuePath}\n` +
+          `         Close MeetFloo and rename it back to ${artifact} to recover.`
         );
       }
     }
@@ -270,14 +270,14 @@ if (os.platform() === 'darwin') {
 
   // Build succeeded AND the expected artifact was verified present, so the
   // copies are now genuinely stale. An unlink that fails here means the DLL is
-  // still mapped by a running Natively; it is out of the way, gitignored, and
+  // still mapped by a running MeetFloo; it is out of the way, gitignored, and
   // swept by the next build.
   for (const { artifact, stalePath } of movedAside) {
     try {
       fs.unlinkSync(stalePath);
     } catch {
       console.log(
-        `Note: ${artifact} is in use (Natively is running); moved it aside so the build can proceed.`
+        `Note: ${artifact} is in use (MeetFloo is running); moved it aside so the build can proceed.`
       );
     }
   }

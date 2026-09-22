@@ -15,7 +15,7 @@ export interface AppSettings {
     // registration lets a chord's modifier/completing key reach the foreground.
     stealthShortcutGuard?: boolean;
     // Context Intelligence debug logging level (Developer settings). The env
-    // var NATIVELY_CONTEXT_DEBUG overrides this — precedence is owned by
+    // var MEETFLOO_CONTEXT_DEBUG overrides this — precedence is owned by
     // context-intelligence/debug/debug-config.ts, which reads this value
     // through the bound reader; this store only persists the UI choice.
     contextDebugLevel?: 'off' | 'standard' | 'verbose';
@@ -36,7 +36,7 @@ export interface AppSettings {
     // Direct Assist is the opt-in, single-provider answer path. It deliberately
     // bypasses meeting retrieval and the legacy answer-orchestration pipeline.
     // Keep the persisted default OFF during rollout; the operator kill switch
-    // (NATIVELY_DIRECT_ASSIST_KILL_SWITCH) always wins over this preference.
+    // (MEETFLOO_DIRECT_ASSIST_KILL_SWITCH) always wins over this preference.
     directAssistEnabled?: boolean;
     /**
      * Whether a failed Direct Assist provider may fall back to another
@@ -142,7 +142,7 @@ export interface AppSettings {
      */
     embedding?: {
         mode?: 'auto' | 'manual';
-        provider?: 'natively' | 'ollama' | 'custom' | 'openrouter' | 'voyage' | 'openai' | 'gemini' | 'local';
+        provider?: 'MeetFloo' | 'ollama' | 'custom' | 'openrouter' | 'voyage' | 'openai' | 'gemini' | 'local';
         model?: string;
         dimensions?: number;
     };
@@ -160,7 +160,7 @@ export interface AppSettings {
      * This file is plaintext on disk.
      */
     reranker?: {
-        provider?: 'local' | 'natively' | 'openrouter' | 'jina';
+        provider?: 'local' | 'MeetFloo' | 'openrouter' | 'jina';
         /**
          * A catalogue id from rag/rerankerModelCatalog.ts, or absent for the
          * bundled model (ms-marco-MiniLM-L-6-v2 as of 2026-09-04 — see
@@ -172,11 +172,11 @@ export interface AppSettings {
         /** Model id for the Jina AI hosted reranker (jina-reranker-v3.5 and friends). */
         jinaModel?: string;
         /**
-         * Model id for the Natively-managed reranker. Absent means the one model
+         * Model id for the MeetFloo-managed reranker. Absent means the one model
          * the API serves — unlike the BYOK providers there is nothing to choose,
          * so this exists only so a second managed model needs no migration.
          */
-        nativelyModel?: string;
+        MeetFlooModel?: string;
         candidateCount?: number;
         fallbackToLocal?: boolean;
         lastTest?: {
@@ -216,7 +216,7 @@ export interface AppSettings {
     };
     // Kill-switch for verified code execution (running model code against test
     // cases in a sandbox after the answer). Default ON; set false to disable at
-    // runtime without a redeploy. Also overridable by env NATIVELY_CODE_VERIFY=off.
+    // runtime without a redeploy. Also overridable by env MEETFLOO_CODE_VERIFY=off.
     codeVerificationEnabled?: boolean;
     // Screen-understanding routing — VISION-ONLY architecture (legacy OCR removed from runtime).
     //   vision_first   — Default. Send screenshot to the first available vision-capable provider; cascade through fallback chain on failure.
@@ -238,7 +238,7 @@ export interface AppSettings {
     liveSessionMemoryRolloutPercent?: number;
 
     // ── Regional STT relay (Phase 7/8) ─────────────────────────────────────
-    // Master switch. When false (DEFAULT), NativelyProSTT behaves byte-for-byte
+    // Master switch. When false (DEFAULT), MeetFlooProSTT behaves byte-for-byte
     // identical to today: it never calls /v1/stt/session and connects directly
     // to the hardcoded Railway WS with the legacy auth frame.
     regionalSttRelayEnabled?: boolean;
@@ -331,11 +331,11 @@ export class SettingsManager {
         // bundle is invisible to reads in another — a flag flipped in the UI
         // never reaches the answering bundle. One process, one settings truth.
         const g = globalThis as unknown as Record<string, SettingsManager | undefined>;
-        if (!g.__nativelySettingsManagerV1__) {
-            g.__nativelySettingsManagerV1__ = SettingsManager.instance ?? new SettingsManager();
+        if (!g.__MeetFlooSettingsManagerV1__) {
+            g.__MeetFlooSettingsManagerV1__ = SettingsManager.instance ?? new SettingsManager();
         }
-        SettingsManager.instance = g.__nativelySettingsManagerV1__;
-        return g.__nativelySettingsManagerV1__;
+        SettingsManager.instance = g.__MeetFlooSettingsManagerV1__;
+        return g.__MeetFlooSettingsManagerV1__;
     }
 
     public get<K extends keyof AppSettings>(key: K): AppSettings[K] {
@@ -418,7 +418,7 @@ export class SettingsManager {
      * establish the effective state before any request is dispatched.
      */
     public isDirectAssistKilledByOperator(): boolean {
-        const raw = String(process.env.NATIVELY_DIRECT_ASSIST_KILL_SWITCH ?? '')
+        const raw = String(process.env.MEETFLOO_DIRECT_ASSIST_KILL_SWITCH ?? '')
             .trim()
             .toLowerCase();
         return raw === '1' || raw === 'true' || raw === 'on' || raw === 'yes';
@@ -458,7 +458,7 @@ export class SettingsManager {
     // ── Regional STT relay (Phase 7/8) typed accessors ─────────────────────
     // These apply the documented defaults consistently so callers never have to
     // remember them. The class is the single source of truth for the relay flag
-    // defaults; NativelyProSTT reads through these.
+    // defaults; MeetFlooProSTT reads through these.
 
     public getRegionalSttRelayEnabled(): boolean {
         return this.settings.regionalSttRelayEnabled === true; // default false

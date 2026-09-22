@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Natively Clean Reset & Fallback Models Installer for macOS
-# This script stops Natively, wipes all legacy caches, databases, preferences, and Keychain secrets,
-# and then downloads and installs the 12 required local fallback models into Natively.app.
+# MeetFloo Clean Reset & Fallback Models Installer for macOS
+# This script stops MeetFloo, wipes all legacy caches, databases, preferences, and Keychain secrets,
+# and then downloads and installs the 12 required local fallback models into MeetFloo.app.
 #
 # Exit immediately if a command exits with a non-zero status.
 set -e
@@ -32,7 +32,7 @@ log_error() {
 
 # Print header
 echo -e "${CYAN}${BOLD}=====================================================${NC}"
-echo -e "${CYAN}${BOLD}     Natively Deep Clean & Fallback Installer        ${NC}"
+echo -e "${CYAN}${BOLD}     MeetFloo Deep Clean & Fallback Installer        ${NC}"
 echo -e "${CYAN}${BOLD}=====================================================${NC}"
 echo ""
 
@@ -47,11 +47,11 @@ fi
 # ---------------------------------------------------------
 # Part 1: Deep Clean Legacies
 # ---------------------------------------------------------
-log_info "Part 1: Stopping Natively and wiping legacy data..."
+log_info "Part 1: Stopping MeetFloo and wiping legacy data..."
 
 # Kill running processes
-killall Natively 2>/dev/null || true
-killall natively 2>/dev/null || true
+killall MeetFloo 2>/dev/null || true
+killall MeetFloo 2>/dev/null || true
 sleep 1
 
 remove_dir() {
@@ -63,13 +63,13 @@ remove_dir() {
     fi
 }
 
-remove_dir "~/Library/Application Support/Natively"
-remove_dir "~/Library/Application Support/natively"
+remove_dir "~/Library/Application Support/MeetFloo"
+remove_dir "~/Library/Application Support/MeetFloo"
 remove_dir "~/Library/Application Support/answercue"
-remove_dir "~/Library/Application Support/Electron/natively.db"
-remove_dir "~/Library/Application Support/Electron/natively-preferences-secure.json"
-remove_dir "~/Library/Caches/natively-updater"
-remove_dir "~/Library/Caches/natively"
+remove_dir "~/Library/Application Support/Electron/MeetFloo.db"
+remove_dir "~/Library/Application Support/Electron/MeetFloo-preferences-secure.json"
+remove_dir "~/Library/Caches/MeetFloo-updater"
+remove_dir "~/Library/Caches/MeetFloo"
 remove_dir "~/Library/Caches/com.electron.meeting-notes"
 remove_dir "~/Library/Preferences/com.electron.meeting-notes.plist"
 remove_dir "~/Library/Saved Application State/com.electron.meeting-notes.savedState"
@@ -85,9 +85,9 @@ delete_keychain_item() {
 }
 
 delete_keychain_item "Electron Safe Storage" "Electron Key"
-delete_keychain_item "natively Safe Storage" "natively Key"
-delete_keychain_item "Natively Safe Storage" "Natively Key"
-delete_keychain_item "Natively Safe Storage" "Electron Key"
+delete_keychain_item "MeetFloo Safe Storage" "MeetFloo Key"
+delete_keychain_item "MeetFloo Safe Storage" "MeetFloo Key"
+delete_keychain_item "MeetFloo Safe Storage" "Electron Key"
 
 defaults delete com.electron.meeting-notes >/dev/null 2>&1 || true
 
@@ -99,9 +99,9 @@ echo ""
 # ---------------------------------------------------------
 log_info "Part 2: Installing fallback models..."
 
-# 1. Detect Natively.app path
-detect_natively_app() {
-    log_info "Detecting Natively.app path..."
+# 1. Detect MeetFloo.app path
+detect_MeetFloo_app() {
+    log_info "Detecting MeetFloo.app path..."
     local mdfind_res
     mdfind_res=$(mdfind "kMDItemCFBundleIdentifier == 'com.electron.meeting-notes'" 2>/dev/null | head -n 1)
     
@@ -109,44 +109,44 @@ detect_natively_app() {
         echo "$mdfind_res"
         return 0
     fi
-    if [ -d "/Applications/Natively.app" ]; then
-        echo "/Applications/Natively.app"
+    if [ -d "/Applications/MeetFloo.app" ]; then
+        echo "/Applications/MeetFloo.app"
         return 0
     fi
-    if [ -d "$HOME/Applications/Natively.app" ]; then
-        echo "$HOME/Applications/Natively.app"
+    if [ -d "$HOME/Applications/MeetFloo.app" ]; then
+        echo "$HOME/Applications/MeetFloo.app"
         return 0
     fi
     echo ""
     return 1
 }
 
-NATIVELY_APP_PATH=$(detect_natively_app || true)
+MEETFLOO_APP_PATH=$(detect_MeetFloo_app || true)
 
-if [ -n "$NATIVELY_APP_PATH" ]; then
-    log_success "Found Natively.app at: ${BOLD}$NATIVELY_APP_PATH${NC}"
+if [ -n "$MEETFLOO_APP_PATH" ]; then
+    log_success "Found MeetFloo.app at: ${BOLD}$MEETFLOO_APP_PATH${NC}"
 else
-    log_warning "Could not automatically locate Natively.app."
-    echo -n "Please drag & drop your Natively.app here (or enter its path): "
+    log_warning "Could not automatically locate MeetFloo.app."
+    echo -n "Please drag & drop your MeetFloo.app here (or enter its path): "
     read -r user_path
     user_path=$(echo "$user_path" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' -e 's/\\//g')
     if [ -d "$user_path" ]; then
-        NATIVELY_APP_PATH="$user_path"
-        log_success "Using path: ${BOLD}$NATIVELY_APP_PATH${NC}"
+        MEETFLOO_APP_PATH="$user_path"
+        log_success "Using path: ${BOLD}$MEETFLOO_APP_PATH${NC}"
     else
         log_error "Directory does not exist: $user_path"
         exit 1
     fi
 fi
 
-RESOURCES_DIR="$NATIVELY_APP_PATH/Contents/Resources"
+RESOURCES_DIR="$MEETFLOO_APP_PATH/Contents/Resources"
 if [ ! -d "$RESOURCES_DIR" ]; then
-    log_error "Not a valid macOS app bundle (missing Contents/Resources): $NATIVELY_APP_PATH"
+    log_error "Not a valid macOS app bundle (missing Contents/Resources): $MEETFLOO_APP_PATH"
     exit 1
 fi
 
 # 2. Setup temporary directory for downloading
-TEMP_DIR="$HOME/Downloads/Natively-Fallback-Models-Temp"
+TEMP_DIR="$HOME/Downloads/MeetFloo-Fallback-Models-Temp"
 log_info "Creating temporary download directory at: ${BOLD}$TEMP_DIR${NC}"
 mkdir -p "$TEMP_DIR"
 
@@ -204,7 +204,7 @@ for file in "${MODELS_TO_DOWNLOAD[@]}"; do
 done
 log_success "All model files downloaded successfully."
 
-# 5. Copy to Natively.app Resources
+# 5. Copy to MeetFloo.app Resources
 DEST_DIR="$RESOURCES_DIR/models"
 log_info "Installing models to: ${BOLD}$DEST_DIR${NC}"
 
@@ -236,7 +236,7 @@ if [ "$ALL_OK" = true ]; then
     echo ""
     echo -e "${GREEN}${BOLD}=====================================================${NC}"
     echo -e "${GREEN}${BOLD}  CLEAN RESET AND INSTALLATION SUCCESSFUL!          ${NC}"
-    echo -e "${GREEN}${BOLD}  You can now start Natively.                       ${NC}"
+    echo -e "${GREEN}${BOLD}  You can now start MeetFloo.                       ${NC}"
     echo -e "${GREEN}${BOLD}=====================================================${NC}"
 else
     log_error "Installation verification failed. Some files were not successfully copied."

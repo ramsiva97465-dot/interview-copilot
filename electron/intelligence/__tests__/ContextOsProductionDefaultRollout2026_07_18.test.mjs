@@ -22,7 +22,7 @@
 //      surface or umbrella env OFF is set.
 //   4. Multi-family coordinator admission predicate under production-like
 //      defaults is unreachable (multi-family flag OFF); under explicit
-//      `NATIVELY_CONTEXT_OS_MULTI_FAMILY_EVIDENCE=1`, in-scope profile/JD
+//      `MEETFLOO_CONTEXT_OS_MULTI_FAMILY_EVIDENCE=1`, in-scope profile/JD
 //      combinations admit the coordinator, transcript-required
 //      combinations stay out of scope, and a coordinator throw resets
 //      `coordinatorGovernedProfileEvidence`/`manualContextOsGeneration`
@@ -89,19 +89,19 @@ describe('Context OS — production-default flag contract (2026-07-18)', () => {
   const CLEAR_ENV_KEYS = [
     'NODE_ENV',
     'BENCHMARK_MODEL',
-    'NATIVELY_INTERNAL',
-    'NATIVELY_DEV',
-    'NATIVELY_VERIFICATION_MODE',
+    'MEETFLOO_INTERNAL',
+    'MEETFLOO_DEV',
+    'MEETFLOO_VERIFICATION_MODE',
     ...Object.values({
-      contextOsEnabled: 'NATIVELY_CONTEXT_OS',
-      contextOsManualChatEnabled: 'NATIVELY_CONTEXT_OS_MANUAL_CHAT',
-      contextOsWtaEnabled: 'NATIVELY_CONTEXT_OS_WTA',
-      contextOsRecapFollowupEnabled: 'NATIVELY_CONTEXT_OS_RECAP_FOLLOWUP',
-      contextOsEvidencePackEnabled: 'NATIVELY_CONTEXT_OS_EVIDENCE_PACK',
-      contextOsMemorySafetyEnabled: 'NATIVELY_CONTEXT_OS_MEMORY_SAFETY',
-      contextOsEnforceSourceCapabilities: 'NATIVELY_CONTEXT_OS_ENFORCE_CAPABILITIES',
-      contextOsPropertyValidation: 'NATIVELY_CONTEXT_OS_PROPERTY_VALIDATION',
-      contextOsMultiFamilyEvidenceEnabled: 'NATIVELY_CONTEXT_OS_MULTI_FAMILY_EVIDENCE',
+      contextOsEnabled: 'MEETFLOO_CONTEXT_OS',
+      contextOsManualChatEnabled: 'MEETFLOO_CONTEXT_OS_MANUAL_CHAT',
+      contextOsWtaEnabled: 'MEETFLOO_CONTEXT_OS_WTA',
+      contextOsRecapFollowupEnabled: 'MEETFLOO_CONTEXT_OS_RECAP_FOLLOWUP',
+      contextOsEvidencePackEnabled: 'MEETFLOO_CONTEXT_OS_EVIDENCE_PACK',
+      contextOsMemorySafetyEnabled: 'MEETFLOO_CONTEXT_OS_MEMORY_SAFETY',
+      contextOsEnforceSourceCapabilities: 'MEETFLOO_CONTEXT_OS_ENFORCE_CAPABILITIES',
+      contextOsPropertyValidation: 'MEETFLOO_CONTEXT_OS_PROPERTY_VALIDATION',
+      contextOsMultiFamilyEvidenceEnabled: 'MEETFLOO_CONTEXT_OS_MULTI_FAMILY_EVIDENCE',
     }),
   ];
 
@@ -180,11 +180,11 @@ describe('Context OS — production-default flag contract (2026-07-18)', () => {
     }
   });
 
-  test('an explicit NATIVELY_CONTEXT_OS_MULTI_FAMILY_EVIDENCE=0 forces the gate OFF without affecting siblings', () => {
+  test('an explicit MEETFLOO_CONTEXT_OS_MULTI_FAMILY_EVIDENCE=0 forces the gate OFF without affecting siblings', () => {
     // contextOsMultiFamilyEvidenceEnabled defaults true (2026-08-30 promotion)
     // now, so the meaningful complementary case is verifying the OFF override
     // still works and doesn't drag its siblings down with it.
-    process.env.NATIVELY_CONTEXT_OS_MULTI_FAMILY_EVIDENCE = '0';
+    process.env.MEETFLOO_CONTEXT_OS_MULTI_FAMILY_EVIDENCE = '0';
     assert.equal(mod.isIntelligenceFlagEnabled('contextOsMultiFamilyEvidenceEnabled'), false);
     for (const key of PRODUCTION_DEFAULT_ON) {
       if (key === 'contextOsMultiFamilyEvidenceEnabled') continue;
@@ -242,10 +242,10 @@ describe('Context OS — production-default contract build behavior (2026-07-18)
         // the EMITTED tree, and TS7 owns the emit path as of the migration.
         execFileSync(process.execPath, [
           // lib/tsc.js, not bin/tsc: bin/tsc is EXTENSIONLESS and contains `import`,
-    // and Node only treats an extensionless entry as ESM from >=22.7 (module
-    // detection). lib/tsc.js is a real .js under "type": "module", so it is ESM
-    // on every Node version. This repo declares no `engines` floor.
-    path.join('node_modules', 'typescript7', 'lib', 'tsc.js'),
+          // and Node only treats an extensionless entry as ESM from >=22.7 (module
+          // detection). lib/tsc.js is a real .js under "type": "module", so it is ESM
+          // on every Node version. This repo declares no `engines` floor.
+          path.join('node_modules', 'typescript7', 'lib', 'tsc.js'),
           '-p', path.join('electron', 'tsconfig.emit.json'),
           '--outDir', target,
         ], { cwd: repoRoot, stdio: 'pipe' });
@@ -264,17 +264,17 @@ describe('Context OS — production-default contract build behavior (2026-07-18)
   const CLEAR_ENV_KEYS = [
     'NODE_ENV',
     'BENCHMARK_MODEL',
-    'NATIVELY_INTERNAL',
-    'NATIVELY_DEV',
-    'NATIVELY_CONTEXT_OS',
-    'NATIVELY_CONTEXT_OS_MANUAL_CHAT',
-    'NATIVELY_CONTEXT_OS_WTA',
-    'NATIVELY_CONTEXT_OS_RECAP_FOLLOWUP',
-    'NATIVELY_CONTEXT_OS_EVIDENCE_PACK',
-    'NATIVELY_CONTEXT_OS_MEMORY_SAFETY',
-    'NATIVELY_CONTEXT_OS_ENFORCE_CAPABILITIES',
-    'NATIVELY_CONTEXT_OS_PROPERTY_VALIDATION',
-    'NATIVELY_CONTEXT_OS_MULTI_FAMILY_EVIDENCE',
+    'MEETFLOO_INTERNAL',
+    'MEETFLOO_DEV',
+    'MEETFLOO_CONTEXT_OS',
+    'MEETFLOO_CONTEXT_OS_MANUAL_CHAT',
+    'MEETFLOO_CONTEXT_OS_WTA',
+    'MEETFLOO_CONTEXT_OS_RECAP_FOLLOWUP',
+    'MEETFLOO_CONTEXT_OS_EVIDENCE_PACK',
+    'MEETFLOO_CONTEXT_OS_MEMORY_SAFETY',
+    'MEETFLOO_CONTEXT_OS_ENFORCE_CAPABILITIES',
+    'MEETFLOO_CONTEXT_OS_PROPERTY_VALIDATION',
+    'MEETFLOO_CONTEXT_OS_MULTI_FAMILY_EVIDENCE',
   ];
 
   beforeEach(() => {
@@ -326,8 +326,8 @@ describe('Context OS — production-default contract build behavior (2026-07-18)
     assert.equal(co.allowsEvidence(contract, 'profile_project'), false);
   });
 
-  test('explicit NATIVELY_CONTEXT_OS=0 returns null (legacy fallback), not a contract', () => {
-    process.env.NATIVELY_CONTEXT_OS = '0';
+  test('explicit MEETFLOO_CONTEXT_OS=0 returns null (legacy fallback), not a contract', () => {
+    process.env.MEETFLOO_CONTEXT_OS = '0';
     const contract = co.buildTurnContractIfEnabled({
       surface: 'manual_chat',
       question: 'phases',
@@ -343,7 +343,7 @@ describe('Context OS — production-default contract build behavior (2026-07-18)
   });
 
   test('explicit surface flag OFF returns null even when the umbrella is on', () => {
-    process.env.NATIVELY_CONTEXT_OS_MANUAL_CHAT = '0';
+    process.env.MEETFLOO_CONTEXT_OS_MANUAL_CHAT = '0';
     const contract = co.buildTurnContractIfEnabled({
       surface: 'manual_chat',
       question: 'phases',
@@ -357,8 +357,8 @@ describe('Context OS — production-default contract build behavior (2026-07-18)
     });
     assert.equal(contract, null, 'surface OFF must yield the legacy null contract');
 
-    process.env.NATIVELY_CONTEXT_OS_MANUAL_CHAT = '1';
-    process.env.NATIVELY_CONTEXT_OS_WTA = '0';
+    process.env.MEETFLOO_CONTEXT_OS_MANUAL_CHAT = '1';
+    process.env.MEETFLOO_CONTEXT_OS_WTA = '0';
     const wta = co.buildTurnContractIfEnabled({
       surface: 'what_to_answer',
       question: 'phases',
@@ -488,20 +488,34 @@ describe('Context OS — multi-family coordinator admission predicate (2026-07-1
       allowedEvidenceKinds: ['reference_files', 'profile_resume', 'projects', 'profile_jd'],
     };
     const failCases = [
-      { ...baseInput, isCodingChat: true,
-        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true } },
-      { ...baseInput, selectedProfileEvidence: { placeholder: true },
-        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true } },
-      { ...baseInput, isStealthChat: true,
-        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true } },
-      { ...baseInput, answerPlan: { answerType: 'ethical_usage_answer' },
-        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true } },
-      { ...baseInput, turnContract: null,
-        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true } },
-      { ...baseInput, manualTurnSourceDecision: null,
-        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true } },
-      { ...baseInput, ownershipAllowsProfileEvidence: false,
-        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true } },
+      {
+        ...baseInput, isCodingChat: true,
+        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true }
+      },
+      {
+        ...baseInput, selectedProfileEvidence: { placeholder: true },
+        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true }
+      },
+      {
+        ...baseInput, isStealthChat: true,
+        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true }
+      },
+      {
+        ...baseInput, answerPlan: { answerType: 'ethical_usage_answer' },
+        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true }
+      },
+      {
+        ...baseInput, turnContract: null,
+        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true }
+      },
+      {
+        ...baseInput, manualTurnSourceDecision: null,
+        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true }
+      },
+      {
+        ...baseInput, ownershipAllowsProfileEvidence: false,
+        flags: { contextOsEvidencePackEnabled: true, contextOsMultiFamilyEvidenceEnabled: true }
+      },
       { ...baseInput, flags: { contextOsEvidencePackEnabled: false, contextOsMultiFamilyEvidenceEnabled: true } },
     ];
     for (const tc of failCases) {

@@ -64,7 +64,7 @@ export const PROFILE_OKF_RESERVED_MODE_ID = '__profile_okf__';
  * rather than merely tidy. Exported so a test can assert the shared slot
  * exists — a per-instance regression would still pass any single-bundle test.
  */
-export const ACTIVE_MODE_CACHE_KEY = '__nativelyActiveModeInfoCacheV1__';
+export const ACTIVE_MODE_CACHE_KEY = '__MeetFlooActiveModeInfoCacheV1__';
 
 export type ModeTemplateType =
     | 'general'
@@ -138,24 +138,24 @@ export const MODE_TEMPLATES: Array<{
     label: string;
     description: string;
 }> = [
-    { type: 'general',              label: 'General',              description: 'Universal adaptive copilot for any meeting or conversation.' },
-    { type: 'sales',                label: 'Sales',                description: 'Close deals with strategic discovery and objection handling.' },
-    { type: 'recruiting',           label: 'Recruiting',           description: 'Evaluate candidates with structured interview insights.' },
-    { type: 'team-meet',            label: 'Team Meet',            description: 'Track action items and key decisions from meetings.' },
-    { type: 'looking-for-work',     label: 'Looking for work',     description: 'Answer interview questions with confidence and clarity.' },
-    { type: 'technical-interview',  label: 'Technical Interview',  description: 'Whiteboard-style coding and system design support.' },
-    { type: 'lecture',              label: 'Lecture',              description: 'Capture key concepts and content from lectures.' },
-    // Campaign-3 (2026-07-19, fix/answer-policy-engine): 8th built-in mode.
-    // "Seminar Mode" — strict file-grounded Q&A for presentations, thesis
-    // defenses, paper walkthroughs. Off-document questions are answered
-    // general-labeled with a visible "not from your reference files" preamble
-    // (NEVER a refusal — even strict profiles answer; they just label honestly).
-    { type: 'seminar',              label: 'Seminar',              description: 'Strict file-grounded Q&A: answer from your reference files; off-file questions get a visible "general knowledge" label, never a refusal.' },
-    // 9th built-in (2026-08-23): support / call-center calls — issue ->
-    // resolution -> escalation framing (Sales was the closest template and it
-    // frames everything as pipeline, which support notes must not).
-    { type: 'call-center',          label: 'Call Center',          description: 'Support-call notes: customer issue, questions asked, resolution given, and escalations.' },
-];
+        { type: 'general', label: 'General', description: 'Universal adaptive copilot for any meeting or conversation.' },
+        { type: 'sales', label: 'Sales', description: 'Close deals with strategic discovery and objection handling.' },
+        { type: 'recruiting', label: 'Recruiting', description: 'Evaluate candidates with structured interview insights.' },
+        { type: 'team-meet', label: 'Team Meet', description: 'Track action items and key decisions from meetings.' },
+        { type: 'looking-for-work', label: 'Looking for work', description: 'Answer interview questions with confidence and clarity.' },
+        { type: 'technical-interview', label: 'Technical Interview', description: 'Whiteboard-style coding and system design support.' },
+        { type: 'lecture', label: 'Lecture', description: 'Capture key concepts and content from lectures.' },
+        // Campaign-3 (2026-07-19, fix/answer-policy-engine): 8th built-in mode.
+        // "Seminar Mode" — strict file-grounded Q&A for presentations, thesis
+        // defenses, paper walkthroughs. Off-document questions are answered
+        // general-labeled with a visible "not from your reference files" preamble
+        // (NEVER a refusal — even strict profiles answer; they just label honestly).
+        { type: 'seminar', label: 'Seminar', description: 'Strict file-grounded Q&A: answer from your reference files; off-file questions get a visible "general knowledge" label, never a refusal.' },
+        // 9th built-in (2026-08-23): support / call-center calls — issue ->
+        // resolution -> escalation framing (Sales was the closest template and it
+        // frames everything as pipeline, which support notes must not).
+        { type: 'call-center', label: 'Call Center', description: 'Support-call notes: customer issue, questions asked, resolution given, and escalations.' },
+    ];
 
 // Default note sections seeded when a mode is created from a template
 export const TEMPLATE_NOTE_SECTIONS: Record<ModeTemplateType, Array<{ title: string; description: string }>> = {
@@ -400,7 +400,7 @@ export class ModesManager {
      *  false-refusal gate. See getLastRetrievalConfidence. */
     private lastRetrievalConfidence = 0;
 
-    private constructor() {}
+    private constructor() { }
 
     public static getInstance(): ModesManager {
         if (!ModesManager.instance) {
@@ -1068,7 +1068,7 @@ export class ModesManager {
                     groundingProfile: mode.sourceContract.groundingProfile
                         ? Object.freeze({ ...mode.sourceContract.groundingProfile })
                         : mode.sourceContract.groundingProfile,
-                  })
+                })
                 : null,
         };
         return Object.freeze(frozen) as unknown as Readonly<Mode>;
@@ -1675,19 +1675,19 @@ export class ModesManager {
             try {
                 const hybridResult = await this.modeContextRetriever.retrieveHybrid(
                     mode, files, {
-                        query,
-                        transcript,
-                        tokenBudget,
-                        answerType,
-                        excludeCustomContext,
-                        allowRerank,
-                        forceDocumentGrounding: true,
-                        followUpReferentHint: retrievalOptions?.followUpReferentHint,
-                        rerankSurface: retrievalOptions?.rerankSurface,
-                        rerankDeadlineMs: retrievalOptions?.rerankDeadlineMs,
-                        rerankPoolMultiplier: retrievalOptions?.rerankPoolMultiplier,
-                        ...(retrievalOptions?.relaxed ? { topK: retrievalOptions.topK, tokenBudget: tokenBudget ?? 5200 } : {}),
-                    },
+                    query,
+                    transcript,
+                    tokenBudget,
+                    answerType,
+                    excludeCustomContext,
+                    allowRerank,
+                    forceDocumentGrounding: true,
+                    followUpReferentHint: retrievalOptions?.followUpReferentHint,
+                    rerankSurface: retrievalOptions?.rerankSurface,
+                    rerankDeadlineMs: retrievalOptions?.rerankDeadlineMs,
+                    rerankPoolMultiplier: retrievalOptions?.rerankPoolMultiplier,
+                    ...(retrievalOptions?.relaxed ? { topK: retrievalOptions.topK, tokenBudget: tokenBudget ?? 5200 } : {}),
+                },
                 );
                 diagLog('ModesManager hybrid-first branch', {
                     query,

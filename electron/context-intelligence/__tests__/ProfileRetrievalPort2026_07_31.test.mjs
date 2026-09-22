@@ -23,20 +23,24 @@ const { resolveModePolicy } = await import(pathToFileURL(path.join(base, 'polici
 
 // ── fixture: the acceptance-spec documents ──────────────────────────────────
 const RESUME_STRUCTURED = {
-  identity: { name: 'Evin John', summary: 'Engineer shipping user-facing AI products. Built Natively, an open-source AI desktop assistant used by 16,000+ users.', location: 'Kochi, Kerala' },
+  identity: { name: 'Evin John', summary: 'Engineer shipping user-facing AI products. Built MeetFloo, an open-source AI desktop assistant used by 16,000+ users.', location: 'Kochi, Kerala' },
   skills: {
     Languages: ['TypeScript', 'JavaScript', 'Python', 'Java', 'SQL', 'C++'],
     Frameworks: ['React', 'Node.js', 'FastAPI', 'Electron'],
   },
   skills_flat: ['TypeScript', 'JavaScript', 'Python', 'Java', 'SQL', 'C++', 'React', 'Node.js', 'FastAPI', 'Electron'],
   experience: [
-    { company: 'Aetherbot AI', role: 'Software Engineer Intern', start_date: 'Dec 2024', end_date: 'Mar 2025',
-      bullets: ['Engineered a real-time pixel-streaming pipeline on AWS EC2 with sub-80ms interaction latency', 'Improved React/Node.js workflows contributing to a reported 25% increase in customer retention'] },
-    { company: 'EstroTech Robotics', role: 'AI & Full Stack Engineer Intern', start_date: 'Jun 2025', end_date: 'Aug 2025',
-      bullets: ['Built a Python/FastAPI backend processing voice and touch inputs with sub-100ms latency'] },
+    {
+      company: 'Aetherbot AI', role: 'Software Engineer Intern', start_date: 'Dec 2024', end_date: 'Mar 2025',
+      bullets: ['Engineered a real-time pixel-streaming pipeline on AWS EC2 with sub-80ms interaction latency', 'Improved React/Node.js workflows contributing to a reported 25% increase in customer retention']
+    },
+    {
+      company: 'EstroTech Robotics', role: 'AI & Full Stack Engineer Intern', start_date: 'Jun 2025', end_date: 'Aug 2025',
+      bullets: ['Built a Python/FastAPI backend processing voice and touch inputs with sub-100ms latency']
+    },
   ],
   projects: [
-    { name: 'Natively', description: 'Built and launched an open-source AI meeting copilot. Grew to 16,000+ users, 1,500+ GitHub stars and $25K+ revenue.', technologies: ['Electron', 'TypeScript', 'Rust', 'SQLite'] },
+    { name: 'MeetFloo', description: 'Built and launched an open-source AI meeting copilot. Grew to 16,000+ users, 1,500+ GitHub stars and $25K+ revenue.', technologies: ['Electron', 'TypeScript', 'Rust', 'SQLite'] },
     { name: 'TalentScope', description: 'Real-time technical interview platform with RBAC and collaborative coding.', technologies: ['React', 'Node.js'] },
   ],
   education: [{ institution: 'CUSAT', degree: 'B.Tech', field: 'Computer Science Engineering', gpa: '7.5/10' }],
@@ -188,14 +192,14 @@ describe('complete-inventory metadata (grounded absence)', () => {
     // path). This port's complete-inventory policy admission at fixed 0.6 —
     // the evidence for grounded absence, which BY CONSTRUCTION cannot rank on
     // similarity — must be byte-for-byte unaffected by the flag.
-    process.env.NATIVELY_SEMANTIC_ADMISSION_GATE = 'on';
+    process.env.MEETFLOO_SEMANTIC_ADMISSION_GATE = 'on';
     try {
       const r = await lfwPort().retrieve({ decision: lfwDecision('Do I have Kubernetes experience?') });
       const skills = r.evidence.find((e) => e.metadata?.completeInventory === true && e.sourceType === 'RESUME');
       assert.ok(skills, 'the inventory must still be policy-admitted with the gate flag ON');
       assert.ok(!skills.content.includes('Kubernetes'));
     } finally {
-      delete process.env.NATIVELY_SEMANTIC_ADMISSION_GATE;
+      delete process.env.MEETFLOO_SEMANTIC_ADMISSION_GATE;
     }
   });
 
@@ -443,11 +447,14 @@ describe('identity & contact lookups (2026-08-02)', () => {
 // 350,000-650,000 (medium)"). Derived facts now hydrate that pool.
 // ---------------------------------------------------------------------------
 describe('derived profile facts (PROFILE_FACT, 2026-08-02)', () => {
-  const SALARY = { salary_estimate: {
-    role: 'Software Engineer', location: 'Kochi, India', currency: 'INR',
-    min: 350000, max: 650000, confidence: 'medium',
-    justification_factors: ['0.6 years professional experience'],
-    estimated_at: '2026-08-02T03:47:24Z' } };
+  const SALARY = {
+    salary_estimate: {
+      role: 'Software Engineer', location: 'Kochi, India', currency: 'INR',
+      min: 350000, max: 650000, confidence: 'medium',
+      justification_factors: ['0.6 years professional experience'],
+      estimated_at: '2026-08-02T03:47:24Z'
+    }
+  };
   const FACT_DOC = {
     kind: 'fact', sourceId: 'psrc_fact_test', versionId: 'fv1',
     fileName: 'Derived profile facts (Profile Intelligence)', structured: SALARY,

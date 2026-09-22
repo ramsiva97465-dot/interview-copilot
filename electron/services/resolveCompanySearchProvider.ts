@@ -17,15 +17,15 @@ export function resolveCompanySearchProvider(): any | null {
       return new TavilySearchProvider(tavilyApiKey);
     }
 
-    const nativelyKey = cm.getNativelyApiKey();
-    if (nativelyKey) {
-      const nativelyMod = '../../premium/electron/knowledge/NativelySearchProvider';
-      const { NativelySearchProvider } = require(nativelyMod);
+    const MeetFlooKey = cm.getMeetFlooApiKey();
+    if (MeetFlooKey) {
+      const MeetFlooMod = '../../premium/electron/knowledge/MeetFlooSearchProvider';
+      const { MeetFlooSearchProvider } = require(MeetFlooMod);
       // Pass the real trial token when the key is the __trial__ sentinel so the
       // server can authenticate via x-trial-token instead of the invalid key.
-      const trialToken = nativelyKey === TRIAL_SENTINEL_KEY ? cm.getTrialToken() : undefined;
-      console.log('[CompanySearch] Using Natively API search (no Tavily key configured)');
-      return new NativelySearchProvider(nativelyKey, trialToken ?? undefined);
+      const trialToken = MeetFlooKey === TRIAL_SENTINEL_KEY ? cm.getTrialToken() : undefined;
+      console.log('[CompanySearch] Using MeetFloo API search (no Tavily key configured)');
+      return new MeetFlooSearchProvider(MeetFlooKey, trialToken ?? undefined);
     }
   } catch (err) {
     console.warn('[CompanySearch] Could not load premium search provider:', err);

@@ -77,7 +77,7 @@ function freshManager(env) {
   // field leaves getInstance() returning the FIRST env's manager, which still holds
   // that env's CREDENTIALS_PATH/FALLBACK_PATH and safeStorage mock — so every
   // "restart" after the first silently read and wrote the first test's directory.
-  delete globalThis.__nativelyCredentialsManagerV1__;
+  delete globalThis.__MeetFlooCredentialsManagerV1__;
   const cm = mod.CredentialsManager.getInstance();
   cm.init();
   return cm;
@@ -221,13 +221,13 @@ test.after(() => { Module._load = origLoad; });
  * ────────────────────────────────────────────────────────────────────────── */
 
 const STT_KEY_SETTERS = [
-  { name: 'Groq STT',         setter: 'setGroqSttApiKey',     getter: 'getGroqSttApiKey',     secret: 'sk-groq-STT-LIVE-aaa111' },
-  { name: 'OpenAI STT',       setter: 'setOpenAiSttApiKey',   getter: 'getOpenAiSttApiKey',   secret: 'sk-openai-STT-LIVE-bbb222' },
-  { name: 'Deepgram',         setter: 'setDeepgramApiKey',    getter: 'getDeepgramApiKey',    secret: 'sk-deepgram-LIVE-ccc333' },
-  { name: 'ElevenLabs',       setter: 'setElevenLabsApiKey',  getter: 'getElevenLabsApiKey',  secret: 'sk-elevenlabs-LIVE-ddd444' },
-  { name: 'Azure',            setter: 'setAzureApiKey',       getter: 'getAzureApiKey',       secret: 'sk-azure-LIVE-eee555' },
-  { name: 'IBM Watson',       setter: 'setIbmWatsonApiKey',   getter: 'getIbmWatsonApiKey',   secret: 'sk-ibmwatson-LIVE-fff666' },
-  { name: 'Soniox',           setter: 'setSonioxApiKey',      getter: 'getSonioxApiKey',      secret: 'sk-soniox-LIVE-ggg777' },
+  { name: 'Groq STT', setter: 'setGroqSttApiKey', getter: 'getGroqSttApiKey', secret: 'sk-groq-STT-LIVE-aaa111' },
+  { name: 'OpenAI STT', setter: 'setOpenAiSttApiKey', getter: 'getOpenAiSttApiKey', secret: 'sk-openai-STT-LIVE-bbb222' },
+  { name: 'Deepgram', setter: 'setDeepgramApiKey', getter: 'getDeepgramApiKey', secret: 'sk-deepgram-LIVE-ccc333' },
+  { name: 'ElevenLabs', setter: 'setElevenLabsApiKey', getter: 'getElevenLabsApiKey', secret: 'sk-elevenlabs-LIVE-ddd444' },
+  { name: 'Azure', setter: 'setAzureApiKey', getter: 'getAzureApiKey', secret: 'sk-azure-LIVE-eee555' },
+  { name: 'IBM Watson', setter: 'setIbmWatsonApiKey', getter: 'getIbmWatsonApiKey', secret: 'sk-ibmwatson-LIVE-fff666' },
+  { name: 'Soniox', setter: 'setSonioxApiKey', getter: 'getSonioxApiKey', secret: 'sk-soniox-LIVE-ggg777' },
 ];
 
 for (const { name, setter, getter, secret } of STT_KEY_SETTERS) {
@@ -245,7 +245,7 @@ for (const { name, setter, getter, secret } of STT_KEY_SETTERS) {
   });
 }
 
-test('empty-string resave clears the stored key (M1 contract — matches setNativelyApiKey semantics)', () => {
+test('empty-string resave clears the stored key (M1 contract — matches setMeetFlooApiKey semantics)', () => {
   const env = makeEnv();
   env.state.keyringAvailable = false;
 
@@ -357,7 +357,7 @@ test('LLM key setter source normalizes empty string to undefined (M-2 follow-up 
     path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../CredentialsManager.ts'),
     'utf8',
   );
-  // The 4 LLM key setters that originally stored `''` verbatim. setNativelyApiKey
+  // The 4 LLM key setters that originally stored `''` verbatim. setMeetFlooApiKey
   // and setDeepseekApiKey already had the trim pattern before this work.
   const LLM_KEY_SETTERS = ['setGeminiApiKey', 'setGroqApiKey', 'setOpenaiApiKey', 'setClaudeApiKey'];
   for (const setter of LLM_KEY_SETTERS) {

@@ -10,7 +10,7 @@
  *     discard  <=>  chars < 160  AND  stream still open at 7000ms
  */
 import fs from 'node:fs';
-const env = fs.readFileSync('/tmp/natively-land-wt/.env', 'utf8');
+const env = fs.readFileSync('/tmp/MeetFloo-land-wt/.env', 'utf8');
 const k = (n) => env.split('\n').find((l) => l.startsWith(n + '=')).split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '');
 const DS = k('DEEPSEEK_API_KEY'), GM = k('GEMINI_API_KEY');
 const GATE = 160, FIRST_USEFUL_MS = 7000;
@@ -20,19 +20,27 @@ const SYS = 'You are helping a candidate answer live in an interview. Answer in 
 
 async function streamDS(u) {
   const t0 = Date.now();
-  const r = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST',
+  const r = await fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${DS}` },
-    body: JSON.stringify({ model: 'deepseek-v4-flash', temperature: 0, max_tokens: 2000, stream: true,
-      messages: [{ role: 'system', content: SYS }, { role: 'user', content: u }] }) });
+    body: JSON.stringify({
+      model: 'deepseek-v4-flash', temperature: 0, max_tokens: 2000, stream: true,
+      messages: [{ role: 'system', content: SYS }, { role: 'user', content: u }]
+    })
+  });
   return readSSE(r, t0, (j) => j.choices?.[0]?.delta?.content ?? '');
 }
 async function streamGM(u) {
   const t0 = Date.now();
   const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:streamGenerateContent?alt=sse&key=${GM}`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ systemInstruction: { parts: [{ text: SYS }] },
+    {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SYS }] },
         contents: [{ role: 'user', parts: [{ text: u }] }],
-        generationConfig: { temperature: 0, maxOutputTokens: 2000 } }) });
+        generationConfig: { temperature: 0, maxOutputTokens: 2000 }
+      })
+    });
   return readSSE(r, t0, (j) => ((j.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? '').join('')));
 }
 
@@ -71,7 +79,7 @@ for (const [mname, fn] of [['deepseek-v4-flash', streamDS], ['gemini-3.1-flash-l
   console.log('--------------------------------|-------|---------|----------|--------|--------|------|---------|--------');
   let discards = 0, shorts = 0, maxLinger = 0;
   for (const q of QS) {
-    let r; try { r = await fn(q); } catch (e) { console.log(`${q.slice(0,31).padEnd(31)} | ERROR ${e.message.slice(0,40)}`); continue; }
+    let r; try { r = await fn(q); } catch (e) { console.log(`${q.slice(0, 31).padEnd(31)} | ERROR ${e.message.slice(0, 40)}`); continue; }
     const linger = r.tLast === null ? 0 : r.tClose - r.tLast;
     maxLinger = Math.max(maxLinger, linger);
     const short = r.text.length < GATE;
@@ -79,7 +87,7 @@ for (const [mname, fn] of [['deepseek-v4-flash', streamDS], ['gemini-3.1-flash-l
     const discard = short && openAt7;
     if (short) shorts++;
     if (discard) discards++;
-    console.log(`${q.slice(0,31).padEnd(31)} | ${String(r.text.length).padEnd(5)} | ${String(r.tFirst ?? '-').padEnd(7)} | ${String(r.tLast ?? '-').padEnd(8)} | ${String(r.tClose).padEnd(6)} | ${String(linger).padEnd(6)} | ${String(short).padEnd(4)} | ${String(openAt7).padEnd(7)} | ${discard ? 'YES' : 'no'}`);
+    console.log(`${q.slice(0, 31).padEnd(31)} | ${String(r.text.length).padEnd(5)} | ${String(r.tFirst ?? '-').padEnd(7)} | ${String(r.tLast ?? '-').padEnd(8)} | ${String(r.tClose).padEnd(6)} | ${String(linger).padEnd(6)} | ${String(short).padEnd(4)} | ${String(openAt7).padEnd(7)} | ${discard ? 'YES' : 'no'}`);
   }
   console.log(`  short answers (<160): ${shorts}/${QS.length} | max linger after last token: ${maxLinger}ms | would DISCARD: ${discards}/${QS.length}`);
 }

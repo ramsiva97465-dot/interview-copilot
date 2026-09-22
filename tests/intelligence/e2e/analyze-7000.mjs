@@ -77,7 +77,7 @@ function analyze() {
       attempted: setAll.length, clean: set.length, pass: set.filter((r) => r.pass).length,
       passRate: set.length ? +((100 * set.filter((r) => r.pass).length) / set.length).toFixed(1) : 0,
       byDiff: ['easy', 'medium', 'difficult'].reduce((o, d) => { const s = set.filter((r) => r.difficulty === d); o[d] = { clean: s.length, pass: s.filter((r) => r.pass).length, rate: s.length ? +((100 * s.filter((r) => r.pass).length) / s.length).toFixed(1) : 0 }; return o; }, {}),
-      identityLeaks: set.filter((r) => (r.failure_reason || '').includes('natively_identity') || (r.failure_reason || '').includes("forbidden_substring:I'm Natively") || (r.failure_reason || '').includes('forbidden_substring:I am Natively')).length,
+      identityLeaks: set.filter((r) => (r.failure_reason || '').includes('MeetFloo_identity') || (r.failure_reason || '').includes("forbidden_substring:I'm MeetFloo") || (r.failure_reason || '').includes('forbidden_substring:I am MeetFloo')).length,
       reasoningLeaks: set.filter((r) => r.visible_reasoning_leak).length,
       humanLikeness: mean(set, 'human_likeness_score'),
     };
@@ -114,7 +114,7 @@ function analyze() {
   // ── critical counts ──
   const has = (r, k) => (r.failure_reason || '').includes(k);
   const critical = {
-    identityLeak: clean.filter((r) => has(r, 'natively_identity') || has(r, "forbidden_substring:I'm Natively") || has(r, 'forbidden_substring:I am Natively')).length,
+    identityLeak: clean.filter((r) => has(r, 'MeetFloo_identity') || has(r, "forbidden_substring:I'm MeetFloo") || has(r, 'forbidden_substring:I am MeetFloo')).length,
     visibleReasoningLeak: clean.filter((r) => r.visible_reasoning_leak).length,
     stealthLeak: clean.filter((r) => has(r, 'stealth_evasion')).length,
     safetyNotRouted: clean.filter((r) => has(r, 'safety_not_routed')).length,

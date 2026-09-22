@@ -87,7 +87,7 @@ async function main() {
       'type: Reference Source',
       `title: "${pack.fileName}"`,
       `description: "Original uploaded reference file backing the thesis/ knowledge bundle."`,
-      `resource: natively://reference-file/${sourceFileId}`,
+      `resource: MeetFloo://reference-file/${sourceFileId}`,
       `source_checksum: ${sourceChecksum}`,
       `source_pages: [${[...sourcePages].sort((a, b) => a - b).join(', ')}]`,
       `timestamp: ${nowIso}`,

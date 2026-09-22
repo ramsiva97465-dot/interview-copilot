@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { SkillUploadPayload } from './services/skills/SkillValidator';
-import type { NativelyUsageResponse, NativelyPlansResponse } from '../src/types/nativelyUsage';
+import type { MeetFlooUsageResponse, MeetFlooPlansResponse } from '../src/types/nativelyUsage';
 import { PAGE_CAPTURE_FALLBACK_CHANNEL, PAGE_CAPTURE_STARTED_CHANNEL, type PageCaptureFallbackNotice } from './services/pageCaptureFallback';
 
 /**
@@ -50,14 +50,14 @@ type DirectAssistEvent =
   | { type: 'start'; requestId: string; provider: string; model: string; trimmedFields: string[]; shortenedFields: string[] }
   | { type: 'delta'; requestId: string; sequence: number; text: string }
   | {
-      type: 'provider_switch';
-      requestId: string;
-      /** SNAPSHOT of the delta counter, never a slot of its own — always 0. */
-      sequence: number;
-      from: { provider: string; model: string };
-      to: { provider: string; model: string };
-      reason: string;
-    }
+    type: 'provider_switch';
+    requestId: string;
+    /** SNAPSHOT of the delta counter, never a slot of its own — always 0. */
+    sequence: number;
+    from: { provider: string; model: string };
+    to: { provider: string; model: string };
+    reason: string;
+  }
   | { type: 'done'; requestId: string; sequence: number; provider: string; model: string; fullText?: string }
   | { type: 'error'; requestId: string; sequence: number; partial: boolean; error: DirectAssistError }
   | { type: 'cancel'; requestId: string; sequence: number };
@@ -98,6 +98,8 @@ interface ElectronAPI {
   onSolutionStart: (callback: () => void) => () => void;
   onDebugStart: (callback: () => void) => () => void;
   onDebugSuccess: (callback: (data: any) => void) => () => void;
+  openDesktopLogin: () => Promise<void>;
+  onOAuthTokenReceived: (callback: (url: string) => void) => () => void;
   onSolutionError: (callback: (error: string) => void) => () => void;
   onProcessingNoScreenshots: (callback: () => void) => () => void;
   onProblemExtracted: (callback: (data: any) => void) => () => void;
@@ -185,7 +187,7 @@ interface ElectronAPI {
   getDisabledProviders: () => Promise<string[]>;
   setDisabledProviders: (providers: string[]) => Promise<{ success: boolean; error?: string }>;
   setCloudEnabledModels: (provider: string, models: string[]) => Promise<{ success: boolean; error?: string }>;
-  setNativelyApiKey: (apiKey: string) => Promise<{ success: boolean; error?: string }>;
+  setMeetFlooApiKey: (apiKey: string) => Promise<{ success: boolean; error?: string }>;
   setAppApiKey: (apiKey: string) => Promise<{ success: boolean; error?: string }>;
   // ── In-app review / testimonial prompt ─────────────────────────────────
   reviewGetPromptState: () => Promise<{
@@ -221,10 +223,10 @@ interface ElectronAPI {
   // Shape imported, not restated. This used to be written out here AND in
   // src/types/electron.d.ts, so the resource model would have had to be
   // remembered in three places.
-  getNativelyUsage: (force?: boolean) => Promise<NativelyUsageResponse>;
+  getMeetFlooUsage: (force?: boolean) => Promise<MeetFlooUsageResponse>;
   /** The plan catalog — allowances and prices, straight from the server, so the
    *  plan table never carries its own copy of numbers the server enforces. */
-  getNativelyPlans: () => Promise<NativelyPlansResponse>;
+  getMeetFlooPlans: () => Promise<MeetFlooPlansResponse>;
   getStoredCredentials: () => Promise<{
     hasGeminiKey: boolean;
     hasGroqKey: boolean;
@@ -238,7 +240,7 @@ interface ElectronAPI {
     fluxionProtocol?: 'openai' | 'anthropic';
     disabledProviders?: string[];
     cloudEnabledModels?: Record<string, string[]>;
-    hasNativelyKey: boolean;
+    hasMeetFlooKey: boolean;
     googleServiceAccountPath: string | null;
     sttProvider: string;
     hasSttGroqKey: boolean;
@@ -306,7 +308,7 @@ interface ElectronAPI {
       | 'ibmwatson'
       | 'soniox'
       | 'nvidia_nim'
-      | 'natively'
+      | 'MeetFloo'
       | 'local-whisper' | 'apple-speech',
   ) => Promise<{ success: boolean; error?: string }>;
   getAppleSpeechLocales: () => Promise<{ available: boolean; supported: string[]; installed: string[]; reserved: string[]; maxReserved: number }>;
@@ -524,7 +526,7 @@ interface ElectronAPI {
   }>;
   getEmbeddingCatalog: () => Promise<{
     providers: Array<{
-      id: 'natively' | 'ollama' | 'custom' | 'openrouter' | 'voyage' | 'openai' | 'gemini' | 'local'
+      id: 'MeetFloo' | 'ollama' | 'custom' | 'openrouter' | 'voyage' | 'openai' | 'gemini' | 'local'
       name: string
       cloud: boolean
       managed?: boolean
@@ -629,7 +631,7 @@ interface ElectronAPI {
    *  has existed since the OllamaManager work and had no bridge, so the settings
    *  screen reached it through a generic `invoke` that this preload does not
    *  expose — see AIProvidersSettings.ensureOllamaStartup. */
-  ensureOllamaRunning: () => Promise<{ success: boolean; reason?: string; [k: string]: unknown }>;
+  ensureOllamaRunning: () => Promise<{ success: boolean; reason?: string;[k: string]: unknown }>;
 
   // Settings Window
   toggleSettingsWindow: (coords?: { x: number; y: number }) => Promise<void>;
@@ -702,7 +704,7 @@ interface ElectronAPI {
   // ChatGPT OAuth IPCs — replace the old `codex login` CLI subprocess flow.
   // startLogin kicks off the PKCE flow + opens the system browser; the
   // renderer listens for codex:login:complete / :failed events to update UI.
-  codexLoginStatus: () => Promise<{ success: boolean; signedIn: boolean; source?: 'natively' | 'codex-cli' | null; cliLogin?: 'ok' | 'expired' | 'missing' | 'api-key' | 'invalid'; email?: string; expiresAt?: number; error?: string }>;
+  codexLoginStatus: () => Promise<{ success: boolean; signedIn: boolean; source?: 'MeetFloo' | 'codex-cli' | null; cliLogin?: 'ok' | 'expired' | 'missing' | 'api-key' | 'invalid'; email?: string; expiresAt?: number; error?: string }>;
   antigravityStatus: () => Promise<{ signedIn: boolean; inProgress: boolean; expiresAt?: number; projectId?: string; error?: string }>;
   antigravityStartLogin: () => Promise<{ success: boolean; error?: string }>;
   antigravityCancelLogin: () => Promise<void>;
@@ -1299,6 +1301,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('update-content-dimensions', dimensions),
   updateContentDimensionsCentered: (dimensions: { width: number; height: number }) =>
     ipcRenderer.invoke('update-content-dimensions-centered', dimensions),
+  openDesktopLogin: () => ipcRenderer.invoke('open-desktop-login'),
+  onOAuthTokenReceived: (callback: (url: string) => void) => {
+    const subscription = (_: any, url: string) => callback(url);
+    ipcRenderer.on('oauth-token-received', subscription);
+    return () => {
+      ipcRenderer.removeListener('oauth-token-received', subscription);
+    };
+  },
   // ── Overlay aux windows (pill / resize toggle) coordination ──────────────
   // Overlay renderer → main → aux windows: UI-state broadcast.
   sendOverlayUiState: (state: Record<string, unknown>) =>
@@ -1322,7 +1332,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Overlay renderer → main: hover hit-test (margins click-through gate).
   setOverlayHoverInteractive: (interactive: boolean) =>
     ipcRenderer.invoke('overlay-hover-interactive', interactive),
-  // Any Natively window → main: dismiss the overlay dropdowns (settings /
+  // Any MeetFloo window → main: dismiss the overlay dropdowns (settings /
   // model selector). Used by the click-catcher, the aux windows, and the
   // overlay renderer's click-outside handler.
   dismissOverlayPopovers: (opts?: { settings?: boolean; model?: boolean }) =>
@@ -1625,8 +1635,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getDisabledProviders: () => ipcRenderer.invoke('get-disabled-providers'),
   setDisabledProviders: (providers: string[]) => ipcRenderer.invoke('set-disabled-providers', providers),
   setCloudEnabledModels: (provider: string, models: string[]) => ipcRenderer.invoke('set-cloud-enabled-models', provider, models),
-  setNativelyApiKey: (apiKey: string) => ipcRenderer.invoke('set-natively-api-key', apiKey),
-  setAppApiKey: (apiKey: string) => ipcRenderer.invoke('set-natively-api-key', apiKey),
+  setMeetFlooApiKey: (apiKey: string) => ipcRenderer.invoke('set-MeetFloo-api-key', apiKey),
+  setAppApiKey: (apiKey: string) => ipcRenderer.invoke('set-MeetFloo-api-key', apiKey),
 
   // ── In-app review / testimonial prompt ─────────────────────────────────
   reviewGetPromptState: () => ipcRenderer.invoke('review:get-prompt-state'),
@@ -1644,8 +1654,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     can_use_publicly: boolean;
     display_name_publicly: boolean;
   }) => ipcRenderer.invoke('review:update-testimonial', payload),
-  getNativelyUsage: (force?: boolean) => ipcRenderer.invoke('get-natively-usage', force ? { force: true } : undefined),
-  getNativelyPlans: () => ipcRenderer.invoke('get-natively-plans'),
+  getMeetFlooUsage: (force?: boolean) => ipcRenderer.invoke('get-MeetFloo-usage', force ? { force: true } : undefined),
+  getMeetFlooPlans: () => ipcRenderer.invoke('get-MeetFloo-plans'),
   getStoredCredentials: () => ipcRenderer.invoke('get-stored-credentials'),
   // R-10 resolution flow: ambiguous credential stores (names + last-4 only).
   getAmbiguousCredentialStores: () => ipcRenderer.invoke('credentials:get-ambiguous-stores'),
@@ -1683,7 +1693,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       | 'ibmwatson'
       | 'soniox'
       | 'nvidia_nim'
-      | 'natively'
+      | 'MeetFloo'
       | 'local-whisper' | 'apple-speech' | 'sarvam',
   ) => ipcRenderer.invoke('set-stt-provider', provider),
   getSttProvider: () => ipcRenderer.invoke('get-stt-provider'),
@@ -2052,10 +2062,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // Was 'local' | 'openrouter' — already missing 'jina' before this change.
     // The object is forwarded opaquely so the omission never failed at runtime,
     // which is exactly why it went unnoticed; kept in step with the handler now.
-    provider?: 'local' | 'natively' | 'openrouter' | 'jina';
+    provider?: 'local' | 'MeetFloo' | 'openrouter' | 'jina';
     openrouterModel?: string;
     jinaModel?: string;
-    nativelyModel?: string;
+    MeetFlooModel?: string;
     candidateCount?: number;
     fallbackToLocal?: boolean;
   }) => ipcRenderer.invoke('reranker:set-config', next),
@@ -3000,9 +3010,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // scripts/audit/F-117-repro.mjs). Undefined in shipped sessions.
   ...(process.env.NATIVELY_E2E === '1'
     ? {
-        e2eInvoke: (channel: string, ...args: any[]) =>
-          ipcRenderer.invoke(channel, ...args),
-      }
+      e2eInvoke: (channel: string, ...args: any[]) =>
+        ipcRenderer.invoke(channel, ...args),
+    }
     : {}),
   modesUpdate: (
     id: string,
@@ -3150,7 +3160,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 // Renderer-side console forwarding to main-process log file.
 // When verbose logging is on, patch console.log/warn/error so that renderer
-// output appears in ~/Documents/natively_debug.log alongside main-process logs.
+// output appears in ~/Documents/MeetFloo_debug.log alongside main-process logs.
 (function patchRendererConsole() {
   let _verbose = false;
 
@@ -3193,7 +3203,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     .then((v: boolean) => {
       _verbose = v;
     })
-    .catch(() => {});
+    .catch(() => { });
 
   // Keep flag in sync when the user toggles verbose in settings
   ipcRenderer.on('verbose-logging-changed', (_event: any, enabled: boolean) => {

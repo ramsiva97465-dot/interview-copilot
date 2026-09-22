@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const SRC = readFileSync(join(__dirname, '../settings/NativelyApiSettings.tsx'), 'utf8')
+const SRC = readFileSync(join(__dirname, '../settings/MeetFlooApiSettings.tsx'), 'utf8')
 
 /**
  * The JSX of one usage card, located by its RENDERED section heading.
@@ -95,13 +95,13 @@ test('the Knowledge warning colour reads the worst half, not the blend', () => {
 test('the worst half falls back to percent for a server that predates the blend', () => {
   // Older servers sent percent = max(halves) and no max_half_percent. Treating
   // the absent field as 0 would disarm the warning against exactly those.
-  const TYPES = readFileSync(join(__dirname, '../../types/nativelyUsage.ts'), 'utf8')
+  const TYPES = readFileSync(join(__dirname, '../../types/MeetFlooUsage.ts'), 'utf8')
   assert.match(TYPES, /max_half_percent: q\.knowledge\?\.max_half_percent\s*\n\s*\?\? q\.knowledge\?\.percent/,
     'fall back to percent, which WAS the max on those servers')
 })
 
 test('an unmetered half is excluded from the client-side blend', () => {
-  const TYPES = readFileSync(join(__dirname, '../../types/nativelyUsage.ts'), 'utf8')
+  const TYPES = readFileSync(join(__dirname, '../../types/MeetFlooUsage.ts'), 'utf8')
   assert.match(TYPES, /function meanOfMetered/)
   assert.match(TYPES, /h\.limit != null/,
     'averaging against an unmetered half\'s 0 would report half the true figure')

@@ -63,7 +63,7 @@ const { NemotronEngine } = fs.existsSync(nemotronEnginePath)
 // e.g. pointing at a one-off inspection directory like this report's own
 // /tmp/nemotron-inspect run).
 function defaultAppUserDataDir() {
-  const appName = 'natively';
+  const appName = 'MeetFloo';
   if (process.platform === 'darwin') {
     return path.join(os.homedir(), 'Library', 'Application Support', appName);
   }

@@ -115,8 +115,8 @@ const PARSE_TIMEOUT_MS_PER_MB = 2_000;
 // deterministically (a real parse finishing in ms, not 30s+) instead of
 // requiring an artificially slow/poison fixture. When set, this literal
 // value wins regardless of file size.
-const PARSE_TIMEOUT_MS_OVERRIDE = process.env.NATIVELY_PARSE_TIMEOUT_MS
-  ? Number(process.env.NATIVELY_PARSE_TIMEOUT_MS)
+const PARSE_TIMEOUT_MS_OVERRIDE = process.env.MEETFLOO_PARSE_TIMEOUT_MS
+  ? Number(process.env.MEETFLOO_PARSE_TIMEOUT_MS)
   : undefined;
 
 export const computeParseTimeoutMs = (fileSizeBytes: number): number => {
@@ -143,7 +143,7 @@ const withTimeout = <T>(promise: Promise<T>, label: string, timeoutMs: number, o
       if (settled) return;
       settled = true;
       onTimeout?.();
-      promise.catch(() => {});
+      promise.catch(() => { });
       reject(new Error(`${label} timed out after ${timeoutMs}ms`));
     }, timeoutMs);
     promise.then(
@@ -270,7 +270,7 @@ export const extractSafeDocumentText = async (
         parser.getText(),
         'PDF parse',
         parseTimeoutMs,
-        () => { parser.destroy().catch(() => {}); },
+        () => { parser.destroy().catch(() => { }); },
       );
       pageCount =
         typeof data?.total === 'number' && data.total > 0
@@ -292,7 +292,7 @@ export const extractSafeDocumentText = async (
         content = String(data?.text || '');
       }
     } finally {
-      await parser.destroy().catch(() => {});
+      await parser.destroy().catch(() => { });
     }
   } else if (extension === '.docx') {
     // mammoth has no cancellation/destroy surface at all, so a timeout here

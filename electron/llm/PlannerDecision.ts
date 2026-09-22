@@ -8,7 +8,7 @@
 // below, passed on seven of eight labels and matched a hardcoded `general` on
 // 98.3% of 1,011 held-out rows. So `general` is what it now returns, and the
 // types stay only because three consumers still carry an IntentResult.
-// docs/natively-router-final-answer-2026-09-05.md has the evidence.
+// docs/MeetFloo-router-final-answer-2026-09-05.md has the evidence.
 
 export type ConversationIntent =
     | 'coding' | 'clarification' | 'follow_up' | 'deep_dive'

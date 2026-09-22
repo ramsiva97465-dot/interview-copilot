@@ -66,7 +66,7 @@ function makeResume() {
 
 function makeOrchestrator() {
   const db = {
-    initializeSchema() {},
+    initializeSchema() { },
     getDocumentByType(t) { return t === 'resume' ? makeResume() : null; },
     getAllNodes() { return []; },
     getNodeCount() { return 0; },
@@ -84,23 +84,23 @@ function makeOrchestrator() {
 describe('pronounRegexShadowObservation flag registration', () => {
   test('defaults to true everywhere (promoted 2026-08-30 — shadow-only, zero risk to running in production)', () => {
     __resetIntelligenceFlagsCache();
-    delete process.env.NATIVELY_PRONOUN_REGEX_SHADOW_OBSERVATION;
+    delete process.env.MEETFLOO_PRONOUN_REGEX_SHADOW_OBSERVATION;
     const { isIntelligenceFlagEnabled } = require(
       path.resolve(repoRoot, 'dist-electron/electron/intelligence/intelligenceFlags.js'),
     );
     assert.equal(isIntelligenceFlagEnabled('pronounRegexShadowObservation'), true);
   });
 
-  test('NATIVELY_PRONOUN_REGEX_SHADOW_OBSERVATION=0 env override can still force it off', () => {
+  test('MEETFLOO_PRONOUN_REGEX_SHADOW_OBSERVATION=0 env override can still force it off', () => {
     __resetIntelligenceFlagsCache();
-    process.env.NATIVELY_PRONOUN_REGEX_SHADOW_OBSERVATION = '0';
+    process.env.MEETFLOO_PRONOUN_REGEX_SHADOW_OBSERVATION = '0';
     try {
       const { isIntelligenceFlagEnabled } = require(
         path.resolve(repoRoot, 'dist-electron/electron/intelligence/intelligenceFlags.js'),
       );
       assert.equal(isIntelligenceFlagEnabled('pronounRegexShadowObservation'), false);
     } finally {
-      delete process.env.NATIVELY_PRONOUN_REGEX_SHADOW_OBSERVATION;
+      delete process.env.MEETFLOO_PRONOUN_REGEX_SHADOW_OBSERVATION;
       __resetIntelligenceFlagsCache();
     }
   });
@@ -111,7 +111,7 @@ describe('processQuestion shadow-logs a divergence without changing its return v
     __resetIntelligenceFlagsCache();
     // Explicit '0' — the flag now defaults to true (promoted 2026-08-30), so
     // deleting the env var no longer produces the OFF state.
-    process.env.NATIVELY_PRONOUN_REGEX_SHADOW_OBSERVATION = '0';
+    process.env.MEETFLOO_PRONOUN_REGEX_SHADOW_OBSERVATION = '0';
     const o = makeOrchestrator();
     const logs = [];
     const origWarn = console.warn;
@@ -123,14 +123,14 @@ describe('processQuestion shadow-logs a divergence without changing its return v
       assert.equal(shadowLogs.length, 0, 'no shadow-divergence log when the flag is off');
     } finally {
       console.warn = origWarn;
-      delete process.env.NATIVELY_PRONOUN_REGEX_SHADOW_OBSERVATION;
+      delete process.env.MEETFLOO_PRONOUN_REGEX_SHADOW_OBSERVATION;
       __resetIntelligenceFlagsCache();
     }
   });
 
   test('flag ON: a real question produces a shadow-divergence or shadow-agreement trace, and processQuestion\'s return value is byte-identical to flag-off', async () => {
     __resetIntelligenceFlagsCache();
-    process.env.NATIVELY_PRONOUN_REGEX_SHADOW_OBSERVATION = '1';
+    process.env.MEETFLOO_PRONOUN_REGEX_SHADOW_OBSERVATION = '1';
     const question = 'Have I demonstrated Kubernetes experience?';
     try {
       const oShadowOn = makeOrchestrator();
@@ -152,20 +152,20 @@ describe('processQuestion shadow-logs a divergence without changing its return v
       __resetIntelligenceFlagsCache();
       // Explicit '0' — the flag now defaults to true (promoted 2026-08-30), so
       // deleting the env var no longer produces the OFF state.
-      process.env.NATIVELY_PRONOUN_REGEX_SHADOW_OBSERVATION = '0';
+      process.env.MEETFLOO_PRONOUN_REGEX_SHADOW_OBSERVATION = '0';
       const oShadowOff = makeOrchestrator();
       const resultOff = await oShadowOff.processQuestion(question);
 
       assert.deepEqual(resultOn, resultOff, 'the shadow observation must be a pure side-channel log — processQuestion\'s actual return value must be unaffected by the flag');
     } finally {
-      delete process.env.NATIVELY_PRONOUN_REGEX_SHADOW_OBSERVATION;
+      delete process.env.MEETFLOO_PRONOUN_REGEX_SHADOW_OBSERVATION;
       __resetIntelligenceFlagsCache();
     }
   });
 
   test('flag ON: the shadow trace names both the legacy gate\'s decision and isLayerAllowed\'s decision', async () => {
     __resetIntelligenceFlagsCache();
-    process.env.NATIVELY_PRONOUN_REGEX_SHADOW_OBSERVATION = '1';
+    process.env.MEETFLOO_PRONOUN_REGEX_SHADOW_OBSERVATION = '1';
     try {
       const o = makeOrchestrator();
       const logs = [];
@@ -187,7 +187,7 @@ describe('processQuestion shadow-logs a divergence without changing its return v
       assert.ok('canonicalResumeAllowed' in payload, 'must name isLayerAllowed\'s resume-allowed decision');
       assert.ok('answerType' in payload, 'must name the AnswerPlan\'s answerType for correlation');
     } finally {
-      delete process.env.NATIVELY_PRONOUN_REGEX_SHADOW_OBSERVATION;
+      delete process.env.MEETFLOO_PRONOUN_REGEX_SHADOW_OBSERVATION;
       __resetIntelligenceFlagsCache();
     }
   });

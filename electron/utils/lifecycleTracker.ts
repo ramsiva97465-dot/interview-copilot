@@ -345,7 +345,7 @@ export class LifecycleTracker {
    * canonical Electron location) and falls back to a tmpdir-based fallback
    * when called BEFORE app.whenReady() — that's the case for handlers
    * installed at module-load time (e.g. native-arch gate's pre-whenReady
-   * path). The fallback path uses `${tmp}/natively-lifecycle-${pid}.json`
+   * path). The fallback path uses `${tmp}/MeetFloo-lifecycle-${pid}.json`
    * so the marker is still per-PID and the next launch can find it.
    *
    * IMPORTANT: userData is the durable location (survives reboots); the
@@ -361,7 +361,7 @@ export class LifecycleTracker {
       // the event. The marker is still PID-scoped (we never read across
       // PIDs), so this is safe even though it's not durable across reboots.
       try {
-        return path.join(os.tmpdir(), `natively-lifecycle-${process.pid}.json`);
+        return path.join(os.tmpdir(), `MeetFloo-lifecycle-${process.pid}.json`);
       } catch {
         return null;
       }

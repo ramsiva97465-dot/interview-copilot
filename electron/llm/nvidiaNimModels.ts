@@ -1,6 +1,6 @@
 // electron/llm/nvidiaNimModels.ts
 //
-// The single place that names which NVIDIA NIM models Natively pins, which ones
+// The single place that names which NVIDIA NIM models MeetFloo pins, which ones
 // NVIDIA has shut down, and how to read a probe response.
 //
 // Why this exists (2026-08-28): Settings -> AI Providers -> "Test Connection"
@@ -43,7 +43,7 @@
 // Platform note: pure constants and HTTP status matching. Identical on macOS
 // and Windows — there is no platform-conditional code in this module.
 
-/** Strip the `nvidia_nim/` routing prefix Natively puts on picker ids. */
+/** Strip the `nvidia_nim/` routing prefix MeetFloo puts on picker ids. */
 export function bareNvidiaNimModelId(modelId: string | null | undefined): string {
   const id = modelId || '';
   return id.startsWith('nvidia_nim/') ? id.slice('nvidia_nim/'.length) : id;

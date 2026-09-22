@@ -15,7 +15,7 @@ const config = loadConfig()
 const RUNS = Number(arg('--runs', config.runs_per_pair))
 const manifest = JSON.parse(fs.readFileSync(path.join(BENCH, 'manifest.json'), 'utf8'))
 const convIds = (arg('--conversations', '') || manifest.conversations.map(c => c.id).join(',')).split(',').filter(Boolean)
-const convMode = Object.fromEntries(manifest.conversations.map(c => [c.id, c.natively_mode]))
+const convMode = Object.fromEntries(manifest.conversations.map(c => [c.id, c.MeetFloo_mode]))
 const cfgIds = (arg('--configs', '') || config.configs.map(c => c.id).join(',')).split(',')
 const GLOBAL_CONCURRENCY = Number(arg('--concurrency', 14))
 const PORT_OFFSET = Number(arg('--port-offset', 0))
@@ -54,7 +54,7 @@ for (const conv of convIds) for (const cfg of cfgIds) for (let run = 1; run <= R
   }
 }
 const rnd = seeded(SEED + (RETRY ? 1 : 0))
-for (let i = jobs.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [jobs[i], jobs[j]] = [jobs[j], jobs[i]] }
+for (let i = jobs.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1));[jobs[i], jobs[j]] = [jobs[j], jobs[i]] }
 log(`jobs=${jobs.length} retry=${RETRY} runs=${RUNS} conversations=${convIds.join(',')} configs=${cfgIds.join(',')} seed=${SEED}`)
 if (!jobs.length) process.exit(0)
 

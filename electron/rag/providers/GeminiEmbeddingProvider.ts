@@ -18,7 +18,7 @@ const DEFAULT_MODEL = 'gemini-embedding-2';
 // done, and 3072 is also in KNOWN_DIMS, so the training wheel comes off.
 //
 // COST: float32 storage is 4x (12KB/chunk vs 3KB) and distance work scales with
-// width. Selectable per model in Settings; NATIVELY_GEMINI_EMBED_DIMS still pins
+// width. Selectable per model in Settings; MEETFLOO_GEMINI_EMBED_DIMS still pins
 // it without a rebuild.
 const DEFAULT_DIMS = 3072;
 // Gemini rejects batchEmbedContents requests with >100 items. Chunk locally so a
@@ -28,13 +28,13 @@ const MAX_BATCH_REQUESTS = 100;
 
 // Per-key cooldown after a 429 so a rate-limited key is skipped until its window
 // likely resets, instead of being hammered. Mirrors the backend's key-pool cooldown.
-const KEY_COOLDOWN_MS = Number(process.env.NATIVELY_GEMINI_EMBED_COOLDOWN_MS) || 60_000;
+const KEY_COOLDOWN_MS = Number(process.env.MEETFLOO_GEMINI_EMBED_COOLDOWN_MS) || 60_000;
 // When ALL keys are cooling, wait at most this long for the soonest to free up
 // before giving up (so a re-index drains rather than hard-failing on a transient
 // full-pool rate-limit). The per-minute Gemini window is ~60s, so the default
 // budget must exceed that or an all-keys-hot pool never drains — set to 75s.
 // Bounded so a persistent multi-minute outage still eventually degrades gracefully.
-const MAX_COOLDOWN_WAIT_MS = Number(process.env.NATIVELY_GEMINI_EMBED_MAX_WAIT_MS) || 75_000;
+const MAX_COOLDOWN_WAIT_MS = Number(process.env.MEETFLOO_GEMINI_EMBED_MAX_WAIT_MS) || 75_000;
 
 export class GeminiEmbeddingProvider implements IEmbeddingProvider {
   readonly name = 'gemini';

@@ -16,7 +16,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const REPO = '/tmp/natively-land-wt';
+const REPO = '/tmp/MeetFloo-land-wt';
 const SRC = fs.readFileSync(path.join(REPO, 'electron/ipcHandlers.ts'), 'utf8');
 const env = fs.readFileSync(path.join(REPO, '.env'), 'utf8');
 const key = (n) => env.split('\n').find((l) => l.startsWith(n + '='))
@@ -30,7 +30,7 @@ const lift = (anchor) => {
   return eval(line.slice(line.indexOf('=') + 1, line.lastIndexOf('.test(')).trim());
 };
 const looksMetaRe = lift('const looksMeta =');
-const hasFenceRe  = lift('const hasCodeFence =');
+const hasFenceRe = lift('const hasCodeFence =');
 
 // REFINED structural predicate. Bare "no closed fence" misses a meta-reply that
 // emits an EMPTY/placeholder fence to satisfy the contract's shape: measured on
@@ -59,8 +59,10 @@ async function deepseek(user) {
   const r = await fetch('https://api.deepseek.com/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${DS}` },
-    body: JSON.stringify({ model: 'deepseek-v4-flash', temperature: 0, max_tokens: 3000,
-      messages: [{ role: 'system', content: CONTRACT }, { role: 'user', content: user }] }),
+    body: JSON.stringify({
+      model: 'deepseek-v4-flash', temperature: 0, max_tokens: 3000,
+      messages: [{ role: 'system', content: CONTRACT }, { role: 'user', content: user }]
+    }),
   });
   if (!r.ok) throw new Error(`deepseek HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`);
   const c = (await r.json()).choices[0];
@@ -86,16 +88,16 @@ async function gemini(user) {
 
 // expectCode=false => a correct system MUST catch this as a non-answer.
 const CASES = [
-  ['truncated request',       'Implement the function described above for the case where n is', false],
-  ['code never pasted',       'Fix the bug in the code I pasted earlier.',                      false],
-  ['ambiguous referent',      'Write the function for the thing we discussed.',                 false],
-  ['missing spec',            'Optimise it.',                                                   false],
-  ['dangling constraint',     'Rewrite the sort so that it handles the case where',             false],
-  ['LRU cache',               'Implement an LRU cache with O(1) get and put.',                  true ],
-  ['BFS shortest path',       'Write a BFS shortest-path function for an unweighted graph.',    true ],
-  ['level order traversal',   'Given a binary tree, return its level order traversal.',         true ],
-  ['two sum',                 'Solve two sum and give the complexity.',                         true ],
-  ['debounce',                'Implement a debounce function in JavaScript.',                   true ],
+  ['truncated request', 'Implement the function described above for the case where n is', false],
+  ['code never pasted', 'Fix the bug in the code I pasted earlier.', false],
+  ['ambiguous referent', 'Write the function for the thing we discussed.', false],
+  ['missing spec', 'Optimise it.', false],
+  ['dangling constraint', 'Rewrite the sort so that it handles the case where', false],
+  ['LRU cache', 'Implement an LRU cache with O(1) get and put.', true],
+  ['BFS shortest path', 'Write a BFS shortest-path function for an unweighted graph.', true],
+  ['level order traversal', 'Given a binary tree, return its level order traversal.', true],
+  ['two sum', 'Solve two sum and give the complexity.', true],
+  ['debounce', 'Implement a debounce function in JavaScript.', true],
 ];
 
 const MODELS = [['deepseek-v4-flash', deepseek], ['gemini-3.1-flash-lite', gemini]];
@@ -109,7 +111,7 @@ for (const [modelName, call] of MODELS) {
   for (const [name, q, expectCode] of CASES) {
     let out;
     try { out = await call(q); } catch (e) { console.log(`${name.padEnd(22)} | ERROR ${e.message}`); continue; }
-    if (out === TRUNC) { t.trunc++; console.log(`${name.padEnd(22)} | ${(expectCode?'code':'meta').padEnd(6)} | TRUNC — excluded from scoring`); continue; }
+    if (out === TRUNC) { t.trunc++; console.log(`${name.padEnd(22)} | ${(expectCode ? 'code' : 'meta').padEnd(6)} | TRUNC — excluded from scoring`); continue; }
     const fence = hasFenceRe.test(out);
     const body = fenceBodyChars(out);
     const kw = looksMetaRe.test(out) && !fence;
@@ -117,7 +119,7 @@ for (const [modelName, call] of MODELS) {
     if (expectCode) { t.codeN++; if (structural) t.fp++; }
     else { t.metaN++; if (kw) t.kwCaught++; if (structural) t.structCaught++; }
     const correct = expectCode ? !structural : structural;
-    console.log(`${name.padEnd(22)} | ${(expectCode?'code':'meta').padEnd(6)} | ${String(fence).padEnd(5)} | ${String(body).padEnd(5)} | ${String(kw).padEnd(9)} | ${String(structural).padEnd(10)} | ${correct?'ok':'MISS'}`);
+    console.log(`${name.padEnd(22)} | ${(expectCode ? 'code' : 'meta').padEnd(6)} | ${String(fence).padEnd(5)} | ${String(body).padEnd(5)} | ${String(kw).padEnd(9)} | ${String(structural).padEnd(10)} | ${correct ? 'ok' : 'MISS'}`);
   }
   tally[modelName] = t;
 }

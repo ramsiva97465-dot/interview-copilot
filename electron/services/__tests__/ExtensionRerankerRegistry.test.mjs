@@ -173,7 +173,7 @@ test('a hanging reranker is bounded and aborted, even though the doc-grounded pa
   const source = makeSource({
     async rerank(_id, _q, _c, _k, signal) {
       signal.addEventListener('abort', () => { aborted = true; });
-      return new Promise(() => {}); // never settles
+      return new Promise(() => { }); // never settles
     },
   });
   source.extensions = [rerankerExt('jina')];
@@ -199,7 +199,7 @@ test('a failing extension falls back to the BUILT-IN, not to no reranking', asyn
     source,
     builtInPort: () => ({ rerank: async () => [{ index: 1, score: 0.9 }, { index: 0, score: 0.1 }] }),
     onOutcome: (o) => outcomes.push(o),
-    logger: { warn: () => {} },
+    logger: { warn: () => { } },
   });
 
   const order = await registry.resolvePort().rerank('q', ['a', 'b']);
@@ -213,7 +213,7 @@ test('with no built-in available the seam still keeps the existing order', async
   const source = makeSource({ async rerank() { throw new Error('boom'); } });
   source.extensions = [rerankerExt('broken')];
   const registry = new RerankerRegistry({
-    isEnabled: () => true, source, builtInPort: () => null, logger: { warn: () => {} },
+    isEnabled: () => true, source, builtInPort: () => null, logger: { warn: () => { } },
   });
   assert.equal(await registry.resolvePort().rerank('q', ['a', 'b']), null);
 });
@@ -280,7 +280,7 @@ test('the flag is registered, defaults OFF, and has a convenience reader', () =>
   assert.match(src, /\|\s*'extensionRerankers'/, 'must be in the key union');
   assert.match(
     src,
-    /extensionRerankers:\s*\{[^}]*env:\s*'NATIVELY_EXTENSION_RERANKERS'[^}]*default:\s*false[^}]*\}/,
+    /extensionRerankers:\s*\{[^}]*env:\s*'MEETFLOO_EXTENSION_RERANKERS'[^}]*default:\s*false[^}]*\}/,
     'must default OFF',
   );
   assert.match(src, /isExtensionRerankersEnabled/);

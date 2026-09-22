@@ -23,8 +23,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '../../../..');
 const distRoot = path.join(repoRoot, 'dist-electron', 'electron');
 const isElectronRuntime = Boolean(process.versions?.electron) || process.env.ELECTRON_RUN_AS_NODE === '1';
-if (!process.env.NATIVELY_TEST_USERDATA) {
-  process.env.NATIVELY_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'okf-profile-review-'));
+if (!process.env.MEETFLOO_TEST_USERDATA) {
+  process.env.MEETFLOO_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'okf-profile-review-'));
 }
 async function load(rel) {
   return import(pathToFileURL(path.join(distRoot, rel)).href);

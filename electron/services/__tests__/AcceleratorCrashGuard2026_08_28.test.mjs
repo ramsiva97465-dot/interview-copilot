@@ -22,7 +22,7 @@ const load = () => import(pathToFileURL(modulePath).href);
 // isRegistered() probe sat OUTSIDE the try, so the throw escaped the Map.forEach,
 // escaped the health-check setInterval, and became an uncaughtException —
 // killing the main process ~10s after every launch that reached overlay mode.
-// The app "closed by itself" in a loop. (natively_debug 2026-08-28, pid 7388.)
+// The app "closed by itself" in a loop. (MeetFloo_debug 2026-08-28, pid 7388.)
 
 // ---------------------------------------------------------------- validation
 

@@ -71,7 +71,7 @@ export interface RegistryEntry {
 }
 
 /**
- * Copy a local extension into `~/.natively/extensions/<id>/`.
+ * Copy a local extension into `~/.MeetFloo/extensions/<id>/`.
  *
  * The manifest is read but NOT validated here — validation belongs to
  * `ExtensionManager.install()`, which owns the trust prompt and the registry
@@ -99,7 +99,7 @@ export function stageFromDirectory(
 
   // The entrypoint must exist BEFORE anything is copied. An extension whose
   // dist/ was never built would otherwise install cleanly and then fail to start
-  // with a module-not-found error that reads like a Natively bug.
+  // with a module-not-found error that reads like a MeetFloo bug.
   const entryPath = path.join(sourceDir, entrypoint);
   if (!path.resolve(entryPath).startsWith(path.resolve(sourceDir) + path.sep)) {
     return { ok: false, errors: [`entrypoint ${JSON.stringify(entrypoint)} escapes the extension directory`] };
@@ -134,7 +134,7 @@ export function stageFromDirectory(
     // A prebuilt .node is compiled against ONE ABI. The extension host is an
     // Electron utilityProcess, so an addon built for plain Node fails at init
     // with ERR_DLOPEN_FAILED and a NODE_MODULE_VERSION mismatch — which reads
-    // as a Natively crash rather than as an extension that needs rebuilding.
+    // as a MeetFloo crash rather than as an extension that needs rebuilding.
     // Nothing here can fix that, so say it plainly instead of discovering it
     // at load time.
     warnings.push(

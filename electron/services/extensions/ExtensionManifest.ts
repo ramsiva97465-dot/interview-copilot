@@ -94,7 +94,7 @@ export const extensionManifestSchema = z.object({
   entrypoint: z.string().min(1),
   author: z.string().min(1).max(128),
   homepage: z.string().url(),
-  engines: z.object({ natively: z.string().min(1) }),
+  engines: z.object({ MeetFloo: z.string().min(1) }),
   permissions: z.array(permissionSchema),
   models: z.array(modelSchema).default([]),
   /**
@@ -162,7 +162,7 @@ export function satisfiesEngineRange(range: string, appVersion: string): boolean
 // ---------------------------------------------------------------------------
 
 export interface ValidateManifestOptions {
-  /** Running app version, checked against `engines.natively`. */
+  /** Running app version, checked against `engines.MeetFloo`. */
   appVersion: string;
   /** Defaults to this build's `EXTENSION_API_VERSION`. */
   apiVersion?: string;
@@ -192,9 +192,9 @@ export function validateManifest(
     );
   }
 
-  if (!satisfiesEngineRange(manifest.engines.natively, options.appVersion)) {
+  if (!satisfiesEngineRange(manifest.engines.MeetFloo, options.appVersion)) {
     errors.push(
-      `engines.natively "${manifest.engines.natively}" is not satisfied by Natively ${options.appVersion}`,
+      `engines.MeetFloo "${manifest.engines.MeetFloo}" is not satisfied by MeetFloo ${options.appVersion}`,
     );
   }
 

@@ -1,4 +1,4 @@
-// natively-browser/src/__tests__/service-worker.test.mjs
+// MeetFloo-browser/src/__tests__/service-worker.test.mjs
 //
 // Tests the pure service-worker core: the loopback POST classifier and the
 // pairing-string parser. Imports compiled JS from dist-test/. The chrome.*
@@ -52,7 +52,7 @@ describe('postDomToDesktop', () => {
     assert.equal(out.kind, 'unauthorized');
   });
 
-  test('409 maps to no-session (Natively running but no active overlay)', async () => {
+  test('409 maps to no-session (MeetFloo running but no active overlay)', async () => {
     const out = await postDomToDesktop(PAIRING, 'x', async () =>
       fakeResponse(409, { error: 'no_active_session' }),
     );

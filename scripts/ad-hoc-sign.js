@@ -5,7 +5,7 @@ const path = require('path');
 // ─── Packed native-arch guard ───
 // better-sqlite3 + keytar ship a SINGLE compiled binary each (no per-arch
 // loader), so a build on an Apple-Silicon Mac can silently embed arm64 binaries
-// in the x64 (`Natively.dmg`) pack — every Intel Mac then boots into main.ts's
+// in the x64 (`MeetFloo.dmg`) pack — every Intel Mac then boots into main.ts's
 // nativeArchGate "Architecture mismatch" dialog. scripts/rebuild-native-for-target.cjs
 // (beforeBuild) rebuilds them for the correct target arch; THIS guard verifies
 // the binaries actually inside the packed .app match the target arch and FAILS
@@ -127,7 +127,7 @@ function verifyPackedNativeArch(appPath, targetArchName) {
         throw new Error(
             `[Arch Guard] FATAL: packed native binaries do not match the ${targetArchName} target:\n` +
             lines.join('\n') +
-            `\n\nThe ${targetArchName === 'x64' ? 'Intel (Natively.dmg)' : 'Apple-Silicon (Natively-arm64.dmg)'} build would crash on launch. ` +
+            `\n\nThe ${targetArchName === 'x64' ? 'Intel (MeetFloo.dmg)' : 'Apple-Silicon (MeetFloo-arm64.dmg)'} build would crash on launch. ` +
             `Ensure scripts/rebuild-native-for-target.cjs (build.beforeBuild) is wired and ran for this arch.`
         );
     }
@@ -142,7 +142,7 @@ const HELPER_SUFFIXES = ['', ' (GPU)', ' (Renderer)', ' (Plugin)'];
 
 /**
  * Update the display names inside each helper's Info.plist so Activity Monitor
- * shows "CoreServices Helper" instead of "Natively Helper".
+ * shows "CoreServices Helper" instead of "MeetFloo Helper".
  *
  * IMPORTANT: We only modify CFBundleDisplayName and CFBundleName.
  * We do NOT rename the .app folders or the executable binaries — doing so
@@ -215,20 +215,20 @@ exports.default = async function (context) {
     }
 
     // ── Production guard: never ad-hoc sign when a real Developer ID identity is configured ──
-    // When CSC_LINK / CSC_NAME / NATIVELY_SIGN_IDENTITY is present, electron-builder performs
+    // When CSC_LINK / CSC_NAME / MEETFLOO_SIGN_IDENTITY is present, electron-builder performs
     // proper inside-out Developer ID signing with the entitlements + hardened runtime declared
     // in package.json, and electron-builder's built-in mac.notarize notarizes + staples.
     // Running `codesign --sign -` here would clobber that real signature with an ad-hoc one,
     // which can never be notarized — so we skip the ad-hoc step entirely in that case.
     const hasRealIdentity = !!(
-        process.env.NATIVELY_PRODUCTION_SIGN === '1' || // set by electron-builder.signed.cjs
+        process.env.MEETFLOO_PRODUCTION_SIGN === '1' || // set by electron-builder.signed.cjs
         process.env.CSC_LINK ||
         process.env.CSC_NAME ||
-        process.env.NATIVELY_SIGN_IDENTITY
+        process.env.MEETFLOO_SIGN_IDENTITY
     );
     if (hasRealIdentity) {
         console.log(
-            '[Ad-Hoc Signing] Developer ID identity detected (CSC_LINK/CSC_NAME/NATIVELY_SIGN_IDENTITY) — ' +
+            '[Ad-Hoc Signing] Developer ID identity detected (CSC_LINK/CSC_NAME/MEETFLOO_SIGN_IDENTITY) — ' +
             'skipping ad-hoc signing. electron-builder will sign with Developer ID; afterSign will notarize.'
         );
         return;
@@ -236,14 +236,14 @@ exports.default = async function (context) {
 
     // Optional: shape the ad-hoc build like a hardened-runtime build for local TCC testing.
     // Off by default because a hardened-runtime ad-hoc build has stricter launch requirements
-    // that cannot be fully verified without a real signing identity. Set NATIVELY_ADHOC_HARDENED=1
+    // that cannot be fully verified without a real signing identity. Set MEETFLOO_ADHOC_HARDENED=1
     // to opt in when testing entitlement/permission behavior locally.
-    const hardenedOpt = process.env.NATIVELY_ADHOC_HARDENED === '1' ? '--options runtime ' : '';
+    const hardenedOpt = process.env.MEETFLOO_ADHOC_HARDENED === '1' ? '--options runtime ' : '';
 
     // ── Step 2: Ad-hoc sign the application (DEV / local distribution only) ──
     // Resolve the path to the entitlements file so V8 gets JIT memory permissions
     const entitlementsPath = path.join(context.packager.info.projectDir, 'build', 'entitlements.mac.plist');
-    
+
     // ── Step 2a: Sign the main app bundle with --deep first ──
     // --deep recurses into nested Mach-O binaries (frameworks, helpers, .node files).
     // It signs them with --sign - only (no custom entitlements on nested items).

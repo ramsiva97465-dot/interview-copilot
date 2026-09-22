@@ -1,8 +1,8 @@
-// electron/services/__tests__/NativelyApiE2E.test.mjs
+// electron/services/__tests__/MeetFlooApiE2E.test.mjs
 //
-// Env-gated real Natively API smoke test. Enabled only when both:
-//   RUN_NATIVELY_API_E2E=1
-//   NATIVELY_API_KEY=<key>   (or NATIVELY_TRIAL_TOKEN=<token>)
+// Env-gated real MeetFloo API smoke test. Enabled only when both:
+//   RUN_MEETFLOO_API_E2E=1
+//   MEETFLOO_API_KEY=<key>   (or MEETFLOO_TRIAL_TOKEN=<token>)
 //
 // When disabled (the default), every test in this suite is `skip`-ed cleanly
 // so the suite produces a deterministic, hermetic pass. Skip messages explain
@@ -15,21 +15,21 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-const ENABLED = process.env.RUN_NATIVELY_API_E2E === '1';
-const KEY = process.env.NATIVELY_API_KEY ?? '';
-const TRIAL = process.env.NATIVELY_TRIAL_TOKEN ?? '';
-const API_BASE = process.env.NATIVELY_API_BASE ?? 'https://api.natively.software';
+const ENABLED = process.env.RUN_MEETFLOO_API_E2E === '1';
+const KEY = process.env.MEETFLOO_API_KEY ?? '';
+const TRIAL = process.env.MEETFLOO_TRIAL_TOKEN ?? '';
+const API_BASE = process.env.MEETFLOO_API_BASE ?? 'https://api.MeetFloo.software';
 
 function authHeader() {
-  if (KEY) return { 'x-natively-key': KEY };
+  if (KEY) return { 'x-MeetFloo-key': KEY };
   if (TRIAL) return { 'x-trial-token': TRIAL };
   return null;
 }
 
-describe('Natively API real-network smoke', { skip: !ENABLED ? 'skip: set RUN_NATIVELY_API_E2E=1 with NATIVELY_API_KEY or NATIVELY_TRIAL_TOKEN to enable' : false }, () => {
+describe('MeetFloo API real-network smoke', { skip: !ENABLED ? 'skip: set RUN_MEETFLOO_API_E2E=1 with MEETFLOO_API_KEY or MEETFLOO_TRIAL_TOKEN to enable' : false }, () => {
   test('credentials are present in env (sanity check, key value not logged)', () => {
     const h = authHeader();
-    assert.ok(h, 'NATIVELY_API_KEY or NATIVELY_TRIAL_TOKEN must be set when RUN_NATIVELY_API_E2E=1');
+    assert.ok(h, 'MEETFLOO_API_KEY or MEETFLOO_TRIAL_TOKEN must be set when RUN_MEETFLOO_API_E2E=1');
   });
 
   test('valid auth — health endpoint responds', async () => {

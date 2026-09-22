@@ -42,7 +42,7 @@ const require = createRequire(import.meta.url);
 const SINGLETON_PATH = path.join(
     repoRoot, 'dist-electron/electron/services/extensions/singleton.js',
 );
-const GGUF_PORT_KEY = 'natively.reranker.ggufPort';
+const GGUF_PORT_KEY = 'MeetFloo.reranker.ggufPort';
 
 test('rerankerConfig holds the gguf port on the process, not in a module-local', () => {
     const source = require('node:fs').readFileSync(

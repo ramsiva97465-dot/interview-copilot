@@ -9,7 +9,7 @@
 //
 // Mechanism under test: SettingsManager.getInstance() (electron/intelligence/
 // intelligenceFlags.ts's readSettingOverride) is anchored on the
-// `globalThis.__nativelySettingsManagerV1__` singleton slot (see e.g.
+// `globalThis.__MeetFlooSettingsManagerV1__` singleton slot (see e.g.
 // ScreenUnderstandingModeEnforcement2026_08_01.test.mjs / HindsightManager.test.mjs for
 // the same pattern) — getInstance() hands back whatever already occupies that slot
 // without ever calling `new SettingsManager()`, so a plain fake `{ get(key) {...} }`
@@ -22,11 +22,11 @@ import {
   __resetIntelligenceFlagsCache,
 } from '../../../dist-electron/electron/intelligence/intelligenceFlags.js';
 
-const SETTINGS_SLOT = '__nativelySettingsManagerV1__';
+const SETTINGS_SLOT = '__MeetFlooSettingsManagerV1__';
 const ENV_KEYS = [
-  'NATIVELY_MEETING_SUMMARY_V3',
-  'NATIVELY_FOLLOWUP_DRAFT_V2',
-  'NATIVELY_MEETING_MODE_AUTODETECT',
+  'MEETFLOO_MEETING_SUMMARY_V3',
+  'MEETFLOO_FOLLOWUP_DRAFT_V2',
+  'MEETFLOO_MEETING_MODE_AUTODETECT',
 ];
 
 let slotBefore;
@@ -66,9 +66,9 @@ describe('meetingSummaryV3 — settings override retired (permanently-on flag)',
     assert.equal(isIntelligenceFlagEnabled('meetingSummaryV3'), true);
   });
 
-  test('NATIVELY_MEETING_SUMMARY_V3=0 still forces the flag off (operator kill-switch survives)', () => {
+  test('MEETFLOO_MEETING_SUMMARY_V3=0 still forces the flag off (operator kill-switch survives)', () => {
     fakeSettings({ meetingSummaryV3Enabled: true });
-    process.env.NATIVELY_MEETING_SUMMARY_V3 = '0';
+    process.env.MEETFLOO_MEETING_SUMMARY_V3 = '0';
     __resetIntelligenceFlagsCache();
     assert.equal(
       isIntelligenceFlagEnabled('meetingSummaryV3'),
@@ -77,8 +77,8 @@ describe('meetingSummaryV3 — settings override retired (permanently-on flag)',
     );
   });
 
-  test('NATIVELY_MEETING_SUMMARY_V3=1 still forces the flag on explicitly', () => {
-    process.env.NATIVELY_MEETING_SUMMARY_V3 = '1';
+  test('MEETFLOO_MEETING_SUMMARY_V3=1 still forces the flag on explicitly', () => {
+    process.env.MEETFLOO_MEETING_SUMMARY_V3 = '1';
     __resetIntelligenceFlagsCache();
     assert.equal(isIntelligenceFlagEnabled('meetingSummaryV3'), true);
   });
@@ -120,9 +120,9 @@ describe('followUpDraftV2 — settings override retired (permanently-on flag)', 
     assert.equal(isIntelligenceFlagEnabled('followUpDraftV2'), true);
   });
 
-  test('NATIVELY_FOLLOWUP_DRAFT_V2=0 still forces the flag off (operator kill-switch survives)', () => {
+  test('MEETFLOO_FOLLOWUP_DRAFT_V2=0 still forces the flag off (operator kill-switch survives)', () => {
     fakeSettings({ followUpDraftV2Enabled: true });
-    process.env.NATIVELY_FOLLOWUP_DRAFT_V2 = '0';
+    process.env.MEETFLOO_FOLLOWUP_DRAFT_V2 = '0';
     __resetIntelligenceFlagsCache();
     assert.equal(
       isIntelligenceFlagEnabled('followUpDraftV2'),
@@ -131,8 +131,8 @@ describe('followUpDraftV2 — settings override retired (permanently-on flag)', 
     );
   });
 
-  test('NATIVELY_FOLLOWUP_DRAFT_V2=1 still forces the flag on explicitly', () => {
-    process.env.NATIVELY_FOLLOWUP_DRAFT_V2 = '1';
+  test('MEETFLOO_FOLLOWUP_DRAFT_V2=1 still forces the flag on explicitly', () => {
+    process.env.MEETFLOO_FOLLOWUP_DRAFT_V2 = '1';
     __resetIntelligenceFlagsCache();
     assert.equal(isIntelligenceFlagEnabled('followUpDraftV2'), true);
   });

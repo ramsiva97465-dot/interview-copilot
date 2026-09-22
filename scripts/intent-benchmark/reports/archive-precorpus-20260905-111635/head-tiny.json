@@ -6,7 +6,7 @@
     "sizeOnDiskMB": 0,
     "runtime": "onnx",
     "ortBinding": "onnxruntime-node",
-    "modelId": "resources/models/natively/router-tiny-multihead",
+    "modelId": "resources/models/MeetFloo/router-tiny-multihead",
     "forwardPassesPerRow": 1,
     "loadMs": 117,
     "split": "holdout",

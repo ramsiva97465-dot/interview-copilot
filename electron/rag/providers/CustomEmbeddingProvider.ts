@@ -165,7 +165,7 @@ export class CustomEmbeddingProvider implements IEmbeddingProvider {
   async isAvailable(): Promise<boolean> {
     if (!this.baseUrl || !this.model) return false;
     try {
-      await this.embed('natively embedding availability probe');
+      await this.embed('MeetFloo embedding availability probe');
       return true;
     } catch (error: any) {
       if (error?.permanentAuthFailure) throw error;

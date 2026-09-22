@@ -16,7 +16,7 @@ const { app } = require('electron');
 
 const repoRoot = path.resolve(__dirname, '..');
 const distRoot = path.join(repoRoot, 'dist-electron', 'electron');
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-okf-queue-test-'));
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-okf-queue-test-'));
 app.setPath('userData', tmpUserData);
 
 let pass = 0, fail = 0;
@@ -27,7 +27,7 @@ function check(label, ok, detail) {
 
 async function main() {
   await app.whenReady();
-  process.env.NATIVELY_OKF_KNOWLEDGE_PACKS = '1';
+  process.env.MEETFLOO_OKF_KNOWLEDGE_PACKS = '1';
 
   const { ModesManager } = require(path.join(distRoot, 'services/ModesManager.js'));
   // Separate require path than KnowledgeManager.js internally uses — this

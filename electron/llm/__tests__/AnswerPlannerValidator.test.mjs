@@ -138,7 +138,7 @@ The approach uses the modulo operator \`%\`.`;
   assert.match(result.repaired ?? '', /O\(\?\)/, 'absent complexity → O(?) placeholder');
   assert.doesNotMatch(result.repaired ?? '', /Time Complexity:\s*`?O\(1\)`?/i, 'must NOT fabricate O(1)');
   assert.doesNotMatch(result.repaired ?? '', /resume|job description|salary|negotiation/i);
-  assert.doesNotMatch(result.repaired ?? '', /I am Natively|I'm Natively|as an AI/i);
+  assert.doesNotMatch(result.repaired ?? '', /I am MeetFloo|I'm MeetFloo|as an AI/i);
 });
 
 test('validateAnswerStructure requires deterministic markdown heading order for dsa answers', () => {

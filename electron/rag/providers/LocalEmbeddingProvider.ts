@@ -26,10 +26,10 @@ import { IEmbeddingProvider } from './IEmbeddingProvider';
 import { embeddingSpaceKey } from '../embeddingSpace';
 import { acquireOnnxSlot, hasEnoughMemoryForOnnxSession, getMinFreeGBForOnnxSession } from '../../utils/onnxThreadConfig';
 import {
-    clearLoadSentinel as clearOnnxLoadSentinel,
-    consumePoisonedOnnxLoad,
-    isSentinelWithinTtl,
-    writeLoadSentinel as writeOnnxLoadSentinel,
+  clearLoadSentinel as clearOnnxLoadSentinel,
+  consumePoisonedOnnxLoad,
+  isSentinelWithinTtl,
+  writeLoadSentinel as writeOnnxLoadSentinel,
 } from '../../utils/onnxLoadSentinel';
 import { ProviderStatusRegistry } from '../../services/ProviderStatusRegistry';
 import type { LocalWorkerStatus } from '../../utils/workerStatus';
@@ -85,7 +85,7 @@ export class LocalEmbeddingProvider implements IEmbeddingProvider {
       } catch { /* fallback */ }
     }
     const candidates: string[] = [];
-    if (process.env.NATIVELY_LOCAL_MODELS_PATH) candidates.push(process.env.NATIVELY_LOCAL_MODELS_PATH);
+    if (process.env.MEETFLOO_LOCAL_MODELS_PATH) candidates.push(process.env.MEETFLOO_LOCAL_MODELS_PATH);
     if (app.isPackaged) candidates.push(path.join(process.resourcesPath, 'models'));
     let appPath = '';
     try { appPath = app.getAppPath(); } catch { /* not ready */ }
@@ -313,7 +313,7 @@ export class LocalEmbeddingProvider implements IEmbeddingProvider {
       // Human-readable status; `details.reason` carries the debug classification.
       message: status.recoverable
         ? 'Local embedding fallback running in degraded mode. Some semantic search features may be slower or less accurate.'
-        : 'Natively local embedding fallback assets are missing or corrupted. Please reinstall Natively.',
+        : 'MeetFloo local embedding fallback assets are missing or corrupted. Please reinstall MeetFloo.',
       recoverable: status.recoverable,
       details: { backend: status.backend, reason: status.reason, error: status.message },
     });
@@ -345,7 +345,7 @@ export class LocalEmbeddingProvider implements IEmbeddingProvider {
       health: 'missing_required_asset',
       requiredForStartup: false,
       requiredForCoreFallback: true,
-      message: 'Natively local embedding fallback assets are missing or corrupted. Please reinstall Natively.',
+      message: 'MeetFloo local embedding fallback assets are missing or corrupted. Please reinstall MeetFloo.',
       recoverable: false,
       details: { reason: 'worker-died-before-ready', error: message },
     });

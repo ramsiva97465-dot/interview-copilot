@@ -11,17 +11,19 @@ import { _electron as electron } from '@playwright/test';
 import fs from 'node:fs';
 
 const dotenv = Object.fromEntries(
-  fs.readFileSync('/tmp/natively-land-wt/.env', 'utf8').split('\n')
+  fs.readFileSync('/tmp/MeetFloo-land-wt/.env', 'utf8').split('\n')
     .filter((l) => /^[A-Z0-9_]+=/.test(l))
     .map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1).trim().replace(/^["']|["']$/g, '')]),
 );
-const env = { ...process.env, ...dotenv, NATIVELY_E2E: '1', NODE_ENV: 'development',
-  NATIVELY_DEV_BYPASS_SCREEN_TCC: '1', NATIVELY_E2E_LOCAL_TEST_TOKEN: 'local-test' };
+const env = {
+  ...process.env, ...dotenv, MEETFLOO_E2E: '1', NODE_ENV: 'development',
+  MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1', MEETFLOO_E2E_LOCAL_TEST_TOKEN: 'local-test'
+};
 
 const app = await electron.launch({ args: ['dist-electron/electron/main.js'], env, timeout: 90000 });
 await app.firstWindow({ timeout: 45000 });
 const w = app.windows()[0];
-await w.waitForLoadState('domcontentloaded').catch(() => {});
+await w.waitForLoadState('domcontentloaded').catch(() => { });
 
 const result = await w.evaluate(async () => {
   const api = window.electronAPI || window.api;
@@ -32,7 +34,7 @@ const result = await w.evaluate(async () => {
   };
 });
 
-const { classifyMicStatus } = await import('/tmp/natively-land-wt/src/lib/micPermissionPolicy.mjs');
+const { classifyMicStatus } = await import('/tmp/MeetFloo-land-wt/src/lib/micPermissionPolicy.mjs');
 const plan = classifyMicStatus(result.perms.platform, result.perms.microphone);
 
 console.log('real systemPreferences payload :', JSON.stringify(result.perms));

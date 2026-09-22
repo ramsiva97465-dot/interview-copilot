@@ -20,11 +20,11 @@ const repoRoot = path.resolve(__dirname, '../../../..');
 const distRoot = path.join(repoRoot, 'dist-electron', 'electron');
 const isElectronRuntime = Boolean(process.versions?.electron) || process.env.ELECTRON_RUN_AS_NODE === '1';
 
-if (!process.env.NATIVELY_TEST_USERDATA) {
-  process.env.NATIVELY_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'okf-profile-p2-'));
+if (!process.env.MEETFLOO_TEST_USERDATA) {
+  process.env.MEETFLOO_TEST_USERDATA = fs.mkdtempSync(path.join(os.tmpdir(), 'okf-profile-p2-'));
 }
-process.env.NATIVELY_OKF_PROFILE_PACKS = '1';
-process.env.NATIVELY_OKF_PROFILE_HYBRID_RETRIEVAL = '1';
+process.env.MEETFLOO_OKF_PROFILE_PACKS = '1';
+process.env.MEETFLOO_OKF_PROFILE_HYBRID_RETRIEVAL = '1';
 
 async function load(rel) {
   return import(pathToFileURL(path.join(distRoot, rel)).href);
@@ -35,8 +35,8 @@ async function seedPacks() {
   // files concurrently in one process; the flag-off subtest below flips a shared
   // process.env flag, so every "allowed" test re-sets both flags on entry to be
   // resilient to that race (product code reads the flag live per call).
-  process.env.NATIVELY_OKF_PROFILE_PACKS = '1';
-  process.env.NATIVELY_OKF_PROFILE_HYBRID_RETRIEVAL = '1';
+  process.env.MEETFLOO_OKF_PROFILE_PACKS = '1';
+  process.env.MEETFLOO_OKF_PROFILE_HYBRID_RETRIEVAL = '1';
   const { DatabaseManager } = await load('db/DatabaseManager.js');
   DatabaseManager.getInstance();
   const { ProfilePackBuilder } = await load('services/knowledge/ProfilePackBuilder.js');
@@ -97,7 +97,7 @@ test('Phase2: document-grounded active → empty (blockedReason doc_grounded), r
   assert.equal(r.blockedReason, 'doc_grounded');
 });
 
-// NOTE: the flag-OFF assertion (which must flip the shared NATIVELY_OKF_PROFILE_
+// NOTE: the flag-OFF assertion (which must flip the shared MEETFLOO_OKF_PROFILE_
 // HYBRID_RETRIEVAL env) lives in its OWN file — OkfProfilePhase2FlagOff.test.mjs —
 // NOT here. node --test may run test files concurrently in one process, and a
 // mid-test global env flip in this file would race the retrieval-allowed tests in

@@ -11,7 +11,7 @@
 //
 // The load-bearing test drives the REAL SettingsManager (a temp userData) and
 // the REAL cloudRunner predicate — the function that decides whether code is
-// sent to Piston. NATIVELY_CODE_EXECUTION_CLOUD is set to 'true' on purpose:
+// sent to Piston. MEETFLOO_CODE_EXECUTION_CLOUD is set to 'true' on purpose:
 // without it `cloudExecutionEnabled()` short-circuits to false and the test
 // would pass identically with or without the fix.
 
@@ -86,16 +86,16 @@ describe('a Privacy-panel toggle does not re-enable cloud code execution', () =>
       id: electronPath, filename: electronPath, loaded: true,
       exports: { app: { isReady: () => true, getPath: () => userData, getVersion: () => '0.0.0-test' } },
     };
-    envBefore = process.env.NATIVELY_CODE_EXECUTION_CLOUD;
+    envBefore = process.env.MEETFLOO_CODE_EXECUTION_CLOUD;
     // Without this the predicate short-circuits to false and the test is vacuous.
-    process.env.NATIVELY_CODE_EXECUTION_CLOUD = 'true';
+    process.env.MEETFLOO_CODE_EXECUTION_CLOUD = 'true';
     ({ SettingsManager } = require(dist('services/SettingsManager.js')));
     ({ cloudExecutionEnabled } = require(dist('llm/codeVerification/cloudRunner.js')));
   });
 
   after(() => {
-    if (envBefore === undefined) delete process.env.NATIVELY_CODE_EXECUTION_CLOUD;
-    else process.env.NATIVELY_CODE_EXECUTION_CLOUD = envBefore;
+    if (envBefore === undefined) delete process.env.MEETFLOO_CODE_EXECUTION_CLOUD;
+    else process.env.MEETFLOO_CODE_EXECUTION_CLOUD = envBefore;
     try { fs.rmSync(userData, { recursive: true, force: true }); } catch { /* noop */ }
   });
 

@@ -348,7 +348,7 @@ export class ProviderPerformanceStore {
         const prevRate = workload.generationRate;
         workload.generationRate = {
           tokensPerSecond: prevRate
-            ? Math.round((foldMean(prevRate.tokensPerSecond * 10, prevRate.count, sample.generationRateTps * 10)) ) / 10
+            ? Math.round((foldMean(prevRate.tokensPerSecond * 10, prevRate.count, sample.generationRateTps * 10))) / 10
             : sample.generationRateTps,
           count: (prevRate?.count ?? 0) + 1,
         };
@@ -559,7 +559,7 @@ export function migrate(parsed: unknown): PersistedShape | null {
 // inlines this module into several entry bundles, so a module-level `let` would
 // give each bundle its own store and the evidence would silently split.
 
-const GLOBAL_KEY = '__nativelyProviderPerformanceStore__';
+const GLOBAL_KEY = '__MeetFlooProviderPerformanceStore__';
 
 export function getProviderPerformanceStore(): ProviderPerformanceStore {
   const g = globalThis as Record<string, unknown>;
@@ -595,7 +595,7 @@ function resolveStorageDir(): string | null {
     if (dir) return dir;
   } catch { /* not in Electron — fall through */ }
   try {
-    return path.join(os.tmpdir(), 'natively-provider-performance');
+    return path.join(os.tmpdir(), 'MeetFloo-provider-performance');
   } catch {
     return null;
   }

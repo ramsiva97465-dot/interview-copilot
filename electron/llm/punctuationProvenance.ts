@@ -6,7 +6,7 @@
 // property of the STT provider, not of the utterance: only Deepgram
 // (smart_format: true) and Google (enableAutomaticPunctuation: true) request
 // punctuation, the local models (Whisper/Moonshine/Nemotron) emit it
-// model-inherently, and Soniox/OpenAI/ElevenLabs/NativelyPro/REST providers
+// model-inherently, and Soniox/OpenAI/ElevenLabs/MeetFlooPro/REST providers
 // leave it unconfigured. MRDA segmentation research quantifies the stakes:
 // stripping punctuation+casing roughly doubles dialogue-act segmentation
 // error (14.2% → 32.9% DSER).

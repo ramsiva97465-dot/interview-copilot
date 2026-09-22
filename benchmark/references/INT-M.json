@@ -1,7 +1,7 @@
 {
   "id": "INT-M",
   "category": "interview",
-  "natively_mode": "looking-for-work",
+  "MeetFloo_mode": "looking-for-work",
   "length_bucket": "medium",
   "speakers": [
     {

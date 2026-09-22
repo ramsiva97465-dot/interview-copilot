@@ -6,7 +6,7 @@
 //
 // WHAT PHASE 14 SHIPS: a backend contract so a flag can be toggled by PERSISTING its
 // SettingsManager key — no env edit / redeploy needed. The flags already resolve in the
-// precedence: env override (NATIVELY_*) → SettingsManager.get(<settingKey>) → default(false).
+// precedence: env override (MEETFLOO_*) → SettingsManager.get(<settingKey>) → default(false).
 // This test pins the parts of that contract that are EXECUTABLE headless (under plain
 // node:test, no Electron) and is explicit about the one part that is NOT.
 //
@@ -17,7 +17,7 @@
 //   • setIntelligenceFlag()   — DEFENSIVE: returns false (never throws) when
 //                               SettingsManager is unavailable (headless), because its
 //                               constructor calls Electron's app.isReady().
-//   • the ENV-OVERRIDE resolution chain — set NATIVELY_*=1 → enabled true; unset → false.
+//   • the ENV-OVERRIDE resolution chain — set MEETFLOO_*=1 → enabled true; unset → false.
 //     This is the PRIMARY mechanism the resolution chain shares with the settings path.
 //
 // READ-VERIFIED ONLY (NOT executable here — documented, not asserted):
@@ -163,7 +163,7 @@ const EXPECTED_KEYS = [
   'adaptiveImageQuality',
 ];
 
-// All NATIVELY_* env vars these flags read — cleared before/after so a leaked env from the
+// All MEETFLOO_* env vars these flags read — cleared before/after so a leaked env from the
 // host (or another test) can't make an assertion pass/fail spuriously.
 const DEFAULT_ON_KEYS = new Set([
   // Multi-turn chat history. ON via a plain literal (never isInternalDevTestContext)
@@ -249,62 +249,62 @@ const DEFAULT_ON_KEYS = new Set([
 ]);
 
 const ALL_ENV_VARS = [
-  'NATIVELY_QUESTION_LEDGER_SHADOW',
-  'NATIVELY_WTA_CLAUSE_COVERAGE_REPAIR',
-  'NATIVELY_INTELLIGENCE_TRACE',
-  'NATIVELY_DURABLE_MEMORY_WINDOW',
-  'NATIVELY_PROFILE_TREE_V2',
-  'NATIVELY_CONTEXT_ROUTER_V2',
-  'NATIVELY_LIVE_TRANSCRIPT_BRAIN',
-  'NATIVELY_PROMPT_ASSEMBLER_V2',
-  'NATIVELY_ANSWER_DIVERSITY_GUARD',
-  'NATIVELY_MEETING_MEMORY_V2',
-  'NATIVELY_MEETING_SUMMARY_V3',
-  'NATIVELY_MEETING_MODE_AUTODETECT',
-  'NATIVELY_FOLLOWUP_DRAFT_V2',
-  'NATIVELY_SPEAKER_LABELS_V1',
-  'NATIVELY_MEETING_SUMMARY_LLM_POLISH',
-  'NATIVELY_SPEAKER_DIARIZATION_V1',
-  'NATIVELY_GLOBAL_SEARCH_V2',
-  'NATIVELY_IN_MEETING_SEARCH_V2',
-  'NATIVELY_CONVERSATION_MEMORY_V2',
-  'NATIVELY_LECTURE_INTELLIGENCE_V2',
-  'NATIVELY_DIAGRAM_INTELLIGENCE',
-  'NATIVELY_HINDSIGHT_MEMORY',
-  'NATIVELY_HINDSIGHT_LIVE_RECALL',
-  'NATIVELY_HINDSIGHT_POST_MEETING_RETAIN',
-  'NATIVELY_RAG_CONFIDENCE_GATE',
-  'NATIVELY_RAG_LOCAL_RERANK',
-  'NATIVELY_RAG_RRF_FUSION',
-  'NATIVELY_RAG_SPECULATIVE_RERANK',
-  'NATIVELY_OKF_KNOWLEDGE_PACKS',
-  'NATIVELY_OKF_MARKDOWN_EXPORT',
-  'NATIVELY_OKF_HYBRID_RETRIEVAL',
-  'NATIVELY_OKF_GRAPH_EXPANSION',
-  'NATIVELY_OKF_KNOWLEDGE_UI',
-  'NATIVELY_OKF_USER_EDITABLE_CARDS',
-  'NATIVELY_OKF_PROFILE_PACKS',
-  'NATIVELY_OKF_PROFILE_HYBRID_RETRIEVAL',
-  'NATIVELY_OKF_PROFILE_MARKDOWN_EXPORT',
-  'NATIVELY_OKF_PROFILE_GRAPH_EXPANSION',
-  'NATIVELY_OKF_PROFILE_KNOWLEDGE_UI',
-  'NATIVELY_DOC_GROUNDED_STRICT_ISOLATION',
-  'NATIVELY_DOC_GROUNDED_FALSE_REFUSAL_REPAIR',
-  'NATIVELY_CUSTOM_MODE_SOURCE_ENFORCEMENT',
-  'NATIVELY_JIT_FINAL_ANSWER_ENFORCED',
-  'NATIVELY_CONTEXT_OS',
-  'NATIVELY_CONTEXT_OS_MANUAL_CHAT',
-  'NATIVELY_CONTEXT_OS_WTA',
-  'NATIVELY_CONTEXT_OS_RECAP_FOLLOWUP',
-  'NATIVELY_CONTEXT_OS_EVIDENCE_PACK',
-  'NATIVELY_CONTEXT_OS_MEMORY_SAFETY',
-  'NATIVELY_CONTEXT_OS_ENFORCE_CAPABILITIES',
-  'NATIVELY_CONTEXT_OS_PROPERTY_VALIDATION',
-  'NATIVELY_CONTEXT_OS_MULTI_FAMILY_EVIDENCE',
-  'NATIVELY_ANSWER_RELEVANCE_GUARD_LIVE',
-  'NATIVELY_PROMPT_COMPOSER_V2',
-  'NATIVELY_ATOMIC_JD_PROFILE_PACK',
-  'NATIVELY_PRONOUN_REGEX_SHADOW_OBSERVATION',
+  'MEETFLOO_QUESTION_LEDGER_SHADOW',
+  'MEETFLOO_WTA_CLAUSE_COVERAGE_REPAIR',
+  'MEETFLOO_INTELLIGENCE_TRACE',
+  'MEETFLOO_DURABLE_MEMORY_WINDOW',
+  'MEETFLOO_PROFILE_TREE_V2',
+  'MEETFLOO_CONTEXT_ROUTER_V2',
+  'MEETFLOO_LIVE_TRANSCRIPT_BRAIN',
+  'MEETFLOO_PROMPT_ASSEMBLER_V2',
+  'MEETFLOO_ANSWER_DIVERSITY_GUARD',
+  'MEETFLOO_MEETING_MEMORY_V2',
+  'MEETFLOO_MEETING_SUMMARY_V3',
+  'MEETFLOO_MEETING_MODE_AUTODETECT',
+  'MEETFLOO_FOLLOWUP_DRAFT_V2',
+  'MEETFLOO_SPEAKER_LABELS_V1',
+  'MEETFLOO_MEETING_SUMMARY_LLM_POLISH',
+  'MEETFLOO_SPEAKER_DIARIZATION_V1',
+  'MEETFLOO_GLOBAL_SEARCH_V2',
+  'MEETFLOO_IN_MEETING_SEARCH_V2',
+  'MEETFLOO_CONVERSATION_MEMORY_V2',
+  'MEETFLOO_LECTURE_INTELLIGENCE_V2',
+  'MEETFLOO_DIAGRAM_INTELLIGENCE',
+  'MEETFLOO_HINDSIGHT_MEMORY',
+  'MEETFLOO_HINDSIGHT_LIVE_RECALL',
+  'MEETFLOO_HINDSIGHT_POST_MEETING_RETAIN',
+  'MEETFLOO_RAG_CONFIDENCE_GATE',
+  'MEETFLOO_RAG_LOCAL_RERANK',
+  'MEETFLOO_RAG_RRF_FUSION',
+  'MEETFLOO_RAG_SPECULATIVE_RERANK',
+  'MEETFLOO_OKF_KNOWLEDGE_PACKS',
+  'MEETFLOO_OKF_MARKDOWN_EXPORT',
+  'MEETFLOO_OKF_HYBRID_RETRIEVAL',
+  'MEETFLOO_OKF_GRAPH_EXPANSION',
+  'MEETFLOO_OKF_KNOWLEDGE_UI',
+  'MEETFLOO_OKF_USER_EDITABLE_CARDS',
+  'MEETFLOO_OKF_PROFILE_PACKS',
+  'MEETFLOO_OKF_PROFILE_HYBRID_RETRIEVAL',
+  'MEETFLOO_OKF_PROFILE_MARKDOWN_EXPORT',
+  'MEETFLOO_OKF_PROFILE_GRAPH_EXPANSION',
+  'MEETFLOO_OKF_PROFILE_KNOWLEDGE_UI',
+  'MEETFLOO_DOC_GROUNDED_STRICT_ISOLATION',
+  'MEETFLOO_DOC_GROUNDED_FALSE_REFUSAL_REPAIR',
+  'MEETFLOO_CUSTOM_MODE_SOURCE_ENFORCEMENT',
+  'MEETFLOO_JIT_FINAL_ANSWER_ENFORCED',
+  'MEETFLOO_CONTEXT_OS',
+  'MEETFLOO_CONTEXT_OS_MANUAL_CHAT',
+  'MEETFLOO_CONTEXT_OS_WTA',
+  'MEETFLOO_CONTEXT_OS_RECAP_FOLLOWUP',
+  'MEETFLOO_CONTEXT_OS_EVIDENCE_PACK',
+  'MEETFLOO_CONTEXT_OS_MEMORY_SAFETY',
+  'MEETFLOO_CONTEXT_OS_ENFORCE_CAPABILITIES',
+  'MEETFLOO_CONTEXT_OS_PROPERTY_VALIDATION',
+  'MEETFLOO_CONTEXT_OS_MULTI_FAMILY_EVIDENCE',
+  'MEETFLOO_ANSWER_RELEVANCE_GUARD_LIVE',
+  'MEETFLOO_PROMPT_COMPOSER_V2',
+  'MEETFLOO_ATOMIC_JD_PROFILE_PACK',
+  'MEETFLOO_PRONOUN_REGEX_SHADOW_OBSERVATION',
 ];
 
 function clearAllEnv() {
@@ -323,8 +323,8 @@ describe('Phase 14 — intelligence flag settings contract (key + meta surface)'
     assert.deepEqual([...keys].sort(), [...EXPECTED_KEYS].sort());
     // Spot-check the keys the task names explicitly.
     for (const k of ['trace', 'durableMemoryWindow', 'conversationMemoryV2',
-                     'lectureIntelligenceV2', 'diagramIntelligence',
-                     'hindsightMemory', 'hindsightLiveRecall', 'hindsightPostMeetingRetain']) {
+      'lectureIntelligenceV2', 'diagramIntelligence',
+      'hindsightMemory', 'hindsightLiveRecall', 'hindsightPostMeetingRetain']) {
       assert.ok(keys.includes(k), `expected key present: ${k}`);
     }
   });
@@ -334,7 +334,7 @@ describe('Phase 14 — intelligence flag settings contract (key + meta surface)'
       const meta = intelligenceFlagMeta(key);
       assert.equal(typeof meta.setting, 'string', `${key}.setting is a string`);
       assert.ok(meta.setting.length > 0, `${key}.setting non-empty`);
-      assert.ok(meta.env.startsWith('NATIVELY_'), `${key}.env follows NATIVELY_ convention (${meta.env})`);
+      assert.ok(meta.env.startsWith('MEETFLOO_'), `${key}.env follows MEETFLOO_ convention (${meta.env})`);
       const expectedDefault = DEFAULT_ON_KEYS.has(key) ? true : false;
       assert.equal(meta.default, expectedDefault, `${key}.default matches documented rollout posture`);
     }
@@ -342,17 +342,17 @@ describe('Phase 14 — intelligence flag settings contract (key + meta surface)'
 
   test('intelligenceFlagMeta exact values for several named flags', () => {
     assert.deepEqual(intelligenceFlagMeta('trace'),
-      { setting: 'intelligenceTraceEnabled', env: 'NATIVELY_INTELLIGENCE_TRACE', default: false });
+      { setting: 'intelligenceTraceEnabled', env: 'MEETFLOO_INTELLIGENCE_TRACE', default: false });
     assert.deepEqual(intelligenceFlagMeta('durableMemoryWindow'),
-      { setting: 'intelligenceDurableMemoryWindow', env: 'NATIVELY_DURABLE_MEMORY_WINDOW', default: false });
+      { setting: 'intelligenceDurableMemoryWindow', env: 'MEETFLOO_DURABLE_MEMORY_WINDOW', default: false });
     assert.deepEqual(intelligenceFlagMeta('conversationMemoryV2'),
-      { setting: 'conversationMemoryV2Enabled', env: 'NATIVELY_CONVERSATION_MEMORY_V2', default: false });
+      { setting: 'conversationMemoryV2Enabled', env: 'MEETFLOO_CONVERSATION_MEMORY_V2', default: false });
     assert.deepEqual(intelligenceFlagMeta('lectureIntelligenceV2'),
-      { setting: 'lectureIntelligenceV2Enabled', env: 'NATIVELY_LECTURE_INTELLIGENCE_V2', default: false });
+      { setting: 'lectureIntelligenceV2Enabled', env: 'MEETFLOO_LECTURE_INTELLIGENCE_V2', default: false });
     assert.deepEqual(intelligenceFlagMeta('diagramIntelligence'),
-      { setting: 'diagramIntelligenceEnabled', env: 'NATIVELY_DIAGRAM_INTELLIGENCE', default: false });
+      { setting: 'diagramIntelligenceEnabled', env: 'MEETFLOO_DIAGRAM_INTELLIGENCE', default: false });
     assert.deepEqual(intelligenceFlagMeta('hindsightMemory'),
-      { setting: 'hindsightMemoryEnabled', env: 'NATIVELY_HINDSIGHT_MEMORY', default: false });
+      { setting: 'hindsightMemoryEnabled', env: 'MEETFLOO_HINDSIGHT_MEMORY', default: false });
   });
 
   test('flag setting-keys are UNIQUE (no two flags share a SettingsManager key)', () => {
@@ -412,47 +412,47 @@ describe('Phase 14 — ENV override resolution chain (the mechanism the UI/IPC r
 
   test('trace: env=1 → true, then unset → false (fresh read each call, no cache)', () => {
     assert.equal(isIntelligenceFlagEnabled('trace'), false, 'starts false');
-    process.env.NATIVELY_INTELLIGENCE_TRACE = '1';
+    process.env.MEETFLOO_INTELLIGENCE_TRACE = '1';
     __resetIntelligenceFlagsCache();
     assert.equal(isIntelligenceFlagEnabled('trace'), true, 'env=1 → true');
     assert.equal(isIntelligenceTraceEnabled(), true, 'helper agrees');
-    delete process.env.NATIVELY_INTELLIGENCE_TRACE;
+    delete process.env.MEETFLOO_INTELLIGENCE_TRACE;
     __resetIntelligenceFlagsCache();
     assert.equal(isIntelligenceFlagEnabled('trace'), false, 'unset → false (fresh read)');
   });
 
   test('env accepts on/true/yes/enabled and off/false/no/disabled, case-insensitive', () => {
     for (const on of ['1', 'true', 'TRUE', 'on', 'On', 'yes', 'enabled']) {
-      process.env.NATIVELY_CONVERSATION_MEMORY_V2 = on;
+      process.env.MEETFLOO_CONVERSATION_MEMORY_V2 = on;
       __resetIntelligenceFlagsCache();
       assert.equal(isIntelligenceFlagEnabled('conversationMemoryV2'), true, `"${on}" → true`);
     }
     for (const off of ['0', 'false', 'FALSE', 'off', 'no', 'disabled']) {
-      process.env.NATIVELY_CONVERSATION_MEMORY_V2 = off;
+      process.env.MEETFLOO_CONVERSATION_MEMORY_V2 = off;
       __resetIntelligenceFlagsCache();
       assert.equal(isIntelligenceFlagEnabled('conversationMemoryV2'), false, `"${off}" → false`);
     }
-    delete process.env.NATIVELY_CONVERSATION_MEMORY_V2;
+    delete process.env.MEETFLOO_CONVERSATION_MEMORY_V2;
   });
 
   test('env override is PER-FLAG (toggling one does not affect another)', () => {
-    process.env.NATIVELY_LECTURE_INTELLIGENCE_V2 = '1';
+    process.env.MEETFLOO_LECTURE_INTELLIGENCE_V2 = '1';
     __resetIntelligenceFlagsCache();
     assert.equal(isIntelligenceFlagEnabled('lectureIntelligenceV2'), true);
     assert.equal(isIntelligenceFlagEnabled('diagramIntelligence'), false, 'sibling unaffected');
-    delete process.env.NATIVELY_LECTURE_INTELLIGENCE_V2;
+    delete process.env.MEETFLOO_LECTURE_INTELLIGENCE_V2;
   });
 
   test('intelligenceFlagSnapshot() reflects the resolved state of the env override', () => {
     let snap = intelligenceFlagSnapshot();
     assert.equal(snap.trace, false, 'snapshot default false');
-    process.env.NATIVELY_INTELLIGENCE_TRACE = 'on';
+    process.env.MEETFLOO_INTELLIGENCE_TRACE = 'on';
     __resetIntelligenceFlagsCache();
     snap = intelligenceFlagSnapshot();
     assert.equal(snap.trace, true, 'snapshot tracks env=on');
     // Snapshot covers EVERY key (so the diagnostics surface can never silently drop one).
     assert.deepEqual(Object.keys(snap).sort(), [...EXPECTED_KEYS].sort());
-    delete process.env.NATIVELY_INTELLIGENCE_TRACE;
+    delete process.env.MEETFLOO_INTELLIGENCE_TRACE;
   });
 });
 

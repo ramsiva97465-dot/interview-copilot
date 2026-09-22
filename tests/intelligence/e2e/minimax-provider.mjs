@@ -1,6 +1,6 @@
 /**
  * minimax-provider.mjs — a TEST-ONLY OpenAI-compatible client that drops into the
- * `llmHelper.groqClient` seam so the REAL Natively backend (routing → context →
+ * `llmHelper.groqClient` seam so the REAL MeetFloo backend (routing → context →
  * prompt assembly → streamChat/WhatToAnswerLLM) runs unchanged with MiniMax-M2.7
  * as the upstream model. MiniMax serves the OpenAI Chat Completions shape at
  * https://api.minimax.io/v1/chat/completions, so the only thing the seam needs is
@@ -9,7 +9,7 @@
  *   - stream:false → { choices:[{ message:{ content } }] }
  *
  * Why a custom adapter (the prompt explicitly allows this): the electron client has
- * NO MiniMax transport — MiniMax lives only in the natively-api gateway. This adapter
+ * NO MiniMax transport — MiniMax lives only in the MeetFloo-api gateway. This adapter
  * lives at the transport seam ONLY; it changes nothing about the app's decisions.
  *
  * MiniMax-M2.7 specifics handled here (all verified live 2026-06-14):
@@ -29,7 +29,7 @@ import { GlobalThrottle } from './minimax-throttle.mjs';
 const DEFAULT_BASE_URL = 'https://api.minimax.io';
 const CHAT_PATH = '/v1/chat/completions';
 
-// ── status-code → reason (mirrors natively-api/lib/minimaxProvider.js) ───────────
+// ── status-code → reason (mirrors MeetFloo-api/lib/minimaxProvider.js) ───────────
 const STATUS = { OK: 0, RATE_LIMIT: 1002, TIMEOUT: 1001, AUTH_FAIL: 1004, INSUFFICIENT_BALANCE: 1008, INTERNAL: 1013, UNKNOWN: 1000, OUTPUT_CONTENT: 1027, TOKEN_LIMIT: 1039, PARAM_ERROR: 2013 };
 function statusToReason(code) {
   if (code == null || code === 0) return null;
@@ -238,7 +238,7 @@ export function createMiniMaxClient(usable, opts = {}) {
     const stripper = makeThinkStripper();
     try {
       const res = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${k.key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(buildBody(params, true)), signal: ac.signal });
-      if (res.status !== 200) { let data = null; try { data = await res.json(); } catch {} const e = new Error(`http_${res.status}`); e.reason = httpToReason(res.status); e.httpStatus = res.status; e.baseStatus = data?.base_resp?.status_code; throw e; }
+      if (res.status !== 200) { let data = null; try { data = await res.json(); } catch { } const e = new Error(`http_${res.status}`); e.reason = httpToReason(res.status); e.httpStatus = res.status; e.baseStatus = data?.base_resp?.status_code; throw e; }
       const reader = res.body.getReader();
       const dec = new TextDecoder();
       let sse = '';

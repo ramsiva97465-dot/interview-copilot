@@ -1,4 +1,4 @@
-Yes. The prompts were deliberately *not* changed for this benchmark; these are observations for a follow-up. Several parts of the current Natively pipeline interact with model behaviour and change results per model:
+Yes. The prompts were deliberately *not* changed for this benchmark; these are observations for a follow-up. Several parts of the current MeetFloo pipeline interact with model behaviour and change results per model:
 
 1. **The polish "no new tokens" gate rejects mostly correct rewrites, at model-dependent rates.**
    - **Where.** `SummaryPolisher.newSignificantTokens` strips punctuation from each output token but normalizes the grounded notes differently.

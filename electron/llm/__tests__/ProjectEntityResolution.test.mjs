@@ -17,7 +17,7 @@ const { planAnswer, extractProjectEntity } = await import(
 
 describe('extractProjectEntity edge cases', () => {
   test('explicit capitalized name', () => {
-    assert.equal(extractProjectEntity('how is Natively developed?'), 'Natively');
+    assert.equal(extractProjectEntity('how is MeetFloo developed?'), 'MeetFloo');
   });
   test('hyphenated name preserved (SQL-Copilot)', () => {
     assert.equal(extractProjectEntity('what was your role in SQL-Copilot?'), 'SQL-Copilot');
@@ -27,16 +27,16 @@ describe('extractProjectEntity edge cases', () => {
     assert.equal(extractProjectEntity('how is that developed?'), '');
   });
   test('lowercase common word → empty (requires a capitalized name)', () => {
-    assert.equal(extractProjectEntity('how is natively developed?'), '');
+    assert.equal(extractProjectEntity('how is MeetFloo developed?'), '');
   });
   test('stopword-prefix does NOT leak ("The Project" / "My Project" → stripped)', () => {
     assert.equal(extractProjectEntity('how is The Project built?'), '');
     assert.equal(extractProjectEntity('what was your role in My Project?'), '');
   });
-  test('stopword-prefixed REAL name keeps the name ("The Natively" → "Natively")', () => {
+  test('stopword-prefixed REAL name keeps the name ("The MeetFloo" → "MeetFloo")', () => {
     // The capture stops at the first lowercase token ("app"), and the leading
     // stopword "The" is stripped — leaving the real capitalized name.
-    assert.equal(extractProjectEntity('how is The Natively built?'), 'Natively');
+    assert.equal(extractProjectEntity('how is The MeetFloo built?'), 'MeetFloo');
   });
 });
 
@@ -53,9 +53,9 @@ describe('project_followup pronoun path + followUpTarget resolution', () => {
   });
 
   test('pronoun + followUpTarget from prior turn resolves the entity', () => {
-    const r = p({ q: 'how was it built?', eq: { latestQuestion: 'how was it built?', questionType: 'follow_up', followUpTarget: 'Natively', confidence: 0.8, detectedSpeaker: 'interviewer', isFollowUp: true } });
+    const r = p({ q: 'how was it built?', eq: { latestQuestion: 'how was it built?', questionType: 'follow_up', followUpTarget: 'MeetFloo', confidence: 0.8, detectedSpeaker: 'interviewer', isFollowUp: true } });
     assert.equal(r.answerType, 'project_followup_answer');
-    assert.equal(r.resolvedEntity, 'Natively');
+    assert.equal(r.resolvedEntity, 'MeetFloo');
   });
 
   test('explicit name in the question wins for resolvedEntity', () => {

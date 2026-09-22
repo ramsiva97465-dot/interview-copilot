@@ -172,11 +172,11 @@ test('code hint examples avoid named problems and em dashes', () => {
 });
 
 // ── SERVER ROUTING CONTRACT ──────────────────────────────────────────────────
-// The Natively server (natively-api/lib/flashModelPicker.js) routes the live
+// The MeetFloo server (MeetFloo-api/lib/flashModelPicker.js) routes the live
 // interview modes to gemini-3.7-flash by regex-matching this exact phrase in the
 // system prompt the client sends. If a prompt edit drops/rewords the phrase,
 // those modes silently fall back to flash-lite. This guard fails LOUDLY on drift.
-// Keep in sync with INTERVIEW_MODE_RE in natively-api/lib/flashModelPicker.js.
+// Keep in sync with INTERVIEW_MODE_RE in MeetFloo-api/lib/flashModelPicker.js.
 const SERVER_INTERVIEW_MODE_RE = /spoken voice in a live (?:job|technical) interview/i;
 
 test('SERVER-ROUTING: looking-for-work prompt contains the interview-mode detector phrase', () => {

@@ -80,7 +80,7 @@ describe('T7 — a referent never crosses a scope boundary', () => {
 
   test('the kill switch restores the pre-fix cross-scope resolution', () => {
     const s = stateFor(SCOPE_A, 'What is the retry policy on Orbit Bridge?');
-    withFlag('NATIVELY_RETRIEVAL_REFERENT_SCOPE_CHECK', '0', () => {
+    withFlag('MEETFLOO_RETRIEVAL_REFERENT_SCOPE_CHECK', '0', () => {
       const r = resolveReference('Why?', s, SCOPE_B);
       assert.equal(r.usedState, true, 'flag OFF must reproduce the pre-fix behaviour');
       assert.notEqual(r.reason, 'SCOPE_CHANGED');

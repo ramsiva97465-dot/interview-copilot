@@ -6,7 +6,7 @@
 // Import strategy: unlike this directory's other __tests__/*.test.mjs files
 // (rnntDecoder.test.mjs / melFrontend.test.mjs / cacheState.test.mjs / etc.,
 // which import their target `.ts` file directly — this Electron/Node
-// runtime strips TS syntax natively for a single leaf file with no local
+// runtime strips TS syntax MeetFloo for a single leaf file with no local
 // cross-file imports), nemotronEngine.ts itself has FIVE extensionless local
 // imports (onnxThreadConfig, melFrontend, cacheState, rnntDecoder,
 // tokenizer). Extensionless imports are a CommonJS convention that Node's
@@ -53,17 +53,17 @@ const { NemotronEngine } = fs.existsSync(nemotronEnginePath)
 // identical problem). So the OS default userData root is recomputed
 // directly here, matching Electron's own per-platform default
 // (`path.join(appDataRoot, app.name)`, with app.name defaulting to
-// package.json's `name` field, "natively", before any app.setName()
+// package.json's `name` field, "MeetFloo", before any app.setName()
 // override runs — verified against this machine's real, dev-mode (`npm
-// start`) `~/Library/Application Support/natively/whisper-models/...`
+// start`) `~/Library/Application Support/MeetFloo/whisper-models/...`
 // directory). A packaged (electron-builder) build may instead resolve the
-// capitalized `productName` ("Natively") — not re-verified against a
+// capitalized `productName` ("MeetFloo") — not re-verified against a
 // packaged install here — but macOS and Windows filesystems are both
-// case-insensitive by default, so 'natively' still resolves to the same
+// case-insensitive by default, so 'MeetFloo' still resolves to the same
 // directory either way; only case-sensitive Linux filesystems could diverge,
 // and Linux packaging isn't in this project's scope (see CLAUDE.md).
 function defaultAppUserDataDir() {
-  const appName = 'natively';
+  const appName = 'MeetFloo';
   if (process.platform === 'darwin') {
     return path.join(os.homedir(), 'Library', 'Application Support', appName);
   }

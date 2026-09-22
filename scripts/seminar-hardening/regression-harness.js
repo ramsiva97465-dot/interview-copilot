@@ -14,7 +14,7 @@
 //      validation/regen → answer-out)
 //
 // Backend for GENERATION: Gemini DIRECT (llm.setApiKey + setModel(
-//   'gemini-3.1-flash-lite')) — the same model the natively server proxies to.
+//   'gemini-3.1-flash-lite')) — the same model the MeetFloo server proxies to.
 //   Key resolved from env (GEMINI_API_KEY, then GEMINI_API_KEY_1..6) or a .env
 //   parse. PRESENCE is logged only; a key value is NEVER printed or written.
 //
@@ -54,7 +54,7 @@ const RETRIEVAL_ONLY = process.env.HARNESS_RETRIEVAL_ONLY === '1';
 const ONLY = (process.env.HARNESS_ONLY || '').split(',').map((s) => s.trim()).filter(Boolean);
 const PER_Q_TIMEOUT_MS = 30000;
 
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-seminar-harness-'));
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-seminar-harness-'));
 app.setPath('userData', tmpUserData);
 
 // Same custom prompt the phase-0 probe / e2e harness use (seminar assistant).

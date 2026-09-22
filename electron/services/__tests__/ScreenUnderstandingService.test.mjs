@@ -21,7 +21,7 @@ const test = (name, opts, fn) => {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '../../..');
 const screenDir = path.join(root, 'dist-electron/electron/services/screen');
-process.env.NATIVELY_TEST_USER_DATA = '/Users/alice/Library/Application Support/Natively';
+process.env.MEETFLOO_TEST_USER_DATA = '/Users/alice/Library/Application Support/MeetFloo';
 
 async function loadService() {
   const modPath = pathToFileURL(path.join(screenDir, 'ScreenUnderstandingService.js')).href;
@@ -45,13 +45,13 @@ function makeService({ hash = 'same-hash', ocrText = '' } = {}) {
         confidence: ocrText ? 0.9 : 0,
         provider: 'stub-ocr',
       }),
-      clearCache: () => {},
+      clearCache: () => { },
     };
     return service;
   });
 }
 
-const VALID_IMAGE = '/Users/alice/Library/Application Support/Natively/screenshots/test.png';
+const VALID_IMAGE = '/Users/alice/Library/Application Support/MeetFloo/screenshots/test.png';
 
 function baseRequest(overrides = {}) {
   return {

@@ -10,7 +10,7 @@
  *     Error: abortedUpload(resumeRequest: … completedParts: [ …148 parts… ],
  *       error: The operation couldn't be completed. (Network.NWError error 54 -
  *       Connection reset by peer))
- *     ⨯ Command failed: xcrun notarytool submit …/Natively-2.8.7-arm64.dmg --wait
+ *     ⨯ Command failed: xcrun notarytool submit …/MeetFloo-2.8.7-arm64.dmg --wait
  *
  *   notarytool does NOT retry. The single `execFileSync` in afterAllArtifactBuild.cjs
  *   turned one dropped TCP connection into a full rebuild (another ~2× 28-minute app
@@ -331,8 +331,8 @@ async function notarytoolSubmitWithRetry(opts) {
     const delayMs = baseDelayMs * attempt;
     log.warn(
       `[notary-retry] submit did not reach a verdict (${reason}) on attempt ${attempt}/${maxAttempts} — ` +
-        `retrying in ${Math.round(delayMs / 1000)}s. The upload restarts from scratch; ` +
-        'the aborted one expires on Apple’s side, so nothing is double-submitted.'
+      `retrying in ${Math.round(delayMs / 1000)}s. The upload restarts from scratch; ` +
+      'the aborted one expires on Apple’s side, so nothing is double-submitted.'
     );
     await sleep(delayMs);
   }
@@ -340,8 +340,8 @@ async function notarytoolSubmitWithRetry(opts) {
   const tail = outputTail(last && last.output);
   throw new Error(
     `[notary-retry] ${safeCmd} failed (${reason}) after ${attemptsMade === 1 ? '1 attempt' : `${attemptsMade} attempts`}` +
-      `; exit=${last ? last.code : 'null'}${last && last.signal ? ` signal=${last.signal}` : ''}` +
-      (tail ? `\n[notary-retry] last output: ${tail}` : '')
+    `; exit=${last ? last.code : 'null'}${last && last.signal ? ` signal=${last.signal}` : ''}` +
+    (tail ? `\n[notary-retry] last output: ${tail}` : '')
   );
 }
 

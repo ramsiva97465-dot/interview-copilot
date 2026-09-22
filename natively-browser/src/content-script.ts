@@ -33,19 +33,19 @@ export interface SmartExtractOpts {
 }
 
 export type CaptureRequest =
-  | { type: 'natively:extract' }
+  | { type: 'MeetFloo:extract' }
   // Smart Browser Context v2: classify + structured-extract in one round-trip.
   // `mode` lets the SW distinguish manual vs auto captures for the envelope.
   // `fullPage` (experimental) attaches the full readable text of any non-sensitive
   // page in auto mode — sensitive pages are still hard-blocked downstream.
   // `classifyOnly`/`extraCategories`/`aiApproved` drive the AI-classifier round-trip.
-  | ({ type: 'natively:smart-extract' } & SmartExtractOpts);
+  | ({ type: 'MeetFloo:smart-extract' } & SmartExtractOpts);
 export type CaptureResponse =
   | { ok: true; result: ExtractResult }
   | { ok: true; smart: SmartCaptureResult }
   | { ok: false; error: string };
 
-const GUARD = '__natively_capture_listener__';
+const GUARD = '__MeetFloo_capture_listener__';
 
 function pageSelection(): string {
   try {
@@ -99,11 +99,11 @@ if (!w[GUARD]) {
     (message: CaptureRequest, _sender, sendResponse: (r: CaptureResponse) => void) => {
       if (!message) return undefined;
       try {
-        if (message.type === 'natively:extract') {
+        if (message.type === 'MeetFloo:extract') {
           sendResponse({ ok: true, result: runExtraction() });
           return undefined;
         }
-        if (message.type === 'natively:smart-extract') {
+        if (message.type === 'MeetFloo:smart-extract') {
           const smart = runSmartCapture(message);
           sendResponse({ ok: true, smart });
           return undefined;

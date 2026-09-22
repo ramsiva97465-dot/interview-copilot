@@ -39,7 +39,7 @@ import { fileURLToPath } from 'node:url';
 // Hermetic (issue #558): Codex now also accepts the Codex CLI's `codex login`
 // from $CODEX_HOME/auth.json. Point it at an empty dir so these tests never
 // pick up — or send requests with — the developer's real CLI login.
-process.env.CODEX_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-codex-home-'));
+process.env.CODEX_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-codex-home-'));
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -79,7 +79,7 @@ async function makeBigPng(name = 'shot.png') {
   return { file, bytes: buf.length };
 }
 
-const CRED_SLOT = '__nativelyCredentialsManagerV1__';
+const CRED_SLOT = '__MeetFlooCredentialsManagerV1__';
 
 /**
  * Make Codex look signed in to the CodexOAuthService copy that is INLINED into
@@ -90,7 +90,7 @@ const CRED_SLOT = '__nativelyCredentialsManagerV1__';
  * instance the test would touch is a different object from the one
  * CodexCliService.stream() calls. The seam that IS shared is
  * getCredentialsManager() — a LAZY runtime require, which resolves through the
- * `__nativelyCredentialsManagerV1__` global slot from whichever bundle asks.
+ * `__MeetFlooCredentialsManagerV1__` global slot from whichever bundle asks.
  */
 function seedSignedIn() {
   globalThis[CRED_SLOT] = {
@@ -298,7 +298,7 @@ describe('a vision turn whose images all fail to encode does not degrade to text
 
 // ── 3. boundaries on the newly-wired path ───────────────────────────────────
 
-const SETTINGS_SLOT = '__nativelySettingsManagerV1__';
+const SETTINGS_SLOT = '__MeetFlooSettingsManagerV1__';
 const setMode = (mode) => SettingsManager.getInstance().setScreenUnderstandingMode(mode);
 
 /** A bare LLMHelper with Codex reachable — everything else left real. */

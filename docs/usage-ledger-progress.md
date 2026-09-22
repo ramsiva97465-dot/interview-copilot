@@ -35,14 +35,14 @@ PRECISE SCOPE" (E2E result, instrumentation coverage) and "OPEN ITEMS CLOSED".
 
 - [x] Phase 0 — repository forensics (see "Repository facts discovered")
 - [x] Phase 1 — data model + migration + retention job
-      → `natively-api/migrations/008_license_usage_ledger.sql`, `natively-api/lib/licenseLedger.js`
+      → `MeetFloo-api/migrations/008_license_usage_ledger.sql`, `MeetFloo-api/lib/licenseLedger.js`
 - [x] Phase 2 — server-observed usage + Dodo webhook hook
       → verified the pre-existing `bill*` instrumentation (D2); added the webhook hook.
       **Partial: see open gaps O1 (request-id correlation) and O2 (entitlement state on
       metered rows) under "Known deviations from spec".**
 - [x] Phase 3 — license activity journalling (debounced)
       → `/v1/usage` + `/v1/pro/verify`, one row per identity per 6h
-- [x] Campaign 1 test suite (§35) — `natively-api/tests/licenseLedger.test.mjs`, 50/50 pass
+- [x] Campaign 1 test suite (§35) — `MeetFloo-api/tests/licenseLedger.test.mjs`, 50/50 pass
 
 ### Not done, and deliberately so
 
@@ -72,7 +72,7 @@ code that **no longer exists in HEAD**, so taking any of it produced an unbootab
 | 4, 5 | `isProviderHealthy` + a hardcoded `['deepgram','googleSTT','elevenlabs']` order | Drops **Soniox**, the live-verified first-choice realtime STT, and ignores `sttFallbackProviderEligible` / `nextSTTProvidersAfter` / `sttProviderUsableForFailover`. |
 | 6, 7 | `MAX_MESSAGE_CHARS` at the call site | Not defined at that scope in HEAD; HEAD uses `DEEPSEEK_MSG_CHAR_CAP` (imported from `lib/deepseekProvider.js`) at 9+ sites. |
 
-The stash — `stash@{0}: "pre-cleanup natively-api dirty state from PR247 integration"` —
+The stash — `stash@{0}: "pre-cleanup MeetFloo-api dirty state from PR247 integration"` —
 predates the Groq removal, the MiniMax-M3 promotion, and the Soniox STT promotion.
 
 **How it was done, and what was preserved.** `git checkout --ours server.js` was NOT used:
@@ -98,14 +98,14 @@ rather than "tidied" inside someone else's in-flight work:
 stash, so the original work is still recoverable in full. Dropping it is the owner's call.
 
 The conflict is also still marked `UU` in the index — the file content is fixed, but
-`git add natively-api/server.js` is needed to mark it resolved. Left undone on purpose:
+`git add MeetFloo-api/server.js` is needed to mark it resolved. Left undone on purpose:
 staging is the owner's decision, and it must happen in the same commit as
 `lib/licenseLedger.js` (see the tracked-tree note in "Rollout").
 
 <details>
 <summary>Original blocker description (kept for the record)</summary>
 
-`natively-api/server.js` **does not parse.** It carries 7 unresolved
+`MeetFloo-api/server.js` **does not parse.** It carries 7 unresolved
 `<<<<<<< Updated upstream` / `>>>>>>> Stashed changes` conflict blocks from a failed
 `git stash pop` that predates this work. `node --check server.js` fails.
 
@@ -147,20 +147,20 @@ A verbatim copy of the conflicted file is preserved at
 ## Repository facts discovered
 
 All server.js line numbers are from `git show HEAD:server.js` unless stated otherwise.
-`natively-api` is a **git submodule** with its own history (branch
+`MeetFloo-api` is a **git submodule** with its own history (branch
 `fix/bound-interactive-stream-output`, HEAD `d38c22b`).
 
 ### CURRENT ARCHITECTURE
 
-* Backend: single-file Fastify app, `natively-api/server.js` (~11.7k lines at HEAD),
-  plus `natively-api/lib/*.js` helper modules and `natively-api/services/stt-relay/`.
+* Backend: single-file Fastify app, `MeetFloo-api/server.js` (~11.7k lines at HEAD),
+  plus `MeetFloo-api/lib/*.js` helper modules and `MeetFloo-api/services/stt-relay/`.
 * Deps are deliberately thin: fastify, @fastify/{cors,rate-limit,websocket},
   fastify-raw-body, @supabase/supabase-js, undici, ws, sharp, @google-cloud/speech,
   dotenv. **No ORM, no migration runner** — migrations are hand-applied `.sql` files.
-* Migrations: `natively-api/migrations/00N_*.sql`, currently 001–007. Convention is a
+* Migrations: `MeetFloo-api/migrations/00N_*.sql`, currently 001–007. Convention is a
   long `--` header explaining *why*, `CREATE TABLE IF NOT EXISTS`, `COMMENT ON TABLE`,
   `ENABLE ROW LEVEL SECURITY`, `REVOKE ALL … FROM anon, authenticated`.
-* Tests: `natively-api/tests/*.test.mjs` run by `npm test` → `node --test tests/*.test.mjs`.
+* Tests: `MeetFloo-api/tests/*.test.mjs` run by `npm test` → `node --test tests/*.test.mjs`.
   Pure-logic reference-model tests also live in `migrations/__tests__/`.
 
 ### A USAGE LEDGER ALREADY EXISTS (biggest deviation from the plan)
@@ -405,10 +405,10 @@ must not hide behind a ticked checkbox.
 | `docs/usage-ledger-architecture.md` | new |
 | `docs/usage-ledger-progress.md` | new (this file) |
 | `docs/usage-ledger-privacy-diff.md` | new — release gate, not applied |
-| `natively-api/migrations/008_license_usage_ledger.sql` | new — **not applied to any DB** |
-| `natively-api/lib/licenseLedger.js` | new |
-| `natively-api/tests/licenseLedger.test.mjs` | new — 50 tests, all passing |
-| `natively-api/server.js` | edited at 4 sites, all outside the conflict blocks |
+| `MeetFloo-api/migrations/008_license_usage_ledger.sql` | new — **not applied to any DB** |
+| `MeetFloo-api/lib/licenseLedger.js` | new |
+| `MeetFloo-api/tests/licenseLedger.test.mjs` | new — 50 tests, all passing |
+| `MeetFloo-api/server.js` | edited at 4 sites, all outside the conflict blocks |
 
 `server.js` edit sites (import block, boot, stats route, `/v1/usage`, `/v1/pro/verify`,
 `registerWebhookRoute`). No conflict block was read, resolved, moved, or touched; the
@@ -446,7 +446,7 @@ count is still 7.
 ## Rollout — exact next steps
 
 1. Resolve the `server.js` stash conflict (owner's call — not this campaign's).
-2. Apply `natively-api/migrations/008_license_usage_ledger.sql` in the Supabase SQL
+2. Apply `MeetFloo-api/migrations/008_license_usage_ledger.sql` in the Supabase SQL
    editor for project `fvflvlobvwbywjhzifng` (the CUSTOMER database — `usage_events` lives
    there, and the view cannot reference a table in another project). **DONE 2026-08-13.**
 2b. Apply `008a_license_ledger_revoke_service_role_writes.sql`. Required for any database
@@ -471,7 +471,7 @@ count is still 7.
 **Campaign 1 is code-complete. Campaign 2 (Phases 4–5) is next.**
 
 Read the blocker section at the top of this file first, then spot-check that these still
-exist before trusting the rest: `natively-api/lib/licenseLedger.js`,
+exist before trusting the rest: `MeetFloo-api/lib/licenseLedger.js`,
 `migrations/008_license_usage_ledger.sql`, and `journalLicenseActivity` in `server.js`.
 Only re-run full forensics if they do not.
 
@@ -493,7 +493,7 @@ covers Campaign 1 only.
 ## Client forensics (the pass Campaign 1 explicitly still owed)
 
 * **Local SQLite layer:** `electron/db/DatabaseManager.ts` — singleton `getInstance()`,
-  `natively.db` under `app.getPath('userData')` (overridable with `NATIVELY_TEST_USERDATA`),
+  `MeetFloo.db` under `app.getPath('userData')` (overridable with `MEETFLOO_TEST_USERDATA`),
   `PRAGMA user_version` migration blocks, WAL with an explicit `checkpoint()` on shutdown.
   Never throws from its constructor; degrades to `db: null` and every public method guards.
   **Schema was at v26; the outbox is v27.**
@@ -502,8 +502,8 @@ covers Campaign 1 only.
 * **Install identity:** `getOrCreateInstallId()` in `services/InstallPingManager.ts` already
   provides exactly what §15 asks for — a random per-install UUID in `install_id.txt`,
   explicitly not derived from hardware. Reused rather than reinvented.
-* **Auth to the backend:** `x-natively-key` header, key from
-  `CredentialsManager.getInstance().getNativelyApiKey()`, base URL `NATIVELY_API_URL`.
+* **Auth to the backend:** `x-MeetFloo-key` header, key from
+  `CredentialsManager.getInstance().getMeetFlooApiKey()`, base URL `MEETFLOO_API_URL`.
   `services/ReviewService.ts` was the template.
 * **Typecheck reality:** the root `tsconfig.json` includes only `src` and `premium/src`, and
   `tsconfig.node.json` only `vite.config.mts`. **Neither covers `electron/`.** The real gate
@@ -514,11 +514,11 @@ covers Campaign 1 only.
 
 | File | |
 |---|---|
-| `natively-api/lib/usageAuditSchema.js` | new — strict allowlist (§10) |
-| `natively-api/migrations/009_operational_telemetry.sql` | new — Layer B, **NOT YET APPLIED** |
-| `natively-api/lib/licenseLedger.js` | extended — Layer B buffer sharing the one flush timer |
-| `natively-api/server.js` | `POST /v1/usage/audit` + `byokClientEventsEnabled()` |
-| `natively-api/tests/usageAudit.test.mjs` | new — 28 tests |
+| `MeetFloo-api/lib/usageAuditSchema.js` | new — strict allowlist (§10) |
+| `MeetFloo-api/migrations/009_operational_telemetry.sql` | new — Layer B, **NOT YET APPLIED** |
+| `MeetFloo-api/lib/licenseLedger.js` | extended — Layer B buffer sharing the one flush timer |
+| `MeetFloo-api/server.js` | `POST /v1/usage/audit` + `byokClientEventsEnabled()` |
+| `MeetFloo-api/tests/usageAudit.test.mjs` | new — 28 tests |
 | `electron/db/DatabaseManager.ts` | v27 migration + 7 outbox methods |
 | `electron/services/UsageOutbox.ts` | new — durable dispatcher |
 | `electron/services/usageInstrumentation.ts` | new — feature lifecycle + failure classification |
@@ -555,7 +555,7 @@ diagnostics are not worth holding process memory for. Ledger rows are evidence.
 Reporting a custom mode called "Technical Interview" as a `technical_interview` execution
 would be a guess printed as a fact (§31). Custom modes report `mode_execution`.
 
-**D14 — an uncategorised error is attributed to `natively`, not `unknown`.** *Rationale:* a
+**D14 — an uncategorised error is attributed to `MeetFloo`, not `unknown`.** *Rationale:* a
 dispute report must never imply a provider was at fault when the truth is we could not tell.
 
 ## Bugs this campaign's own verification caught
@@ -624,7 +624,7 @@ asserts that set never grows.
 
 ## Live end-to-end run
 
-`natively-api/tests/usageLedgerLiveE2E.mjs` boots the real server against the real Supabase
+`MeetFloo-api/tests/usageLedgerLiveE2E.mjs` boots the real server against the real Supabase
 project with every flag on, drives the real HTTP endpoints with a real (disposable, deleted
 afterwards) licence, and reads the rows back. **22 of 24 checks passed**; the 2 failures were
 both diagnosed and are not defects in the system:
@@ -645,21 +645,21 @@ history**.
 
 | Suite | |
 |---|---|
-| `natively-api` — licenseLedger + usageAudit + evidenceReport | **109 pass / 0 fail** |
+| `MeetFloo-api` — licenseLedger + usageAudit + evidenceReport | **109 pass / 0 fail** |
 | `electron` — UsageOutbox (real SQLite, Electron runner) | **16 pass / 0 fail** |
 | `npm run typecheck:electron` | **clean** |
 | live E2E | 22/24, blocked only on migration 009 |
 
 ## Next action
 
-1. Apply `natively-api/migrations/009_operational_telemetry.sql` in the Supabase SQL editor
+1. Apply `MeetFloo-api/migrations/009_operational_telemetry.sql` in the Supabase SQL editor
    (project `fvflvlobvwbywjhzifng`).
-2. Re-run `node natively-api/tests/usageLedgerLiveE2E.mjs` — expect 24/24.
+2. Re-run `node MeetFloo-api/tests/usageLedgerLiveE2E.mjs` — expect 24/24.
 3. Apply the `PRIVACY.md` diff **and extend it for Campaign 2's fields** (`install_id`,
    `app_version`, `platform`, session ids, product feature names) — the existing
    `docs/usage-ledger-privacy-diff.md` deliberately covers Campaign 1 only. Release gate.
 4. Then set `LICENSE_LEDGER_ENABLED`, `OPS_TELEMETRY_ENABLED`, `BYOK_CLIENT_EVENTS_ENABLED`
-   (server) and `NATIVELY_USAGE_OUTBOX_ENABLED` (client).
+   (server) and `MEETFLOO_USAGE_OUTBOX_ENABLED` (client).
 
 ---
 
@@ -825,7 +825,7 @@ now tracked and survive a fresh clone.
 | | |
 |---|---|
 | Live E2E against production | **28 passed / 0 failed** |
-| `natively-api` suites | **109 / 0** |
+| `MeetFloo-api` suites | **109 / 0** |
 | Electron suite | **26 / 0** (was 18 — 8 new wrapper tests) |
 | `typecheck:electron` | 1 error, **0 in usage-ledger files** (pre-existing, `IntelligenceEngine.ts`) |
 | Schema probe | 14 / 0 / **1 warned** — the warning is O3, and clears when 010 is applied |
@@ -849,7 +849,7 @@ flush. Row count asserted unchanged either side (22,371 → 22,371). This also c
 later flipping `ignoreDuplicates` to false: a merging upsert needs UPDATE and would start
 failing here, which is the intended alarm — an append-only ledger must never merge.
 
-**2. The control plane keeps its read access.** natively-control reads `usage_events` for the
+**2. The control plane keeps its read access.** MeetFloo-control reads `usage_events` for the
 cost and reliability dashboards. Before applying 010 I checked what it actually is: all seven
 of its calls are `.select()`, and it authenticates as a dedicated **`control_readonly`** role
 — never `service_role`, which `packages/data/src/customerDb.ts` refuses to hold. So neither
@@ -928,7 +928,7 @@ The E2E created a fresh licence per run and deleted it at teardown, but the ledg
 append-only, so its rows survived pointing at an id that no longer resolved. Ten runs meant
 ten phantom licences someone would eventually meet during a real dispute lookup.
 
-Now ONE standing licence (`usage-ledger-e2e@natively.invalid`), re-activated for the run and
+Now ONE standing licence (`usage-ledger-e2e@MeetFloo.invalid`), re-activated for the run and
 **suspended with its secret rotated** at teardown — never deleted. All synthetic history sits
 under one obviously-test identity, and the key cannot be used in between because a suspended
 key fails authentication.
@@ -953,7 +953,7 @@ under the single licence.**
 
 | | |
 |---|---|
-| `natively-api` suites | **118 / 0** |
+| `MeetFloo-api` suites | **118 / 0** |
 | Electron suite | **26 / 0** |
 | `typecheck:electron` | **0 errors** |
 | Live E2E, run twice | **28 / 0** each |

@@ -13,7 +13,7 @@
 //      string value looks like sensitive content (so a careless caller can't leak).
 //
 // By default events are buffered in-memory (bounded ring) and a marker line is logged
-// only when NATIVELY_PI_TELEMETRY_DEBUG=true. A sink can be registered (e.g. to ship
+// only when MEETFLOO_PI_TELEMETRY_DEBUG=true. A sink can be registered (e.g. to ship
 // to an analytics backend) — the sink only ever sees scrubbed marker payloads.
 
 export type PiTelemetryEvent =
@@ -197,7 +197,7 @@ class PiTelemetry {
     // buffered ring reaches the log without a terminal. require() keeps this
     // module free of a static dependency — it is imported from hot paths and
     // must stay side-effect-free if the flag module is unavailable.
-    try { debug = (process.env.NATIVELY_PI_TELEMETRY_DEBUG || '').trim().toLowerCase() === 'true'; } catch { /* ignore */ }
+    try { debug = (process.env.MEETFLOO_PI_TELEMETRY_DEBUG || '').trim().toLowerCase() === 'true'; } catch { /* ignore */ }
     if (!debug) {
       try { debug = require('../verboseLog').isVerboseLogging(); } catch { /* optional */ }
     }

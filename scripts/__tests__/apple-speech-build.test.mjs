@@ -83,7 +83,7 @@ test('release runner carries the macOS 26 SDK required by SpeechTranscriber', ()
 
 test('generated local helper is gitignored', () => {
   const ignore = fs.readFileSync(path.join(repoRoot, '.gitignore'), 'utf8');
-  assert.match(ignore, /^\/resources\/apple-speech\/natively-apple-speech$/m);
+  assert.match(ignore, /^\/resources\/apple-speech\/MeetFloo-apple-speech$/m);
 });
 
 test('Swift bridge drains resampler state before flush and end-of-input', () => {
@@ -138,7 +138,7 @@ test('old macOS SDK fails with an actionable Xcode requirement', () => {
 
 test('thin helper is cross-compiled for the requested package architecture', () => {
   const root = fixtureRoot();
-  const output = path.join(root, 'out', 'natively-apple-speech');
+  const output = path.join(root, 'out', 'MeetFloo-apple-speech');
   const { calls, run } = fakeToolchain();
   const result = buildScript.buildAppleSpeech({
     platform: 'darwin',
@@ -161,7 +161,7 @@ test('thin helper is cross-compiled for the requested package architecture', () 
 
 test('universal local build merges arm64 and x64 slices', () => {
   const root = fixtureRoot();
-  const output = path.join(root, 'out', 'natively-apple-speech');
+  const output = path.join(root, 'out', 'MeetFloo-apple-speech');
   const { calls, run } = fakeToolchain();
   buildScript.buildAppleSpeech({ platform: 'darwin', arch: 'universal', root, output, run });
 
@@ -180,18 +180,18 @@ test('afterPack destination is private to one target app', () => {
     appOutDir,
     packager: {
       info: { projectDir },
-      appInfo: { productFilename: 'Natively' },
+      appInfo: { productFilename: 'MeetFloo' },
     },
   });
   assert.deepEqual(result, {
     root: projectDir,
     output: path.join(
       appOutDir,
-      'Natively.app',
+      'MeetFloo.app',
       'Contents',
       'Resources',
       'apple-speech',
-      'natively-apple-speech',
+      'MeetFloo-apple-speech',
     ),
   });
 });

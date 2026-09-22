@@ -15,7 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const read = (rel) => fs.readFileSync(path.resolve(__dirname, '..', '..', rel), 'utf8');
 
 describe('main process DNS', () => {
-  test('main.ts installs the resilient lookup and no longer routes natively through c-ares first', () => {
+  test('main.ts installs the resilient lookup and no longer routes MeetFloo through c-ares first', () => {
     const main = read('main.ts');
     assert.match(main, /installResilientDnsLookup\(\)/);
     assert.doesNotMatch(main, /dns\.resolve4\(hostname/, 'the unbounded c-ares-first override must not come back');
@@ -30,16 +30,16 @@ describe('main process DNS', () => {
   });
 });
 
-describe('natively text race lets a configured spare land', () => {
+describe('MeetFloo text race lets a configured spare land', () => {
   const src = read('LLMHelper.ts');
-  test('natively gets one attempt when a spare exists', () => {
-    assert.match(src, /if \(rung\.id === 'natively'\) rung\.maxAttempts = 1;/);
+  test('MeetFloo gets one attempt when a spare exists', () => {
+    assert.match(src, /if \(rung\.id === 'MeetFloo'\) rung\.maxAttempts = 1;/);
   });
-  test('spares receive the natively-sized first-token budget instead of the 2.5 s text default', () => {
-    assert.match(src, /else if \(rung\.ttftTimeoutMs == null\) rung\.ttftTimeoutMs = NATIVELY_TEXT_TTFT_MS;/);
+  test('spares receive the MeetFloo-sized first-token budget instead of the 2.5 s text default', () => {
+    assert.match(src, /else if \(rung\.ttftTimeoutMs == null\) rung\.ttftTimeoutMs = MEETFLOO_TEXT_TTFT_MS;/);
   });
   test('the reshaping is gated on a spare actually existing', () => {
-    const i = src.indexOf("if (rung.id === 'natively') rung.maxAttempts = 1;");
+    const i = src.indexOf("if (rung.id === 'MeetFloo') rung.maxAttempts = 1;");
     const before = src.slice(Math.max(0, i - 400), i);
     assert.match(before, /if \(textProviders\.length > 1\)/);
   });

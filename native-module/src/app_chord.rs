@@ -15,7 +15,7 @@
 //!
 //! # Scope (deliberately narrow)
 //!
-//! The supported set is Natively's default Windows chords: `Ctrl` (optionally
+//! The supported set is MeetFloo's default Windows chords: `Ctrl` (optionally
 //! with `Shift`) plus letters, digits, Enter, Space, or arrows. `Ctrl+Alt` is
 //! accepted only for arrows (the horizontal-scroll defaults), keeping AltGr
 //! text outside this matcher. `Win` and function-key chords remain untouched.
@@ -72,7 +72,7 @@ pub fn app_chords_from_inputs(inputs: Vec<AppChordInput>) -> Vec<AppChord> {
     inputs.into_iter().map(AppChordInput::into_app_chord).collect()
 }
 
-/// True if `vk` is a completing key used by Natively's default Windows binds.
+/// True if `vk` is a completing key used by MeetFloo's default Windows binds.
 pub fn is_supported_app_vk(vk: u32) -> bool {
     matches!(vk, 0x30..=0x39 | 0x41..=0x5A | 0x0D | 0x20 | 0x25..=0x28)
 }

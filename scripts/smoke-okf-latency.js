@@ -14,7 +14,7 @@ const { app } = require('electron');
 
 const repoRoot = path.resolve(__dirname, '..');
 const distRoot = path.join(repoRoot, 'dist-electron', 'electron');
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-okf-latency-test-'));
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-okf-latency-test-'));
 app.setPath('userData', tmpUserData);
 
 let pass = 0, fail = 0;
@@ -41,7 +41,7 @@ async function ingestPdfText(pdfPath) {
 
 async function main() {
   await app.whenReady();
-  process.env.NATIVELY_OKF_KNOWLEDGE_PACKS = '1';
+  process.env.MEETFLOO_OKF_KNOWLEDGE_PACKS = '1';
 
   const pdfPath = path.join(repoRoot, 'Sample thesis for testing.pdf');
   if (!fs.existsSync(pdfPath)) {

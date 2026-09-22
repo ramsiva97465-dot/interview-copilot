@@ -2,14 +2,14 @@
 //
 // Symptom: after switching the STT provider to Google (service-account JSON),
 // audio transcribed as garbled tiny fragments — "he", "heh", "hehehe" — while
-// the SAME audio devices produced correct transcripts on Deepgram/Natively.
+// the SAME audio devices produced correct transcripts on Deepgram/MeetFloo.
 //
 // Root cause (verified against native-module/src/): the Rust DSP injects pure
 // zero-filled keepalive frames into the emitted PCM stream
 // (FrameAction::SendSilence -> `vec![0u8; chunk_size*2]`, lib.rs). For SYSTEM
 // audio the suppressor runs with VAD disabled and a permissive RMS floor, so it
 // oscillates between real low-amplitude `Send` frames and these silent
-// keepalives. Deepgram/Natively endpoint cleanly on the zero frames; Google's
+// keepalives. Deepgram/MeetFloo endpoint cleanly on the zero frames; Google's
 // streamingRecognize instead hallucinates short interim tokens from the
 // real-audio/silence interleaving. The audio sample RATE is correct and
 // declared correctly to Google — the keepalive interleaving is the defect.
@@ -42,16 +42,16 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 // file present it uses it directly and NEVER probes the metadata server. No
 // network, no async rejection, no flakiness. Belt-and-braces: also swallow any
 // stray auth rejection (real ones can't occur — we never call an RPC).
-const DUMMY_KEY = path.join(os.tmpdir(), `natively-stt-test-sa-${process.pid}.json`);
+const DUMMY_KEY = path.join(os.tmpdir(), `MeetFloo-stt-test-sa-${process.pid}.json`);
 fs.writeFileSync(
   DUMMY_KEY,
   JSON.stringify({
     type: 'service_account',
-    project_id: 'natively-stt-test',
+    project_id: 'MeetFloo-stt-test',
     private_key_id: 'test',
     // Not a real key — never used because no RPC is issued in these tests.
     private_key: '-----BEGIN PRIVATE KEY-----\nMIIBVAIBADAN\n-----END PRIVATE KEY-----\n',
-    client_email: 'test@natively-stt-test.iam.gserviceaccount.com',
+    client_email: 'test@MeetFloo-stt-test.iam.gserviceaccount.com',
     client_id: '0',
     token_uri: 'https://oauth2.googleapis.com/token',
   }),

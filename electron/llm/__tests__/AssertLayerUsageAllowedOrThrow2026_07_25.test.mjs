@@ -19,7 +19,7 @@ const { assertLayerUsageAllowedOrThrow } = cjsRequire(path.resolve(repoRoot, 'di
 const { planAnswer } = cjsRequire(path.resolve(repoRoot, 'dist-electron/electron/llm/AnswerPlanner.js'));
 
 function clearVerificationMode() {
-  delete process.env.NATIVELY_VERIFICATION_MODE;
+  delete process.env.MEETFLOO_VERIFICATION_MODE;
 }
 
 describe('assertLayerUsageAllowedOrThrow — the required (not optional) Slice 4 CI assertion', () => {
@@ -34,7 +34,7 @@ describe('assertLayerUsageAllowedOrThrow — the required (not optional) Slice 4
   });
 
   test('THROWS when verification mode is on and a forbidden layer was used (the deliberate violation)', () => {
-    process.env.NATIVELY_VERIFICATION_MODE = '1';
+    process.env.MEETFLOO_VERIFICATION_MODE = '1';
     const plan = planAnswer({ question: 'Solve two sum.', source: 'what_to_answer', speakerPerspective: 'interviewer' });
     assert.throws(
       () => assertLayerUsageAllowedOrThrow(plan, 'resume', 'mock retrieval call'),
@@ -43,7 +43,7 @@ describe('assertLayerUsageAllowedOrThrow — the required (not optional) Slice 4
   });
 
   test('does NOT throw when verification mode is on and the layer IS allowed (compliant case)', () => {
-    process.env.NATIVELY_VERIFICATION_MODE = '1';
+    process.env.MEETFLOO_VERIFICATION_MODE = '1';
     const plan = planAnswer({ question: 'Tell me about yourself.', source: 'manual_input', speakerPerspective: 'user' });
     assert.equal(plan.answerType, 'identity_answer');
     // resume IS allowed for identity_answer.
@@ -51,7 +51,7 @@ describe('assertLayerUsageAllowedOrThrow — the required (not optional) Slice 4
   });
 
   test('the thrown error message names the layer and answerType (actionable, not opaque)', () => {
-    process.env.NATIVELY_VERIFICATION_MODE = '1';
+    process.env.MEETFLOO_VERIFICATION_MODE = '1';
     const plan = planAnswer({ question: 'Explain BFS.', source: 'what_to_answer', speakerPerspective: 'interviewer' });
     assert.throws(() => assertLayerUsageAllowedOrThrow(plan, 'resume'), (err) => {
       assert.match(err.message, /resume/);
@@ -60,8 +60,8 @@ describe('assertLayerUsageAllowedOrThrow — the required (not optional) Slice 4
     });
   });
 
-  test('NATIVELY_VERIFICATION_MODE=0 (explicit off) is also a no-op, mirroring assertVerificationFlagsOrThrow\'s convention', () => {
-    process.env.NATIVELY_VERIFICATION_MODE = '0';
+  test('MEETFLOO_VERIFICATION_MODE=0 (explicit off) is also a no-op, mirroring assertVerificationFlagsOrThrow\'s convention', () => {
+    process.env.MEETFLOO_VERIFICATION_MODE = '0';
     const plan = planAnswer({ question: 'Solve two sum.', source: 'what_to_answer', speakerPerspective: 'interviewer' });
     assert.doesNotThrow(() => assertLayerUsageAllowedOrThrow(plan, 'resume'));
   });

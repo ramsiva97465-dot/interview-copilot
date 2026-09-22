@@ -16,7 +16,7 @@
 // MEASURED on macOS (Electron 43.1.0), `electron .` with port 5180 closed:
 //
 //   BEFORE: 39 retries in a 40s run, every one logged "(1/10)". A prior session
-//           log (natively_debug.prev.log, 2026-08-15 11:07->11:36) shows the
+//           log (MeetFloo_debug.prev.log, 2026-08-15 11:07->11:36) shows the
 //           same loop running 1447 times across 29 minutes, all "(1/10)".
 //   AFTER:  exactly 10 retries in the same 40s window, logged "(1/10)" through
 //           "(10/10)", then silence.

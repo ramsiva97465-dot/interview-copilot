@@ -13,7 +13,7 @@
  * many bundles inlined this file. Same approach as the context-debug registry.
  */
 
-const NAMESPACE = '__nativelyExtensionSingletons__';
+const NAMESPACE = '__MeetFlooExtensionSingletons__';
 
 type Store = Map<string, unknown>;
 

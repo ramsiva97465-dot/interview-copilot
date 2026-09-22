@@ -83,11 +83,11 @@ const electronStub = {
   app: {
     isReady: () => true,
     getPath: name => (name === 'userData' ? tmpUserData : os.tmpdir()),
-    getName: () => 'natively-test',
+    getName: () => 'MeetFloo-test',
     getVersion: () => '0.0.0-test',
   },
   shell: { openPath: async () => '' },
-  ipcMain: { on: () => {}, handle: () => {}, removeAllListeners: () => {} },
+  ipcMain: { on: () => { }, handle: () => { }, removeAllListeners: () => { } },
   BrowserWindow: { getAllWindows: () => [] },
 };
 const electronStubModule = new Module('electron');

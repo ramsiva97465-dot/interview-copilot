@@ -1,6 +1,6 @@
 // Direct Assist renderer contract regressions.
 //
-// NativelyInterface is intentionally a large inline orchestration component,
+// MeetFlooInterface is intentionally a large inline orchestration component,
 // so these tests pin source-level control-flow boundaries that are otherwise
 // difficult to mount without an Electron preload. Backend/IPC tests exercise
 // the behavioral provider boundary; this suite ensures each overlay surface
@@ -15,7 +15,7 @@ import { buildDirectWhatToSayPayload } from '../directAssistWhatToSayPayload.mjs
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const interfaceSource = fs.readFileSync(
-  path.resolve(dirname, '../../components/NativelyInterface.tsx'),
+  path.resolve(dirname, '../../components/MeetFlooInterface.tsx'),
   'utf8',
 );
 const settingsSource = fs.readFileSync(
@@ -46,8 +46,8 @@ test('Direct Assist uses the shared SettingsManager IPC flag and defaults render
   assert.match(interfaceSource, /getDirectAssistEnabled/);
   assert.match(interfaceSource, /onDirectAssistEnabledChanged/);
   assert.match(settingsSource, /setDirectAssistEnabled\?\.\(next\)/);
-  assert.doesNotMatch(interfaceSource, /natively_direct_assist_enabled/);
-  assert.doesNotMatch(settingsSource, /natively_direct_assist_enabled/);
+  assert.doesNotMatch(interfaceSource, /MeetFloo_direct_assist_enabled/);
+  assert.doesNotMatch(settingsSource, /MeetFloo_direct_assist_enabled/);
 });
 
 test('typed Direct submission preserves exact text, skill prefix, screenshots and one-shot page context', () => {

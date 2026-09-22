@@ -29,9 +29,9 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const read = (rel) => readFileSync(join(HERE, rel), 'utf8');
 
 const FILES = {
-    api: read('../settings/NativelyApiSettings.tsx'),
+    api: read('../settings/MeetFlooApiSettings.tsx'),
     plans: read('../settings/PlansSettings.tsx'),
-    pro: read('../settings/NativelyProSettings.tsx'),
+    pro: read('../settings/MeetFlooProSettings.tsx'),
 };
 
 /** Strip both comment styles so prose about the old approach never trips this. */

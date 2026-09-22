@@ -51,7 +51,7 @@ export class OpenRouterEmbeddingProvider implements IEmbeddingProvider {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${this.apiKey}`,
       // OpenRouter attributes usage per app via these. Harmless elsewhere, and it
-      // makes Natively's traffic identifiable on the user's own dashboard.
+      // makes MeetFloo's traffic identifiable on the user's own dashboard.
       'HTTP-Referer': 'https://meetfloo.com',
       'X-Title': 'MeetFloo',
     };
@@ -113,7 +113,7 @@ export class OpenRouterEmbeddingProvider implements IEmbeddingProvider {
   async isAvailable(): Promise<boolean> {
     if (!this.apiKey || !this.model) return false;
     try {
-      await this.embed('natively embedding availability probe');
+      await this.embed('MeetFloo embedding availability probe');
       return true;
     } catch (error: any) {
       if (error?.permanentAuthFailure) throw error;

@@ -46,7 +46,7 @@ export interface LiveSessionMemoryRolloutConfig {
   enabled: boolean;
   /** Why (marker for telemetry — no raw content). */
   reason: 'kill_switch' | 'env_on' | 'env_off' | 'settings_on' | 'settings_off'
-    | 'internal_context' | 'rollout_in' | 'rollout_out' | 'default_off' | 'default_on';
+  | 'internal_context' | 'rollout_in' | 'rollout_out' | 'default_off' | 'default_on';
   /** The rollout percent in effect (0–100), or null when not gating by percent. */
   rolloutPercent: number | null;
   /** The session's deterministic bucket (0–99) when percentage gating applies. */
@@ -65,7 +65,7 @@ function readEnvOverride(): 'on' | 'off' | null {
   if (cachedEnv !== undefined) return cachedEnv ?? null;
   let result: 'on' | 'off' | null = null;
   try {
-    const v = (process.env.NATIVELY_ENABLE_LIVE_SESSION_MEMORY || '').trim().toLowerCase();
+    const v = (process.env.MEETFLOO_ENABLE_LIVE_SESSION_MEMORY || '').trim().toLowerCase();
     if (v === '1' || v === 'true' || v === 'on' || v === 'enabled') result = 'on';
     else if (v === '0' || v === 'false' || v === 'off' || v === 'disabled') result = 'off';
   } catch { result = null; }
@@ -76,7 +76,7 @@ function readEnvOverride(): 'on' | 'off' | null {
 /** Emergency kill switch (env or settings) — overrides everything to OFF. */
 function killSwitchEngaged(): boolean {
   try {
-    const v = (process.env.NATIVELY_LIVE_SESSION_MEMORY_KILL_SWITCH || '').trim().toLowerCase();
+    const v = (process.env.MEETFLOO_LIVE_SESSION_MEMORY_KILL_SWITCH || '').trim().toLowerCase();
     if (v === '1' || v === 'true' || v === 'on' || v === 'enabled') return true;
   } catch { /* ignore */ }
   try {
@@ -91,7 +91,7 @@ function isInternalContext(): boolean {
   try {
     if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') return true;
     if (process.env.BENCHMARK_MODEL) return true; // any benchmark run
-    if (process.env.NATIVELY_INTERNAL === '1' || process.env.NATIVELY_DEV === '1') return true;
+    if (process.env.MEETFLOO_INTERNAL === '1' || process.env.MEETFLOO_DEV === '1') return true;
   } catch { /* default false */ }
   return false;
 }
@@ -99,7 +99,7 @@ function isInternalContext(): boolean {
 /** The configured rollout percent (0–100), or null when unset/invalid (no gating). */
 function rolloutPercent(): number | null {
   try {
-    const raw = process.env.NATIVELY_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT;
+    const raw = process.env.MEETFLOO_LIVE_SESSION_MEMORY_ROLLOUT_PERCENT;
     if (raw == null || raw.trim() === '') {
       const { SettingsManager } = require('../services/SettingsManager');
       const sv = SettingsManager.getInstance().get('liveSessionMemoryRolloutPercent');
@@ -194,7 +194,7 @@ export function isLiveSessionMemoryEnabled(sessionId?: string): boolean {
 /** Max items kept in a live SessionMemory (bounded to prevent unbounded growth). */
 export function liveSessionMemoryMaxItems(): number {
   try {
-    const v = parseInt(process.env.NATIVELY_SESSION_MEMORY_MAX_ITEMS || '', 10);
+    const v = parseInt(process.env.MEETFLOO_SESSION_MEMORY_MAX_ITEMS || '', 10);
     if (Number.isFinite(v) && v >= 20 && v <= 2000) return v;
   } catch { /* default */ }
   return 200;
@@ -202,7 +202,7 @@ export function liveSessionMemoryMaxItems(): number {
 
 /** Whether to emit (redaction-safe, marker-only) session-memory debug logs. */
 export function liveSessionMemoryDebug(): boolean {
-  try { return (process.env.NATIVELY_SESSION_MEMORY_DEBUG || '').trim().toLowerCase() === 'true'; }
+  try { return (process.env.MEETFLOO_SESSION_MEMORY_DEBUG || '').trim().toLowerCase() === 'true'; }
   catch { return false; }
 }
 

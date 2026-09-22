@@ -93,7 +93,7 @@ export interface ManualQualityRatings {
   factualCorrectness?: number;
   instructionAdherence?: number;
   usefulness?: number;
-  naturalNativelyStyle?: number;
+  naturalMeetFlooStyle?: number;
 }
 
 export interface VisionBenchmarkRun {
@@ -160,4 +160,4 @@ export interface VisionBenchmarkSession {
 }
 
 export const DEFAULT_BENCHMARK_QUESTION =
-  'Analyze the attached screenshot using the active Natively mode. Identify the main question or task visible on screen and provide the exact answer Natively should display to the user. Do not discuss the benchmark.';
+  'Analyze the attached screenshot using the active MeetFloo mode. Identify the main question or task visible on screen and provide the exact answer MeetFloo should display to the user. Do not discuss the benchmark.';

@@ -30,21 +30,25 @@ before(async () => {
     lastUrl = req.url;
     const json = (c, o) => { res.writeHead(c, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(o)); };
     if (req.url.startsWith('/v1/models')) {
-      return json(200, { data: [
-        { id: 'gpt-5.1' },
-        { id: 'text-embedding-3-small' },
-        { id: 'text-embedding-3-large' },
-        { id: 'text-embedding-ada-002' },
-        { id: 'whisper-1' },
-      ] });
+      return json(200, {
+        data: [
+          { id: 'gpt-5.1' },
+          { id: 'text-embedding-3-small' },
+          { id: 'text-embedding-3-large' },
+          { id: 'text-embedding-ada-002' },
+          { id: 'whisper-1' },
+        ]
+      });
     }
     if (req.url.startsWith('/v1beta/models')) {
-      return json(200, { models: [
-        { name: 'models/gemini-3.7-flash', displayName: 'Gemini 3.7 Flash', supportedGenerationMethods: ['generateContent'] },
-        { name: 'models/gemini-embedding-2', displayName: 'Gemini Embedding 2', supportedGenerationMethods: ['embedContent', 'batchEmbedContents'] },
-        { name: 'models/gemini-embedding-001', displayName: 'Gemini Embedding 001', supportedGenerationMethods: ['embedContent'] },
-        { name: 'models/aqa', displayName: 'AQA', supportedGenerationMethods: ['generateAnswer'] },
-      ] });
+      return json(200, {
+        models: [
+          { name: 'models/gemini-3.7-flash', displayName: 'Gemini 3.7 Flash', supportedGenerationMethods: ['generateContent'] },
+          { name: 'models/gemini-embedding-2', displayName: 'Gemini Embedding 2', supportedGenerationMethods: ['embedContent', 'batchEmbedContents'] },
+          { name: 'models/gemini-embedding-001', displayName: 'Gemini Embedding 001', supportedGenerationMethods: ['embedContent'] },
+          { name: 'models/aqa', displayName: 'AQA', supportedGenerationMethods: ['generateAnswer'] },
+        ]
+      });
     }
     json(404, {});
   });
@@ -121,8 +125,8 @@ describe('failure', () => {
   });
 
   test('a provider with no discovery API yields an empty list', async () => {
-    // Natively pins its model server-side; Ollama and custom have their own
+    // MeetFloo pins its model server-side; Ollama and custom have their own
     // discovery paths.
-    assert.deepEqual(await fetchEmbeddingModels('natively', 'k', { baseUrl: origin }), []);
+    assert.deepEqual(await fetchEmbeddingModels('MeetFloo', 'k', { baseUrl: origin }), []);
   });
 });

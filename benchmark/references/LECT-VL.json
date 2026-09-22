@@ -1,7 +1,7 @@
 {
   "id": "LECT-VL",
   "category": "lecture",
-  "natively_mode": "lecture",
+  "MeetFloo_mode": "lecture",
   "length_bucket": "very_long",
   "speakers": [
     {

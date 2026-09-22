@@ -1,13 +1,13 @@
 // benchmark/harness/provider-shim.mjs
 //
-// Preloaded into an UNMODIFIED natively-api process with `node --import`.
-// It changes nothing in natively-api's code. It sits at the transport boundary:
+// Preloaded into an UNMODIFIED MeetFloo-api process with `node --import`.
+// It changes nothing in MeetFloo-api's code. It sits at the transport boundary:
 //
-//   natively-api routeChat -> callDeepSeek -> buildDeepSeekBody (production body)
+//   MeetFloo-api routeChat -> callDeepSeek -> buildDeepSeekBody (production body)
 //        -> fetch('https://api.deepseek.com/chat/completions')   <- intercepted here
 //
 // and, per BENCH_CONFIG_ID, translates ONLY provider/model/reasoning before
-// forwarding to the real provider, then hands natively-api back a response in
+// forwarding to the real provider, then hands MeetFloo-api back a response in
 // the shape callDeepSeek already parses. Everything upstream of the fetch
 // (prompt assembly, message clamping, language injection, routing, parsing,
 // validation, repair) is the real code path.
@@ -34,8 +34,8 @@ const CFG = CONFIGS.find(c => c.id === CONFIG_ID)
 if (!CFG) throw new Error(`[bench-shim] unknown BENCH_CONFIG_ID ${CONFIG_ID}`)
 const WIRE_LOG = process.env.BENCH_WIRE_LOG
 
-// Keys: DeepSeek from natively-api/.env (what the server uses); OpenAI from the
-// repo-root .env (natively-api has no OpenAI key). Read, never printed.
+// Keys: DeepSeek from MeetFloo-api/.env (what the server uses); OpenAI from the
+// repo-root .env (MeetFloo-api has no OpenAI key). Read, never printed.
 const rootEnv = dotenv.parse(fs.readFileSync(process.env.BENCH_ROOT_ENV))
 const apiEnv = dotenv.parse(fs.readFileSync(`${API_DIR}/.env`))
 const KEYS = { deepseek: apiEnv.DEEPSEEK_API_KEY, openai: rootEnv.OPENAI_API_KEY }
@@ -194,7 +194,7 @@ async function handleModelCall(url, init, ctx) {
     rec.reasoning_tokens = data.usage?.completion_tokens_details?.reasoning_tokens ?? 0
     rec.reasoning_content_chars = typeof msg.reasoning_content === 'string' ? msg.reasoning_content.length : 0
     rec.output_chars = String(msg.content || '').length
-    // Strip hidden reasoning before it reaches natively-api (never persisted anywhere).
+    // Strip hidden reasoning before it reaches MeetFloo-api (never persisted anywhere).
     if (msg.reasoning_content !== undefined) delete msg.reasoning_content
     out = data
   } else {

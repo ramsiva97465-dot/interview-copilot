@@ -31,15 +31,17 @@ const distDir = (() => {
   if (!isBundled) return path.resolve(repoRoot, 'dist-electron');
   const target = fs.mkdtempSync(path.join(os.tmpdir(), 'phonechat-ro-dist-'));
   fs.symlinkSync(path.join(repoRoot, 'node_modules'), path.join(target, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
-  try { execFileSync(process.execPath, [
-    // lib/tsc.js, not bin/tsc: bin/tsc is EXTENSIONLESS and contains `import`,
-    // and Node only treats an extensionless entry as ESM from >=22.7 (module
-    // detection). lib/tsc.js is a real .js under "type": "module", so it is ESM
-    // on every Node version. This repo declares no `engines` floor.
-    path.join('node_modules', 'typescript7', 'lib', 'tsc.js'),
-    '-p', path.join('electron', 'tsconfig.emit.json'),
-    '--outDir', target,
-  ], { cwd: repoRoot, stdio: 'pipe' }); } catch { /* expected */ }
+  try {
+    execFileSync(process.execPath, [
+      // lib/tsc.js, not bin/tsc: bin/tsc is EXTENSIONLESS and contains `import`,
+      // and Node only treats an extensionless entry as ESM from >=22.7 (module
+      // detection). lib/tsc.js is a real .js under "type": "module", so it is ESM
+      // on every Node version. This repo declares no `engines` floor.
+      path.join('node_modules', 'typescript7', 'lib', 'tsc.js'),
+      '-p', path.join('electron', 'tsconfig.emit.json'),
+      '--outDir', target,
+    ], { cwd: repoRoot, stdio: 'pipe' });
+  } catch { /* expected */ }
   if (!fs.existsSync(path.join(target, 'electron/llm/index.js'))) {
     throw new Error('tsc emission failed — LLMHelper.js missing from isolated tree');
   }
@@ -50,15 +52,15 @@ const cjsRequire = createRequire(import.meta.url);
 // Electron stub
 const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'phonechat-ro-userdata-'));
 const electronStub = {
-  app: { isReady: () => true, getPath: n => (n === 'userData' ? tmpUserData : os.tmpdir()), getName: () => 'natively-test', getVersion: () => '0.0.0-test' },
+  app: { isReady: () => true, getPath: n => (n === 'userData' ? tmpUserData : os.tmpdir()), getName: () => 'MeetFloo-test', getVersion: () => '0.0.0-test' },
   shell: { openPath: async () => '' },
-  ipcMain: { on: () => {}, handle: () => {}, removeAllListeners: () => {} },
+  ipcMain: { on: () => { }, handle: () => { }, removeAllListeners: () => { } },
   BrowserWindow: { getAllWindows: () => [] },
 };
 const em = new Module('electron');
 em.exports = electronStub; em.loaded = true;
 cjsRequire.cache.electron = em;
-try { cjsRequire.cache[cjsRequire.resolve('electron')] = em; } catch {}
+try { cjsRequire.cache[cjsRequire.resolve('electron')] = em; } catch { }
 
 const { planAnswer } = cjsRequire(path.resolve(distDir, 'electron/llm/index.js'));
 

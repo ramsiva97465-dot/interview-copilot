@@ -5,7 +5,7 @@
  * Drives the SAME manual-chat sequence ipcHandlers.ts's `gemini-chat-stream`
  * handler runs (planAnswer -> fast-path preflight -> coding/contract context
  * assembly -> streamChat -> post-stream validators) against the real compiled
- * backend (dist-electron), using the real natively.db profile (copied, never
+ * backend (dist-electron), using the real MeetFloo.db profile (copied, never
  * mutated) via benchmarks/profile-intelligence/harness.cjs.
  *
  * Usage:
@@ -181,7 +181,7 @@ async function main() {
   const cases = fixture.cases || fixture;
 
   const h = H.createHarness({});
-  // The harness copies the LIVE natively.db, which may have an active custom
+  // The harness copies the LIVE MeetFloo.db, which may have an active custom
   // mode (e.g. a document-grounded "Seminar mode" left active by an unrelated
   // concurrent session on this machine) — deactivate it on the SAFE COPY only
   // so this replay tests plain manual-chat routing, matching every earlier

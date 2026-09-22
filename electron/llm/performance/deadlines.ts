@@ -118,7 +118,7 @@ export interface TtftContext {
  * For every route except `user_endpoint` this returns the shipped value
  * unchanged, and that is the correct answer rather than a cautious one: those
  * numbers are derived from a mechanism we can read (a cold weight load, an image
- * prefill, natively-api's own 10s cutover, a direct call with nothing behind it
+ * prefill, MeetFloo-api's own 10s cutover, a direct call with nothing behind it
  * to rescue it), not guessed at, so there is nothing for measurement to correct.
  * Narrowing `server_cascade` in particular would re-create F-301 — the client
  * abandoning a turn 2s before the server rotates.
@@ -290,7 +290,7 @@ export function performanceGrade(profile: ProviderPerformanceProfile | null): Pe
  * do: truncate a healthy long answer mid-sentence.
  *
  * So it feeds diagnostics and {@link workloadTooSlowFor}, which changes what
- * Natively SENDS rather than when it gives up. The stall guard remains the only
+ * MeetFloo SENDS rather than when it gives up. The stall guard remains the only
  * thing that ends a stream that is still producing.
  */
 export function projectTotalDurationMs(

@@ -14,25 +14,25 @@
 import { _electron as electron } from '@playwright/test';
 
 const env = {
-  ...process.env, NATIVELY_E2E: '1', NODE_ENV: 'development',
-  NATIVELY_DEV_BYPASS_SCREEN_TCC: '1', NATIVELY_E2E_LOCAL_TEST_TOKEN: 'local-test',
-  NATIVELY_CONTEXT_OS: '1', NATIVELY_CONTEXT_OS_WTA: '1', NATIVELY_CONTEXT_OS_MANUAL_CHAT: '1',
-  NATIVELY_CONTEXT_OS_EVIDENCE_PACK: '1', NATIVELY_CONTEXT_OS_PROPERTY_VALIDATION: '1',
-  NATIVELY_CONTEXT_OS_PROMPT_AUDIT: '1', NATIVELY_INTELLIGENCE_TRACE: '1',
+  ...process.env, MEETFLOO_E2E: '1', NODE_ENV: 'development',
+  MEETFLOO_DEV_BYPASS_SCREEN_TCC: '1', MEETFLOO_E2E_LOCAL_TEST_TOKEN: 'local-test',
+  MEETFLOO_CONTEXT_OS: '1', MEETFLOO_CONTEXT_OS_WTA: '1', MEETFLOO_CONTEXT_OS_MANUAL_CHAT: '1',
+  MEETFLOO_CONTEXT_OS_EVIDENCE_PACK: '1', MEETFLOO_CONTEXT_OS_PROPERTY_VALIDATION: '1',
+  MEETFLOO_CONTEXT_OS_PROMPT_AUDIT: '1', MEETFLOO_INTELLIGENCE_TRACE: '1',
   OLLAMA_URL: 'http://127.0.0.1:1',
 };
 
 const app = await electron.launch({ args: ['dist-electron/electron/main.js'], env, timeout: 60000 });
 await app.firstWindow({ timeout: 30000 });
-await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => {});
+await app.windows()[0].waitForLoadState('domcontentloaded').catch(() => { });
 const RAW = async (fn, arg) => {
   for (let a = 0; a < 5; a++) {
-    try { const w = app.windows()[0] || await app.firstWindow(); await w.waitForLoadState('domcontentloaded').catch(() => {}); return await w.evaluate(fn, arg); }
+    try { const w = app.windows()[0] || await app.firstWindow(); await w.waitForLoadState('domcontentloaded').catch(() => { }); return await w.evaluate(fn, arg); }
     catch (e) { if (a === 4) throw e; await new Promise((r) => setTimeout(r, 1800)); }
   }
 };
 const R = (ch, ...a) => RAW(async ({ ch, a }) => (window.electronAPI || window.api).e2eInvoke(ch, ...a), { ch, a });
-await R('__e2e__:enable-pro').catch(() => {});
+await R('__e2e__:enable-pro').catch(() => { });
 
 // --- 1. Create mode as General ---
 const created = await RAW(async () => {
@@ -107,5 +107,5 @@ const verdict = {
 console.log('KS_REALFIXTURE_BEGIN');
 console.log(JSON.stringify(verdict, null, 2));
 console.log('KS_REALFIXTURE_END');
-await app.close().catch(() => {});
+await app.close().catch(() => { });
 console.log('CLOSED');

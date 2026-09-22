@@ -26,7 +26,7 @@ POST http://127.0.0.1:<port>/dom?t=<token>
 | `200 {"success":true}` | Accepted. Desktop fires IPC `dom-context-received` → renderer `window.lastCapturedDOM`. |
 | `400 Bad Request` | Body wasn't JSON, or had no string `dom`. |
 | `401 Pairing token missing or invalid.` | Bad/missing `?t`. This is the real auth gate. With a persisted desktop token this is now rare (only after a deliberate Rotate). The extension **re-resolves the port and retries once** before treating it as a genuine revocation; only a re-probed 401 drops the pairing. |
-| `409 {"error":"no_active_session"}` | Natively is running and paired, but there is no active session/overlay to receive the context. The DOM is delivered to the overlay window (the only one that mounts `NativelyInterface`); when no overlay exists the route returns 409 instead of silently dropping. The extension surfaces "Start a Natively session, then capture again". |
+| `409 {"error":"no_active_session"}` | MeetFloo is running and paired, but there is no active session/overlay to receive the context. The DOM is delivered to the overlay window (the only one that mounts `MeetFlooInterface`); when no overlay exists the route returns 409 instead of silently dropping. The extension surfaces "Start a MeetFloo session, then capture again". |
 | `405 Method Not Allowed` | Non-`POST`. |
 | `413 Payload Too Large` | Raw body > 500 KB. |
 | `429` | Rate limited (120 req / 60 s per IP). |
@@ -49,7 +49,7 @@ Hands the extension the token with no copy-paste. Strictly gated:
     - `chrome-extension://lmhgnkbjnelmciecjkleaomjpejcgaln` — Chrome Web Store build.
     - `chrome-extension://macjecgdfliikhplbbdbpljomcigjnjg` — unpacked dev build
       (deterministic from the manifest `key`).
-  Plus an optional `NATIVELY_DOM_EXTENSION_ID` override. A web page cannot forge a
+  Plus an optional `MEETFLOO_DOM_EXTENSION_ID` override. A web page cannot forge a
   `chrome-extension://` origin; a different extension won't match any pinned ID.
 - **Must be armed**: the user clicked "Connect browser extension" in Settings, which opens
   a 60-second window. **Single-use** — burns on first success.
@@ -64,7 +64,7 @@ Hands the extension the token with no copy-paste. Strictly gated:
 The extension's service worker opens this WebSocket (same token as `/dom`) and sends a
 hello frame `{"type":"hello","role":"extension","v":1}` so the desktop can target it. The
 desktop pushes capture commands here; the extension acks over WS and POSTs the content to
-`/dom`. This is how a **Natively global hotkey** triggers capture from any focused app
+`/dom`. This is how a **MeetFloo global hotkey** triggers capture from any focused app
 (the old `chrome.commands` hotkey only fired while Chrome was frontmost — removed in v2).
 
 MV3 lifecycle: the SW is kept resident with a `chrome.alarms` 25s heartbeat that re-opens
@@ -89,8 +89,8 @@ The `/dom` POST body gains optional `reqId` (correlation) and `meta:{title,url,s
 
 - **Phone Mirror must be RUNNING.** `/dom` is a path on PhoneMirrorService's HTTP
   server. If Phone Mirror is off, the connection is refused (`fetch` rejects).
-  The extension surfaces this as "Open Natively and enable Phone Mirror".
-- **An active Natively session (overlay) must exist.** The DOM is delivered to the
+  The extension surfaces this as "Open MeetFloo and enable Phone Mirror".
+- **An active MeetFloo session (overlay) must exist.** The DOM is delivered to the
   overlay window. With no active session the route returns `409` (see above); the
   extension tells the user to start a session first.
 - **The desktop READS-AND-CLEARS** `window.lastCapturedDOM` on each "What to say".

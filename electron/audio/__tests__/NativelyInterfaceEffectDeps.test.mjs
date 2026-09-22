@@ -1,6 +1,6 @@
-// Regression test for: NativelyInterface.tsx mega-effect dep array must be []
+// Regression test for: MeetFlooInterface.tsx mega-effect dep array must be []
 //
-// Bug: The large useEffect at ~L1434 in src/components/NativelyInterface.tsx
+// Bug: The large useEffect at ~L1434 in src/components/MeetFlooInterface.tsx
 // — the one that registers ~20 IPC subscriptions including
 // onNativeAudioConnected, onIntelligenceManualResult, onIntelligenceError,
 // etc. — previously declared `[isExpanded]` as its dep array. Every expand
@@ -19,7 +19,7 @@
 // expanded state already reads `isExpandedRef.current` (the ref is kept
 // in sync by a separate effect).
 //
-// Strategy: source-level static check on NativelyInterface.tsx. Rendering
+// Strategy: source-level static check on MeetFlooInterface.tsx. Rendering
 // this 4065-line component in RTL would require a massive IPC/electronAPI
 // mock surface and would not actually validate the dep array semantics.
 
@@ -32,7 +32,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const filePath = path.resolve(
     __dirname,
-    '../../../src/components/NativelyInterface.tsx',
+    '../../../src/components/MeetFlooInterface.tsx',
 );
 
 const source = readFileSync(filePath, 'utf8');

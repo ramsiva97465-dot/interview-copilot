@@ -239,45 +239,45 @@ const UpdateModal: React.FC<UpdateModalProps> = ({
                                 {/* 2. Premium Troubleshooting Card — macOS-only.
                                     The xattr quarantine bypass is meaningless on
                                     Windows (NSIS installer has no Gatekeeper
-                                    equivalent), and the /Applications/Natively.app
+                                    equivalent), and the /Applications/MeetFloo.app
                                     path doesn't exist there. */}
                                 {isMac && (
-                                <div
-                                    tabIndex={-1}
-                                    className="w-full max-w-[360px] bg-white/[0.03] rounded-xl border border-white/[0.06] p-3.5 flex flex-col gap-2.5 text-left mb-8 outline-none focus:outline-none focus:ring-0"
-                                >
-                                    <div className="flex items-start gap-2.5">
-                                        <div className="w-5 h-5 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                            <span className="text-[10px] text-amber-500">!</span>
+                                    <div
+                                        tabIndex={-1}
+                                        className="w-full max-w-[360px] bg-white/[0.03] rounded-xl border border-white/[0.06] p-3.5 flex flex-col gap-2.5 text-left mb-8 outline-none focus:outline-none focus:ring-0"
+                                    >
+                                        <div className="flex items-start gap-2.5">
+                                            <div className="w-5 h-5 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <span className="text-[10px] text-amber-500">!</span>
+                                            </div>
+                                            <div className="space-y-0.5">
+                                                <p className="text-[12px] font-medium text-white/80 leading-tight">
+                                                    {t('If macOS says "App is damaged"')}
+                                                </p>
+                                                <p className="text-[11px] text-white/40 leading-snug">
+                                                    {t('Move app to Applications folder, then run:')}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="space-y-0.5">
-                                            <p className="text-[12px] font-medium text-white/80 leading-tight">
-                                                {t('If macOS says "App is damaged"')}
-                                            </p>
-                                            <p className="text-[11px] text-white/40 leading-snug">
-                                                {t('Move app to Applications folder, then run:')}
-                                            </p>
-                                        </div>
-                                    </div>
 
-                                    {/* Code Block with Copy */}
-                                    <div className="flex items-center justify-between bg-black/20 rounded-lg pl-3 pr-1.5 py-1.5 border border-white/[0.03] group hover:border-white/10 transition-colors">
-                                        <code className="text-[10px] font-mono text-blue-400 truncate mr-2 select-all">
-                                            xattr -cr /Applications/MeetFloo.app
-                                        </code>
-                                        <button
-                                            onClick={handleCopyCommand}
-                                            className="h-6 px-2.5 rounded-md bg-white/5 hover:bg-white/10 active:bg-white/15 flex items-center justify-center transition-colors border border-white/5"
-                                            title={t("Copy to clipboard")}
-                                        >
-                                            {copied ? (
-                                                <span className="text-[10px] font-semibold text-green-400">{t('Copied')}</span>
-                                            ) : (
-                                                <span className="text-[10px] font-medium text-white/50 group-hover:text-white/80">{t('Copy')}</span>
-                                            )}
-                                        </button>
+                                        {/* Code Block with Copy */}
+                                        <div className="flex items-center justify-between bg-black/20 rounded-lg pl-3 pr-1.5 py-1.5 border border-white/[0.03] group hover:border-white/10 transition-colors">
+                                            <code className="text-[10px] font-mono text-blue-400 truncate mr-2 select-all">
+                                                xattr -cr /Applications/MeetFloo.app
+                                            </code>
+                                            <button
+                                                onClick={handleCopyCommand}
+                                                className="h-6 px-2.5 rounded-md bg-white/5 hover:bg-white/10 active:bg-white/15 flex items-center justify-center transition-colors border border-white/5"
+                                                title={t("Copy to clipboard")}
+                                            >
+                                                {copied ? (
+                                                    <span className="text-[10px] font-semibold text-green-400">{t('Copied')}</span>
+                                                ) : (
+                                                    <span className="text-[10px] font-medium text-white/50 group-hover:text-white/80">{t('Copy')}</span>
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
                                 )}
 
                                 {/* 3. Progress Bar */}

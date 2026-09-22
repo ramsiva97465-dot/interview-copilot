@@ -31,8 +31,8 @@ function goodManifest(overrides = {}) {
     type: 'reranker',
     entrypoint: 'dist/index.js',
     author: 'community',
-    homepage: 'https://github.com/example/natively-ettin-reranker',
-    engines: { natively: '>=2.8.0' },
+    homepage: 'https://github.com/example/MeetFloo-ettin-reranker',
+    engines: { MeetFloo: '>=2.8.0' },
     permissions: ['filesystem.models'],
     models: [
       {
@@ -128,13 +128,13 @@ test('an unresolved huggingface repo id warns but does not silently pass as down
   assert.match(result.warnings.join('; '), /no resolved repo id/);
 });
 
-test('engines.natively gates on the running app version', () => {
+test('engines.MeetFloo gates on the running app version', () => {
   const tooNew = validateManifest(
-    goodManifest({ engines: { natively: '>=99.0.0' } }),
+    goodManifest({ engines: { MeetFloo: '>=99.0.0' } }),
     { appVersion: APP_VERSION },
   );
   assert.equal(tooNew.ok, false);
-  assert.match(tooNew.errors.join('; '), /engines\.natively/);
+  assert.match(tooNew.errors.join('; '), /engines\.MeetFloo/);
 });
 
 test('an unparseable engine range is refused, not treated as satisfied', () => {

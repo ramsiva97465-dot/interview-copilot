@@ -1,101 +1,101 @@
 import path from 'path';
 
 export interface AudioDeviceInfo {
-  id: string;
-  name: string;
+    id: string;
+    name: string;
 }
 
 export interface NativeModule {
-  getHardwareId(): string;
-  verifyGumroadKey(licenseKey: string): Promise<string>;
-  // Dodo Payments — all three require a binary rebuild (cargo build --release)
-  // They are optional (?) so the module loads even with a stale binary.
-  verifyDodoKey?: (licenseKey: string, deviceLabel: string) => Promise<string>;
-  validateDodoKey?: (licenseKey: string) => Promise<string>;
-  deactivateDodoKey?: (licenseKey: string, instanceId: string) => Promise<string>;
-  getInputDevices(): Array<AudioDeviceInfo>;
-  getOutputDevices(): Array<AudioDeviceInfo>;
-  // Default-output device id for the system default route. Optional because
-  // existing shipped binaries don't have it — main.ts checks `typeof` before
-  // calling. Requires a binary rebuild (cargo build --release).
-  getDefaultOutputDeviceId?: () => string;
-  // macOS-only: apply NSPanel-nonactivating + becomesKeyOnlyIfNeeded +
-  // hidesOnDeactivate=NO + the right collectionBehavior on the overlay
-  // window so clicks/keystrokes don't activate Natively (foreground app
-  // keeps key state in dock/menu bar/screen-share). Requires a binary
-  // rebuild — WindowHelper checks `typeof` and degrades to plain panel
-  // type if missing. Caller passes BrowserWindow.getNativeWindowHandle().
-  applyStealthToWindow?: (handle: Buffer) => void;
-  // Permission gate for the stealth keyboard capture. macOS: CGEventTap
-  // Accessibility trust (true if granted). Windows: always true — a
-  // WH_KEYBOARD_LL hook needs no OS permission. Cheap; safe to poll to
-  // drive UI state.
-  isAccessibilityGranted?: () => boolean;
-  // Windows-only: true when the active keyboard layout is a CJK IME
-  // (Chinese/Japanese/Korean). The WH_KEYBOARD_LL hook swallows keystrokes
-  // before IMM32/TSF can compose them, so stealth typing must be reported
-  // UNAVAILABLE for these users — they fall back to normal focusable typing.
-  // macOS makes the same call from ImeDetector.ts. Optional: requires a binary
-  // rebuild; callers must `typeof`-check and treat a missing export as "no IME"
-  // so a stale binary keeps today's behaviour.
-  isImeKeyboardActive?: () => boolean;
-  // Stealth keyboard interception. macOS: CGEventTap. Windows:
-  // WH_KEYBOARD_LL low-level hook (native-module/src/keyboard_hook_windows.rs)
-  // exposing this IDENTICAL surface. Engaged by StealthKeyboardManager; the
-  // foreground app does NOT receive any keystroke while active, so the user
-  // types into the overlay without it taking OS focus. Optional: requires a
-  // binary rebuild (macOS additionally needs Accessibility permission).
-  StealthKeyboardTap?: new () => {
-    start(
-      callback: (err: Error | null, ev: CapturedKey) => void,
-      // The app's own global shortcuts (printable-leak subset) the native hook
-      // should swallow + self-dispatch so they can't leak into the foreground
-      // app while a RegisterHotKey registration is temporarily dropped. Pass []
-      // to disable. Ignored on macOS (shortcuts are consumed by Carbon/IOKit
-      // before the tap); honoured by the Windows WH_KEYBOARD_LL hook.
-      appChords: Array<{ vk: number; mods: number; id: string }>,
-      // When true, engage shortcut-guard mode: swallow only the app's own chords,
-      // pass all other keys through, and install no outside-click/Alt+Tab hooks.
-      // When false, the full stealth-typing tap. Ignored on macOS.
-      shortcutOnly: boolean,
-      overlayBounds?: OverlayBoundsInput | null,
-    ): boolean;
-    stop(): void;
-    readonly isActive: boolean;
-  };
-  SystemAudioCapture: new (deviceId?: string | null) => {
-    getSampleRate(): number;
-    start(callback: (...args: any[]) => any, onSpeechEnded?: (...args: any[]) => any): void;
-    stop(): void;
-  };
-  MicrophoneCapture: new (deviceId?: string | null) => {
-    getSampleRate(): number;
-    start(callback: (...args: any[]) => any, onSpeechEnded?: (...args: any[]) => any): void;
-    stop(): void;
-  };
+    getHardwareId(): string;
+    verifyGumroadKey(licenseKey: string): Promise<string>;
+    // Dodo Payments — all three require a binary rebuild (cargo build --release)
+    // They are optional (?) so the module loads even with a stale binary.
+    verifyDodoKey?: (licenseKey: string, deviceLabel: string) => Promise<string>;
+    validateDodoKey?: (licenseKey: string) => Promise<string>;
+    deactivateDodoKey?: (licenseKey: string, instanceId: string) => Promise<string>;
+    getInputDevices(): Array<AudioDeviceInfo>;
+    getOutputDevices(): Array<AudioDeviceInfo>;
+    // Default-output device id for the system default route. Optional because
+    // existing shipped binaries don't have it — main.ts checks `typeof` before
+    // calling. Requires a binary rebuild (cargo build --release).
+    getDefaultOutputDeviceId?: () => string;
+    // macOS-only: apply NSPanel-nonactivating + becomesKeyOnlyIfNeeded +
+    // hidesOnDeactivate=NO + the right collectionBehavior on the overlay
+    // window so clicks/keystrokes don't activate MeetFloo (foreground app
+    // keeps key state in dock/menu bar/screen-share). Requires a binary
+    // rebuild — WindowHelper checks `typeof` and degrades to plain panel
+    // type if missing. Caller passes BrowserWindow.getNativeWindowHandle().
+    applyStealthToWindow?: (handle: Buffer) => void;
+    // Permission gate for the stealth keyboard capture. macOS: CGEventTap
+    // Accessibility trust (true if granted). Windows: always true — a
+    // WH_KEYBOARD_LL hook needs no OS permission. Cheap; safe to poll to
+    // drive UI state.
+    isAccessibilityGranted?: () => boolean;
+    // Windows-only: true when the active keyboard layout is a CJK IME
+    // (Chinese/Japanese/Korean). The WH_KEYBOARD_LL hook swallows keystrokes
+    // before IMM32/TSF can compose them, so stealth typing must be reported
+    // UNAVAILABLE for these users — they fall back to normal focusable typing.
+    // macOS makes the same call from ImeDetector.ts. Optional: requires a binary
+    // rebuild; callers must `typeof`-check and treat a missing export as "no IME"
+    // so a stale binary keeps today's behaviour.
+    isImeKeyboardActive?: () => boolean;
+    // Stealth keyboard interception. macOS: CGEventTap. Windows:
+    // WH_KEYBOARD_LL low-level hook (native-module/src/keyboard_hook_windows.rs)
+    // exposing this IDENTICAL surface. Engaged by StealthKeyboardManager; the
+    // foreground app does NOT receive any keystroke while active, so the user
+    // types into the overlay without it taking OS focus. Optional: requires a
+    // binary rebuild (macOS additionally needs Accessibility permission).
+    StealthKeyboardTap?: new () => {
+        start(
+            callback: (err: Error | null, ev: CapturedKey) => void,
+            // The app's own global shortcuts (printable-leak subset) the native hook
+            // should swallow + self-dispatch so they can't leak into the foreground
+            // app while a RegisterHotKey registration is temporarily dropped. Pass []
+            // to disable. Ignored on macOS (shortcuts are consumed by Carbon/IOKit
+            // before the tap); honoured by the Windows WH_KEYBOARD_LL hook.
+            appChords: Array<{ vk: number; mods: number; id: string }>,
+            // When true, engage shortcut-guard mode: swallow only the app's own chords,
+            // pass all other keys through, and install no outside-click/Alt+Tab hooks.
+            // When false, the full stealth-typing tap. Ignored on macOS.
+            shortcutOnly: boolean,
+            overlayBounds?: OverlayBoundsInput | null,
+        ): boolean;
+        stop(): void;
+        readonly isActive: boolean;
+    };
+    SystemAudioCapture: new (deviceId?: string | null) => {
+        getSampleRate(): number;
+        start(callback: (...args: any[]) => any, onSpeechEnded?: (...args: any[]) => any): void;
+        stop(): void;
+    };
+    MicrophoneCapture: new (deviceId?: string | null) => {
+        getSampleRate(): number;
+        start(callback: (...args: any[]) => any, onSpeechEnded?: (...args: any[]) => any): void;
+        stop(): void;
+    };
 }
 
 export interface OverlayBoundsInput {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
 }
 
 /** Mirrors native-module/src/keyboard_tap.rs CapturedKey. */
 export interface CapturedKey {
-  keyCode: number;
-  chars: string;
-  flags: number;
-  isKeyDown: boolean;
-  isOutsideMouseDown?: boolean;
-  /**
-   * Non-empty ⟹ this event is the app's OWN global shortcut firing, swallowed
-   * by the native hook (Windows) so it can never leak into the foreground app.
-   * The value is the KeybindManager action id; StealthKeyboardManager dispatches
-   * it instead of typing. Always absent/empty on macOS.
-   */
-  appChordId?: string;
+    keyCode: number;
+    chars: string;
+    flags: number;
+    isKeyDown: boolean;
+    isOutsideMouseDown?: boolean;
+    /**
+     * Non-empty ⟹ this event is the app's OWN global shortcut firing, swallowed
+     * by the native hook (Windows) so it can never leak into the foreground app.
+     * The value is the KeybindManager action id; StealthKeyboardManager dispatches
+     * it instead of typing. Always absent/empty on macOS.
+     */
+    appChordId?: string;
 }
 
 // Hard-required: crash the module load if any of these are missing.
@@ -185,13 +185,13 @@ function validateNativeModule(mod: any): asserts mod is NativeModule {
 function getNativeBinaryName(): string {
     const { platform, arch } = process;
     const map: Record<string, Record<string, string>> = {
-        win32:  {
-            x64:   'index.win32-x64-msvc.node',
-            ia32:  'index.win32-ia32-msvc.node',
+        win32: {
+            x64: 'index.win32-x64-msvc.node',
+            ia32: 'index.win32-ia32-msvc.node',
             arm64: 'index.win32-arm64-msvc.node',
         },
         darwin: { x64: 'index.darwin-x64.node', arm64: 'index.darwin-arm64.node' },
-        linux:  { x64: 'index.linux-x64-gnu.node', arm64: 'index.linux-arm64-gnu.node' },
+        linux: { x64: 'index.linux-x64-gnu.node', arm64: 'index.linux-arm64-gnu.node' },
     };
     return map[platform]?.[arch] ?? `index.${platform}-${arch}.node`;
 }
@@ -202,8 +202,8 @@ let cached: NativeModule | null | undefined = undefined;
 /**
  * Loads the Rust native module directly from the .node binary file.
  *
- * We bypass `require('natively-audio')` intentionally. That approach relied on
- * npm creating a symlink from node_modules/natively-audio -> native-module/,
+ * We bypass `require('MeetFloo-audio')` intentionally. That approach relied on
+ * npm creating a symlink from node_modules/MeetFloo-audio -> native-module/,
  * which breaks on Windows (Git Bash produces POSIX-style symlinks that Node
  * can't resolve). Loading the .node file directly avoids npm entirely.
  *

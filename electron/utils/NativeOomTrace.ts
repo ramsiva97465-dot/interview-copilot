@@ -2,8 +2,8 @@ import { app, contentTracing } from 'electron';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const TRACE_ENV = 'NATIVELY_NATIVE_OOM_TRACE';
-const CONTENT_TRACE_ENV = 'NATIVELY_NATIVE_OOM_CONTENT_TRACE';
+const TRACE_ENV = 'MEETFLOO_NATIVE_OOM_TRACE';
+const CONTENT_TRACE_ENV = 'MEETFLOO_NATIVE_OOM_CONTENT_TRACE';
 const MAX_TRACE_BYTES = 5 * 1024 * 1024;
 const CONTENT_TRACE_DURATION_MS = 25_000;
 const CONTENT_TRACE_RSS_DELTA_BYTES = 512 * 1024 * 1024;

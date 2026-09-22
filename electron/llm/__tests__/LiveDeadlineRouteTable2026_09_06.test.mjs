@@ -3,7 +3,7 @@
 // The live first-token ceiling used to be one number, 13000, for everyone.
 //
 // That number is not general. Its derivation is written into
-// LIVE_TOTAL_HARD_TIMEOUT_MS's own comment: "the natively-api server's 10s
+// LIVE_TOTAL_HARD_TIMEOUT_MS's own comment: "the MeetFloo-api server's 10s
 // cutover + 3s for the next leg to produce a first token". It describes a
 // mechanism — a SEQUENTIAL server-side provider cascade — that only exists on
 // one route. Every other route was inheriting it by sharing its `return`.
@@ -20,10 +20,10 @@
 //
 //  • vision must stay ABOVE user-endpoint, or a screenshot turn on a Custom
 //    provider silently loses the budget e079cd4a was measured to need;
-//  • the natively route must stay ABOVE the server's 10s cutover, which is the
+//  • the MeetFloo route must stay ABOVE the server's 10s cutover, which is the
 //    F-301 invariant DeadlineBudgetOrdering2026_08_10 owns — asserted here too,
 //    against the constant rather than the server file, so the ordering is still
-//    checked in CI where natively-api is not checked out;
+//    checked in CI where MeetFloo-api is not checked out;
 //  • the two selectors must agree about the same turn, because they are read by
 //    two different surfaces (WTA reads the ceiling, manual chat reads the
 //    first-useful cap) and a disagreement is invisible from either one.
@@ -56,14 +56,14 @@ electronStub.exports = {
     isReady: () => true,
     getPath: (n) => (n === 'userData' ? tmpUserData : os.tmpdir()),
     getAppPath: () => root,
-    getName: () => 'natively-test',
+    getName: () => 'MeetFloo-test',
     getVersion: () => '0.0.0-test',
     isPackaged: false,
-    on: () => {},
+    on: () => { },
   },
   shell: { openPath: async () => '' },
   safeStorage: { isEncryptionAvailable: () => false },
-  ipcMain: { on: () => {}, handle: () => {}, removeAllListeners: () => {} },
+  ipcMain: { on: () => { }, handle: () => { }, removeAllListeners: () => { } },
   BrowserWindow: { getAllWindows: () => [] },
   desktopCapturer: { getSources: async () => [] },
   net: { isOnline: () => true },
@@ -106,7 +106,7 @@ describe('the route table assigns each route the number its own path justifies',
     assert.equal(totalHardTimeoutMs({ isUserEndpoint: true }), 15000);
   });
 
-  test('the natively route keeps 13s, unchanged', () => {
+  test('the MeetFloo route keeps 13s, unchanged', () => {
     // Deliberately NOT lowered. 8000 is the exact value
     // DeadlineBudgetOrdering2026_08_10's header documents as the broken,
     // inverted configuration: the client abandoning the turn 2s before the
@@ -141,16 +141,16 @@ describe('ordering constraints that a future edit would otherwise break silently
     );
   });
 
-  test('a vision turn on the natively route still uses the natively ceiling', () => {
+  test('a vision turn on the MeetFloo route still uses the MeetFloo ceiling', () => {
     assert.equal(
       totalHardTimeoutMs({ isVisionTurn: true, viaServerCascade: true }),
       LIVE_TOTAL_HARD_TIMEOUT_MS,
     );
   });
 
-  test('the natively ceiling still clears the server cutover by >= 2s', () => {
+  test('the MeetFloo ceiling still clears the server cutover by >= 2s', () => {
     // The same invariant DeadlineBudgetOrdering2026_08_10 checks against
-    // natively-api/server.js. Repeated here against the literal because that
+    // MeetFloo-api/server.js. Repeated here against the literal because that
     // suite SKIPS when the gitlink is not checked out — which is every CI run.
     const SERVER_CUTOVER_MS = 10_000;
     assert.ok(
@@ -166,7 +166,7 @@ describe('ordering constraints that a future edit would otherwise break silently
     for (const [name, ms] of [
       ['default', totalHardTimeoutMs({})],
       ['user endpoint', totalHardTimeoutMs({ isUserEndpoint: true })],
-      ['natively', totalHardTimeoutMs({ viaServerCascade: true })],
+      ['MeetFloo', totalHardTimeoutMs({ viaServerCascade: true })],
       ['vision', totalHardTimeoutMs({ isVisionTurn: true })],
     ]) {
       assert.ok(ms >= 5000, `${name} route is only ${ms}ms`);
@@ -194,7 +194,7 @@ describe('WTA and manual chat cannot disagree about the same turn', () => {
     );
   });
 
-  test('the natively route agrees across both selectors', () => {
+  test('the MeetFloo route agrees across both selectors', () => {
     assert.equal(
       firstUsefulDeadlineMs('identity_answer', false, true, false),
       totalHardTimeoutMs({ viaServerCascade: true }),
@@ -247,7 +247,7 @@ describe('the predicate that selects the user-endpoint route', () => {
   });
 
   test('a shipped provider is NOT a user endpoint, even on the user’s own key', () => {
-    assert.equal(helperWithModel('natively').isUsingUserEndpoint(), false);
+    assert.equal(helperWithModel('MeetFloo').isUsingUserEndpoint(), false);
     for (const id of ['gemini', 'gemini-pro', 'claude', 'llama', 'deepseek']) {
       assert.equal(helperWithModel(id).isUsingUserEndpoint(), false, `${id} should use the default route`);
     }
@@ -276,9 +276,9 @@ describe('the predicate that selects the user-endpoint route', () => {
     );
   });
 
-  test('natively is the cascade route and not the user-endpoint route', () => {
-    const h = helperWithModel('natively');
-    assert.equal(h.isUsingNativelyServerCascade(), true);
+  test('MeetFloo is the cascade route and not the user-endpoint route', () => {
+    const h = helperWithModel('MeetFloo');
+    assert.equal(h.isUsingMeetFlooServerCascade(), true);
     assert.equal(h.isUsingUserEndpoint(), false);
   });
 });
@@ -457,7 +457,7 @@ describe('a repair stream is route-aware without becoming an answer stream', () 
   test('no route can make a repair shorter than it is today', () => {
     for (const minMs of [7000, 8000]) {
       for (const opts of [{}, { viaServerCascade: true }, { isUserEndpoint: true },
-                          { isUserEndpoint: true, observedUserEndpointLatency: { maxMs: 300, count: 50 } }]) {
+      { isUserEndpoint: true, observedUserEndpointLatency: { maxMs: 300, count: 50 } }]) {
         assert.ok(repairDeadlineMs({ ...opts, minMs }) >= minMs,
           `${JSON.stringify(opts)} at floor ${minMs} produced ${repairDeadlineMs({ ...opts, minMs })}`);
       }
@@ -504,7 +504,7 @@ describe('rung fitting keeps the whole chain inside the route ceiling', () => {
   // docblock). What makes that safe is not the value but these two invariants,
   // swept across every observed latency the adaptive budget can produce.
   const MIN_USEFUL_RUNG_MS = 3000;
-  const NATIVELY_TEXT_TTFT_MS = 8000;
+  const MEETFLOO_TEXT_TTFT_MS = 8000;
   // Mirrors LLMHelper.hedgeDelayForBudget.
   const hedgeDelayForBudget = (budget, obs) => obs == null
     ? Math.round(budget * 0.6)
@@ -533,8 +533,8 @@ describe('rung fitting keeps the whole chain inside the route ceiling', () => {
     const src = fs.readFileSync(path.join(root, 'electron/LLMHelper.ts'), 'utf8');
     assert.match(src, /const MIN_USEFUL_RUNG_MS = 3_000;/,
       'mirror assumes a 3000ms floor');
-    assert.match(src, /const NATIVELY_TEXT_TTFT_MS = 8_000;/,
-      'mirror assumes the natively spare asks for 8000ms');
+    assert.match(src, /const MEETFLOO_TEXT_TTFT_MS = 8_000;/,
+      'mirror assumes the MeetFloo spare asks for 8000ms');
     assert.match(src, /if \(remainingForSpares < MIN_USEFUL_RUNG_MS\) break;/,
       'mirror assumes the loop stops below the floor');
     assert.match(src, /const give = Math\.min\(want, remainingForSpares\);/,
@@ -549,7 +549,7 @@ describe('rung fitting keeps the whole chain inside the route ceiling', () => {
         const observed = isUserEndpoint ? { maxMs: obs, ewmaMs: obs, count: 9 } : null;
         const budget = totalHardTimeoutMs({ isUserEndpoint, observedUserEndpointLatency: observed });
         const { primary, fitted } = fit(budget, isUserEndpoint ? obs : null,
-          [NATIVELY_TEXT_TTFT_MS, undefined, undefined]);
+          [MEETFLOO_TEXT_TTFT_MS, undefined, undefined]);
         const total = primary + fitted.reduce((a, b) => a + b, 0);
         assert.ok(total <= budget,
           `obs=${obs} userEndpoint=${isUserEndpoint}: chain ${total}ms exceeds ceiling ${budget}ms`);
@@ -566,8 +566,10 @@ describe('rung fitting keeps the whole chain inside the route ceiling', () => {
     // PRE-fitting count, so dropping every spare left the primary on a
     // shortened failover trigger with nothing behind it and no parallel retry.
     for (let obs = 0; obs <= 30000; obs += 250) {
-      const budget = totalHardTimeoutMs({ isUserEndpoint: true,
-        observedUserEndpointLatency: { maxMs: obs, ewmaMs: obs, count: 9 } });
+      const budget = totalHardTimeoutMs({
+        isUserEndpoint: true,
+        observedUserEndpointLatency: { maxMs: obs, ewmaMs: obs, count: 9 }
+      });
       // A spare so slow that nothing can fit behind the primary.
       const { primary, hedging } = fit(budget, obs, [Number.MAX_SAFE_INTEGER, undefined]);
       if (hedging) {

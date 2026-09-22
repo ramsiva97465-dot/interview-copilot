@@ -88,7 +88,7 @@ describe('what one probe response settles', () => {
   });
 });
 
-describe('nothing Natively ships points at a retired id', () => {
+describe('nothing MeetFloo ships points at a retired id', () => {
   test('the probe ladder is clean', () => {
     assert.ok(nv.NVIDIA_NIM_TEST_MODEL_LADDER.length >= 2,
       'the ladder needs a second rung for the 410 case, where the response is pre-auth');

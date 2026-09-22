@@ -3,10 +3,19 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+try {
+    if (process.loadEnvFile) {
+        process.loadEnvFile();
+    }
+} catch (e) {
+    // .env might be missing in some environments, ignore
+}
+
 import { handleAuthRoutes } from './server/routes/auth.mjs';
 import { handleUserRoutes } from './server/routes/user.mjs';
 import { handlePaymentRoutes } from './server/routes/payments.mjs';
 import { handleAdminRoutes } from './server/routes/admin.mjs';
+import { handleDesktopLoginRoutes } from './server/routes/desktopLogin.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -58,6 +67,9 @@ async function handleRequest(req, res) {
             res.end();
             return;
         }
+
+        // Desktop Login Route
+        if (await handleDesktopLoginRoutes(req, res, pathname)) return;
 
         // ── API ROUTES ──
         if (pathname.startsWith('/api/')) {

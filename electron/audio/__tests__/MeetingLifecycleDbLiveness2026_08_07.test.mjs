@@ -9,7 +9,7 @@
 //
 //     after any amount of start/stop churn, can we still save a meeting?
 //
-// So this test cycles the real NativelyProSTT over real sockets through a fixed
+// So this test cycles the real MeetFlooProSTT over real sockets through a fixed
 // sequence of handshake outcomes, wires main.ts's REAL fatal policy
 // (uncaughtException -> emergencyCloseDatabase), and after EVERY cycle performs
 // a genuine SELECT 1 + insert + read-back + delete against a real SQLite file.
@@ -72,15 +72,15 @@ Module._load = function patchedLoad(request) {
 // imports run at MODULE LOAD the whole file fails before a single test runs —
 // which is why this file showed up as one opaque file-level ✖ in the Windows
 // leg rather than as a failing assertion. `pathToFileURL` is the fix.
-const { NativelyProSTT } = await import(pathToFileURL(path.join(repoRoot, 'dist-electron/electron/audio/NativelyProSTT.js')).href);
+const { MeetFlooProSTT } = await import(pathToFileURL(path.join(repoRoot, 'dist-electron/electron/audio/MeetFlooProSTT.js')).href);
 const { MeetingLifecycleQueue } = await import(pathToFileURL(path.join(repoRoot, 'dist-electron/electron/audio/meetingLifecycleQueue.js')).href);
 
 const settle = (ms) => new Promise(r => setTimeout(r, ms));
 
 test('25 start/stop cycles leave the database live and writable', opts, async () => {
     // ── A real SQLite file this test owns outright ─────────────────────────
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-liveness-'));
-    const db = new Database(path.join(dir, 'natively.db'));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-liveness-'));
+    const db = new Database(path.join(dir, 'MeetFloo.db'));
     db.exec(`CREATE TABLE meetings (
         id TEXT PRIMARY KEY, title TEXT, start_time INTEGER,
         duration_ms INTEGER, created_at TEXT
@@ -129,11 +129,11 @@ test('25 start/stop cycles leave the database live and writable', opts, async ()
     const PLATFORMS = ['darwin', 'win32'];
 
     function makeStt(url, channel) {
-        const stt = new NativelyProSTT('liveness-key', channel);
+        const stt = new MeetFlooProSTT('liveness-key', channel);
         // SEAM: BACKEND_URL survives start(); `target` is nulled by start(), so
         // pinning it would silently fall back to the production endpoint.
         stt.BACKEND_URL = url;
-        stt.on('error', () => {});   // production subscribes at main.ts:3259
+        stt.on('error', () => { });   // production subscribes at main.ts:3259
         return stt;
     }
 
@@ -158,63 +158,63 @@ test('25 start/stop cycles leave the database live and writable', opts, async ()
     // failing run leaves listening sockets holding the event loop open and the
     // test runner hangs instead of reporting the failure.
     try {
-    for (let cycle = 0; cycle < 25; cycle++) {
-        const url = URLS[BEHAVIOURS[cycle % BEHAVIOURS.length]];
-        const fixture = FIXTURES[cycle % FIXTURES.length];
-        const platform = PLATFORMS[cycle % PLATFORMS.length];
-        const states = [];
-        const queue = new MeetingLifecycleQueue((s) => states.push(s));
+        for (let cycle = 0; cycle < 25; cycle++) {
+            const url = URLS[BEHAVIOURS[cycle % BEHAVIOURS.length]];
+            const fixture = FIXTURES[cycle % FIXTURES.length];
+            const platform = PLATFORMS[cycle % PLATFORMS.length];
+            const states = [];
+            const queue = new MeetingLifecycleQueue((s) => states.push(s));
 
-        let mic = null, sys = null;
-        await queue.start(async () => {
-            if (fixture !== 'system-only') { mic = makeStt(url, 'mic'); mic.start(); }
-            if (fixture !== 'mic-only') { sys = makeStt(url, 'system'); sys.start(); }
-            await settle([0, 12, 45][cycle % 3]);   // cancel at varied handshake depths
-        });
-        assertDbLive(cycle, 'after-start');
+            let mic = null, sys = null;
+            await queue.start(async () => {
+                if (fixture !== 'system-only') { mic = makeStt(url, 'mic'); mic.start(); }
+                if (fixture !== 'mic-only') { sys = makeStt(url, 'system'); sys.start(); }
+                await settle([0, 12, 45][cycle % 3]);   // cancel at varied handshake depths
+            });
+            assertDbLive(cycle, 'after-start');
 
-        if (mic?.ws) discarded.push(mic.ws);
-        if (sys?.ws) discarded.push(sys.ws);
+            if (mic?.ws) discarded.push(mic.ws);
+            if (sys?.ws) discarded.push(sys.ws);
 
-        await queue.stop(async () => { mic?.stop(); sys?.stop(); await settle(15); });
-        await settle(25);
-        assertDbLive(cycle, 'after-stop');
+            await queue.stop(async () => { mic?.stop(); sys?.stop(); await settle(15); });
+            await settle(25);
+            assertDbLive(cycle, 'after-stop');
 
-        assert.equal(queue.getState(), 'idle',
-            `cycle ${cycle} (${platform}/${fixture}) must settle idle`);
-        assert.deepEqual([states[0], states[states.length - 1]], ['starting', 'idle'],
-            `cycle ${cycle}: unexpected state sequence ${JSON.stringify(states)}`);
+            assert.equal(queue.getState(), 'idle',
+                `cycle ${cycle} (${platform}/${fixture}) must settle idle`);
+            assert.deepEqual([states[0], states[states.length - 1]], ['starting', 'idle'],
+                `cycle ${cycle}: unexpected state sequence ${JSON.stringify(states)}`);
 
-        for (const [name, s] of [['mic', mic], ['system', sys]]) {
-            if (!s) continue;
-            assert.equal(s.isActive, false, `cycle ${cycle}: ${name} still active`);
-            assert.equal(s.ws, null, `cycle ${cycle}: ${name} still holds a socket`);
-            for (const t of ['reconnectTimer', 'stabilityTimer', 'pendingConnectTimer']) {
-                assert.equal(s[t], null, `cycle ${cycle}: ${name} leaked ${t}`);
+            for (const [name, s] of [['mic', mic], ['system', sys]]) {
+                if (!s) continue;
+                assert.equal(s.isActive, false, `cycle ${cycle}: ${name} still active`);
+                assert.equal(s.ws, null, `cycle ${cycle}: ${name} still holds a socket`);
+                for (const t of ['reconnectTimer', 'stabilityTimer', 'pendingConnectTimer']) {
+                    assert.equal(s[t], null, `cycle ${cycle}: ${name} leaked ${t}`);
+                }
             }
         }
-    }
 
-    await settle(400);
+        await settle(400);
 
-    // ── The properties that matter ─────────────────────────────────────────
-    assert.deepEqual(problems, [],
-        'The database must remain live and writable across every cycle. A failure here is ' +
-        'the user-visible symptom: meetings silently stop saving for the rest of the session.');
+        // ── The properties that matter ─────────────────────────────────────────
+        assert.deepEqual(problems, [],
+            'The database must remain live and writable across every cycle. A failure here is ' +
+            'the user-visible symptom: meetings silently stop saving for the rest of the session.');
 
-    assert.equal(uncaught.length, 0,
-        `${uncaught.length} uncaught exception(s) escaped: ` +
-        [...new Set(uncaught.map(e => e.message))].join(' | '));
+        assert.equal(uncaught.length, 0,
+            `${uncaught.length} uncaught exception(s) escaped: ` +
+            [...new Set(uncaught.map(e => e.message))].join(' | '));
 
-    const retained = discarded.filter(s => s.listenerCount('error') + s.listenerCount('close') > 0);
-    assert.equal(retained.length, 0,
-        `${retained.length}/${discarded.length} discarded sockets retained listeners — ` +
-        'these are cycled every meeting, so a retained listener accumulates for the process lifetime.');
+        const retained = discarded.filter(s => s.listenerCount('error') + s.listenerCount('close') > 0);
+        assert.equal(retained.length, 0,
+            `${retained.length}/${discarded.length} discarded sockets retained listeners — ` +
+            'these are cycled every meeting, so a retained listener accumulates for the process lifetime.');
 
-    // Final proof, after everything.
-    assert.equal(db.open, true, 'the database handle must still be open at the end');
-    assertDbLive(999, 'final');
-    assert.deepEqual(problems, [], 'final liveness check must pass');
+        // Final proof, after everything.
+        assert.equal(db.open, true, 'the database handle must still be open at the end');
+        assertDbLive(999, 'final');
+        assert.deepEqual(problems, [], 'final liveness check must pass');
 
     } finally {
         // ── Teardown, guaranteed ───────────────────────────────────────────

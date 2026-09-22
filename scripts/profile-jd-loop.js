@@ -89,7 +89,7 @@ function suggestNextActions(cluster) {
         out.push('if scattered across rows, suspect a per-question guard or a stale surface');
     } else if (cluster.kind === 'refusal') {
         out.push('audit the persistent source-contract authority (ModesManager.getOrMigrateSourceContract) for this mode');
-        out.push('re-run scripts/e2e-profile-jd-real-path.js with NATIVELY_INTERNAL=1 to surface diagnostics');
+        out.push('re-run scripts/e2e-profile-jd-real-path.js with MEETFLOO_INTERNAL=1 to surface diagnostics');
         out.push('cross-check: did the migration fix from Phase 1/2 make this mode reference_files_primary, not reference_files_only?');
     } else if (cluster.kind === 'drift') {
         out.push('extract the first forbidden token and grep the codebase for it');

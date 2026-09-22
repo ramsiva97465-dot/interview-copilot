@@ -74,11 +74,11 @@ export class HindsightManager {
     // `pendingStart`/`serverProcess` — two copies could EACH spawn a hindsight
     // server, and only the spawning copy's kill ran on quit.
     const g = globalThis as unknown as Record<string, HindsightManager | undefined>;
-    if (!g.__nativelyHindsightManagerV1__) {
-      g.__nativelyHindsightManagerV1__ = HindsightManager.instance ?? new HindsightManager();
+    if (!g.__MeetFlooHindsightManagerV1__) {
+      g.__MeetFlooHindsightManagerV1__ = HindsightManager.instance ?? new HindsightManager();
     }
-    HindsightManager.instance = g.__nativelyHindsightManagerV1__;
-    return g.__nativelyHindsightManagerV1__;
+    HindsightManager.instance = g.__MeetFlooHindsightManagerV1__;
+    return g.__MeetFlooHindsightManagerV1__;
   }
 
   /** Cached health result + when it was taken. */
@@ -357,7 +357,7 @@ export class HindsightManager {
 
   /**
    * True when the `hindsightMemory` flag is FORCED by an env override
-   * (`NATIVELY_HINDSIGHT_MEMORY` set to a recognized on/off value). Env writes no
+   * (`MEETFLOO_HINDSIGHT_MEMORY` set to a recognized on/off value). Env writes no
    * SettingsManager state, so `hindsightMemoryExplicitlyOff()` can't see it — this
    * helper covers the gap. The auto-flip must skip when the env forces the value in
    * EITHER direction: forcing OFF must not be silently overwritten with a persisted ON,
@@ -540,7 +540,7 @@ export class HindsightManager {
       //   (1) UI/settings: `setIntelligenceFlag` writes the sibling
       //       `hindsightMemoryEnabledExplicit=true` whenever the value DIFFERS from the
       //       registry default → `hindsightMemoryExplicitlyOff()` returns true → skip.
-      //   (2) Env override: `NATIVELY_HINDSIGHT_MEMORY=0` writes NO SettingsManager state,
+      //   (2) Env override: `MEETFLOO_HINDSIGHT_MEMORY=0` writes NO SettingsManager state,
       //       so the sibling check alone can't see it. `isIntelligenceFlagEnvForced`
       //       detects it. CRITICAL: without this, the auto-flip would write
       //       `hindsightMemoryEnabled=true` to settings while env=0 wins at read time —
@@ -644,11 +644,11 @@ export class HindsightManager {
         const litellmKey = cm.getLitellmApiKey();
         if (litellmKey) extra.OPENAI_API_KEY = litellmKey;
         // Guard: if neither key is present, litellm still needs a non-empty string. The
-        // placeholder 'natively-gateway' satisfies litellm's non-empty check but WILL
+        // placeholder 'MeetFloo-gateway' satisfies litellm's non-empty check but WILL
         // 401 against any auth-required LiteLLM proxy (the common case). Log so the
         // operator has a trail when retains/reflects silently fail.
         if (!extra.OPENAI_API_KEY) {
-          extra.OPENAI_API_KEY = 'natively-gateway';
+          extra.OPENAI_API_KEY = 'MeetFloo-gateway';
           console.warn('[HindsightManager] LiteLLM URL configured without an API key — using placeholder. Retains/reflects will likely fail on auth-required proxies. Save an OpenAI or LiteLLM key in AI Providers.');
         }
       }

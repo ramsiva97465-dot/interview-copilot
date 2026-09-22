@@ -75,16 +75,16 @@ describe('GeminiEmbeddingProvider — key rotation', () => {
 
   test('all keys 429 → throws (within bounded wait) rather than hanging', async () => {
     // Short cooldown/wait via env so the test is fast.
-    process.env.NATIVELY_GEMINI_EMBED_COOLDOWN_MS = '50';
-    process.env.NATIVELY_GEMINI_EMBED_MAX_WAIT_MS = '0'; // don't wait — fail fast
+    process.env.MEETFLOO_GEMINI_EMBED_COOLDOWN_MS = '50';
+    process.env.MEETFLOO_GEMINI_EMBED_MAX_WAIT_MS = '0'; // don't wait — fail fast
     // Re-import with fresh module state so the new env is read at module load.
     const mod = await import(pathToFileURL(provPath).href + `?t=${Date.now()}`);
     const P = mod.GeminiEmbeddingProvider;
     global.fetch = stubFetch({ k1: '429', k2: '429' });
     const p = new P(['k1', 'k2'], 'gemini-embedding-2', DIMS);
     await assert.rejects(() => p.embed('x'), /429|rate-limited/i);
-    delete process.env.NATIVELY_GEMINI_EMBED_COOLDOWN_MS;
-    delete process.env.NATIVELY_GEMINI_EMBED_MAX_WAIT_MS;
+    delete process.env.MEETFLOO_GEMINI_EMBED_COOLDOWN_MS;
+    delete process.env.MEETFLOO_GEMINI_EMBED_MAX_WAIT_MS;
   });
 
   test('embedBatch rotates keys on a 429 sub-batch before serial fallback', async () => {

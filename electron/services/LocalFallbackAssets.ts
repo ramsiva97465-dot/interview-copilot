@@ -49,7 +49,7 @@ export function getResourcesPathSafe(): string {
 
 export function candidateModelRoots(): string[] {
   const candidates: string[] = [];
-  if (process.env.NATIVELY_LOCAL_MODELS_PATH) candidates.push(process.env.NATIVELY_LOCAL_MODELS_PATH);
+  if (process.env.MEETFLOO_LOCAL_MODELS_PATH) candidates.push(process.env.MEETFLOO_LOCAL_MODELS_PATH);
   candidates.push(path.join(getResourcesPathSafe(), 'models'));
   candidates.push(path.join(getResourcesPathSafe(), 'app.asar.unpacked', 'resources', 'models'));
 

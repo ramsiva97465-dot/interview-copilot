@@ -1,6 +1,6 @@
-**What ran.** Each summary run executes the real production code, bundled from this repo's source with the same esbuild options as `scripts/build-electron.js` (`benchmark/build/pipeline.cjs`, sha256 prefix `48a85f51891adcb6`). It runs under Electron-as-Node (same Node ABI as the app) and replicates `MeetingPersistence.processAndSaveMeeting`'s V3 branch step by step, minus the DB write, IPC and telemetry. LLM calls go through the real `LLMHelper.generateMeetingSummary` → `generateWithNatively` → an **unmodified local natively-api** (`node server.js`, local-test auth). There, the real `routeChat` / `buildDeepSeekBody` / `callDeepSeek` build the production request. **No production source file was modified.**
+**What ran.** Each summary run executes the real production code, bundled from this repo's source with the same esbuild options as `scripts/build-electron.js` (`benchmark/build/pipeline.cjs`, sha256 prefix `48a85f51891adcb6`). It runs under Electron-as-Node (same Node ABI as the app) and replicates `MeetingPersistence.processAndSaveMeeting`'s V3 branch step by step, minus the DB write, IPC and telemetry. LLM calls go through the real `LLMHelper.generateMeetingSummary` → `generateWithMeetFloo` → an **unmodified local MeetFloo-api** (`node server.js`, local-test auth). There, the real `routeChat` / `buildDeepSeekBody` / `callDeepSeek` build the production request. **No production source file was modified.**
 
-**The only substitution** is a transport shim (`benchmark/harness/provider-shim.mjs`) preloaded with `node --import`. It intercepts the `fetch` to `api.deepseek.com/chat/completions` that natively-api makes, and per configuration:
+**The only substitution** is a transport shim (`benchmark/harness/provider-shim.mjs`) preloaded with `node --import`. It intercepts the `fetch` to `api.deepseek.com/chat/completions` that MeetFloo-api makes, and per configuration:
 - **`ds-flash-prod`**: forwards the production body byte-for-byte (`thinking: disabled`).
 - **`ds-flash-thinking`**: removes only the `thinking` field (API default = enabled, default effort).
 - **`luna-*`**: sends the same system and user messages to the OpenAI **Responses API** with `reasoning.effort` = max|medium|low|none, `max_output_tokens` = min(production 384,000, Luna's 128,000 ceiling) = 128,000, and `store:false`. The visible text is reshaped into the chat-completion JSON that `callDeepSeek` parses. Everything upstream and downstream (prompts, chunking, parsing, validation, repair, reduce, polish gate, title) is identical.
@@ -13,7 +13,7 @@
 
 **Deadlines.** Production deadlines would have replaced slow outputs with a Gemini fallback, contaminating the comparison. They were therefore lifted for measurement:
 - **Server** (via env): `DEEPSEEK_TIMEOUT_MS`, `DEEPSEEK_TTFT_CAP_MS`, `AI_ROUTE_BUDGET_MS`, `EXTRACTION_DEEPSEEK_TIMEOUT_MS`, `EXTRACTION_ROUTE_BUDGET_MS`.
-- **Client:** the timeout argument of `generateWithNatively` / `withTimeout`.
+- **Client:** the timeout argument of `generateWithMeetFloo` / `withTimeout`.
 - **Shim:** its own undici agent with long timeouts.
 
 Each call's elapsed time is still checked against the real production limits and reported as "production deadline compliance".
@@ -25,8 +25,8 @@ Each call's elapsed time is still checked against the real production limits and
 No summary text in this benchmark came from a non-candidate model. When production routing *would* have used Gemini (see Failure Analysis: the 25k-char size gate on JSON repair), the call was blocked and the chunk was dropped. That is counted against the model whose invalid JSON triggered it.
 
 **Isolation from production systems.**
-- **Environment:** natively-api ran with `SUPABASE_URL` pointed at a closed local port, all ledgers, watchdogs and telemetry disabled, and Telegram, PostHog, Axiom, Sentry and Resend keys blanked, all for the child process only. `.env` was not modified.
-- **Keys:** read from the existing `.env` files and never printed or written. The OpenAI key lives in the repo-root `.env`; natively-api's `.env` has none.
+- **Environment:** MeetFloo-api ran with `SUPABASE_URL` pointed at a closed local port, all ledgers, watchdogs and telemetry disabled, and Telegram, PostHog, Axiom, Sentry and Resend keys blanked, all for the child process only. `.env` was not modified.
+- **Keys:** read from the existing `.env` files and never printed or written. The OpenAI key lives in the repo-root `.env`; MeetFloo-api's `.env` has none.
 - **Server ports:** 18701-18706 (conversations other than LECT-VL) and 18801-18806 (LECT-VL, a second orchestrator started when that transcript finished authoring).
 
 **Fairness.**
@@ -47,7 +47,7 @@ No summary text in this benchmark came from a non-candidate model. When producti
 **Limitations**
 - **Judge noise.** The judge is a single LLM. Fact-level verdicts are more stable than the 1-10 scores, but not human-verified. A blind human-review bundle is provided.
 - **Synthetic content.** The synthetic transcripts are cleaner than real STT (light artifacts only). The two real lectures are single-channel (no diarization) and sentence-cased from all-caps captions.
-- **Transcription.** Transcription was not benchmarked: no Natively STT run, no audio downloaded (the disk had <500 MB free).
+- **Transcription.** Transcription was not benchmarked: no MeetFloo STT run, no audio downloaded (the disk had <500 MB free).
 - **Caching.** Repeated runs of the same transcript can hit provider prompt caches. Cost is therefore reported cold-cache, and latency may be slightly optimistic for runs 2-3.
 - **Latency conditions.** Latency is from one machine in one region (India → provider APIs), at the concurrency used here (≤ ~20 simultaneous provider calls), on 2026-09-16 between 20:04 and 20:48 UTC (01:34-02:18 IST). That window is DeepSeek off-peak.
 - **Concurrent edits.** Other sessions edited this checkout during the benchmark. Seminar/call-center edits in `ModesManager.ts`, `MeetingModeDetector.ts` and `MeetingSummaryReducer.ts` predate the 01:20 IST bundle build and are in the bundle, but they don't touch the six modes or any prompt used here. About 15 more files (including `LLMHelper.ts`, `CredentialsManager.ts`, `ProcessingHelper.ts`) were modified at 02:33-02:37 IST. That is after all 198 runs had finished (last run 02:17 IST) and after the bundle was built, so no run could have used them. Every run used the same bundle.

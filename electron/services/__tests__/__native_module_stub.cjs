@@ -1,4 +1,4 @@
-// Minimal stand-in for the Rust native module (natively-audio .node binary).
+// Minimal stand-in for the Rust native module (MeetFloo-audio .node binary).
 //
 // nativeModuleLoader loads the binary with `require(<absolute>.node)`, and
 // Module._resolveFilename is consulted for absolute requests too — so a test
@@ -53,8 +53,8 @@ class FakeCapture {
   getSampleRate() {
     return 16000;
   }
-  start() {}
-  stop() {}
+  start() { }
+  stop() { }
 }
 
 module.exports = {

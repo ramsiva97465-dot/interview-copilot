@@ -75,8 +75,8 @@ const MEETING = 'rag-guard-meeting';
 
 /** A private database with just the tables the cleanup boundaries touch. */
 function makeIsolatedDb() {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-ragguard-'));
-    const db = new Database(path.join(dir, 'natively.db'));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-ragguard-'));
+    const db = new Database(path.join(dir, 'MeetFloo.db'));
     db.exec(`
         CREATE TABLE meetings (
             id TEXT PRIMARY KEY, title TEXT, start_time INTEGER, duration_ms INTEGER,
@@ -109,7 +109,7 @@ function makeIsolatedDb() {
 
 test('sanity: the cleanup boundaries do their job while the database is OPEN', opts, () => {
     const { db, dir } = makeIsolatedDb();
-    const store = new VectorStore(db, path.join(dir, 'natively.db'), '');
+    const store = new VectorStore(db, path.join(dir, 'MeetFloo.db'), '');
 
     const embeddedBefore = db.prepare(
         'SELECT COUNT(*) c FROM chunks WHERE meeting_id = ? AND embedding IS NOT NULL').get(MEETING).c;
@@ -126,7 +126,7 @@ test('sanity: the cleanup boundaries do their job while the database is OPEN', o
 
 test('cleanup boundaries are a controlled no-op once the database is closed', opts, () => {
     const { db, dir } = makeIsolatedDb();
-    const store = new VectorStore(db, path.join(dir, 'natively.db'), '');
+    const store = new VectorStore(db, path.join(dir, 'MeetFloo.db'), '');
 
     // Exactly the state emergencyCloseDatabase() leaves behind: the handle the
     // VectorStore is holding has been closed out from under it.
@@ -150,7 +150,7 @@ test('cleanup boundaries are a controlled no-op once the database is closed', op
 test('the guard keys off availability, so real errors on an OPEN database still surface', opts, () => {
     // If this were a blanket try/catch instead of an availability check, it
     // would mask genuine cleanup bugs during normal operation.
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-ragguard-bare-'));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-ragguard-bare-'));
     const db = new Database(path.join(dir, 'bare.db'));   // deliberately no schema
     const store = new VectorStore(db, path.join(dir, 'bare.db'), '');
 
@@ -171,7 +171,7 @@ test('RAGManager.deleteMeetingData is guarded at the boundary too', opts, async 
     const { RAGManager } = await import(pathToFileURL(path.join(repoRoot, 'dist-electron/electron/rag/RAGManager.js')).href);
     const { db, dir } = makeIsolatedDb();
 
-    const mgr = new RAGManager({ db, dbPath: path.join(dir, 'natively.db'), extPath: '' });
+    const mgr = new RAGManager({ db, dbPath: path.join(dir, 'MeetFloo.db'), extPath: '' });
     db.close();
 
     assert.doesNotThrow(

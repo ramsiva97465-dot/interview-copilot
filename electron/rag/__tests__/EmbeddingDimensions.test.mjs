@@ -21,7 +21,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const load = p => import(pathToFileURL(path.resolve(__dirname, '../../../dist-electron/electron/rag', p)).href);
 const { OpenAIEmbeddingProvider } = await load('providers/OpenAIEmbeddingProvider.js');
 const { GeminiEmbeddingProvider } = await load('providers/GeminiEmbeddingProvider.js');
-const { NativelyEmbeddingProvider } = await load('providers/NativelyEmbeddingProvider.js');
+const { MeetFlooEmbeddingProvider } = await load('providers/MeetFlooEmbeddingProvider.js');
 const { buildEmbeddingCatalog } = await load('embeddingCatalog.js');
 
 describe('defaults', () => {
@@ -31,24 +31,24 @@ describe('defaults', () => {
     assert.equal(p.space, 'gemini:gemini-embedding-2:3072');
   });
 
-  test('Natively-managed is voyage-4 at 2048, matching what the server serves', () => {
+  test('MeetFloo-managed is voyage-4 at 2048, matching what the server serves', () => {
     // Not the same as the direct-Gemini provider above any more: /v1/embed
     // serves voyage-4 to any request that names it, and this provider does.
-    const p = new NativelyEmbeddingProvider('nk', {});
+    const p = new MeetFlooEmbeddingProvider('nk', {});
     assert.equal(p.model, 'voyage-4');
     assert.equal(p.dimensions, 2048);
-    assert.equal(p.space, 'natively:voyage-4:2048');
+    assert.equal(p.space, 'MeetFloo:voyage-4:2048');
   });
 
   test('the catalogue advertises the same defaults the providers use', () => {
-    const cat = buildEmbeddingCatalog({ hasGeminiKey: true, hasOpenaiKey: true, hasNativelyKey: true });
+    const cat = buildEmbeddingCatalog({ hasGeminiKey: true, hasOpenaiKey: true, hasMeetFlooKey: true });
     const gem = cat.find(p => p.id === 'gemini').models.find(m => m.id === 'gemini-embedding-2');
     assert.equal(gem.dimensions, 3072);
-    const nat = cat.find(p => p.id === 'natively').models[0];
+    const nat = cat.find(p => p.id === 'MeetFloo').models[0];
     // Pinned to the PROVIDER's own constants, not to a literal: the panel and
     // the provider disagreeing about which model stores the user's vectors is
     // the exact drift this asserts against.
-    const provider = new NativelyEmbeddingProvider('nk', {});
+    const provider = new MeetFlooEmbeddingProvider('nk', {});
     assert.equal(nat.id, provider.model);
     assert.equal(nat.dimensions, provider.dimensions);
   });
@@ -56,20 +56,20 @@ describe('defaults', () => {
 
 describe('selectable widths', () => {
   test('Gemini offers the three documented widths', () => {
-    const cat = buildEmbeddingCatalog({ hasGeminiKey: true, hasOpenaiKey: true, hasNativelyKey: true });
+    const cat = buildEmbeddingCatalog({ hasGeminiKey: true, hasOpenaiKey: true, hasMeetFlooKey: true });
     const gem = cat.find(p => p.id === 'gemini').models.find(m => m.id === 'gemini-embedding-2');
     assert.deepEqual(gem.supportedDimensions, [768, 1536, 3072]);
   });
 
   test('ada-002 offers NO width choice — it is fixed at 1536', () => {
-    const cat = buildEmbeddingCatalog({ hasGeminiKey: true, hasOpenaiKey: true, hasNativelyKey: true });
+    const cat = buildEmbeddingCatalog({ hasGeminiKey: true, hasOpenaiKey: true, hasMeetFlooKey: true });
     const ada = cat.find(p => p.id === 'openai').models.find(m => m.id === 'text-embedding-ada-002');
     assert.equal(ada.supportedDimensions, undefined);
     assert.equal(ada.dimensions, 1536);
   });
 
   test('a model\'s default width is one of its own supported widths', () => {
-    for (const p of buildEmbeddingCatalog({ hasGeminiKey: true, hasOpenaiKey: true, hasNativelyKey: true })) {
+    for (const p of buildEmbeddingCatalog({ hasGeminiKey: true, hasOpenaiKey: true, hasMeetFlooKey: true })) {
       for (const m of p.models) {
         if (!m.supportedDimensions) continue;
         assert.ok(m.supportedDimensions.includes(m.dimensions),
@@ -81,7 +81,7 @@ describe('selectable widths', () => {
   test('every offered width has a vec table or can get one', () => {
     // KNOWN_DIMS is [768, 1536, 3072] and storeEmbedding lazily provisions any
     // novel width, so this is about not offering something absurd.
-    for (const p of buildEmbeddingCatalog({ hasGeminiKey: true, hasOpenaiKey: true, hasNativelyKey: true })) {
+    for (const p of buildEmbeddingCatalog({ hasGeminiKey: true, hasOpenaiKey: true, hasMeetFlooKey: true })) {
       for (const m of p.models) {
         for (const d of m.supportedDimensions ?? [m.dimensions]) {
           assert.ok(Number.isInteger(d) && d > 0 && d <= 4096, `${m.id}: implausible width ${d}`);

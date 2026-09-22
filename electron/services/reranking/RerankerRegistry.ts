@@ -1,7 +1,7 @@
 /**
  * Resolves the ONE reranker that may run at the single rerank seam.
  *
- * Natively already has a reranking stage: `ModeHybridRetriever.maybeRerankCandidates`
+ * MeetFloo already has a reranking stage: `ModeHybridRetriever.maybeRerankCandidates`
  * runs a local cross-encoder inside a 1200ms race, and `ragLocalRerank` /
  * `ragSpeculativeRerank` both default ON. This registry deliberately does NOT
  * add a second stage beside it. An enabled reranker extension REPLACES the

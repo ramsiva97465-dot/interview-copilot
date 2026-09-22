@@ -10,7 +10,7 @@ const config = JSON.parse(fs.readFileSync(path.join(BENCH, 'config.json'), 'utf8
 const manifest = JSON.parse(fs.readFileSync(path.join(BENCH, 'manifest.json'), 'utf8'))
 const sel = fs.readFileSync(path.join(BENCH, 'results/runs-selected.jsonl'), 'utf8').trim().split('\n').map(JSON.parse)
 const ORDER = ['ds-flash-prod', 'ds-flash-thinking', 'luna-max', 'luna-medium', 'luna-low', 'luna-none']
-const LABEL = { 'ds-flash-prod': 'DeepSeek V4.1 Flash — current Natively (thinking off)', 'ds-flash-thinking': 'DeepSeek V4.1 Flash — thinking ON (diagnostic)', 'luna-max': 'GPT-5.6 Luna — max', 'luna-medium': 'GPT-5.6 Luna — medium', 'luna-low': 'GPT-5.6 Luna — low', 'luna-none': 'GPT-5.6 Luna — none' }
+const LABEL = { 'ds-flash-prod': 'DeepSeek V4.1 Flash — current MeetFloo (thinking off)', 'ds-flash-thinking': 'DeepSeek V4.1 Flash — thinking ON (diagnostic)', 'luna-max': 'GPT-5.6 Luna — max', 'luna-medium': 'GPT-5.6 Luna — medium', 'luna-low': 'GPT-5.6 Luna — low', 'luna-none': 'GPT-5.6 Luna — none' }
 const SHORT = { 'ds-flash-prod': 'DS Flash (current)', 'ds-flash-thinking': 'DS Flash thinking', 'luna-max': 'Luna max', 'luna-medium': 'Luna medium', 'luna-low': 'Luna low', 'luna-none': 'Luna none' }
 const narrative = (name) => { const p = path.join(BENCH, 'reports/narrative', `${name}.md`); return fs.existsSync(p) ? fs.readFileSync(p, 'utf8').trim() : `_(narrative "${name}" not written)_` }
 
@@ -35,13 +35,13 @@ const blended = id => {
 }
 
 const L = []
-L.push(`# Natively summary-model benchmark — DeepSeek V4.1 Flash vs GPT-5.6 Luna`, '')
+L.push(`# MeetFloo summary-model benchmark — DeepSeek V4.1 Flash vs GPT-5.6 Luna`, '')
 L.push(`Benchmark id \`${config.benchmark_id}\` · generated ${agg.generated_at} · ${agg.totals.selected_runs} summary runs used (${agg.totals.excluded_infra_failures} excluded as infra failures, ${agg.totals.retries_used} retries used) · ${manifest.conversations.length} conversations × ${ORDER.length} configurations × ${config.runs_per_pair} runs`, '')
 L.push('# Executive Summary', '', narrative('executive-summary'), '')
-L.push('# Current Natively Configuration', '', narrative('current-config'), '')
+L.push('# Current MeetFloo Configuration', '', narrative('current-config'), '')
 
 L.push('# Benchmark Corpus', '')
-L.push(table(['ID', 'Type', 'Mode', 'Length', 'Duration', 'Words', 'Tokens (chars/4)', 'Speakers', 'Source'], manifest.conversations.map(c => [c.id, c.category, c.natively_mode, c.length_bucket, `${c.duration_min} min`, int(c.words), int(c.token_estimate_chars_div_4), c.speaker_count, c.source === 'youtube' ? `[YouTube](${c.source_url})` : 'synthetic'])))
+L.push(table(['ID', 'Type', 'Mode', 'Length', 'Duration', 'Words', 'Tokens (chars/4)', 'Speakers', 'Source'], manifest.conversations.map(c => [c.id, c.category, c.MeetFloo_mode, c.length_bucket, `${c.duration_min} min`, int(c.words), int(c.token_estimate_chars_div_4), c.speaker_count, c.source === 'youtube' ? `[YouTube](${c.source_url})` : 'synthetic'])))
 L.push('', `Measured provider input tokens per summary (all calls, DeepSeek tokenizer, current config): see Token Usage. Full per-conversation metadata: \`benchmark/manifest.json\`.`, '')
 L.push(narrative('corpus'), '')
 
@@ -118,7 +118,7 @@ L.push('# Cost / Quality / Latency Tradeoff', '')
 L.push(table(['Model', 'Overall', 'Fact retention', 'P50 E2E', 'P90 E2E', '$/summary (blended)', '$/1M summaries', 'Cost vs current'], ORDER.filter(C).map(id => { const c = C(id); return [SHORT[id], f2(c.q_overall_summary_quality.mean), pctf(c.fact_retention_weighted.mean), sec(c.pipeline_ms.median), sec(c.pipeline_ms.p90), usd(blended(id), 5), usd(blended(id) * 1e6, 0), `${(blended(id) / blended('ds-flash-prod')).toFixed(2)}×`] })))
 L.push('', narrative('tradeoff'), '')
 L.push('# Requirements Screening', '', narrative('requirements'), '')
-L.push('# Does the current Natively prompt cause model-specific differences?', '', narrative('prompt-effects'), '')
+L.push('# Does the current MeetFloo prompt cause model-specific differences?', '', narrative('prompt-effects'), '')
 L.push('# Method, Fairness and Limitations', '', narrative('method'), '')
 L.push('# Files', '', narrative('files'), '')
 fs.writeFileSync(path.join(BENCH, 'reports/REPORT.md'), L.join('\n') + '\n')

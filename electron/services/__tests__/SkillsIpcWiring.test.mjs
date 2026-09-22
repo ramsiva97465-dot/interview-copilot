@@ -89,7 +89,7 @@ test('skills:upload and skills:reap-stages handlers are registered in ipcHandler
   assert.match(uploadBlock, /code:\s*['"]ipc_failed['"]/);
 
   // A startup one-shot reap must be invoked outside the handler (best-effort
-  // cleanup of leftover natively-skill-upload-* dirs in os.tmpdir()).
+  // cleanup of leftover MeetFloo-skill-upload-* dirs in os.tmpdir()).
   // Match against the function body — it's not a safeHandle but it must
   // exist somewhere in initializeIpcHandlers.
   assert.match(source,
@@ -278,7 +278,7 @@ test('every preload ipcRenderer.invoke channel has a matching ipcMain.handle reg
 //    `app.isReady()` work without a real Electron host.
 // ---------------------------------------------------------------------------
 test('SkillsManager.listSkills() returns the builtin humanize-ai-text skill', () => {
-  const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-skills-test-'));
+  const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-skills-test-'));
 
   // Stub `electron` module before SkillsManager is loaded. Inject directly
   // into Node's CJS cache so the bundled `require("electron")` resolves to
@@ -530,7 +530,7 @@ test('disabled-skill invocation gate in ipcHandlers.ts remains as defense-in-dep
 // Shared harness — call before each functional test to ensure a clean tmp dir,
 // fresh singleton instance, and stubbed electron module.
 function freshManager() {
-  const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-skills-func-'));
+  const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-skills-func-'));
 
   const stubExports = {
     app: {

@@ -50,16 +50,16 @@ test('versionGte: boundary cases (matches inline comparator in component)', () =
   assert.equal(versionGte('3.0.0', '2.8.0'), true);
   assert.equal(versionGte('2.7.9', '2.8.0'), false);
   assert.equal(versionGte('2.8.0', '2.7.9'), true);
-  assert.equal(versionGte('1.0.0',  '2.8.0'), false);
+  assert.equal(versionGte('1.0.0', '2.8.0'), false);
   assert.equal(versionGte('10.0.0', '2.8.0'), true);
-  assert.equal(versionGte('0.0.1',  '0.0.0'), true);
-  assert.equal(versionGte('0.0.0',  '0.0.0'), true);
+  assert.equal(versionGte('0.0.1', '0.0.0'), true);
+  assert.equal(versionGte('0.0.0', '0.0.0'), true);
 });
 
-test('source: uses documented DISMISS_KEY = natively_ext_connect_dismissed_v1', () => {
+test('source: uses documented DISMISS_KEY = MeetFloo_ext_connect_dismissed_v1', () => {
   // Constant may have alignment whitespace between name and `=`.
-  assert.ok(/const\s+DISMISS_KEY\s*=\s*'natively_ext_connect_dismissed_v1'/.test(source),
-    'DISMISS_KEY constant must equal natively_ext_connect_dismissed_v1');
+  assert.ok(/const\s+DISMISS_KEY\s*=\s*'MeetFloo_ext_connect_dismissed_v1'/.test(source),
+    'DISMISS_KEY constant must equal MeetFloo_ext_connect_dismissed_v1');
 });
 
 test('source: uses documented gating ID = extension_connect', () => {
@@ -167,7 +167,7 @@ test('source: aria attributes for accessibility (dialog, labelled-by, labels)', 
     'must reference labelled-by for the headline');
   assert.ok(source.includes('id="ext-toast-title"'),
     'must set id on the headline for labelled-by');
-  assert.ok(source.includes('aria-label="Install Natively browser extension on Chrome"'),
+  assert.ok(source.includes('aria-label="Install MeetFloo browser extension on Chrome"'),
     'CTA must have descriptive aria-label');
   assert.ok(source.includes('aria-label="Dismiss browser extension invitation"'),
     'dismiss must have descriptive aria-label');
@@ -221,7 +221,7 @@ test('source: ?extToaster=force URL param bypasses all gating (test hook)', () =
     'must clear the cooldown time stamp');
   assert.ok(source.includes("localStorage.removeItem('last_shown_opens_extension_connect')"),
     'must clear the cooldown opens counter');
-  assert.ok(source.includes("sessionStorage.removeItem('natively_session_toaster_shown')"),
+  assert.ok(source.includes("sessionStorage.removeItem('MeetFloo_session_toaster_shown')"),
     'must clear the one-toaster-per-session flag');
 });
 

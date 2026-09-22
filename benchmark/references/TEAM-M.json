@@ -1,7 +1,7 @@
 {
   "id": "TEAM-M",
   "category": "team_meeting",
-  "natively_mode": "team-meet",
+  "MeetFloo_mode": "team-meet",
   "length_bucket": "long",
   "speakers": [
     {

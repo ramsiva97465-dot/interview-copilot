@@ -1,7 +1,7 @@
 # Provider brand marks
 
 Official brand marks for the AI providers listed in Settings → AI Providers,
-and for the speech providers listed in Settings → Audio. Used nominatively — to
+and for the speech providers listed in Settings → Audio. Used nomiMeetFloo — to
 identify the provider a card or dropdown row configures — not as endorsement or
 affiliation.
 
@@ -67,7 +67,7 @@ the Fluxion branding. It shipped here briefly by mistake.
 
 If Fluxion ever publishes a simplified icon-sized mark, prefer it over the
 monogram. No licence statement accompanies any of these assets, so the mark is
-used purely nominatively, as stated at the top of this file.
+used purely nomiMeetFloo, as stated at the top of this file.
 
 ### Jina
 
@@ -174,7 +174,7 @@ against the dark theme.
 Raster marks have no `currentColor` to resolve, so they are imported as URLs and
 rendered with `<img>`. Both consumers split their registries along that line:
 `AI_PROVIDER_MARKS` / `AI_PROVIDER_MARK_IMAGES` in `ui/aiProviderMarks.ts` (for
-`litellm.png` and the Natively app icon), and `BRAND_MARKS` /
+`litellm.png` and the MeetFloo app icon), and `BRAND_MARKS` /
 `BRAND_MARK_IMAGES` in `BrandMark.tsx`. Both renderers resolve the vector
 registry first, so an id must not appear in both — the coverage test enforces
 that.
@@ -219,10 +219,10 @@ inventing a brand colour.
 - **Soniox** — publishes no mark in either source package, and no other
   licence-compatible vector exists. Renders the `SO` monogram. Recorded in
   `BRAND_MARK_EXEMPT` so the coverage test can tell this apart from an oversight.
-- **Natively** — our own brand, so nothing is vendored here. The speech selector
+- **MeetFloo** — our own brand, so nothing is vendored here. The speech selector
   uses the app icon at the repo root (`assets/icon-512.png`) via
   `BRAND_MARK_IMAGES`, the raster registry in `BrandMark.tsx`. There is also
-  `src/components/NativelyLogoMark.tsx`, a `currentColor` vector logomark, if a
+  `src/components/MeetFlooLogoMark.tsx`, a `currentColor` vector logomark, if a
   surface needs one that tints.
 - **Local Models** — not a brand. It is a set of on-device engines (Moonshine,
   Distil-Whisper, Whisper), so it renders the HOST OS mark instead: `apple` on

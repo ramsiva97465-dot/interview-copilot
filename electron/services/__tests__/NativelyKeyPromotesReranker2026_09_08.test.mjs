@@ -1,5 +1,5 @@
 /**
- * Pasting a Natively API key makes Natively the ACTIVE provider everywhere it
+ * Pasting a MeetFloo API key makes MeetFloo the ACTIVE provider everywhere it
  * can be — generation, speech, embeddings and now reranking.
  *
  * Three of those four already worked. This covers the fourth, and the guards
@@ -24,8 +24,8 @@
  *     so there is no symptom to notice.
  *
  * Embeddings are deliberately absent here: EmbeddingProviderResolver already
- * probes Natively FIRST whenever a key exists (see
- * EmbeddingResolverNativelyFirst.test.mjs). Writing embeddingMode:'manual' to
+ * probes MeetFloo FIRST whenever a key exists (see
+ * EmbeddingResolverMeetFlooFirst.test.mjs). Writing embeddingMode:'manual' to
  * "select" it would filter the candidate list to exactly one entry and delete
  * the fallback chain — a regression wearing the feature's clothes.
  */
@@ -53,11 +53,11 @@ function makeSettings(initial = {}) {
 function decide(settings, to) {
   const current = settings.get('reranker') ?? {};
   const provider = current.provider;
-  if (to === 'natively') {
+  if (to === 'MeetFloo') {
     if (!(!provider || provider === 'local')) return false;
     const scopes = settings.get('providerDataScopes');
     if (scopes?.reference_files === false) return false;
-  } else if (provider !== 'natively') {
+  } else if (provider !== 'MeetFloo') {
     return false;
   }
   settings.set('reranker', { ...current, provider: to });
@@ -65,29 +65,29 @@ function decide(settings, to) {
 }
 
 describe('promotion on key paste', () => {
-  test('an unset reranker becomes natively', () => {
+  test('an unset reranker becomes MeetFloo', () => {
     const s = makeSettings();
-    assert.equal(decide(s, 'natively'), true);
-    assert.equal(s.store.reranker.provider, 'natively');
+    assert.equal(decide(s, 'MeetFloo'), true);
+    assert.equal(s.store.reranker.provider, 'MeetFloo');
   });
 
-  test('the default local reranker becomes natively', () => {
+  test('the default local reranker becomes MeetFloo', () => {
     const s = makeSettings({ reranker: { provider: 'local' } });
-    assert.equal(decide(s, 'natively'), true);
-    assert.equal(s.store.reranker.provider, 'natively');
+    assert.equal(decide(s, 'MeetFloo'), true);
+    assert.equal(s.store.reranker.provider, 'MeetFloo');
   });
 
   test('other reranker settings survive the promotion', () => {
     // A user who set a candidate count or opted into local fallback keeps both.
     const s = makeSettings({ reranker: { provider: 'local', candidateCount: 40, fallbackToLocal: true } });
-    decide(s, 'natively');
-    assert.deepEqual(s.store.reranker, { provider: 'natively', candidateCount: 40, fallbackToLocal: true });
+    decide(s, 'MeetFloo');
+    assert.deepEqual(s.store.reranker, { provider: 'MeetFloo', candidateCount: 40, fallbackToLocal: true });
   });
 
   test('a DELIBERATE hosted choice is never overridden', () => {
     for (const chosen of ['openrouter', 'jina']) {
       const s = makeSettings({ reranker: { provider: chosen } });
-      assert.equal(decide(s, 'natively'), false, `${chosen} must be left alone`);
+      assert.equal(decide(s, 'MeetFloo'), false, `${chosen} must be left alone`);
       assert.equal(s.store.reranker.provider, chosen);
     }
   });
@@ -96,26 +96,26 @@ describe('promotion on key paste', () => {
 describe('the privacy gate', () => {
   test('a denied reference-files scope blocks the promotion', () => {
     const s = makeSettings({ providerDataScopes: { reference_files: false } });
-    assert.equal(decide(s, 'natively'), false);
+    assert.equal(decide(s, 'MeetFloo'), false);
     assert.equal(s.store.reranker, undefined, 'nothing may be written');
   });
 
   test('an explicitly allowed scope permits it', () => {
     const s = makeSettings({ providerDataScopes: { reference_files: true } });
-    assert.equal(decide(s, 'natively'), true);
+    assert.equal(decide(s, 'MeetFloo'), true);
   });
 
   test('an absent scope permits it — matching referenceFilesScopeAllowed()', () => {
     // That helper reads `!== false`, so absent means allowed. The promotion must
     // agree with the runtime gate, or it refuses in a state that would have run.
-    assert.equal(decide(makeSettings({ providerDataScopes: {} }), 'natively'), true);
-    assert.equal(decide(makeSettings({}), 'natively'), true);
+    assert.equal(decide(makeSettings({ providerDataScopes: {} }), 'MeetFloo'), true);
+    assert.equal(decide(makeSettings({}), 'MeetFloo'), true);
   });
 });
 
 describe('revert — cleared key, and key refused by the server', () => {
-  test('natively goes back to local', () => {
-    const s = makeSettings({ reranker: { provider: 'natively' } });
+  test('MeetFloo goes back to local', () => {
+    const s = makeSettings({ reranker: { provider: 'MeetFloo' } });
     assert.equal(decide(s, 'local'), true);
     assert.equal(s.store.reranker.provider, 'local');
   });
@@ -134,7 +134,7 @@ describe('revert — cleared key, and key refused by the server', () => {
 
   test('promote then revert returns to exactly the starting state', () => {
     const s = makeSettings({ reranker: { provider: 'local', candidateCount: 25 } });
-    decide(s, 'natively');
+    decide(s, 'MeetFloo');
     decide(s, 'local');
     assert.deepEqual(s.store.reranker, { provider: 'local', candidateCount: 25 });
   });
@@ -145,21 +145,21 @@ describe('the shipped implementation matches this rule', () => {
     const { readFileSync } = await import('node:fs');
     const src = readFileSync('electron/services/CredentialsManager.ts', 'utf8');
     // Promotion is wired into the key-stored path...
-    assert.match(src, /setRerankerProviderIfManaged\('natively', 'Natively key stored'\)/);
-    // ...and the revert into applyNativelyAutoDefaultRevert, which is what both
-    // the cleared-key path and revertNativelyAutoDefaults() call.
-    const revert = src.slice(src.indexOf('private applyNativelyAutoDefaultRevert'));
+    assert.match(src, /setRerankerProviderIfManaged\('MeetFloo', 'MeetFloo key stored'\)/);
+    // ...and the revert into applyMeetFlooAutoDefaultRevert, which is what both
+    // the cleared-key path and revertMeetFlooAutoDefaults() call.
+    const revert = src.slice(src.indexOf('private applyMeetFlooAutoDefaultRevert'));
     assert.match(revert.slice(0, 1600), /setRerankerProviderIfManaged\('local', reason\)/);
     // The privacy gate must be on the promote branch specifically.
     const fn = src.slice(src.indexOf('private setRerankerProviderIfManaged'));
     assert.match(fn.slice(0, 2600), /reference_files === false/);
     // Only these two providers are ever written.
-    assert.match(src, /setRerankerProviderIfManaged\(to: 'natively' \| 'local'/);
+    assert.match(src, /setRerankerProviderIfManaged\(to: 'MeetFloo' \| 'local'/);
   });
 
-  test("AppSettings allows 'natively' — the value being written", async () => {
+  test("AppSettings allows 'MeetFloo' — the value being written", async () => {
     const { readFileSync } = await import('node:fs');
     const src = readFileSync('electron/services/SettingsManager.ts', 'utf8');
-    assert.match(src, /provider\?: 'local' \| 'natively' \| 'openrouter' \| 'jina';/);
+    assert.match(src, /provider\?: 'local' \| 'MeetFloo' \| 'openrouter' \| 'jina';/);
   });
 });

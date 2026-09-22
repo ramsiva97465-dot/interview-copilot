@@ -115,7 +115,7 @@ export type SupervisorVerdict =
 export class CrashSupervisor {
   private readonly counts = new Map<string, number>();
 
-  constructor(private readonly limit: number = CRASH_LIMIT_PER_SESSION) {}
+  constructor(private readonly limit: number = CRASH_LIMIT_PER_SESSION) { }
 
   recordCrash(extensionId: string): SupervisorVerdict {
     const crashes = (this.counts.get(extensionId) ?? 0) + 1;
@@ -336,7 +336,7 @@ class UtilityProcessExtensionHost implements ExtensionHost {
     };
 
     return utilityProcess.fork(bootstrapPath(), [], {
-      serviceName: `Natively Extension (${this.extensionId})`,
+      serviceName: `MeetFloo Extension (${this.extensionId})`,
       // Inherited so the child's stdout/stderr land in the app log alongside
       // everything else; the extension's own logging goes over RPC.
       stdio: 'inherit',
@@ -613,7 +613,7 @@ class UtilityProcessExtensionHost implements ExtensionHost {
     const declared = Number(response.headers.get('content-length'));
     if (Number.isFinite(declared) && declared > MAX_BROKERED_BODY_BYTES) {
       throw new Error(
-        `[natively] response body of ${declared} bytes exceeds the ${MAX_BROKERED_BODY_BYTES}-byte ` +
+        `[MeetFloo] response body of ${declared} bytes exceeds the ${MAX_BROKERED_BODY_BYTES}-byte ` +
         'brokered-fetch limit. Large downloads must go through the model store, not fetch().',
       );
     }
@@ -621,7 +621,7 @@ class UtilityProcessExtensionHost implements ExtensionHost {
     const buffer = Buffer.from(await response.arrayBuffer());
     if (buffer.byteLength > MAX_BROKERED_BODY_BYTES) {
       throw new Error(
-        `[natively] response body of ${buffer.byteLength} bytes exceeds the ` +
+        `[MeetFloo] response body of ${buffer.byteLength} bytes exceeds the ` +
         `${MAX_BROKERED_BODY_BYTES}-byte brokered-fetch limit.`,
       );
     }

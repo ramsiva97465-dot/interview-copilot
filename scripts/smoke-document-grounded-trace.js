@@ -7,7 +7,7 @@
 //
 //   real ModesManager + ModeContextRetriever (real chunking/retrieval)
 //   → real LLMHelper.streamChat with CHAT_MODE_PROMPT
-//   → model = natively  →  POST https://api.natively.software/v1/chat
+//   → model = MeetFloo  →  POST https://api.MeetFloo.software/v1/chat
 //   → server-chosen serverModel (observed via llmHelper.getLastProviderModel())
 //
 // All 8 trace questions are captured to
@@ -24,7 +24,7 @@
 //   8. four main phases
 //
 // Run:
-//   RUN_NATIVELY_API_E2E=1 NATIVELY_API_KEY=<key> \
+//   RUN_MEETFLOO_API_E2E=1 MEETFLOO_API_KEY=<key> \
 //     ./node_modules/.bin/electron scripts/smoke-document-grounded-trace.js
 //
 // Key value is never logged.
@@ -41,15 +41,15 @@ const distRoot = path.join(repoRoot, 'dist-electron', 'electron');
 const outDir = path.join(repoRoot, 'debug-artifacts', 'document-grounded-system-map');
 fs.mkdirSync(outDir, { recursive: true });
 
-const KEY = process.env.NATIVELY_API_KEY || '';
-if (process.env.RUN_NATIVELY_API_E2E !== '1' || !KEY) {
-  console.log('[trace] SKIP — set RUN_NATIVELY_API_E2E=1 + NATIVELY_API_KEY to run');
+const KEY = process.env.MEETFLOO_API_KEY || '';
+if (process.env.RUN_MEETFLOO_API_E2E !== '1' || !KEY) {
+  console.log('[trace] SKIP — set RUN_MEETFLOO_API_E2E=1 + MEETFLOO_API_KEY to run');
   process.exit(0);
 }
 
 // Point userData at a throwaway dir BEFORE app is ready so the real DB is
-// created in isolation (never touches the user's live natively.db).
-const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'natively-trace-'));
+// created in isolation (never touches the user's live MeetFloo.db).
+const tmpUserData = fs.mkdtempSync(path.join(os.tmpdir(), 'MeetFloo-trace-'));
 app.setPath('userData', tmpUserData);
 
 const CUSTOM_PROMPT = [
@@ -77,22 +77,38 @@ const FIXTURE_FILES = [
 
 // The 8 trace questions. Same wording every time.
 const QUESTIONS = [
-  { idx: 1, q: 'What is the main topic of my thesis?',
-    expected: ['Agentic AI', 'Vision-Language-Action', 'robotic', 'Mercury X1'] },
-  { idx: 2, q: 'What are the two research questions?',
-    expected: ['agentic', 'VLA', 'Vision-Language-Action', 'embodied', 'cognition'] },
-  { idx: 3, q: 'What is OpenVLA-OFT?',
-    expected: ['OpenVLA-OFT', 'LoRA', 'parallel decoding', 'action chunking', '43x', 'fine-?tun'] },
-  { idx: 4, q: 'How many degrees of freedom does Mercury X1 have?',
-    expected: ['19', 'degrees of freedom', 'Mercury X1'] },
-  { idx: 5, q: 'What sensors does Mercury X1 use?',
-    expected: ['LiDAR', 'ultrasonic', 'vision', 'Mercury X1'] },
-  { idx: 6, q: 'What is the role of ROS#?',
-    expected: ['ROS#', 'Unity', 'ROS', 'bridg'] },
-  { idx: 7, q: 'What is the role of Unity?',
-    expected: ['Unity', 'simulat', 'teleop', 'VR', 'ROS#'] },
-  { idx: 8, q: 'What are the four main phases of the project?',
-    expected: ['teleoperation', 'data collection', 'training', 'Agentic AI'] },
+  {
+    idx: 1, q: 'What is the main topic of my thesis?',
+    expected: ['Agentic AI', 'Vision-Language-Action', 'robotic', 'Mercury X1']
+  },
+  {
+    idx: 2, q: 'What are the two research questions?',
+    expected: ['agentic', 'VLA', 'Vision-Language-Action', 'embodied', 'cognition']
+  },
+  {
+    idx: 3, q: 'What is OpenVLA-OFT?',
+    expected: ['OpenVLA-OFT', 'LoRA', 'parallel decoding', 'action chunking', '43x', 'fine-?tun']
+  },
+  {
+    idx: 4, q: 'How many degrees of freedom does Mercury X1 have?',
+    expected: ['19', 'degrees of freedom', 'Mercury X1']
+  },
+  {
+    idx: 5, q: 'What sensors does Mercury X1 use?',
+    expected: ['LiDAR', 'ultrasonic', 'vision', 'Mercury X1']
+  },
+  {
+    idx: 6, q: 'What is the role of ROS#?',
+    expected: ['ROS#', 'Unity', 'ROS', 'bridg']
+  },
+  {
+    idx: 7, q: 'What is the role of Unity?',
+    expected: ['Unity', 'simulat', 'teleop', 'VR', 'ROS#']
+  },
+  {
+    idx: 8, q: 'What are the four main phases of the project?',
+    expected: ['teleoperation', 'data collection', 'training', 'Agentic AI']
+  },
 ];
 
 const FORBIDDEN_DRIFT = [
@@ -473,8 +489,8 @@ async function traceQuestion(llmHelper, mm, modeId, qDef, llmFactory) {
       includes_history: /prior assistant|previous answer|earlier turn/i.test(contextBlock),
     },
     provider: {
-      model: 'natively',
-      is_natively: true,
+      model: 'MeetFloo',
+      is_MeetFloo: true,
       serverModel: reported,
       gemini_model: reported && /gemini/i.test(reported) ? reported : null,
     },
@@ -549,13 +565,13 @@ async function main() {
   // Task 3 — ingestion diagnostic
   await runIngestionDiag({ modesMgr: mm, modeId });
 
-  // Set up the LLM helper to use the natively backend with the real key.
+  // Set up the LLM helper to use the MeetFloo backend with the real key.
   const llmHelper = new LLMHelper();
-  llmHelper.setNativelyKey(KEY);
-  llmHelper.setModel('natively');
+  llmHelper.setMeetFlooKey(KEY);
+  llmHelper.setModel('MeetFloo');
 
   // LLM factory: drive the production streamChat so we get the full
-  // CHAT_MODE_PROMPT + doc-grounded shaping + natively backend + serverModel.
+  // CHAT_MODE_PROMPT + doc-grounded shaping + MeetFloo backend + serverModel.
   async function llmFactory(systemPrompt, userPayload, signal) {
     let out = '';
     try {

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // A fake LiteLLM proxy. Zero dependencies — plain node:http.
 //
-// Natively never speaks anything LiteLLM-specific to the proxy: it is an
+// MeetFloo never speaks anything LiteLLM-specific to the proxy: it is an
 // OpenAI-compatible gateway, so three endpoints are the entire contract.
 //   GET  /v1/models           → the model catalogue (drives the picker + Refresh)
 //   GET  /model/info          → per-model output budgets (drives Max Tokens "Auto")
@@ -42,7 +42,7 @@ const json = (res, code, body) => {
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   // Strip an optional /v1 so both base-URL styles a user might type work,
-  // exactly like the real proxy (Natively hits /model/info at the ROOT).
+  // exactly like the real proxy (MeetFloo hits /model/info at the ROOT).
   const route = url.pathname.replace(/^\/v1/, '') || '/';
   console.log(`[fake-litellm:${PORT}] ${req.method} ${url.pathname}`);
 

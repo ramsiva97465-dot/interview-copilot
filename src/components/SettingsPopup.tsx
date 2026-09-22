@@ -74,7 +74,7 @@ const SettingsPopup = () => {
     const isLightTheme = useResolvedTheme() === 'light';
     const [isUndetectable, setIsUndetectable] = useState(false);
     const [useGroqFastText, setUseGroqFastText] = useState(() => {
-        return localStorage.getItem('natively_groq_fast_text') === 'true';
+        return localStorage.getItem('MeetFloo_groq_fast_text') === 'true';
     });
     const [profileMode, setProfileMode] = useState(false);
     // Context Intelligence V3 (Phase 7): when the V3 flag is on, the Profile
@@ -99,7 +99,7 @@ const SettingsPopup = () => {
     });
 
     // Overlay opacity — same localStorage key + init logic SettingsOverlay.tsx
-    // and App.tsx use ('natively_overlay_opacity', theme-aware default when
+    // and App.tsx use ('MeetFloo_overlay_opacity', theme-aware default when
     // unset). This window (the settings-popup BrowserWindow, ?window=settings)
     // is a SEPARATE Electron window from both the real meeting overlay
     // (?window=overlay) and the launcher — App.tsx's own `overlayOpacity`
@@ -112,7 +112,7 @@ const SettingsPopup = () => {
     // without touching App.tsx (which has unrelated work in progress on it
     // right now — see git status).
     const [overlayOpacity, setOverlayOpacity] = useState<number>(() => {
-        const stored = localStorage.getItem('natively_overlay_opacity');
+        const stored = localStorage.getItem('MeetFloo_overlay_opacity');
         const parsed = stored ? parseFloat(stored) : NaN;
         const isUserSet = Number.isFinite(parsed) && parsed !== OVERLAY_OPACITY_DEFAULT;
         return isUserSet ? clampOverlayOpacity(parsed) : getDefaultOverlayOpacity();
@@ -130,7 +130,7 @@ const SettingsPopup = () => {
                     openai: !!creds.hasOpenaiKey,
                     claude: !!creds.hasClaudeKey,
                     deepseek: !!creds.hasDeepseekKey,
-                    natively: !!creds.hasNativelyKey
+                    MeetFloo: !!creds.hasMeetFlooKey
                 });
             }
         } catch (e) {
@@ -218,7 +218,7 @@ const SettingsPopup = () => {
     // `BrowserWindow.getAllWindows().forEach(...)` (electron/ipcHandlers.ts
     // `set-overlay-opacity`), this popup window included, which is exactly
     // what `onOverlayOpacityChanged` below picks up — the identical listener
-    // NativelyInterface's own overlay window uses (App.tsx ~720-722) for the
+    // MeetFlooInterface's own overlay window uses (App.tsx ~720-722) for the
     // real panel shell.
     useEffect(() => {
         const unsubscribe = window.electronAPI?.onOverlayOpacityChanged?.((opacity: number) => {
@@ -241,7 +241,7 @@ const SettingsPopup = () => {
         if (window.electronAPI?.onUndetectableChanged) {
             const unsubscribe = window.electronAPI.onUndetectableChanged((newState: boolean) => {
                 setIsUndetectable(newState);
-                localStorage.setItem('natively_undetectable', String(newState));
+                localStorage.setItem('MeetFloo_undetectable', String(newState));
             });
             return () => unsubscribe();
         }
@@ -252,7 +252,7 @@ const SettingsPopup = () => {
         if (window.electronAPI?.onGroqFastTextChanged) {
             const unsubscribe = window.electronAPI.onGroqFastTextChanged((enabled: boolean) => {
                 setUseGroqFastText(enabled);
-                localStorage.setItem('natively_groq_fast_text', String(enabled));
+                localStorage.setItem('MeetFloo_groq_fast_text', String(enabled));
             });
             return () => unsubscribe();
         }
@@ -273,7 +273,7 @@ const SettingsPopup = () => {
         }
 
         // Apply Groq Text Mode
-        localStorage.setItem('natively_groq_fast_text', String(useGroqFastText));
+        localStorage.setItem('MeetFloo_groq_fast_text', String(useGroqFastText));
         try {
             // @ts-ignore - electronAPI not typed in this file yet
             window.electronAPI?.setGroqFastTextMode(useGroqFastText);
@@ -285,13 +285,13 @@ const SettingsPopup = () => {
     const [actionButtonMode, setActionButtonModeState] = useState<'recap' | 'brainstorm'>('recap');
 
     const [showTranscript, setShowTranscript] = useState(() => {
-        const stored = localStorage.getItem('natively_interviewer_transcript');
+        const stored = localStorage.getItem('MeetFloo_interviewer_transcript');
         return stored !== 'false'; // Default to true if not set
     });
 
     useEffect(() => {
         const handleStorage = () => {
-            const stored = localStorage.getItem('natively_interviewer_transcript');
+            const stored = localStorage.getItem('MeetFloo_interviewer_transcript');
             setShowTranscript(stored !== 'false');
         };
 
@@ -304,7 +304,7 @@ const SettingsPopup = () => {
         // @ts-ignore
         window.electronAPI?.getActionButtonMode?.()?.then((mode: 'recap' | 'brainstorm') => {
             setActionButtonModeState(mode ?? 'recap');
-        }).catch(() => {});
+        }).catch(() => { });
         // @ts-ignore
         if (!window.electronAPI?.onActionButtonModeChanged) return;
         // @ts-ignore
@@ -358,8 +358,8 @@ const SettingsPopup = () => {
         : 'border-black/10 bg-black/[0.04] text-slate-600 glass-shortcut-key';
     const defaultToggleTrackClass = isDarkBg ? 'bg-white/10 glass-toggle-track' : 'bg-black/[0.22] glass-toggle-track';
 
-    // Real per-theme panel material — same computation NativelyInterface uses
-    // for its own shell (NativelyInterface.tsx ~1531-1537) and ResizeToggle
+    // Real per-theme panel material — same computation MeetFlooInterface uses
+    // for its own shell (MeetFlooInterface.tsx ~1531-1537) and ResizeToggle
     // uses for itself (ResizeToggle.tsx): isGlassTheme ?
     // getGlassOverlayAppearance() : getOverlayAppearance(opacity, theme).
     // Applied as an inline style on the contentRef div below, alongside the
@@ -396,208 +396,208 @@ const SettingsPopup = () => {
             >
                 <div className="relative z-[1] flex flex-col">
 
-                {/* Undetectability */}
-                <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group cursor-default ${itemHoverClass} ${glassRowClass}`}>
-                    <div className="flex items-center gap-2.5">
-                        <CustomGhost
-                            className={`w-4 h-4 transition-colors ${isUndetectable ? (isDarkBg ? 'text-white' : 'text-slate-900') : inactiveIconColorClass}`}
-                            fill={isUndetectable ? "currentColor" : "none"}
-                            stroke={isUndetectable ? "none" : "currentColor"}
-                            eyeColor={isUndetectable ? (isDarkBg ? "black" : "white") : (isDarkBg ? "white" : "#334155")}
-                        />
-                        <span className={`text-[12px] font-medium transition-colors ${labelColorClass}`}>{isUndetectable ? 'Undetectable' : 'Detectable'}</span>
-                    </div>
-                    <PopupToggle
-                        checked={isUndetectable}
-                        label={isUndetectable ? 'Undetectable' : 'Detectable'}
-                        onChange={() => {
-                            const newState = !isUndetectable;
-                            setIsUndetectable(newState);
-                            localStorage.setItem('natively_undetectable', String(newState));
-                            window.electronAPI?.setUndetectable(newState);
-                        }}
-                        onClassName={isDarkBg
-                            ? 'bg-white shadow-[0_2px_8px_rgba(255,255,255,0.2)]'
-                            : 'bg-slate-900 shadow-[0_2px_8px_rgba(15,23,42,0.18)]'}
-                        offClassName={defaultToggleTrackClass}
-                    />
-                </div>
-
-
-                {/* Groq (Fast Text) Toggle — enabled with Groq key OR Natively API key */}
-                <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group ${!(hasStoredKey.groq || hasStoredKey.natively) ? 'opacity-50 grayscale cursor-not-allowed' : `${itemHoverClass} ${glassRowClass} cursor-default`}`} title={!(hasStoredKey.groq || hasStoredKey.natively) ? "Requires Groq or Natively API key" : ""}>
-                    <div className="flex items-center gap-2.5">
-                        <Zap
-                            className={`w-4 h-4 transition-colors ${useGroqFastText ? 'text-accent-primary' : inactiveIconColorClass}`}
-                            fill={useGroqFastText ? "currentColor" : "none"}
-                        />
-                        <span className={`text-[12px] font-medium transition-colors ${labelColorClass}`}>Fast Response</span>
-                    </div>
-                    <PopupToggle
-                        checked={useGroqFastText}
-                        label="Fast Response"
-                        disabled={!(hasStoredKey.groq || hasStoredKey.natively)}
-                        onChange={() => {
-                            if (!(hasStoredKey.groq || hasStoredKey.natively)) return;
-                            setUseGroqFastText(!useGroqFastText);
-                        }}
-                        onClassName="bg-accent-primary shadow-[0_2px_10px_var(--accent-shadow-20)]"
-                        offClassName={defaultToggleTrackClass}
-                    />
-                </div>
-
-                {/* Interviewer Transcript Toggle */}
-                <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group cursor-default ${itemHoverClass} ${glassRowClass}`}>
-                    <div className="flex items-center gap-2.5">
-                        <MessageSquare
-                            className={`w-3.5 h-3.5 transition-colors ${showTranscript ? 'text-accent-primary' : inactiveIconColorClass}`}
-                            fill={showTranscript ? "currentColor" : "none"}
-                        />
-                        <span className={`text-[12px] font-medium transition-colors ${labelColorClass}`}>Transcript</span>
-                    </div>
-                    <PopupToggle
-                        checked={showTranscript}
-                        label="Transcript"
-                        onChange={() => {
-                            const newState = !showTranscript;
-                            setShowTranscript(newState);
-                            localStorage.setItem('natively_interviewer_transcript', String(newState));
-                            // Dispatch event for same-window listeners
-                            window.dispatchEvent(new Event('storage'));
-                        }}
-                        onClassName="bg-accent-primary shadow-[0_2px_10px_var(--accent-shadow-20)]"
-                        offClassName={defaultToggleTrackClass}
-                    />
-                </div>
-
-                {/* Interview Mode (Brainstorm) Toggle */}
-                <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group cursor-default ${itemHoverClass} ${glassRowClass}`}>
-                    <div className="flex items-center gap-2.5">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className={`w-3.5 h-3.5 transition-colors ${actionButtonMode === 'brainstorm' ? 'text-accent-primary' : inactiveIconColorClass}`}
-                        >
-                            <line x1="6" y1="3" x2="6" y2="15" />
-                            <circle cx="18" cy="6" r="3" />
-                            <circle cx="6" cy="18" r="3" />
-                            <path d="M18 9a9 9 0 0 1-9 9" />
-                        </svg>
-                        <span className={`text-[12px] font-medium transition-colors ${labelColorClass}`}>Interview Mode</span>
-                    </div>
-                    <PopupToggle
-                        checked={actionButtonMode === 'brainstorm'}
-                        label="Interview Mode"
-                        onChange={async () => {
-                            const newMode: 'recap' | 'brainstorm' = actionButtonMode === 'brainstorm' ? 'recap' : 'brainstorm';
-                            setActionButtonModeState(newMode);
-                            try {
-                                // @ts-ignore
-                                await window.electronAPI?.setActionButtonMode?.(newMode);
-                            } catch (e) { console.error(e); }
-                        }}
-                        onClassName="bg-accent-primary shadow-[0_2px_10px_var(--accent-shadow-20)]"
-                        offClassName={defaultToggleTrackClass}
-                    />
-                </div>
-
-                {/* Profile Mode Toggle — hidden under Context Intelligence V3,
-                    where source authority replaces the global override (§6). */}
-                {hasProfile && !ciV3Enabled && (
-                    <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group ${!isPremium ? 'opacity-50 grayscale cursor-not-allowed' : `${itemHoverClass} ${glassRowClass} cursor-default`}`} title={!isPremium ? 'Requires Pro license to be active' : ''}>
+                    {/* Undetectability */}
+                    <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group cursor-default ${itemHoverClass} ${glassRowClass}`}>
                         <div className="flex items-center gap-2.5">
-                            <User
-                                className={`w-3.5 h-3.5 transition-colors ${profileMode && isPremium ? 'text-accent-primary' : inactiveIconColorClass}`}
-                                fill={profileMode && isPremium ? "currentColor" : "none"}
+                            <CustomGhost
+                                className={`w-4 h-4 transition-colors ${isUndetectable ? (isDarkBg ? 'text-white' : 'text-slate-900') : inactiveIconColorClass}`}
+                                fill={isUndetectable ? "currentColor" : "none"}
+                                stroke={isUndetectable ? "none" : "currentColor"}
+                                eyeColor={isUndetectable ? (isDarkBg ? "black" : "white") : (isDarkBg ? "white" : "#334155")}
                             />
-                            <span className={`text-[12px] font-medium transition-colors ${labelColorClass}`}>Profile Mode</span>
+                            <span className={`text-[12px] font-medium transition-colors ${labelColorClass}`}>{isUndetectable ? 'Undetectable' : 'Detectable'}</span>
                         </div>
                         <PopupToggle
-                            checked={profileMode && isPremium}
-                            label="Profile Mode"
-                            disabled={!isPremium}
+                            checked={isUndetectable}
+                            label={isUndetectable ? 'Undetectable' : 'Detectable'}
+                            onChange={() => {
+                                const newState = !isUndetectable;
+                                setIsUndetectable(newState);
+                                localStorage.setItem('MeetFloo_undetectable', String(newState));
+                                window.electronAPI?.setUndetectable(newState);
+                            }}
+                            onClassName={isDarkBg
+                                ? 'bg-white shadow-[0_2px_8px_rgba(255,255,255,0.2)]'
+                                : 'bg-slate-900 shadow-[0_2px_8px_rgba(15,23,42,0.18)]'}
+                            offClassName={defaultToggleTrackClass}
+                        />
+                    </div>
+
+
+                    {/* Groq (Fast Text) Toggle — enabled with Groq key OR MeetFloo API key */}
+                    <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group ${!(hasStoredKey.groq || hasStoredKey.MeetFloo) ? 'opacity-50 grayscale cursor-not-allowed' : `${itemHoverClass} ${glassRowClass} cursor-default`}`} title={!(hasStoredKey.groq || hasStoredKey.MeetFloo) ? "Requires Groq or MeetFloo API key" : ""}>
+                        <div className="flex items-center gap-2.5">
+                            <Zap
+                                className={`w-4 h-4 transition-colors ${useGroqFastText ? 'text-accent-primary' : inactiveIconColorClass}`}
+                                fill={useGroqFastText ? "currentColor" : "none"}
+                            />
+                            <span className={`text-[12px] font-medium transition-colors ${labelColorClass}`}>Fast Response</span>
+                        </div>
+                        <PopupToggle
+                            checked={useGroqFastText}
+                            label="Fast Response"
+                            disabled={!(hasStoredKey.groq || hasStoredKey.MeetFloo)}
+                            onChange={() => {
+                                if (!(hasStoredKey.groq || hasStoredKey.MeetFloo)) return;
+                                setUseGroqFastText(!useGroqFastText);
+                            }}
+                            onClassName="bg-accent-primary shadow-[0_2px_10px_var(--accent-shadow-20)]"
+                            offClassName={defaultToggleTrackClass}
+                        />
+                    </div>
+
+                    {/* Interviewer Transcript Toggle */}
+                    <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group cursor-default ${itemHoverClass} ${glassRowClass}`}>
+                        <div className="flex items-center gap-2.5">
+                            <MessageSquare
+                                className={`w-3.5 h-3.5 transition-colors ${showTranscript ? 'text-accent-primary' : inactiveIconColorClass}`}
+                                fill={showTranscript ? "currentColor" : "none"}
+                            />
+                            <span className={`text-[12px] font-medium transition-colors ${labelColorClass}`}>Transcript</span>
+                        </div>
+                        <PopupToggle
+                            checked={showTranscript}
+                            label="Transcript"
+                            onChange={() => {
+                                const newState = !showTranscript;
+                                setShowTranscript(newState);
+                                localStorage.setItem('MeetFloo_interviewer_transcript', String(newState));
+                                // Dispatch event for same-window listeners
+                                window.dispatchEvent(new Event('storage'));
+                            }}
+                            onClassName="bg-accent-primary shadow-[0_2px_10px_var(--accent-shadow-20)]"
+                            offClassName={defaultToggleTrackClass}
+                        />
+                    </div>
+
+                    {/* Interview Mode (Brainstorm) Toggle */}
+                    <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group cursor-default ${itemHoverClass} ${glassRowClass}`}>
+                        <div className="flex items-center gap-2.5">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className={`w-3.5 h-3.5 transition-colors ${actionButtonMode === 'brainstorm' ? 'text-accent-primary' : inactiveIconColorClass}`}
+                            >
+                                <line x1="6" y1="3" x2="6" y2="15" />
+                                <circle cx="18" cy="6" r="3" />
+                                <circle cx="6" cy="18" r="3" />
+                                <path d="M18 9a9 9 0 0 1-9 9" />
+                            </svg>
+                            <span className={`text-[12px] font-medium transition-colors ${labelColorClass}`}>Interview Mode</span>
+                        </div>
+                        <PopupToggle
+                            checked={actionButtonMode === 'brainstorm'}
+                            label="Interview Mode"
                             onChange={async () => {
-                                if (!isPremium) return;
-                                const newState = !profileMode;
-                                setProfileMode(newState);
+                                const newMode: 'recap' | 'brainstorm' = actionButtonMode === 'brainstorm' ? 'recap' : 'brainstorm';
+                                setActionButtonModeState(newMode);
                                 try {
                                     // @ts-ignore
-                                    await window.electronAPI?.profileSetMode?.(newState);
+                                    await window.electronAPI?.setActionButtonMode?.(newMode);
                                 } catch (e) { console.error(e); }
                             }}
                             onClassName="bg-accent-primary shadow-[0_2px_10px_var(--accent-shadow-20)]"
                             offClassName={defaultToggleTrackClass}
                         />
                     </div>
-                )}
 
-                <div className={`h-px my-0.5 mx-1.5 ${dividerClass}`} />
-
-                {/* Show/Hide Natively */}
-                <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group interaction-base interaction-press ${itemHoverClass} ${glassRowClass}`}>
-                    <div className="flex items-center gap-2.5">
-                        <MessageSquare className={`w-3.5 h-3.5 transition-colors ${inactiveIconColorClass}`} />
-                        <span className={`text-[12px] transition-colors ${labelColorClass}`}>Show/Hide</span>
-                    </div>
-                    <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                        {/* Dynamic Keys for Toggle Visibility */}
-                        {(shortcuts.toggleVisibility || [getModifierSymbol('cmd'), 'B']).map((key, index) => (
-                            <div key={index} className={`px-1.5 py-0.5 rounded border text-[10px] font-medium min-w-[20px] text-center ${shortcutKeyClass}`}>
-                                {key}
+                    {/* Profile Mode Toggle — hidden under Context Intelligence V3,
+                    where source authority replaces the global override (§6). */}
+                    {hasProfile && !ciV3Enabled && (
+                        <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group ${!isPremium ? 'opacity-50 grayscale cursor-not-allowed' : `${itemHoverClass} ${glassRowClass} cursor-default`}`} title={!isPremium ? 'Requires Pro license to be active' : ''}>
+                            <div className="flex items-center gap-2.5">
+                                <User
+                                    className={`w-3.5 h-3.5 transition-colors ${profileMode && isPremium ? 'text-accent-primary' : inactiveIconColorClass}`}
+                                    fill={profileMode && isPremium ? "currentColor" : "none"}
+                                />
+                                <span className={`text-[12px] font-medium transition-colors ${labelColorClass}`}>Profile Mode</span>
                             </div>
-                        ))}
-                    </div>
-                </div>
+                            <PopupToggle
+                                checked={profileMode && isPremium}
+                                label="Profile Mode"
+                                disabled={!isPremium}
+                                onChange={async () => {
+                                    if (!isPremium) return;
+                                    const newState = !profileMode;
+                                    setProfileMode(newState);
+                                    try {
+                                        // @ts-ignore
+                                        await window.electronAPI?.profileSetMode?.(newState);
+                                    } catch (e) { console.error(e); }
+                                }}
+                                onClassName="bg-accent-primary shadow-[0_2px_10px_var(--accent-shadow-20)]"
+                                offClassName={defaultToggleTrackClass}
+                            />
+                        </div>
+                    )}
 
-                {/* Screenshot (Full) */}
-                <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group interaction-base interaction-press ${itemHoverClass} ${glassRowClass}`}>
-                    <div className="flex items-center gap-2.5">
-                        <Camera className={`w-3.5 h-3.5 transition-colors ${inactiveIconColorClass}`} />
-                        <span className={`text-[12px] transition-colors ${labelColorClass}`}>Screenshot</span>
-                    </div>
-                    <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                        {(shortcuts.takeScreenshot || [getModifierSymbol('cmd'), 'H']).map((key, index) => (
-                            <div key={index} className={`px-1.5 py-0.5 rounded border text-[10px] font-medium min-w-[20px] text-center ${shortcutKeyClass}`}>
-                                {key}
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                    <div className={`h-px my-0.5 mx-1.5 ${dividerClass}`} />
 
-                {/* Selective Screenshot */}
-                <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group interaction-base interaction-press ${itemHoverClass} ${glassRowClass}`}>
-                    <div className="flex items-center gap-2.5">
-                        <Crop className={`w-3.5 h-3.5 transition-colors ${inactiveIconColorClass}`} />
-                        <span className={`text-[12px] transition-colors ${labelColorClass}`}>Snip Area</span>
+                    {/* Show/Hide MeetFloo */}
+                    <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group interaction-base interaction-press ${itemHoverClass} ${glassRowClass}`}>
+                        <div className="flex items-center gap-2.5">
+                            <MessageSquare className={`w-3.5 h-3.5 transition-colors ${inactiveIconColorClass}`} />
+                            <span className={`text-[12px] transition-colors ${labelColorClass}`}>Show/Hide</span>
+                        </div>
+                        <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                            {/* Dynamic Keys for Toggle Visibility */}
+                            {(shortcuts.toggleVisibility || [getModifierSymbol('cmd'), 'B']).map((key, index) => (
+                                <div key={index} className={`px-1.5 py-0.5 rounded border text-[10px] font-medium min-w-[20px] text-center ${shortcutKeyClass}`}>
+                                    {key}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                        {(shortcuts.selectiveScreenshot || [getModifierSymbol('cmd'), getModifierSymbol('shift'), 'H']).map((key, index) => (
-                            <div key={index} className={`px-1.5 py-0.5 rounded border text-[10px] font-medium min-w-[20px] text-center ${shortcutKeyClass}`}>
-                                {key}
-                            </div>
-                        ))}
-                    </div>
-                </div>
 
-                {/* Capture & Ask AI */}
-                <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group interaction-base interaction-press ${itemHoverClass} ${glassRowClass}`}>
-                    <div className="flex items-center gap-2.5">
-                        <Sparkles className={`w-3.5 h-3.5 transition-colors ${inactiveIconColorClass}`} />
-                        <span className={`text-[12px] transition-colors ${labelColorClass}`}>Snip & Ask AI</span>
+                    {/* Screenshot (Full) */}
+                    <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group interaction-base interaction-press ${itemHoverClass} ${glassRowClass}`}>
+                        <div className="flex items-center gap-2.5">
+                            <Camera className={`w-3.5 h-3.5 transition-colors ${inactiveIconColorClass}`} />
+                            <span className={`text-[12px] transition-colors ${labelColorClass}`}>Screenshot</span>
+                        </div>
+                        <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                            {(shortcuts.takeScreenshot || [getModifierSymbol('cmd'), 'H']).map((key, index) => (
+                                <div key={index} className={`px-1.5 py-0.5 rounded border text-[10px] font-medium min-w-[20px] text-center ${shortcutKeyClass}`}>
+                                    {key}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                        {(shortcuts.captureAndProcess || [getModifierSymbol('cmd'), getModifierSymbol('shift'), '↵']).map((key, index) => (
-                            <div key={index} className={`px-1.5 py-0.5 rounded border text-[10px] font-medium min-w-[20px] text-center ${shortcutKeyClass}`}>
-                                {key}
-                            </div>
-                        ))}
+
+                    {/* Selective Screenshot */}
+                    <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group interaction-base interaction-press ${itemHoverClass} ${glassRowClass}`}>
+                        <div className="flex items-center gap-2.5">
+                            <Crop className={`w-3.5 h-3.5 transition-colors ${inactiveIconColorClass}`} />
+                            <span className={`text-[12px] transition-colors ${labelColorClass}`}>Snip Area</span>
+                        </div>
+                        <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                            {(shortcuts.selectiveScreenshot || [getModifierSymbol('cmd'), getModifierSymbol('shift'), 'H']).map((key, index) => (
+                                <div key={index} className={`px-1.5 py-0.5 rounded border text-[10px] font-medium min-w-[20px] text-center ${shortcutKeyClass}`}>
+                                    {key}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+
+                    {/* Capture & Ask AI */}
+                    <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-md transition-colors duration-200 group interaction-base interaction-press ${itemHoverClass} ${glassRowClass}`}>
+                        <div className="flex items-center gap-2.5">
+                            <Sparkles className={`w-3.5 h-3.5 transition-colors ${inactiveIconColorClass}`} />
+                            <span className={`text-[12px] transition-colors ${labelColorClass}`}>Snip & Ask AI</span>
+                        </div>
+                        <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                            {(shortcuts.captureAndProcess || [getModifierSymbol('cmd'), getModifierSymbol('shift'), '↵']).map((key, index) => (
+                                <div key={index} className={`px-1.5 py-0.5 rounded border text-[10px] font-medium min-w-[20px] text-center ${shortcutKeyClass}`}>
+                                    {key}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
 
                 </div>
             </div>

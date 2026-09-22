@@ -1,11 +1,11 @@
 // Last known license state, remembered ACROSS RESTARTS.
 //
 // WHY THIS EXISTS. Whether Pro came from a standalone Yearly/Lifetime licence
-// or bundled with a Natively API plan is settled at activation time and does
+// or bundled with a MeetFloo API plan is settled at activation time and does
 // not change until the user pastes a different key. But the Plans & Billing tab
 // re-derives it asynchronously on every open, from two independent
 // `licenseGetDetails()` calls (PlansSettings, to decide whether to collapse the
-// app-only-licence section; NativelyProSettings, to decide which card to
+// app-only-licence section; MeetFlooProSettings, to decide which card to
 // render). Both start from "unknown" and both resolve a beat later, so opening
 // the tab flashed the wrong card for about a second and then swapped it.
 //
@@ -13,7 +13,7 @@
 // the module is re-evaluated on every app launch, so the first open after a
 // restart was cold and flickered again. Hence localStorage, which is the
 // convention already used in this codebase for renderer-side persistence
-// (`natively_trial_claimed`, `natively_groq_fast_text`).
+// (`MeetFloo_trial_claimed`, `MeetFloo_groq_fast_text`).
 //
 // THIS IS A DISPLAY HINT, NEVER AN ENTITLEMENT. Feature gating lives in the
 // main process (`LicenseManager`); nothing here grants access to anything. A
@@ -23,7 +23,7 @@
 export type LicenseSnapshot = {
     isPremium: boolean;
     /**
-     * 'natively_api' means Pro is bundled with an API plan and is NOT
+     * 'MeetFloo_api' means Pro is bundled with an API plan and is NOT
      * device-bound. 'dodo' / 'gumroad' mean a standalone device licence.
      * `undefined` means the details call failed and only the boolean is known,
      * which callers must treat as "assume standalone" rather than "assume
@@ -34,7 +34,7 @@ export type LicenseSnapshot = {
 
 // Versioned: if the shape ever changes, bump the suffix rather than trying to
 // migrate, since a wrong-shaped hint is worse than a cold start.
-const STORAGE_KEY = 'natively_license_snapshot_v1';
+const STORAGE_KEY = 'MeetFloo_license_snapshot_v1';
 
 function read(): LicenseSnapshot | null {
     try {

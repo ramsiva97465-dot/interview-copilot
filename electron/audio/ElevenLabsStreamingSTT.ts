@@ -23,25 +23,25 @@ export class ElevenLabsStreamingSTT extends EventEmitter {
     private reconnectTimer: NodeJS.Timeout | null = null;
     private inputSampleRate = 48000; // what the mic/system audio captures at
     private targetSampleRate = 16000; // what ElevenLabs Scribe v2 requires
-    
+
     private buffer: Buffer[] = [];
     private isConnecting = false;
     private isSessionReady = false;
     private languageCode = 'en'; // Default to English
-    
+
     private debugWriteStream: fs.WriteStream | null = null;
-    
+
     // Chunk buffering properties (250ms @ 16k = 4000 samples)
     private pcmAccumulator: Int16Array[] = [];
     private pcmAccumulatorLen = 0;
     private readonly SEND_THRESHOLD_SAMPLES = 4000;
-    
+
     private debugMessageCount = 0;
 
     constructor(apiKey: string) {
         super();
         this.apiKey = apiKey;
-        
+
         // Open a debug file only in development to avoid disk fill-up in production
         if (process.env.NODE_ENV === 'development') {
             try {
@@ -61,9 +61,9 @@ export class ElevenLabsStreamingSTT extends EventEmitter {
     }
 
     /** No-op - channel count is expected to be mono by ElevenLabs Scribe */
-    public setAudioChannelCount(_count: number): void {}
+    public setAudioChannelCount(_count: number): void { }
 
-    /** Recognition language - maps Natively key to ISO-639-1 for ElevenLabs, or 'auto' to omit code */
+    /** Recognition language - maps MeetFloo key to ISO-639-1 for ElevenLabs, or 'auto' to omit code */
     public setRecognitionLanguage(key: string): void {
         const newCode = key === 'auto' ? '' : (RECOGNITION_LANGUAGES[key]?.iso639 ?? this.languageCode);
         if (this.languageCode !== newCode) {
@@ -78,7 +78,7 @@ export class ElevenLabsStreamingSTT extends EventEmitter {
     }
 
     /** No-op - credentials passed via API key */
-    public setCredentials(_path: string): void {}
+    public setCredentials(_path: string): void { }
 
     public start(): void {
         if (this.isActive) return;
@@ -142,7 +142,7 @@ export class ElevenLabsStreamingSTT extends EventEmitter {
     /**
      * Write raw PCM audio data.
      * ElevenLabs WebSocket expects "input_audio_chunk" in base64 16-bit PCM.
-     * Note: Input from Natively DSP is 32-bit Float PCM (F32).
+     * Note: Input from MeetFloo DSP is 32-bit Float PCM (F32).
      */
     public write(chunk: Buffer): void {
         if (!this.isActive) return;
@@ -168,7 +168,7 @@ export class ElevenLabsStreamingSTT extends EventEmitter {
             // The input buffer from the native module is ALREADY 16-bit PCM (Int16LE).
             // Do NOT read it as Float32.
             const inputS16 = new Int16Array(chunk.buffer, chunk.byteOffset, chunk.byteLength / 2);
-            
+
             let outputS16: Int16Array;
 
             if (this.inputSampleRate === this.targetSampleRate) {
@@ -228,18 +228,18 @@ export class ElevenLabsStreamingSTT extends EventEmitter {
         if (this.isConnecting) return;
         this.isConnecting = true;
         this.isSessionReady = false;
-        
+
         console.log(`[ElevenLabsStreaming] Connecting`, { hasApiKey: Boolean(this.apiKey) });
 
         // raw WebSocket URL with parameters
         let url = `${ELEVENLABS_WS_URL}?model_id=scribe_v2_realtime&include_timestamps=true&sample_rate=${this.targetSampleRate}`;
-        
+
         // Always enable language detection metadata; only pin to a specific code when one is set
         if (this.languageCode) {
             url += `&language_code=${this.languageCode}`;
         }
         url += `&include_language_detection=true`;
-        
+
         console.log(`[ElevenLabsStreaming] Connecting with URL: ${url.replace(this.apiKey, '***')}`);
 
         // streamingStttWsOptions: IPv4-only DNS + 15s handshake cap (dnsHelpers.ts).
@@ -283,7 +283,7 @@ export class ElevenLabsStreamingSTT extends EventEmitter {
                     case 'session_started':
                         console.log('[ElevenLabsStreaming] Session started:', msg.config);
                         this.isSessionReady = true;
-                        
+
                         // Flush buffered audio now that session is strictly ready
                         while (this.buffer.length > 0) {
                             const chunk = this.buffer.shift();
@@ -295,20 +295,20 @@ export class ElevenLabsStreamingSTT extends EventEmitter {
 
                     case 'partial_transcript':
                         if (msg.text) {
-                            this.emit('transcript', { 
-                                text: msg.text, 
-                                isFinal: false, 
-                                confidence: 1.0 
+                            this.emit('transcript', {
+                                text: msg.text,
+                                isFinal: false,
+                                confidence: 1.0
                             });
                         }
                         break;
 
                     case 'committed_transcript':
                         if (msg.text) {
-                            this.emit('transcript', { 
-                                text: msg.text, 
-                                isFinal: true, 
-                                confidence: 1.0 
+                            this.emit('transcript', {
+                                text: msg.text,
+                                isFinal: true,
+                                confidence: 1.0
                             });
                         }
                         break;

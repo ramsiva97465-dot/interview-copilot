@@ -1,4 +1,4 @@
-// Starts one UNMODIFIED natively-api instance per configuration, each with the provider shim
+// Starts one UNMODIFIED MeetFloo-api instance per configuration, each with the provider shim
 // preloaded. Server stdout/stderr go to benchmark/raw/server-logs/<config>.log.
 import { spawn } from 'node:child_process'
 import fs from 'node:fs'
@@ -6,7 +6,7 @@ import path from 'node:path'
 import crypto from 'node:crypto'
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..')
-const API_DIR = path.join(ROOT, 'natively-api')
+const API_DIR = path.join(ROOT, 'MeetFloo-api')
 export const BENCH = path.join(ROOT, 'benchmark')
 
 // BENCH_CONFIG_PATH selects an alternate config file (e.g. the 2026-09-17
@@ -25,8 +25,8 @@ export async function startServer(cfg, config, localTestToken) {
     ...process.env,
     PORT: String(cfg.port),
     NODE_ENV: 'development',
-    NATIVELY_LOCAL_TEST_AUTH: '1',
-    NATIVELY_LOCAL_TEST_TOKEN: localTestToken,
+    MEETFLOO_LOCAL_TEST_AUTH: '1',
+    MEETFLOO_LOCAL_TEST_TOKEN: localTestToken,
     // Side-effect sinks disabled for the benchmark process only (.env untouched;
     // dotenv never overrides a variable that is already set, even to '').
     TG_TOKEN: '', TG_CHAT: '', POSTHOG_API_KEY: '', AXIOM_TOKEN: '', SENTRY_DSN: '', RESEND_API_KEY: '',

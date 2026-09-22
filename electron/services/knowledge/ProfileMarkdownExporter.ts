@@ -27,7 +27,7 @@ function dirForCard(card: KnowledgeCard): string {
 
 function cardResourceUri(card: KnowledgeCard): string {
   const category = card.sourceSections[0] || 'profile';
-  return `natively://profile-card/${card.sourceId}#concept=${encodeURIComponent(card.conceptId)}&category=${encodeURIComponent(category)}`;
+  return `MeetFloo://profile-card/${card.sourceId}#concept=${encodeURIComponent(card.conceptId)}&category=${encodeURIComponent(category)}`;
 }
 
 function buildProfileCardMarkdown(card: KnowledgeCard, nowIso: string, slugByConcept: Map<string, string>): string {
@@ -41,7 +41,7 @@ function buildProfileCardMarkdown(card: KnowledgeCard, nowIso: string, slugByCon
   fm.push(`timestamp: ${nowIso}`);
   fm.push(`okf_version: "0.1"`);
   fm.push(`pii: true`);
-  // Natively producer-defined extension fields (OKF allows extra keys).
+  // MeetFloo producer-defined extension fields (OKF allows extra keys).
   fm.push(`source_category: ${yamlEscapeScalar(category)}`);
   fm.push(`source_quotes: ${yamlList(card.sourceQuotes.map((q) => q.text))}`);
   fm.push(`confidence: ${card.confidence}`);
@@ -85,7 +85,7 @@ function dirIndex(dir: string, cards: KnowledgeCard[]): string {
 function referencePointer(kind: 'resume' | 'job-description', pack: KnowledgePack | null): string {
   const title = kind === 'resume' ? 'Candidate Resume (source document)' : 'Target Job Description (source document)';
   const type = kind === 'resume' ? 'Reference Resume' : 'Reference Job Description';
-  const uri = pack ? `natively://profile-doc/${pack.sourceId}` : `natively://profile-doc/${kind}`;
+  const uri = pack ? `MeetFloo://profile-doc/${pack.sourceId}` : `MeetFloo://profile-doc/${kind}`;
   const fm = [
     `type: ${type}`,
     `title: ${yamlEscapeScalar(title)}`,
