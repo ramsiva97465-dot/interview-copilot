@@ -1,0 +1,10 @@
+node_modules
+admin-panel/node_modules
+landing-page/node_modules
+natively-cluely-ai-assistant/node_modules
+natively-cluely-ai-assistant/dist
+natively-cluely-ai-assistant/dist-electron
+admin-panel/dist
+landing-page/dist
+.git
+.wrangler
