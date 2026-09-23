@@ -1,6 +1,6 @@
 import React from 'react';
 import { Download, Monitor, ShieldCheck } from 'lucide-react';
-import { DOWNLOAD_URLS } from '../../../../shared/constants';
+import { DOWNLOAD_URLS } from '../../constants';
 
 export const DownloadSection: React.FC = () => {
   return (

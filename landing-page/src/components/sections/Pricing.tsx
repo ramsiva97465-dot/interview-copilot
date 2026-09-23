@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check } from 'lucide-react';
-import { DOWNLOAD_URLS } from '../../../../shared/constants';
+import { DOWNLOAD_URLS } from '../../constants';
 
 export const Pricing: React.FC = () => {
   const plans = [

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Download, Sparkles } from 'lucide-react';
-import { DOWNLOAD_URLS } from '../../../../shared/constants';
+import { DOWNLOAD_URLS } from '../../constants';
 
 export const Hero: React.FC = () => {
   return (
