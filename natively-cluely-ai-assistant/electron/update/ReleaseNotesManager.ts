@@ -152,6 +152,8 @@ export class ReleaseNotesManager {
             };
 
             const request = net.request(url);
+            request.setHeader('User-Agent', 'MeetFloo-Desktop');
+            request.setHeader('Accept', 'application/vnd.github.v3+json');
             const timeout = setTimeout(() => {
                 console.warn(`[ReleaseNotesManager] Request timed out for ${url}`);
                 request.abort();
