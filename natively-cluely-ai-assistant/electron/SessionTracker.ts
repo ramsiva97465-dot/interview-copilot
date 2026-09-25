@@ -173,7 +173,8 @@ export class SessionTracker {
     private transcriptEpochSummaries: string[] = [];
     private isCompacting: boolean = false;
 
-    // Track interim interviewer segment
+    // Track interim segments for user and interviewer to prevent data loss on stop
+    private lastInterimUser: TranscriptSegment | null = null;
     private lastInterimInterviewer: TranscriptSegment | null = null;
 
     // Detected coding question from transcript or screenshot extraction
@@ -498,10 +499,15 @@ export class SessionTracker {
      * Handle incoming transcript from native audio service
      */
     handleTranscript(segment: TranscriptSegment): { role: 'interviewer' | 'user' | 'assistant' } | null {
-        // Track interim segments for interviewer to prevent data loss on stop
+        // Track interim segments for user and interviewer to prevent data loss on stop
         if (segment.speaker === 'user') {
             if (isVerboseLogging() && (Math.random() < 0.05 || segment.final)) {
                 console.log(`[SessionTracker] RX User Segment`, { final: segment.final, length: segment.text.length });
+            }
+            if (!segment.final) {
+                this.lastInterimUser = segment;
+            } else {
+                this.lastInterimUser = null;
             }
         }
         if (segment.speaker === 'interviewer') {
@@ -781,11 +787,45 @@ export class SessionTracker {
      * Force-save any pending interim transcript (called on meeting stop)
      */
     flushInterimTranscript(): void {
+        if (this.lastInterimUser) {
+            console.log('[SessionTracker] Force-saving pending interim user transcript', { length: this.lastInterimUser.text.length });
+            const finalSegment = { ...this.lastInterimUser, final: true };
+            this.addTranscript(finalSegment);
+            this.lastInterimUser = null;
+        }
         if (this.lastInterimInterviewer) {
-            console.log('[SessionTracker] Force-saving pending interim transcript', { length: this.lastInterimInterviewer.text.length });
+            console.log('[SessionTracker] Force-saving pending interim interviewer transcript', { length: this.lastInterimInterviewer.text.length });
             const finalSegment = { ...this.lastInterimInterviewer, final: true };
             this.addTranscript(finalSegment);
             this.lastInterimInterviewer = null;
+        }
+    }
+
+    /**
+     * Merge renderer transcript entries to ensure any spoken turns visible on screen
+     * are guaranteed present in the saved fullTranscript (e.g. if STT stopped early).
+     */
+    mergeRendererTranscript(entries: Array<{ speaker: string; text: string; timestamp?: number }>): void {
+        if (!Array.isArray(entries) || entries.length === 0) return;
+        for (const entry of entries) {
+            const text = (entry.text || '').trim();
+            if (!text) continue;
+            // Check if this text is already present in fullTranscript
+            const alreadyExists = this.fullTranscript.some(seg => 
+                seg.text.trim() === text || seg.text.includes(text) || text.includes(seg.text.trim())
+            );
+            if (!alreadyExists) {
+                const normSpeaker = (entry.speaker || '').toLowerCase().trim();
+                const speaker = (normSpeaker === 'you' || normSpeaker === 'me' || normSpeaker === 'user') ? 'user' : 'interviewer';
+                const segment: TranscriptSegment = {
+                    speaker,
+                    text,
+                    timestamp: entry.timestamp || Date.now(),
+                    final: true,
+                    origin: 'stt',
+                };
+                this.addTranscript(segment);
+            }
         }
     }
 
@@ -801,6 +841,7 @@ export class SessionTracker {
         this.sessionStartTime = Date.now();
         this.lastAssistantMessage = null;
         this.assistantResponseHistory = [];
+        this.lastInterimUser = null;
         this.lastInterimInterviewer = null;
         this.detectedCodingQuestion = null;
         this.codingQuestionSource = null;

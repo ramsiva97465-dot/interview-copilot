@@ -382,3 +382,23 @@ describe('candidate claims are reachable in recruiting', () => {
     assert.equal(c.shouldRetrieve, true);
   });
 });
+
+describe('conversational backchannels and acknowledgments take FAST path', () => {
+  test('single-word "ok" is FAST with zero claims even in technical-interview with docs', () => {
+    const c = classify('ok', 'technical-interview');
+    assert.equal(c.path, 'FAST');
+    assert.equal(c.shouldRetrieve, false);
+    assert.equal(c.claimTypes.length, 0);
+    assert.ok(!c.claimTypes.some((claim) => claim.startsWith('USER_')), 'must not claim USER_EMPLOYMENT');
+  });
+
+  test('acknowledgments and greetings are FAST with zero claims', () => {
+    for (const phrase of ['ok', 'okay', 'got it', 'cool', 'sounds good', 'thanks', 'thank you', 'sure', 'yeah', 'hello', 'hi']) {
+      const c = classify(phrase, 'technical-interview');
+      assert.equal(c.path, 'FAST', `${phrase} must be FAST`);
+      assert.equal(c.shouldRetrieve, false, `${phrase} must not retrieve`);
+      assert.equal(c.claimTypes.length, 0, `${phrase} must have 0 claims`);
+    }
+  });
+});
+

@@ -40,8 +40,7 @@ const PROVIDER_CONFIGS: Record<RestSttProvider, ProviderConfigFactory> = {
             authHeader: { 'api-subscription-key': apiKey },
             uploadType: 'multipart',
             extraFormFields: {
-                model: 'saaras:v3',
-                ...(lang ? { language_code: lang } : {})
+                ...(lang ? { language_code: lang } : { language_code: 'en-IN' })
             },
             extractTranscript: (data: any) => {
                 if (typeof data === 'string') return data;
@@ -131,6 +130,20 @@ const PROVIDER_CONFIGS: Record<RestSttProvider, ProviderConfigFactory> = {
     },
 };
 
+// Default technical vocabulary for bias/keyterms in tech/AI interviews
+export const DEFAULT_TECH_KEYTERMS: string[] = [
+    'LangChain', 'LangGraph', 'LlamaIndex', 'LLM', 'STT',
+    'TTS', 'Speech-to-Text', 'FastAPI', 'Python', 'Docker',
+    'Kubernetes', 'SnapServe AI', 'PostgreSQL', 'Vector DB', 'Pinecone',
+    'Qdrant', 'ChromaDB', 'RAG', 'Retrieval-Augmented Generation', 'Fine-tuning',
+    'LoRA', 'Hugging Face', 'PyTorch', 'TensorFlow', 'Redis',
+    'Celery', 'WebRTC', 'SIP', 'VoIP', 'LiveKit',
+    'WebSocket', 'Deepgram', 'Whisper', 'Sarvam', 'ElevenLabs',
+    'OpenAI', 'Anthropic', 'Gemini', 'Claude', 'Groq',
+    'vLLM', 'Ollama', 'Prompt Engineering', 'Few-shot', 'Chain of Thought',
+    'Agents', 'Function Calling', 'Embeddings', 'Chunking', 'Latency'
+];
+
 // Minimum buffer size before sending (avoid sending tiny fragments)
 // 16kHz * 2 bytes/sample * 1 channel * 0.125 seconds = 4000 bytes
 // Lowered from 16000 to allow short command utterances ("Yes", "Stop") to flush instantly.
@@ -163,10 +176,13 @@ export class RestSTT extends EventEmitter {
     private numChannels = 1;
     private bitsPerSample = 16;
 
+    private modelOverride?: string;
+
     constructor(provider: RestSttProvider, apiKey: string, modelOverride?: string, region?: string) {
         super();
         this.provider = provider;
         this.apiKey = apiKey;
+        this.modelOverride = modelOverride;
         // SSRF guard (defense in depth): the region is interpolated into the
         // Azure/IBM endpoint hostname. If a malformed region ever reaches this
         // far (e.g. persisted before the IPC guard existed), drop it so the
@@ -185,6 +201,9 @@ export class RestSTT extends EventEmitter {
     public setApiKey(apiKey: string): void {
         this.apiKey = apiKey;
         this.config = PROVIDER_CONFIGS[this.provider](apiKey, this.region);
+        if (this.modelOverride) {
+            this.config.model = this.modelOverride;
+        }
         console.log(`[RestSTT] API key updated for ${this.provider}`);
     }
 
@@ -212,6 +231,9 @@ export class RestSTT extends EventEmitter {
     public setRecognitionLanguage(key: string): void {
         console.log(`[RestSTT] Updating recognition language to: ${key}`);
         this.config = PROVIDER_CONFIGS[this.provider](this.apiKey, this.region, key);
+        if (this.modelOverride) {
+            this.config.model = this.modelOverride;
+        }
     }
 
     /**
@@ -415,8 +437,30 @@ export class RestSTT extends EventEmitter {
             }
         }
 
-        if (this.vocabularyPrompt && (this.provider === 'groq' || this.provider === 'openai')) {
-            form.append('prompt', this.vocabularyPrompt.slice(0, 400));
+        if (this.provider === 'sarvam') {
+            if (this.config.model === 'saaras:v4') {
+                const keyterms = [...DEFAULT_TECH_KEYTERMS];
+                if (this.vocabularyPrompt) {
+                    const customWords = this.vocabularyPrompt.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
+                    for (const w of customWords) {
+                        if (!keyterms.includes(w) && keyterms.length < 50) {
+                            keyterms.unshift(w);
+                        }
+                    }
+                }
+                form.append('keyterms', JSON.stringify(keyterms.slice(0, 50)));
+            } else {
+                // saaras:v3 supports prompt for vocabulary biasing
+                const vocab = this.vocabularyPrompt
+                    ? `${this.vocabularyPrompt}, ${DEFAULT_TECH_KEYTERMS.slice(0, 25).join(', ')}`
+                    : DEFAULT_TECH_KEYTERMS.slice(0, 30).join(', ');
+                form.append('prompt', vocab.slice(0, 500));
+            }
+        } else if (this.provider === 'groq' || this.provider === 'openai') {
+            const vocab = this.vocabularyPrompt
+                ? `${this.vocabularyPrompt}, ${DEFAULT_TECH_KEYTERMS.slice(0, 20).join(', ')}`
+                : DEFAULT_TECH_KEYTERMS.slice(0, 25).join(', ');
+            form.append('prompt', vocab.slice(0, 400));
         }
 
         const response = await axios.post(this.config.endpoint, form, {

@@ -25,7 +25,7 @@ export interface SpeakerInfo {
 export class SpeakerLabelService {
   // Default display name for a canonical id (independent of any transcript).
   defaultDisplayName(speakerId: string): string {
-    if (speakerId === 'me') return 'Me';
+    if (speakerId === 'me' || speakerId === 'you') return 'You';
     const m = /^speaker_(\d+)$/.exec(speakerId);
     if (m) return `Speaker ${m[1]}`;
     if (speakerId === 'unknown') return 'Unknown';

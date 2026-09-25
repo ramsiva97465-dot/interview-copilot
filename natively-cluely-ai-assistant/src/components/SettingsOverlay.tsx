@@ -283,9 +283,9 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ label, icon, value, options
                 {isOpen && !disabled && (
                     <div className="absolute top-full left-0 w-full mt-1 bg-bg-elevated border border-border-subtle rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto animated fadeIn">
                         <div className="p-1 space-y-0.5">
-                            {options.map((device) => (
+                            {options.map((device, idx) => (
                                 <button
-                                    key={device.deviceId}
+                                    key={device.deviceId || `device-${idx}-${device.label || ''}`}
                                     onClick={() => {
                                         onChange(device.deviceId);
                                         setIsOpen(false);
@@ -427,11 +427,11 @@ const ProviderSelect: React.FC<ProviderSelectProps> = ({ value, options, onChang
                         className={`absolute top-full left-0 w-full mt-2 backdrop-blur-xl rounded-xl shadow-2xl overflow-hidden ring-1 ring-black/5 ${isLight ? 'bg-bg-elevated border border-border-subtle' : 'bg-bg-elevated/90 border border-white/5'}`}
                     >
                         <div className="max-h-[320px] overflow-y-auto p-1.5 space-y-0.5 custom-scrollbar">
-                            {options.map(option => {
+                            {options.map((option, idx) => {
                                 const isSelected = value === option.id;
                                 return (
                                     <button
-                                        key={option.id}
+                                        key={option.id || `option-${idx}-${option.label || ''}`}
                                         onClick={() => { onChange(option.id); setIsOpen(false); }}
                                         className={`w-full rounded-[10px] p-2 flex items-center gap-3 transition-all duration-200 group relative ${isSelected ? (isLight ? 'bg-bg-item-active shadow-inner' : 'bg-white/10 shadow-inner') : (isLight ? 'hover:bg-bg-item-surface' : 'hover:bg-white/5')}`}
                                     >
@@ -3373,7 +3373,7 @@ const SettingsOverlay: React.FC<SettingsOverlayProps> = ({
                                                                            Soniox is a monogram because it publishes no licence-compatible mark;
                                                                            MeetFloo is our own logo component. Every option used to share one
                                                                            generic <Mic>, which made the list unreadable at a glance. */
-                                                                        { id: 'sarvam', label: 'Sarvam AI', badge: 'Default' as const, desc: t('Indian languages & English STT (Saarika v2)'), color: 'orange', icon: <BrandMark provider="sarvam" />, neutralTile: true },
+                                                                        { id: 'sarvam', label: 'Sarvam AI', badge: 'Default' as const, desc: t('Indian languages & English STT (Saaras v4)'), color: 'orange', icon: <BrandMark provider="sarvam" />, neutralTile: true },
                                                                         ...(hasMeetFlooKey ? [{ id: 'MeetFloo', label: 'MeetFloo API', badge: 'Saved' as const, desc: t('Managed transcription via MeetFloo backend'), color: 'blue', icon: <BrandMark provider="MeetFloo" />, neutralTile: true }] : []),
                                                                         /* Directly under MeetFloo API: both are turnkey — no key to paste,
                                                                            nothing to configure — so they belong together at the top, ahead

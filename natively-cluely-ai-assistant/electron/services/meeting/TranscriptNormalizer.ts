@@ -47,7 +47,7 @@ export function canonicalSpeaker(speaker?: string): { speaker: string; speakerId
     if (/^(system|audio)$/i.test(raw)) return { speaker: 'Speaker 1', speakerId: 'speaker_1', uncertainSpeaker: true };
     return { speaker: raw || 'Unknown', speakerId: 'unknown', uncertainSpeaker: true };
   }
-  if (/^(user|me)$/i.test(raw)) return { speaker: 'Me', speakerId: 'me', uncertainSpeaker: false };
+  if (/^(user|me|you)$/i.test(raw)) return { speaker: 'You', speakerId: 'me', uncertainSpeaker: false };
   if (/^(interviewer|them|other)$/i.test(raw)) return { speaker: 'Speaker 1', speakerId: 'speaker_1', uncertainSpeaker: false };
   // A named speaker — derive a stable id from the name.
   const id = raw.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'speaker';
@@ -57,7 +57,7 @@ export function canonicalSpeaker(speaker?: string): { speaker: string; speakerId
 // Default display name for a canonical speaker id (e.g. "speaker_2" → "Speaker 2"). Falls
 // back to the channel-derived name for ids that aren't the speaker_N shape.
 function displayNameForId(speakerId: string, fallback: string): string {
-  if (speakerId === 'me') return 'Me';
+  if (speakerId === 'me' || speakerId === 'you') return 'You';
   const m = /^speaker_(\d+)$/.exec(speakerId);
   if (m) return `Speaker ${m[1]}`;
   return fallback;

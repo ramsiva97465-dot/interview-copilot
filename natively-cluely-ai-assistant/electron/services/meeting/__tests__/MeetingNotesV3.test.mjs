@@ -180,7 +180,7 @@ test('speaker labels: canonical ids + rename resolution', () => {
   const speakers = svc.listSpeakers(t, { speaker_1: 'John from Client' });
   const me = speakers.find(s => s.speakerId === 'me');
   const s1 = speakers.find(s => s.speakerId === 'speaker_1');
-  assert.equal(me.displayName, 'Me');
+  assert.equal(me.displayName, 'You');
   assert.equal(s1.displayName, 'John from Client');
   assert.equal(s1.isRenamed, true);
   assert.equal(s1.segmentCount, 2);

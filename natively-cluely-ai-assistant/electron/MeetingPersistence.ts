@@ -587,7 +587,7 @@ export class MeetingPersistence {
             // NEVER switches the live mode; only records a suggestion in summary.mode.detected*.
             let detectedMode: { templateType: string; modeId?: string; modeName?: string; confidence: number } | undefined;
             try {
-                if (isIntelligenceFlagEnabled('meetingModeAutoDetect') && data.transcript.length > 2) {
+                if (isIntelligenceFlagEnabled('meetingModeAutoDetect') && data.transcript.length > 0) {
                     const { MeetingModeDetector } = require('./services/meeting/MeetingModeDetector');
                     const detection = new MeetingModeDetector().detect({
                         transcript: data.transcript,
@@ -612,7 +612,7 @@ export class MeetingPersistence {
             // Generate Structured Summary. V3 is the long-context path: it never uses a
             // naïve transcript prefix as the primary summary input. If it fails or is
             // disabled, the existing V2 single-pass path below remains the compatibility fallback.
-            if (data.transcript.length > 2 && isIntelligenceFlagEnabled('meetingSummaryV3') && postCallSummaryAllowed) {
+            if (data.transcript.length > 0 && isIntelligenceFlagEnabled('meetingSummaryV3') && postCallSummaryAllowed) {
                 const db = DatabaseManager.getInstance();
                 db.updateSummaryStatus(meetingId, 'queued');
                 const assembler = new MeetingContextAssembler(this.llmHelper);
@@ -706,7 +706,7 @@ export class MeetingPersistence {
                 console.warn('[MeetingSummaryV3] post_call_summary scope denied — skipping V3 cloud summary path.');
             }
 
-            if (summaryData.schemaVersion !== 3 && data.transcript.length > 2 && postCallSummaryAllowed) {
+            if (summaryData.schemaVersion !== 3 && data.transcript.length > 0 && postCallSummaryAllowed) {
                 const baseRules = `RULES:
 - Do NOT invent information not present in the context
 - You MAY infer implied action items or next steps if they are logical consequences of the discussion
@@ -813,6 +813,15 @@ Return ONLY valid JSON (no markdown code blocks):
                 if (generatedTitle) {
                     title = generatedTitle;
                     if (summaryData && summaryData.schemaVersion === 3) summaryData.title = generatedTitle;
+                } else if (data.transcript.length > 0) {
+                    // Contextual title fallback from transcript when summary was too brief for LLM title
+                    const firstNonEmpty = data.transcript.find(s => (s.text || '').trim().length > 3)?.text || '';
+                    if (firstNonEmpty) {
+                        const snippet = firstNonEmpty.trim().slice(0, 50).replace(/[^\p{L}\p{N}\s]/gu, '').trim();
+                        if (snippet) {
+                            title = snippet.charAt(0).toUpperCase() + snippet.slice(1);
+                        }
+                    }
                 }
             }
 

@@ -118,7 +118,20 @@ describe('measured 2026-09-20: disclaimers for notes, resume and general knowled
     assert.equal(prefix("Based on your resume"), true);
     assert.equal(prefix("As per your"), true);
     assert.equal(prefix("Speaking from general"), true);
+    assert.equal(prefix("That specific detail is"), true);
+    assert.equal(prefix("Good interview answer:"), true);
     assert.equal(prefix("SELECT * FROM customers"), false);
+  });
+  test('strips "That detail isn\'t on file" and "Good interview answer"', () => {
+    const raw = 'That detail isn\'t on file. In my previous role I designed and built the event ingestion architecture from scratch.';
+    const r = so(raw);
+    assert.equal(r.stripped.length, 1);
+    assert.match(r.text, /^In my previous role/);
+
+    const raw2 = 'Good interview answer: "I usually approach system design by first clarifying traffic, throughput, and consistency requirements."';
+    const r2 = so(raw2);
+    assert.equal(r2.stripped.length, 1);
+    assert.match(r2.text, /^"I usually approach/);
   });
 });
 

@@ -429,6 +429,11 @@ const CANDIDATE_META_MARKERS: RegExp[] = [
   /\bthe\s+retrieved\s+excerpts?\s+do(?:es)?\s+not\s+state\b/i,
   /\b(?:as|is)\s+not\s+directly\s+mentioned\s+in\s+the\s+uploaded\s+material\b/i,
   /\bfrom\s+general\s+knowledge\b/i,
+  // Robotic absent-file / placeholder disclaimers and meta labels
+  /\b(?:that|this|the)\s+(?:specific\s+)?detail\s+is(?:n't| not)\s+on\s+file\b/i,
+  /\b(?:team of X|owned Y)\b/i,
+  /\bGood interview answer:\s*/i,
+  /\b\[\[GIST\]\]\b/i,
 ];
 
 // PERSPECTIVE REPAIR (2026-06-14, A09 fix). A candidate-voice answer must speak AS the

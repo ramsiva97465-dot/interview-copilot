@@ -139,7 +139,7 @@ export function buildProfileJitPrompt(input: BuildProfileJitPromptInput): BuiltP
     ? [
         '<missing_info>',
         `No supporting evidence was found in: ${checkedSources.map(escapeProfileJitXml).join(', ') || 'the allowed sources'}.`,
-        'Answer with an honest absence statement. Do not use generic HR/interview filler.',
+        'Answer with an honest first-person statement as the candidate (e.g. "No, I haven\'t worked with that directly yet, but..."). Never say "the resume does not mention" or refer to the resume in third person.',
         '</missing_info>',
       ].join('\n')
     : '';

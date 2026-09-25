@@ -106,7 +106,17 @@ function main() {
     execFileSync(cmd, cmdArgs, { stdio: 'inherit', cwd: root });
     console.log('[rebuild-native] Rebuild complete.');
   } catch (err) {
-    console.warn('[rebuild-native] Native electron rebuild failed (non-fatal for cloud builds):', err.message);
+    console.warn('[rebuild-native] Native electron rebuild from source failed, attempting prebuild-install fallback...');
+    try {
+      const bs3Dir = path.join(root, 'node_modules', 'better-sqlite3');
+      const pbCli = path.join(root, 'node_modules', 'prebuild-install', 'bin.js');
+      if (fs.existsSync(bs3Dir) && fs.existsSync(pbCli)) {
+        execFileSync(process.execPath, [pbCli, '-r', 'electron', '-t', electronVersion, '--arch', arch], { stdio: 'inherit', cwd: bs3Dir });
+        console.log('[rebuild-native] Prebuild fallback for better-sqlite3 succeeded.');
+      }
+    } catch (pbErr) {
+      console.warn('[rebuild-native] Prebuild fallback failed:', pbErr.message);
+    }
   }
 }
 

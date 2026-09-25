@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef, useSyncExternalStore }
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ToastProvider, ToastViewport } from "./components/ui/toast"
 import MeetFlooInterface from "./components/NativelyInterface"
+import SummarizeMeetingInterface from "./components/SummarizeMeetingInterface"
+import { getStoredSummarizeDailyRemaining } from "./lib/userUsageService"
 import HindsightStatusBanner from "./components/HindsightStatusBanner"
 import SettingsPopup from "./components/SettingsPopup" // Keeping for legacy/specific window support if needed
 import Launcher from "./components/Launcher"
@@ -243,6 +245,22 @@ const App: React.FC = () => {
     return () => clearTimeout(t);
   }, [showStartup]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Active mode template for overlay routing (Summarize Meeting vs Interview Copilot)
+  const [overlayModeTemplate, setOverlayModeTemplate] = useState<string>('technical-interview');
+  useEffect(() => {
+    if (!isOverlayWindow) return;
+    const updateMode = (mode: any) => {
+      if (mode?.templateType) {
+        setOverlayModeTemplate(mode.templateType);
+      }
+    };
+    (window.electronAPI as any)?.modesGetActive?.().then(updateMode).catch(() => {});
+    const cleanup = (window.electronAPI as any)?.onActiveModeChanged?.(updateMode);
+    return () => {
+      if (typeof cleanup === 'function') cleanup();
+    };
+  }, [isOverlayWindow]);
   /* Settings deep-link target, plus a sequence number that increments on EVERY
      request even when the tab is unchanged.
 
@@ -977,10 +995,25 @@ const App: React.FC = () => {
 
       const userEmail = localStorage.getItem('meetfloo_user_email');
       const userCredits = parseInt(localStorage.getItem('meetfloo_user_credits') || '0', 10);
-      if (userEmail && userCredits <= 0) {
-        console.warn("[App.tsx] 0 credits remaining, opening account settings");
-        openSettingsExclusive('account');
-        return;
+
+      // Distinct entitlement checking: Summarize Meeting uses daily free allowance (10m/day),
+      // completely separate from Interview Copilot credits.
+      const activeMode = await (window.electronAPI as any)?.modesGetActive?.().catch(() => null);
+      const isTeamMeet = activeMode?.templateType === 'team-meet' || activeMode?.id === 'team-meet';
+
+      if (isTeamMeet) {
+        const dailyRemaining = getStoredSummarizeDailyRemaining();
+        if (dailyRemaining <= 0) {
+          console.warn("[App.tsx] 0 summarize daily allowance remaining today");
+          alert("Today's 10-minute free Summarize Meeting allowance is exhausted. It resets tomorrow!");
+          return;
+        }
+      } else {
+        if (userEmail && userCredits <= 0) {
+          console.warn("[App.tsx] 0 interview credits remaining, opening account settings");
+          openSettingsExclusive('account');
+          return;
+        }
       }
 
       const meetingRetention = await window.electronAPI.getMeetingRetention?.().catch(() => 'forever');
@@ -1025,8 +1058,8 @@ const App: React.FC = () => {
     }
   };
 
-  const handleEndMeeting = () => {
-    console.log("[App.tsx] handleEndMeeting triggered");
+  const handleEndMeeting = (rendererTranscript?: Array<{ speaker: string; text: string; timestamp?: number }>) => {
+    console.log("[App.tsx] handleEndMeeting triggered", { rendererTranscriptCount: rendererTranscript?.length });
     analytics.trackMeetingEnded();
     setIsProcessingMeeting(true);
 
@@ -1043,12 +1076,9 @@ const App: React.FC = () => {
 
     // Fire-and-forget: main's endMeeting() handler now performs the
     // launcher swap synchronously at the top, BEFORE any blocking audio
-    // teardown. Awaiting here would stall the overlay's React render
-    // loop for the IPC round-trip while libuv-blocking setImmediate
-    // native stops fire on the main process — which is the lag the user
-    // was seeing. The launcher window receives a 'meetings-updated'
-    // event after the BG teardown so its list refreshes on its own.
-    window.electronAPI.endMeeting().catch(err => {
+    // teardown.
+    const payload = rendererTranscript && rendererTranscript.length > 0 ? { transcript: rendererTranscript } : undefined;
+    window.electronAPI.endMeeting(payload).catch(err => {
       console.error("Failed to end meeting:", err);
       // Belt-and-suspenders: if the IPC itself rejected, the swap may
       // not have happened — request it manually so the user isn't
@@ -1158,11 +1188,20 @@ const App: React.FC = () => {
                 } as React.CSSProperties}
               >
                 <HindsightStatusBanner />
-                <MeetFlooInterface
-                  onEndMeeting={handleEndMeeting}
-                  overlayOpacity={overlayOpacity}
-                  interfaceTheme={meetingInterfaceTheme}
-                />
+                {overlayModeTemplate === 'team-meet' ? (
+                  <SummarizeMeetingInterface
+                    onEndMeeting={handleEndMeeting}
+                    overlayOpacity={overlayOpacity}
+                    interfaceTheme={meetingInterfaceTheme}
+                  />
+                ) : (
+                  <MeetFlooInterface
+                    onEndMeeting={handleEndMeeting}
+                    overlayOpacity={overlayOpacity}
+                    interfaceTheme={meetingInterfaceTheme}
+                  />
+                )}
+
               </div>
               <ToastViewport />
             </ToastProvider>

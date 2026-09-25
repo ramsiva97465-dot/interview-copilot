@@ -199,6 +199,10 @@ export class IntelligenceManager extends EventEmitter {
         this.engine.handleTranscript(segment);
     }
 
+    mergeRendererTranscript(entries: Array<{ speaker: string; text: string; timestamp?: number }>): void {
+        this.session.mergeRendererTranscript(entries);
+    }
+
     async handleSuggestionTrigger(trigger: import('./SessionTracker').SuggestionTrigger): Promise<void> {
         return this.engine.handleSuggestionTrigger(trigger);
     }

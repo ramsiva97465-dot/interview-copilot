@@ -1439,6 +1439,7 @@ export class AppState {
   private _meetingStartTimestamp: number = 0;
   private _meetingLastHeartbeatTimestamp: number = 0;
   private _meetingUserEmail: string | null = null;
+  private _meetingModeTemplate: string = 'technical-interview';
   // NOTE: what contextDebugLevel was before verbose logging raised it lives in
   // SettingsManager ('contextDebugLevelBeforeVerbose'), NOT in a field here.
   // An in-memory field is null again after a restart, so
@@ -2389,20 +2390,37 @@ export class AppState {
   }
 
   // ── Meeting Usage Tracking (Credits deduction & admin sync) ──────────
-  public async recordUsageToBackend(email: string, minutes: number): Promise<{ success: boolean; user?: any }> {
+  public async recordUsageToBackend(email: string, minutes: number, mode?: string): Promise<{ success: boolean; user?: any }> {
     try {
       const baseUrl = process.env.VITE_APP_API_URL || 'https://www.meetfloo.com';
       const cleanUrl = baseUrl.replace(/\/+$/, '');
+      const effectiveMode = mode || this._meetingModeTemplate;
       const resp = await fetch(`${cleanUrl}/api/user/record-usage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.toLowerCase().trim(), minutesUsed: minutes }),
+        body: JSON.stringify({ email: email.toLowerCase().trim(), minutesUsed: minutes, mode: effectiveMode }),
       });
       const data: any = await resp.json();
       if (data?.success && data?.user) {
         this.broadcast('credits-updated', data.user);
-        if ((data.user.credits || 0) <= 0) {
-          this.broadcast('out-of-credits', data.user);
+        if (effectiveMode === 'team-meet' || effectiveMode === 'summarize_meeting') {
+          if (data.user.summarize_daily_remaining !== undefined && data.user.summarize_daily_remaining <= 0) {
+            console.warn(`[Main] User ${email} has 0 summarize daily minutes left. Ending session.`);
+            this.broadcast('summarize-daily-allowance-exhausted', data.user);
+            if (this.isMeetingActive) {
+              this.endMeetingTransition();
+            }
+          }
+        } else {
+          if ((data.user.credits || 0) <= 0) {
+            this.broadcast('out-of-credits', data.user);
+          }
+        }
+      } else if (data?.out_of_daily_allowance) {
+        console.warn(`[Main] Server rejected usage: Daily allowance exhausted for ${email}.`);
+        this.broadcast('summarize-daily-allowance-exhausted', data?.user || { summarize_daily_remaining: 0 });
+        if (this.isMeetingActive) {
+          this.endMeetingTransition();
         }
       }
       return data;
@@ -2412,18 +2430,29 @@ export class AppState {
     }
   }
 
-  public async checkAndSyncUserCredits(email: string): Promise<any> {
+  public async checkAndSyncUserCredits(email: string, mode?: string): Promise<any> {
     try {
       const baseUrl = (process.env.VITE_APP_API_URL || 'https://www.meetfloo.com').replace(/\/+$/, '');
       const resp = await fetch(`${baseUrl}/api/user/profile?email=${encodeURIComponent(email.toLowerCase().trim())}&_t=${Date.now()}`);
       const data: any = await resp.json();
       if (data?.success && data?.user) {
         this.broadcast('credits-updated', data.user);
-        if ((data.user.credits || 0) <= 0) {
-          console.warn(`[Main] User ${email} has 0 credits (synced from server). Triggering out-of-credits.`);
-          this.broadcast('out-of-credits', data.user);
-          if (this.isMeetingActive) {
-            this.endMeetingTransition();
+        const effectiveMode = mode || this._meetingModeTemplate;
+        if (effectiveMode === 'team-meet' || effectiveMode === 'summarize_meeting') {
+          if (typeof data.user.summarize_daily_remaining === 'number' && data.user.summarize_daily_remaining <= 0) {
+            console.warn(`[Main] User ${email} has 0 summarize daily minutes left (synced from server).`);
+            this.broadcast('summarize-daily-allowance-exhausted', data.user);
+            if (this.isMeetingActive) {
+              this.endMeetingTransition();
+            }
+          }
+        } else {
+          if ((data.user.credits || 0) <= 0) {
+            console.warn(`[Main] User ${email} has 0 credits (synced from server). Triggering out-of-credits.`);
+            this.broadcast('out-of-credits', data.user);
+            if (this.isMeetingActive) {
+              this.endMeetingTransition();
+            }
           }
         }
         return data.user;
@@ -2434,7 +2463,7 @@ export class AppState {
     return null;
   }
 
-  public startMeetingUsageTracking(email?: string | null): void {
+  public startMeetingUsageTracking(email?: string | null, mode?: string): void {
     this.stopMeetingUsageTracking(false);
     if (!email || typeof email !== 'string' || !email.includes('@')) {
       console.log('[Main] No valid user email provided for meeting usage tracking');
@@ -2442,13 +2471,14 @@ export class AppState {
     }
 
     this._meetingUserEmail = email.toLowerCase().trim();
+    this._meetingModeTemplate = mode || 'technical-interview';
     this._meetingStartTimestamp = Date.now();
     this._meetingLastHeartbeatTimestamp = Date.now();
 
-    console.log(`[Main] Started meeting usage heartbeat for ${this._meetingUserEmail}`);
+    console.log(`[Main] Started meeting usage heartbeat for ${this._meetingUserEmail} (mode: ${this._meetingModeTemplate})`);
 
-    // Verify credits immediately on meeting start
-    this.checkAndSyncUserCredits(this._meetingUserEmail).catch(() => {});
+    // Verify credits/allowance immediately on meeting start
+    this.checkAndSyncUserCredits(this._meetingUserEmail, this._meetingModeTemplate).catch(() => {});
 
     // Every 60s of active meeting, record 1 minute used
     this._usageHeartbeatTimer = setInterval(async () => {
@@ -2457,8 +2487,8 @@ export class AppState {
         return;
       }
       this._meetingLastHeartbeatTimestamp = Date.now();
-      console.log(`[Main] 1-minute usage heartbeat: deducting 1 minute for ${this._meetingUserEmail}`);
-      await this.recordUsageToBackend(this._meetingUserEmail, 1);
+      console.log(`[Main] 1-minute usage heartbeat: deducting 1 minute for ${this._meetingUserEmail} (mode: ${this._meetingModeTemplate})`);
+      await this.recordUsageToBackend(this._meetingUserEmail, 1, this._meetingModeTemplate);
     }, 60000);
 
     // Also poll backend credit balance every 20s to catch real-time admin deductions/removals
@@ -2467,7 +2497,7 @@ export class AppState {
         if (this._creditCheckTimer) clearInterval(this._creditCheckTimer);
         return;
       }
-      await this.checkAndSyncUserCredits(this._meetingUserEmail);
+      await this.checkAndSyncUserCredits(this._meetingUserEmail, this._meetingModeTemplate);
     }, 20000);
   }
 
@@ -2485,8 +2515,8 @@ export class AppState {
       const elapsedSinceTick = Date.now() - this._meetingLastHeartbeatTimestamp;
       // If at least 30 seconds elapsed since the last 1-min heartbeat tick (or total >= 30s)
       if (elapsedSinceTick >= 30000) {
-        console.log(`[Main] Deducting 1 trailing minute for ${this._meetingUserEmail} (${Math.round(elapsedSinceTick / 1000)}s elapsed since last tick)`);
-        await this.recordUsageToBackend(this._meetingUserEmail, 1);
+        console.log(`[Main] Deducting 1 trailing minute for ${this._meetingUserEmail} (${Math.round(elapsedSinceTick / 1000)}s elapsed since last tick, mode: ${this._meetingModeTemplate})`);
+        await this.recordUsageToBackend(this._meetingUserEmail, 1, this._meetingModeTemplate);
       } else {
         console.log(`[Main] Trailing session < 30s (${Math.round(elapsedSinceTick / 1000)}s), skipping remainder minute deduction`);
       }
@@ -2496,6 +2526,7 @@ export class AppState {
     this._meetingStartTimestamp = 0;
     this._meetingLastHeartbeatTimestamp = 0;
   }
+
 
   // Public so the reference-file upload IPC handler can kick a retry for a
   // file that landed in 'failed'/'lexical_only' during the embedder warm-up
@@ -2632,8 +2663,28 @@ export class AppState {
       console.error('[AppState] Failed to initialize RAGManager:', error);
     }
 
-    // Initialize Knowledge Orchestrator
+    this.initializeKnowledgeOrchestrator();
+  }
+
+  public initializeKnowledgeOrchestrator(): void {
+    if (this.knowledgeOrchestrator) return;
     try {
+      if (!KnowledgeDatabaseManagerClass || !KnowledgeOrchestratorClass) {
+        try {
+          KnowledgeOrchestratorClass = require('../premium/electron/knowledge/KnowledgeOrchestrator').KnowledgeOrchestrator;
+          KnowledgeDatabaseManagerClass = require('../premium/electron/knowledge/KnowledgeDatabaseManager').KnowledgeDatabaseManager;
+          textHasCompEvidence = require('../premium/electron/knowledge/NegotiationConversationTracker').textHasCompEvidence;
+        } catch (e1) {
+          try {
+            KnowledgeOrchestratorClass = require('../../premium/electron/knowledge/KnowledgeOrchestrator').KnowledgeOrchestrator;
+            KnowledgeDatabaseManagerClass = require('../../premium/electron/knowledge/KnowledgeDatabaseManager').KnowledgeDatabaseManager;
+            textHasCompEvidence = require('../../premium/electron/knowledge/NegotiationConversationTracker').textHasCompEvidence;
+          } catch (e2) {
+            console.warn('[AppState] Failed to require premium knowledge modules:', e1, e2);
+          }
+        }
+      }
+
       const db = DatabaseManager.getInstance();
       const sqliteDb = db.getDb();
 
@@ -2839,6 +2890,12 @@ export class AppState {
         }
 
         console.log('[AppState] KnowledgeOrchestrator initialized');
+      } else {
+        console.warn('[AppState] KnowledgeOrchestrator skipped during init', {
+          sqliteDb: !!sqliteDb,
+          KnowledgeDatabaseManagerClass: !!KnowledgeDatabaseManagerClass,
+          KnowledgeOrchestratorClass: !!KnowledgeOrchestratorClass,
+        });
       }
     } catch (error) {
       console.error('[AppState] Failed to initialize KnowledgeOrchestrator:', error);
@@ -3591,7 +3648,7 @@ export class AppState {
       } else {
         const sarvamFallbackKey = CredentialsManager.getInstance().getSarvamApiKey() || (process.env.SARVAM_API_KEY || '').trim();
         if (sarvamFallbackKey) {
-          console.log(`[Main] Falling back to Sarvam STT (saarika:v2) for ${speaker}`);
+          console.log(`[Main] Falling back to Sarvam STT (saaras:v3) for ${speaker}`);
           stt = new RestSTT('sarvam', sarvamFallbackKey);
         } else {
           console.warn(`[Main] No API key for ${sttProvider} STT and no Sarvam key, falling back to GoogleSTT`);
@@ -3624,7 +3681,7 @@ export class AppState {
     } else {
       const sarvamFallbackKey = CredentialsManager.getInstance().getSarvamApiKey() || (process.env.SARVAM_API_KEY || '').trim();
       if (sarvamFallbackKey) {
-        console.log(`[Main] Using Sarvam STT (saarika:v2) for ${speaker}`);
+        console.log(`[Main] Using Sarvam STT (saaras:v3) for ${speaker}`);
         stt = new RestSTT('sarvam', sarvamFallbackKey);
       } else {
         stt = new GoogleSTT(speaker);
@@ -6471,6 +6528,32 @@ export class AppState {
       }
     }
 
+    let activeModeTemplate = 'technical-interview';
+    try {
+      const { ModesManager } = require('./services/ModesManager');
+      const activeMode = ModesManager.getInstance().getActiveMode();
+      if (activeMode?.templateType) {
+        activeModeTemplate = activeMode.templateType;
+      }
+    } catch (_) {}
+    this._meetingModeTemplate = activeModeTemplate;
+
+    if (metadata?.userEmail) {
+      if (activeModeTemplate === 'team-meet' || activeModeTemplate === 'summarize_meeting') {
+        const user = await this.checkAndSyncUserCredits(metadata.userEmail, 'team-meet');
+        if (user && typeof user.summarize_daily_remaining === 'number' && user.summarize_daily_remaining <= 0) {
+          this.broadcast('summarize-daily-allowance-exhausted', user);
+          throw new Error('Your 10-minute free daily allowance for Summarize Meeting has been used today. It will reset tomorrow.');
+        }
+      } else {
+        const user = await this.checkAndSyncUserCredits(metadata.userEmail, activeModeTemplate);
+        if (user && (user.credits || 0) <= 0) {
+          this.broadcast('out-of-credits', user);
+          throw new Error('You have 0 Interview Copilot credits. Please upgrade your plan.');
+        }
+      }
+    }
+
     // Reset overlay position BEFORE the switch so the new meeting starts in
     // a predictable centered position regardless of where the previous
     // session left it. (Moved up from below so setWindowMode('overlay') reads
@@ -6489,7 +6572,8 @@ export class AppState {
     const meetingGeneration = ++this._meetingGeneration;
     this.isMeetingActive = true;
     this.broadcastMeetingState();
-    this.startMeetingUsageTracking(metadata?.userEmail);
+    this.startMeetingUsageTracking(metadata?.userEmail, activeModeTemplate);
+
     if (metadata) {
       this.intelligenceManager.setMeetingMetadata(metadata);
       if (metadata.recordAudio) {
@@ -6736,11 +6820,11 @@ export class AppState {
    * `_endMeetingInFlight` guard below is retained — it protects the
    * synchronous teardown block specifically, which the queue does not replace.
    */
-  public endMeeting(): Promise<void> {
-    return this._meetingLifecycle.stop(() => this.endMeetingTransition());
+  public endMeeting(payload?: { transcript?: Array<{ speaker: string; text: string; timestamp?: number }> }): Promise<void> {
+    return this._meetingLifecycle.stop(() => this.endMeetingTransition(payload));
   }
 
-  private async endMeetingTransition(): Promise<void> {
+  private async endMeetingTransition(payload?: { transcript?: Array<{ speaker: string; text: string; timestamp?: number }> }): Promise<void> {
     // Idempotency guard: a double-click on Stop, or a Stop racing with a
     // global-shortcut reset, can deliver two endMeeting() calls within ms of
     // each other. Without this, both invocations would run the synchronous
@@ -6959,6 +7043,15 @@ export class AppState {
           }
         } catch (recStopErr) {
           console.warn('[Main] Failed to stop/save audio recording:', recStopErr);
+        }
+
+        // 2.8 If renderer supplied transcript segments, merge them so nothing displayed on screen is lost
+        if (payload?.transcript && Array.isArray(payload.transcript) && payload.transcript.length > 0) {
+          try {
+            this.intelligenceManager.mergeRendererTranscript(payload.transcript);
+          } catch (mergeErr) {
+            console.warn('[Main] mergeRendererTranscript warning:', mergeErr);
+          }
         }
 
         // 3. Snapshot transcript + persist placeholder + queue title/summary LLM.
@@ -7414,6 +7507,9 @@ export class AppState {
   }
 
   public getKnowledgeOrchestrator(): any {
+    if (!this.knowledgeOrchestrator) {
+      this.initializeKnowledgeOrchestrator();
+    }
     return this.knowledgeOrchestrator;
   }
 

@@ -35,6 +35,11 @@ const OPENER_SENTENCE_RE = new RegExp(
     "i\\s+need\\s+(?:a\\s+bit\\s+|a\\s+little\\s+|some\\s+)?more\\s+(?:context|information|info|details?)\\b[^.!?\\n]{0,80}[.!?]",
     "i\\s+need\\s+to\\s+know\\s+(?:which|what|whether|if)\\b[^.!?\\n]{0,100}[.!?]",
     "i\\s+(?:don'?t|do\\s+not)\\s+have\\s+(?:that|this|the)\\s+(?:information|info|detail|details|figure|number|data|context)(?:\\s+(?:here|on\\s+hand|in\\s+front\\s+of\\s+me|right\\s+now|yet))?[.!]",
+    "(?:that|this|the)(?:\\s+specific)?\\s+detail\\s+is(?:n't|\\s+not)\\s+on\\s+file[^.!?\\n]{0,80}?[.!?:]?",
+    "(?:we\\s+were\\s+a\\s+team\\s+of\\s+x,?\\s+and\\s+i\\s+owned\\s+y)[^.!?\\n]{0,50}?[.!?:]?",
+    "(?:good|best|suggested|sample)?\\s*interview\\s+answer:?\\s*",
+    "(?:as\\s+an\\s+ai(?:\\s+language\\s+model)?|i\\s+am\\s+an\\s+ai)[^.!?\\n]{0,60}[.!?:]?",
+    "(?:here(?:'s|\\s+is)\\s+(?:what\\s+you\\s+(?:can|could)\\s+say|a\\s+suggested\\s+answer))[:;,]?",
   ].join('|') + ')\\s*',
   'i',
 );
@@ -64,7 +69,7 @@ export function mayBeCannedOpenerPrefix(buffer: string): boolean {
   const b = (buffer ?? '').trimStart().toLowerCase();
   if (!b) return false;
   if (b.length > 160) return false;
-  return /^(?:i(?:'m| am) )?sorry|^i (?:couldn|could not|can'?t|cannot|don'?t|didn)|^i (?:don'?t|do not) have|^(?:could|can|would) you|^(?:i(?:'m| am) )?not (?:quite )?sure|^what is your question|^if you(?:'re| are) asking|^(?:based on|as per|according to)|^(?:while|although) (?:this|that|it)|^speaking from|^since no/.test(b);
+  return /^(?:i(?:'m| am) )?sorry|^i (?:couldn|could not|can'?t|cannot|don'?t|didn)|^i (?:don'?t|do not) have|^(?:could|can|would) you|^(?:i(?:'m| am) )?not (?:quite )?sure|^what is your question|^if you(?:'re| are) asking|^(?:based on|as per|according to)|^(?:while|although) (?:this|that|it)|^speaking from|^since no|^(?:that|this|the)(?: specific)? detail is|^good interview answer|^we were a team of x|^as an ai|^here(?:'s| is) what you can say/.test(b);
 }
 
 /** First-paint gate: keep holding while the buffer is (or may still become) a

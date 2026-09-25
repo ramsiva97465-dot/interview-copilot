@@ -19,7 +19,7 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
     // Using the env variable loaded by Vite
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-    if (!isOpen) return null;
+    const isElectron = typeof window !== 'undefined' && !!(window as any).electronAPI;
 
     const handleGoogleSuccess = async (credentialResponse: any) => {
         const token = credentialResponse.credential;
@@ -57,8 +57,7 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
         }
     };
 
-    const isElectron = typeof window !== 'undefined' && !!(window as any).electronAPI;
-
+    // All hooks must come before any early return (Rules of Hooks).
     React.useEffect(() => {
         if (isElectron && isOpen) {
             const cleanup = (window as any).electronAPI.onOAuthTokenReceived((url: string) => {
@@ -86,6 +85,9 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
             return cleanup;
         }
     }, [isElectron, isOpen]);
+
+    // Early return AFTER all hooks — safe per Rules of Hooks.
+    if (!isOpen) return null;
 
     const handleDesktopLoginClick = async () => {
         setIsSubmitting(true);

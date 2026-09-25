@@ -1648,9 +1648,9 @@ const MeetingDetails: React.FC<MeetingDetailsProps> = ({ meeting: initialMeeting
         const lower = (rawSpeaker || '').trim().toLowerCase();
         if (/^(assistant|ai|model)$/.test(lower)) return 'Assistant';
         const labels = meeting.detailedSummary?.speakerLabels || {};
-        const id = /^(user|me)$/.test(lower) ? 'me' : (/^(interviewer|them|other|system)$/.test(lower) ? 'speaker_1' : lower.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'unknown');
+        const id = /^(user|me|you)$/.test(lower) ? 'me' : (/^(interviewer|them|other|system)$/.test(lower) ? 'speaker_1' : lower.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'unknown');
         if (labels[id]) return labels[id];
-        if (id === 'me') return 'Me';
+        if (id === 'me') return 'You';
         if (id === 'speaker_1') return 'Speaker 1';
         return rawSpeaker || 'Speaker';
     };
@@ -2679,7 +2679,7 @@ ${meeting.detailedSummary.keyPoints?.map(item => `- ${item}`).join('\n') || 'Non
                                             <AnimatePresence initial={false} mode="popLayout">
                                                 {speakers.map((sp) => {
                                                     const display = resolveSpeakerName(sp);
-                                                    const id = (sp || '').toLowerCase().replace(/^(user|me)$/, 'me').replace(/^(interviewer|them|other|system)$/, 'speaker_1').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'unknown';
+                                                    const id = (sp || '').toLowerCase().replace(/^(user|me|you)$/, 'me').replace(/^(interviewer|them|other|system)$/, 'speaker_1').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'unknown';
                                                     if (editingSpeaker === id) {
                                                         return (
                                                             <motion.span

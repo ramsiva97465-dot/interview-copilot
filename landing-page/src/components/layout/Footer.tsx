@@ -32,7 +32,7 @@ export const Footer: React.FC = () => {
       </div>
 
       <div className="footer-bottom">
-        <p>© {new Date().getFullYear()} MeetFloo AI. All rights reserved.</p>
+        <p>© 2024 Meetfloo-AI. All rights reserved.</p>
       </div>
     </footer>
   );

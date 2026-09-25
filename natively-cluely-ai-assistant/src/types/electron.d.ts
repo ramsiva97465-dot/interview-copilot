@@ -355,6 +355,8 @@ export interface ElectronAPI {
 
   // Native Audio Service Events
   onNativeAudioTranscript: (callback: (transcript: { speaker: string; text: string; final: boolean }) => void) => () => void
+  onActiveModeChanged: (callback: (mode: any) => void) => () => void
+  onSummarizeDailyAllowanceExhausted: (callback: (data: any) => void) => () => void
   onNativeAudioSuggestion: (callback: (suggestion: { context: string; lastQuestion: string; confidence: number }) => void) => () => void
   onNativeAudioConnected: (callback: () => void) => () => void
   onNativeAudioDisconnected: (callback: () => void) => () => void
@@ -464,7 +466,7 @@ export interface ElectronAPI {
 
   // Meeting Lifecycle
   startMeeting: (metadata?: any) => Promise<{ success: boolean; error?: string; code?: string }>
-  endMeeting: () => Promise<{ success: boolean; error?: string }>
+  endMeeting: (payload?: { transcript?: Array<{ speaker: string; text: string; timestamp?: number }> }) => Promise<{ success: boolean; error?: string }>
   debugInjectTranscript: (segments: Array<{ speaker?: string; text: string; timestamp?: number; confidence?: number }>)
     => Promise<{ success: boolean; injected?: number; error?: string }>
   finalizeMicSTT: () => Promise<void>
@@ -873,7 +875,22 @@ export interface ElectronAPI {
   onStealthKeyCaptured: (cb: (ev: { keyCode: number; chars: string; flags: number; isKeyDown: boolean }) => void) => () => void
 
   // Profile Engine API
-  profileUploadResume: (filePath: string) => Promise<{ success: boolean; error?: string }>
+  profileUploadResume: (filePath: string, title?: string) => Promise<{ success: boolean; resume?: any; error?: string }>
+  profileListResumes: () => Promise<Array<{
+    id: string
+    title: string
+    file_name: string
+    file_path: string
+    is_active: boolean
+    created_at: string
+    updated_at?: string
+    preview_name?: string
+    preview_role?: string
+    total_experience_years?: number
+  }>>
+  profileSetActiveResume: (resumeId: string) => Promise<{ success: boolean; activeResume?: any; error?: string }>
+  profileDeleteResume: (resumeId: string) => Promise<{ success: boolean; activeResume?: any; error?: string }>
+  profileRenameResume: (resumeId: string, title: string) => Promise<{ success: boolean; error?: string }>
   profileSaveSupplementaryText: (text: string) => Promise<{ success: boolean; error?: string }>
   profileGetSupplementaryText: () => Promise<string>
   // D3 (PROFILE_INTELLIGENCE_RESEARCH_AND_REDESIGN.md §15 R3): the backend

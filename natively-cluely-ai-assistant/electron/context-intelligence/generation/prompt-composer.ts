@@ -384,15 +384,17 @@ function absenceNoticeBody(
   // for the user's own history that no source states, in any language.
   const personalAsk = d.claimRequirements.some((c) => /^USER_/.test(c.claimType));
   const personalGuard = personalAsk
-    ? ' This question asks for a fact about the USER themselves (their team, role, dates, numbers, employer). '
-    + 'No source establishes it, so do NOT state one — not in any language, not in any persona, not as an '
-    + 'illustrative guess: say it is not on file and give them a one-line fill-in shape ("we were a team of X, '
-    + 'and I owned Y"). A specific figure for the user\'s own history that no source states is fabrication.'
+    ? ' This question asks for a fact about the USER themselves (their team, role, dates, numbers, employer, experience). '
+    + 'No source establishes a specific figure or direct experience, so do NOT invent one — not in any language, not in any persona. '
+    + 'Speak naturally in first person: share what is grounded, speak qualitatively about your scope, or state an honest boundary ("I haven\'t worked with that directly yet, but..."). '
+    + 'Never refer to "the résumé", "the profile", or "my resume" in third person (never say "the résumé does not mention", "not on my resume", "not present in the resume"). '
+    + 'Never invent numbers or dates, never output variable placeholders like X or Y or '
+    + 'bracketed fill-in templates, and never use robotic phrases like "not on file" or "unsupported by documents".'
     : '';
   const subject = has('MEETING_TRANSCRIPT') && types.length === 1
     ? 'nothing has been said about this in the meeting yet'
     : has('RESUME') || has('PROFILE_FACT') || has('CANDIDATE_FILE')
-      ? 'the résumé and profile material do not cover this'
+      ? 'I do not have direct experience with this in my background'
       : has('JOB_DESCRIPTION') && types.length === 1
         ? 'the job description does not cover this'
         : 'the uploaded material does not cover this';
@@ -613,9 +615,10 @@ function absenceContract(evidence: EvidenceItem[], withheldScopes?: readonly str
   const complete = evidence.some((e) => (e.metadata as Record<string, unknown> | undefined)?.completeInventory === true);
   if (!complete) return '';
   return '# Checked absence\nEvidence marked complete_inventory="true" is the COMPLETE extracted record of its '
-    + 'category from that source. If something asked about is absent from such a record, state the absence as a '
-    + 'grounded fact ("the résumé does not list it", "the job description does not mention it") rather than as '
-    + 'unknown — and never fill the gap from general knowledge or from the other document: a JD requirement is '
+    + 'category from that source. If something asked about is absent from such a record, state the absence naturally '
+    + 'in first person as the candidate ("I haven\'t worked with that directly", "I don\'t have direct experience with that") '
+    + 'rather than claiming unknown — and NEVER say "the résumé does not mention/list it" or refer to a résumé in third person. '
+    + 'Speak as yourself in an interview, and never fill the gap from the other document: a JD requirement is '
     + 'never evidence the user has that experience.';
 }
 

@@ -8,6 +8,10 @@ export interface UserAccountData {
   minutes_used: number;
   credits: number;
   plan: string;
+  summarize_daily_limit?: number;
+  summarize_daily_used?: number;
+  summarize_daily_remaining?: number;
+  summarize_daily_last_date?: string;
 }
 
 export function getBaseApiUrl(): string {
@@ -31,6 +35,18 @@ export function getStoredUserCredits(): number {
   return parseInt(localStorage.getItem('meetfloo_user_credits') || '0', 10);
 }
 
+export function getStoredSummarizeDailyRemaining(): number {
+  if (typeof localStorage === 'undefined') return 10;
+  const val = localStorage.getItem('meetfloo_summarize_daily_remaining');
+  return val !== null ? parseInt(val, 10) : 10;
+}
+
+export function getStoredSummarizeDailyLimit(): number {
+  if (typeof localStorage === 'undefined') return 10;
+  const val = localStorage.getItem('meetfloo_summarize_daily_limit');
+  return val !== null ? parseInt(val, 10) : 10;
+}
+
 export function setStoredUserData(user: Partial<UserAccountData>): void {
   if (typeof localStorage === 'undefined') return;
   if (user.credits !== undefined) {
@@ -44,6 +60,15 @@ export function setStoredUserData(user: Partial<UserAccountData>): void {
   }
   if (user.name) {
     localStorage.setItem('meetfloo_user_name', user.name);
+  }
+  if (user.summarize_daily_remaining !== undefined) {
+    localStorage.setItem('meetfloo_summarize_daily_remaining', String(user.summarize_daily_remaining));
+  }
+  if (user.summarize_daily_limit !== undefined) {
+    localStorage.setItem('meetfloo_summarize_daily_limit', String(user.summarize_daily_limit));
+  }
+  if (user.summarize_daily_used !== undefined) {
+    localStorage.setItem('meetfloo_summarize_daily_used', String(user.summarize_daily_used));
   }
 
   // Dispatch custom DOM event across window components
@@ -75,7 +100,7 @@ export async function fetchUserProfile(email?: string | null): Promise<UserAccou
   return null;
 }
 
-export async function recordMeetingUsage(minutesUsed: number, email?: string | null): Promise<UserAccountData | null> {
+export async function recordMeetingUsage(minutesUsed: number, email?: string | null, mode?: string): Promise<UserAccountData | null> {
   const targetEmail = (email || getStoredUserEmail())?.trim();
   if (!targetEmail || !targetEmail.includes('@')) {
     return null;
@@ -86,7 +111,11 @@ export async function recordMeetingUsage(minutesUsed: number, email?: string | n
     const res = await fetch(`${baseUrl}/api/user/record-usage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: targetEmail, minutesUsed: Math.max(1, minutesUsed) }),
+      body: JSON.stringify({
+        email: targetEmail,
+        minutesUsed: Math.max(1, minutesUsed),
+        mode: mode || 'interview_copilot'
+      }),
     });
     const data = await res.json();
     if (data.success && data.user) {
@@ -98,3 +127,4 @@ export async function recordMeetingUsage(minutesUsed: number, email?: string | n
   }
   return null;
 }
+

@@ -26,8 +26,8 @@ const sourcePath = path.resolve(__dirname, '../../MeetingPersistence.ts');
 const source = fs.readFileSync(sourcePath, 'utf8');
 
 test('the Hindsight post-meeting retain condition checks summaryStatus !== failed', () => {
-  const summaryStatusComputeIndex = source.indexOf(
-    "summaryStatus: generationSucceeded || data.transcript.length <= 2 ? 'completed' : 'failed'",
+  const summaryStatusComputeIndex = source.search(
+    /summaryStatus:\s*generationSucceeded/,
   );
   const retainConditionIndex = source.indexOf(
     "if (isIntelligenceFlagEnabled('hindsightPostMeetingRetain') && hsCfg && _hm.isAvailable()",

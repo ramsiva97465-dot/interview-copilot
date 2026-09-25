@@ -295,7 +295,7 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
     const [hasCatalog, setHasCatalog] = useState<Record<string, boolean>>({});
     const [fetchingModels, setFetchingModels] = useState<string | null>(null);
     const [active, setActive] = useState<ActiveDescription>({ configured: false });
-    const [configured, setConfigured] = useState<{ mode?: 'auto' | 'manual'; provider?: string; model?: string }>({ mode: 'auto' });
+    const [configured, setConfigured] = useState<{ mode?: 'auto' | 'manual'; provider?: string; model?: string; dimensions?: number }>({ mode: 'auto' });
     const [acknowledged, setAcknowledged] = useState(false);
 
     const [pending, setPending] = useState<string | null>(null);
@@ -472,6 +472,12 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
             model: modelId,
             dimensions: dimensions ?? prev.dimensions,
         }));
+        setConfigured({
+            mode: 'manual',
+            provider: providerId,
+            model: modelId,
+            dimensions,
+        });
 
         try {
             const r = await window.electronAPI.setEmbeddingConfig?.({ mode: 'manual', provider: providerId, model: modelId, dimensions });
@@ -616,12 +622,15 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
         } finally { setEndpointSaving(false); }
     }, [endpointDraft, customApiKeyDraft, refresh, t]);
 
+    const currentEffectiveProvider = active.provider || configured.provider || 'local';
+    const currentEffectiveModel = active.model || configured.model || (currentEffectiveProvider === 'local' ? 'Xenova/all-MiniLM-L6-v2' : undefined);
+
     const activeOptions: EmbeddingSelectOption[] = useMemo(() => {
         const fromCatalogue = providers
             .flatMap(p => {
                 const primaryModels = p.models.filter(m =>
                     (p.id === 'local' ? (m.downloaded || !m.downloadable) : m.recommended) ||
-                    (active.provider === p.id && active.model === m.id)
+                    (currentEffectiveProvider === p.id && currentEffectiveModel === m.id)
                 );
                 const targetModels = primaryModels.length > 0 ? primaryModels : p.models.slice(0, 1);
                 return targetModels.map(m => ({
@@ -632,64 +641,48 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
             });
 
         /* The model you are ON is always in the list, even before the catalogue
-           arrives.
-           
-           refresh() reads getEmbeddingStatus() first (~2ms) and the catalogue
-           last, and the catalogue costs a network round-trip. The Active card's
-           selector is disabled while `activeOptions` is empty, so for the whole
-           of that fetch the control sat greyed out — displaying a model we
-           already knew, and refusing to open. Seeding the active model closes
-           that window: the selector is usable as soon as the card paints, and
-           the remaining options appear when the catalogue lands.
-
-           It also fixes a second case that has nothing to do with timing: an
-           active model the catalogue does not carry (a non-recommended pick, or
-           a provider that has gone away) produced a menu where NOTHING was
-           ticked, because no option matched activeOptionId. */
-        const activeId = active.provider && active.model ? `${active.provider}::${active.model}` : '';
-        if (activeId && !fromCatalogue.some(o => o.id === activeId)) {
+           arrives. */
+        const activeId = currentEffectiveProvider && currentEffectiveModel ? `${currentEffectiveProvider}::${currentEffectiveModel}` : '';
+        if (activeId && currentEffectiveProvider && currentEffectiveModel && !fromCatalogue.some(o => o.id === activeId)) {
             return [{
                 id: activeId,
-                name: qualifiedModelName(active.provider!, active.model!),
-                triggerName: bareModelName(active.model!),
+                name: qualifiedModelName(currentEffectiveProvider, currentEffectiveModel),
+                triggerName: bareModelName(currentEffectiveModel),
             }, ...fromCatalogue];
         }
         return fromCatalogue;
-    }, [providers, active]);
+    }, [providers, currentEffectiveProvider, currentEffectiveModel]);
 
-    const activeOptionId = active.provider && active.model ? `${active.provider}::${active.model}` : '';
+    const activeOptionId = currentEffectiveProvider && currentEffectiveModel ? `${currentEffectiveProvider}::${currentEffectiveModel}` : '';
 
     // Placeholder for the CLOSED trigger only — an active model the option list
     // does not carry (a non-recommended pick, or a catalogue that has not loaded
     // yet). It follows the trigger's rule, not the menu's: bare model name.
     const activeDisplayLabel = useMemo(() => {
-        if (!active.model) return t('Select embedding model');
+        if (!currentEffectiveModel) return t('Select embedding model');
         const matched = activeOptions.find(o => o.id === activeOptionId);
         if (matched) return matched.triggerName || matched.name;
-        return bareModelName(active.model);
-    }, [active, activeOptionId, activeOptions, t]);
+        return bareModelName(currentEffectiveModel);
+    }, [currentEffectiveModel, activeOptionId, activeOptions, t]);
 
     const activeModelDetails = useMemo(() => {
-        if (!active.configured) return null;
+        const isConfigured = active.configured || !!configured.provider || configured.mode === 'manual' || !!currentEffectiveModel;
+        if (!isConfigured) return null;
 
-        const providerId = active.provider || 'local';
-        const modelId = active.model || 'Xenova/all-MiniLM-L6-v2';
+        const providerId = currentEffectiveProvider;
+        const modelId = currentEffectiveModel || 'Xenova/all-MiniLM-L6-v2';
 
         const prov = providers.find(p => p.id === providerId);
         const mod = prov?.models.find(m => m.id === modelId);
 
-        const dims = active.dimensions || mod?.dimensions || (providerId === 'gemini' ? 3072 : providerId === 'openai' ? 1536 : providerId === 'local' ? 384 : 768);
+        const dims = active.dimensions || (configured as any)?.dimensions || mod?.dimensions || (providerId === 'gemini' ? 3072 : providerId === 'openai' ? 1536 : providerId === 'local' ? (modelId === 'Xenova/bge-large-en-v1.5' ? 1024 : modelId === 'Xenova/bge-base-en-v1.5' || modelId === 'nomic-ai/nomic-embed-text-v1' ? 768 : 384) : 768);
 
-        /* No location segment. "Cloud" / "On-device" was a third clause on a
-           line that is already dimensions + a re-index warning, and the
-           provider card for this model states its location in its own header —
-           on the Retrieval page that card is a scroll away in the same view. */
         return {
             dims,
             providerName: prov?.name || providerId,
-            modelLabel: mod?.label || modelId,
+            modelLabel: mod?.label || (modelId ? bareModelName(modelId) : providerId),
         };
-    }, [active, providers]);
+    }, [active, configured, currentEffectiveProvider, currentEffectiveModel, providers]);
 
     const CARD_ORDER = ['local', 'gemini', 'openai', 'voyage', 'openrouter', 'ollama', 'custom'] as const;
     const cardProviders = useMemo(
@@ -730,14 +723,14 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
         const badge = providerBadge(p);
         const empty = emptyLine(p);
         const reason = reasonLine(p);
-        const isActiveProvider = active.provider === p.id;
+        const isActiveProvider = (active.provider ? active.provider === p.id : currentEffectiveProvider === p.id);
         // Gemini, OpenAI and Voyage document selectable output widths, so they get
         // a width control — and they may omit the width from the model labels,
         // because the control states it authoritatively right beside them.
         // (Voyage's domain models — code-4, finance-2, law-2 — are fixed at 1024;
         // the control renders disabled for those rather than disappearing.)
         const hasWidthPicker = p.id === 'gemini' || p.id === 'openai' || p.id === 'voyage' || p.id === 'openrouter';
-        const enabled = isActiveProvider && active.model ? [active.model] : [];
+        const enabled = (isActiveProvider && currentEffectiveModel) ? [currentEffectiveModel] : [];
         const isCloudWithKey = (p.id === 'gemini' || p.id === 'openai' || p.id === 'openrouter' || p.id === 'voyage');
         const hasStored = isCloudWithKey ? !!storedKeys[p.id] : p.id === 'custom' ? !!endpointDraft.trim() : p.available;
         const keyUrl = KEY_URLS[p.id];
@@ -873,7 +866,7 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
                         const downloadedOnnxCount = downloadableModels.filter(m => m.downloaded).length;
                         const totalCount = localModels.length;
                         const installedCount = (bundledModel ? 1 : 0) + downloadedOnnxCount;
-                        const isMiniLMActive = isActiveProvider && active.model === (bundledModel?.id ?? 'Xenova/all-MiniLM-L6-v2');
+                        const isMiniLMActive = (isActiveProvider || currentEffectiveProvider === 'local') && currentEffectiveModel === (bundledModel?.id ?? 'Xenova/all-MiniLM-L6-v2');
 
                         const filteredOnnxModels = downloadableModels.filter(m => {
                             if (localFilterTab === 'installed' && !m.downloaded) return false;
@@ -1047,7 +1040,7 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
                                                     const isDownloading = downloadingSet.has(m.id);
                                                     const progress = downloadProgress[m.id] || 0;
                                                     const isDownloaded = m.downloaded || !m.downloadable;
-                                                    const isCurrentActive = isActiveProvider && active.model === m.id;
+                                                    const isCurrentActive = (isActiveProvider || currentEffectiveProvider === 'local') && currentEffectiveModel === m.id;
                                                     const downloadError = downloadErrors[m.id];
                                                     const modelSize = m.sizeMB ?? m.sizeMb;
 
@@ -1421,7 +1414,7 @@ export const EmbeddingSettings: React.FC<EmbeddingSettingsProps> = ({ renderPart
                         <AlertCircle size={12} strokeWidth={1.75} className="shrink-0 mt-0.5" aria-hidden="true" />
                         <span className="min-w-0">
                             <strong className="text-white/90">{t('Recommendation:')} </strong>
-                            {t('You are using the lightweight default (MiniLM). For higher search accuracy and better answers, we recommend downloading ')}
+                            {t('You are using the lightweight compatibility default (MiniLM). For higher search accuracy and better answers, we recommend downloading ')}
                             <strong className="text-white">BGE Large v1.5</strong>
                             {t(' (or BGE Base for 8GB RAM) from Local Embeddings below.')}
                         </span>

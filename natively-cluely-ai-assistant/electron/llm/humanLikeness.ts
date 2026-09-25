@@ -169,6 +169,7 @@ const withCase = (match: string, replacement: string): string =>
  */
 const PHRASE_REWRITES: ReadonlyArray<{ re: RegExp; to: string }> = [
   // whole-phrase cliches (must precede their component words)
+  { re: /\bwe\s+were\s+a\s+team\s+of\s+x,?\s+and\s+i\s+owned\s+y\.?\b/gi, to: '' },
   { re: /\bturn(?:ing|s|ed)?\s+raw\s+data\s+into\s+actionable\s+intelligence\b/gi, to: 'turn messy data into something useful' },
   { re: /\brobust\s+and\s+scalable\b/gi, to: 'reliable' },
   { re: /\bmove\s+the\s+needle\b/gi, to: 'make a real difference' },
@@ -211,7 +212,7 @@ const PHRASE_REWRITES: ReadonlyArray<{ re: RegExp; to: string }> = [
 
 /** Sentence-initial source-narration that can be cut cleanly (grammar-safe deletion). */
 const SOURCE_NARRATION_RE =
-  /\b(?:based\s+on\s+(?:my|your|the)\s+(?:resume|profile|background|cv|provided\s+context|context)|according\s+to\s+(?:the|my|your)\s+(?:jd|job\s+description|resume|profile))\s*,?\s*/gi;
+  /\b(?:based\s+on\s+(?:my|your|the)\s+(?:resume|profile|background|cv|provided\s+context|context)|according\s+to\s+(?:the|my|your)\s+(?:jd|job\s+description|resume|profile)|(?:that|this|the)\s+(?:specific\s+)?detail\s+is(?:n't| not)\s+on\s+file|(?:good|best|suggested|sample)?\s*interview\s+answer:?|here(?:'s| is)\s+what\s+you\s+(?:can|could)\s+say:?)\s*,?\s*/gi;
 
 /** "the candidate <aux/copula>" -> first person. ONLY safe verb frames (no agreement risk). */
 const CANDIDATE_NARRATION_REWRITES: ReadonlyArray<{ re: RegExp; to: string }> = [

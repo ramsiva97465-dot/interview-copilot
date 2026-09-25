@@ -1298,7 +1298,7 @@ const FileUploadEmpty = ({ hint, hasAccess, onBrowse, onNeedUpgrade, enterClass 
             className="pi-upload-btn"
             onClick={() => { if (!hasAccess) { onNeedUpgrade(); return; } onBrowse(); }}
         >
-            <Paperclip size={13} /> Upload file
+            <Paperclip size={13} /> Upload .txt or .md file
         </button>
     </div>
 );
@@ -2054,6 +2054,11 @@ export function ProfileIntelligenceSettings({
     const supplementaryDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSavedSupplementaryRef = useRef<string>('');
 
+    // Multiple Resumes Library State
+    const [resumes, setResumes] = useState<any[]>([]);
+    const [editingResumeId, setEditingResumeId] = useState<string | null>(null);
+    const [editingResumeTitle, setEditingResumeTitle] = useState<string>('');
+
     // ── Measure & update indicator on section change ───────────────────────────
     useLayoutEffect(() => {
         // Land every section at its own top. Inheriting the previous section's
@@ -2137,6 +2142,9 @@ export function ProfileIntelligenceSettings({
                 setSupplementaryText(res.text);
                 lastSavedSupplementaryRef.current = res.text;
             }
+        }).catch(() => { });
+        window.electronAPI?.profileListResumes?.().then((list: any) => {
+            if (Array.isArray(list)) setResumes(list);
         }).catch(() => { });
     }, []);
 
@@ -2262,23 +2270,25 @@ export function ProfileIntelligenceSettings({
     const visibleNav = NAV_ITEMS;
 
     // ── Upload helpers ────────────────────────────────────────────────────────
-    const doResumeUpload = async (filePath: string) => {
+    const doResumeUpload = async (filePath: string, customTitle?: string) => {
         const token = { cancelled: false };
         profileAbortRef.current = token;
         profileDetachedRef.current = false; // this mount owns the request
         setProfileError(''); setProfileUploading(true); setProfileUploadStatus('uploading');
         try {
             setProfileUploadStatus('processing');
-            const result = await window.electronAPI?.profileUploadResume?.(filePath);
+            const result = await window.electronAPI?.profileUploadResume?.(filePath, customTitle);
             if (token.cancelled) return;
             if (result?.success) {
-                const [status, data] = await Promise.all([
+                const [status, data, list] = await Promise.all([
                     window.electronAPI?.profileGetStatus?.(),
                     window.electronAPI?.profileGetProfile?.(),
+                    window.electronAPI?.profileListResumes?.(),
                 ]);
                 if (token.cancelled) return;
                 if (status) setProfileStatus(status);
                 if (data) setProfileData(data);
+                if (Array.isArray(list)) setResumes(list);
                 setProfileUploadStatus('ready');
             } else {
                 setProfileError(result?.error || 'Upload failed');
@@ -2294,6 +2304,47 @@ export function ProfileIntelligenceSettings({
                 scheduleStatusReset(() => setProfileUploadStatus(undefined));
             }
         }
+    };
+
+    const handleSelectActiveResume = async (resumeId: string) => {
+        try {
+            const res = await window.electronAPI?.profileSetActiveResume?.(resumeId);
+            if (res?.success) {
+                const [status, data, list] = await Promise.all([
+                    window.electronAPI?.profileGetStatus?.(),
+                    window.electronAPI?.profileGetProfile?.(),
+                    window.electronAPI?.profileListResumes?.(),
+                ]);
+                if (status) setProfileStatus(status);
+                if (data) setProfileData(data);
+                if (Array.isArray(list)) setResumes(list);
+            }
+        } catch { /**/ }
+    };
+
+    const handleDeleteResume = async (resumeId: string) => {
+        if (!confirm('Delete this resume and its extracted data?')) return;
+        try {
+            await window.electronAPI?.profileDeleteResume?.(resumeId);
+            const [status, data, list] = await Promise.all([
+                window.electronAPI?.profileGetStatus?.(),
+                window.electronAPI?.profileGetProfile?.(),
+                window.electronAPI?.profileListResumes?.(),
+            ]);
+            if (status) setProfileStatus(status);
+            if (data) setProfileData(data);
+            if (Array.isArray(list)) setResumes(list);
+        } catch { /**/ }
+    };
+
+    const handleRenameResume = async (resumeId: string, title: string) => {
+        if (!title.trim()) return;
+        try {
+            await window.electronAPI?.profileRenameResume?.(resumeId, title.trim());
+            setEditingResumeId(null);
+            const list = await window.electronAPI?.profileListResumes?.();
+            if (Array.isArray(list)) setResumes(list);
+        } catch { /**/ }
     };
 
     const doJdUpload = async (filePath: string) => {
@@ -2437,59 +2488,255 @@ export function ProfileIntelligenceSettings({
                 column is wide enough that one sentence never wraps, so the header
                 block stays a tight two-line unit above the card. */}
                 <div style={{ marginBottom: 10 }}>
-                    <h3 className="pi-section-label" style={{ margin: 0 }}>Resume</h3>
+                    <h3 className="pi-section-label" style={{ margin: 0 }}>Resume Library</h3>
                     <p style={{ fontSize: 12, color: 'var(--pi-secondary)', margin: '4px 0 0', lineHeight: 1.5 }}>
-                        Grounds every answer in what you've actually done, instead of generic advice.
+                        Upload your resume in <strong>.txt</strong> or <strong>.md</strong> format for 100% clean, error-free AI extraction.
                     </p>
                 </div>
                 {profileIndexing || profileHandoff.settling ? (
                     <FileUploadIndexing stages={RESUME_INGEST_STAGES} settling={profileHandoff.settling} />
-                ) : !profileStatus.hasProfile ? (
+                ) : (!profileStatus.hasProfile && (!resumes || resumes.length === 0)) ? (
                     <FileUploadEmpty
-                        hint="Add your resume as real-time context."
+                        hint="Upload your resume in .txt or .md format (avoids PDF layout & header errors)."
                         hasAccess={hasProfileAccess}
                         onBrowse={browseResume}
                         onNeedUpgrade={() => setIsPremiumModalOpen(true)}
                         enterClass={profileHandoff.arriving ? 'pi-handoff-in-self' : undefined}
                     />
                 ) : (
-                    <div className={profileHandoff.arriving ? 'pi-handoff-in' : undefined} style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '13px 1fr 100px 20px', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--pi-btn-bg)', border: '1px solid var(--pi-btn-border)', borderRadius: 'var(--pi-r-md)' }}>
-                            <FileText size={13} style={{ color: 'var(--pi-secondary)', flexShrink: 0 }} />
-                            <span style={{ fontSize: 12, color: 'var(--pi-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {profileData?.identity?.name || 'Resume.pdf'}
-                            </span>
-                            <PIIndexBadge status={profileUploadStatus} />
+                    <div className={profileHandoff.arriving ? 'pi-handoff-in' : undefined} style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+                        {/* Multiple Resumes Cards */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            {resumes.map((r, idx) => {
+                                const isItemActive = Boolean(r.is_active);
+                                const isEditing = editingResumeId === r.id;
+                                const updatedDate = r.updated_at || r.created_at
+                                    ? new Date(r.updated_at || r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                                    : 'Recently';
+
+                                return (
+                                    <div
+                                        key={r.id || `resume-${idx}-${r.title || r.file_name || 'item'}`}
+                                        style={{
+                                            padding: '12px 14px',
+                                            background: isItemActive ? 'rgba(255,255,255,0.04)' : 'var(--pi-btn-bg)',
+                                            border: `1px solid ${isItemActive ? 'var(--pi-accent-border, rgba(160,180,255,0.3))' : 'var(--pi-btn-border)'}`,
+                                            borderRadius: 'var(--pi-r-md)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: 8,
+                                            transition: 'border-color 180ms ease, background 180ms ease',
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, flex: 1, minWidth: 0 }}>
+                                                <div style={{
+                                                    width: 28,
+                                                    height: 28,
+                                                    borderRadius: 6,
+                                                    background: isItemActive ? 'var(--pi-accent-subtle)' : 'rgba(255,255,255,0.04)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    flexShrink: 0,
+                                                    marginTop: 2,
+                                                }}>
+                                                    <FileText size={15} style={{ color: isItemActive ? 'var(--pi-accent)' : 'var(--pi-secondary)' }} />
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1, minWidth: 0 }}>
+                                                    {isEditing ? (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                            <input
+                                                                type="text"
+                                                                value={editingResumeTitle}
+                                                                onChange={(e) => setEditingResumeTitle(e.target.value)}
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter') handleRenameResume(r.id, editingResumeTitle);
+                                                                    if (e.key === 'Escape') setEditingResumeId(null);
+                                                                }}
+                                                                autoFocus
+                                                                style={{
+                                                                    fontSize: 13,
+                                                                    padding: '4px 8px',
+                                                                    background: 'rgba(0,0,0,0.3)',
+                                                                    border: '1px solid var(--pi-input-border-focus)',
+                                                                    borderRadius: 4,
+                                                                    color: 'var(--pi-hero)',
+                                                                    outline: 'none',
+                                                                    width: '100%',
+                                                                    maxWidth: 240,
+                                                                }}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                className="pi-press-soft"
+                                                                onClick={() => handleRenameResume(r.id, editingResumeTitle)}
+                                                                style={{ fontSize: 11, padding: '4px 8px', borderRadius: 4, background: 'var(--pi-accent-subtle)', color: 'var(--pi-accent)', border: '1px solid var(--pi-accent-border)', cursor: 'pointer' }}
+                                                            >
+                                                                Save
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="pi-press-soft"
+                                                                onClick={() => setEditingResumeId(null)}
+                                                                style={{ fontSize: 11, padding: '4px 8px', borderRadius: 4, background: 'none', color: 'var(--pi-tertiary)', border: 'none', cursor: 'pointer' }}
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                                            <span style={{ fontSize: 13, fontWeight: 600, color: isItemActive ? 'var(--pi-hero)' : 'var(--pi-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                                {r.title || r.file_name || 'Resume'}
+                                                            </span>
+                                                            {isItemActive && (
+                                                                <span style={{
+                                                                    fontSize: 10,
+                                                                    fontWeight: 500,
+                                                                    padding: '1px 7px',
+                                                                    borderRadius: 'var(--pi-r-pill)',
+                                                                    background: 'var(--pi-accent-subtle)',
+                                                                    border: '1px solid var(--pi-accent-border)',
+                                                                    color: 'var(--pi-accent)',
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    gap: 4,
+                                                                }}>
+                                                                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor' }} />
+                                                                    Active for Interview Copilot
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    <div style={{ fontSize: 11, color: 'var(--pi-secondary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                        <span>{r.file_name}</span>
+                                                        <span style={{ opacity: 0.4 }}>•</span>
+                                                        <span>Updated: {updatedDate}</span>
+                                                        {r.preview_role && (
+                                                            <>
+                                                                <span style={{ opacity: 0.4 }}>•</span>
+                                                                <span style={{ color: 'var(--pi-tertiary)' }}>{r.preview_role}</span>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Action buttons */}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                                                {!isItemActive && (
+                                                    <button
+                                                        type="button"
+                                                        className="pi-press-soft"
+                                                        onClick={() => handleSelectActiveResume(r.id)}
+                                                        style={{
+                                                            fontSize: 11,
+                                                            fontWeight: 500,
+                                                            padding: '4px 10px',
+                                                            borderRadius: 'var(--pi-r-pill)',
+                                                            background: 'var(--pi-btn-bg)',
+                                                            border: '1px solid var(--pi-btn-border)',
+                                                            color: 'var(--pi-primary)',
+                                                            cursor: 'pointer',
+                                                            transition: 'all 180ms ease',
+                                                        }}
+                                                        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--pi-accent)'; e.currentTarget.style.color = 'var(--pi-accent)'; }}
+                                                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--pi-btn-border)'; e.currentTarget.style.color = 'var(--pi-primary)'; }}
+                                                    >
+                                                        Select
+                                                    </button>
+                                                )}
+                                                {!isEditing && (
+                                                    <button
+                                                        type="button"
+                                                        className="pi-press-soft"
+                                                        title="Rename resume"
+                                                        onClick={() => {
+                                                            setEditingResumeId(r.id);
+                                                            setEditingResumeTitle(r.title || r.file_name);
+                                                        }}
+                                                        style={{
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            color: 'var(--pi-tertiary)',
+                                                            fontSize: 11,
+                                                            padding: '4px 6px',
+                                                            cursor: 'pointer',
+                                                            borderRadius: 4,
+                                                        }}
+                                                        onMouseEnter={e => (e.currentTarget.style.color = 'var(--pi-primary)')}
+                                                        onMouseLeave={e => (e.currentTarget.style.color = 'var(--pi-tertiary)')}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    className="pi-press-soft"
+                                                    disabled={profileUploading}
+                                                    title={profileUploading ? 'Indexing in progress...' : 'Delete resume'}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        cursor: profileUploading ? 'not-allowed' : 'pointer',
+                                                        opacity: profileUploading ? 0.4 : 1,
+                                                        color: 'var(--pi-tertiary)',
+                                                        padding: 4,
+                                                        display: 'flex',
+                                                        borderRadius: 4,
+                                                        transition: 'color 180ms ease',
+                                                    }}
+                                                    onMouseEnter={e => { if (!profileUploading) e.currentTarget.style.color = 'var(--pi-danger)'; }}
+                                                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--pi-tertiary)')}
+                                                    onClick={() => handleDeleteResume(r.id)}
+                                                >
+                                                    <Trash2 size={13} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* + Add Resume CTA */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6, flexWrap: 'wrap', gap: 8 }}>
                             <button
+                                type="button"
                                 className="pi-press-soft"
-                                disabled={profileUploading}
-                                title={profileUploading
-                                    ? 'Indexing — this finishes in the background and cannot be stopped. Delete it once it completes.'
-                                    : 'Delete resume'}
-                                style={{ background: 'none', border: 'none', cursor: profileUploading ? 'not-allowed' : 'pointer', opacity: profileUploading ? 0.4 : 1, color: 'var(--pi-tertiary)', padding: 4, display: 'flex', borderRadius: 4, transition: 'color 180ms ease' }}
-                                onMouseEnter={e => { if (!profileUploading) e.currentTarget.style.color = 'var(--pi-danger)'; }}
-                                onMouseLeave={e => (e.currentTarget.style.color = 'var(--pi-tertiary)')}
-                                onClick={async () => {
-                                    // Previously this set profileAbortRef.cancelled and rendered
-                                    // { hasProfile: false } — but that flag only silences this
-                                    // renderer. Main runs ingestDocument to completion and then
-                                    // enables knowledge mode, so "cancel" produced a UI claiming
-                                    // no profile while the resume was in fact saved and live.
-                                    // The button is disabled mid-ingest rather than lying.
-                                    if (profileUploading) return;
-                                    if (!confirm('Delete your resume and its extracted data?')) return;
-                                    try {
-                                        await window.electronAPI?.profileDelete?.();
-                                        setProfileStatus({ hasProfile: false, profileMode: false });
-                                        const freshData = await window.electronAPI?.profileGetProfile?.();
-                                        setProfileData(freshData ?? null);
-                                        setSupplementaryText('');
-                                    } catch { /**/ }
+                                onClick={browseResume}
+                                style={{
+                                    fontSize: 12,
+                                    fontWeight: 500,
+                                    padding: '6px 14px',
+                                    borderRadius: 'var(--pi-r-pill)',
+                                    background: 'var(--pi-btn-bg)',
+                                    border: '1px dashed var(--pi-btn-border)',
+                                    color: 'var(--pi-primary)',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 6,
+                                    transition: 'all 180ms ease',
+                                }}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.borderColor = 'var(--pi-accent)';
+                                    e.currentTarget.style.color = 'var(--pi-accent)';
+                                    e.currentTarget.style.background = 'var(--pi-accent-subtle)';
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.borderColor = 'var(--pi-btn-border)';
+                                    e.currentTarget.style.color = 'var(--pi-primary)';
+                                    e.currentTarget.style.background = 'var(--pi-btn-bg)';
                                 }}
                             >
-                                <X size={12} />
+                                <Paperclip size={13} /> Add Resume (.txt or .md)
                             </button>
+                            <span style={{ fontSize: 11, color: 'var(--pi-tertiary)' }}>
+                                Recommended format: <strong>.txt</strong> or <strong>.md</strong>
+                            </span>
                         </div>
+
                         {/* Candidate snapshot — shown once extraction is done */}
                         {profileStatus.hasProfile && !profileUploading && profileData?.identity && (() => {
                             const id = profileData.identity;
@@ -2530,8 +2777,8 @@ export function ProfileIntelligenceSettings({
                                     )}
                                     {topSkills.length > 0 && (
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 2 }}>
-                                            {topSkills.map(s => (
-                                                <span key={s} style={{ fontSize: 10, padding: '2px 7px', borderRadius: 'var(--pi-r-pill)', background: 'var(--pi-btn-bg)', border: '1px solid var(--pi-btn-border)', color: 'var(--pi-secondary)' }}>{s}</span>
+                                            {topSkills.map((s, idx) => (
+                                                <span key={`${s}-${idx}`} style={{ fontSize: 10, padding: '2px 7px', borderRadius: 'var(--pi-r-pill)', background: 'var(--pi-btn-bg)', border: '1px solid var(--pi-btn-border)', color: 'var(--pi-secondary)' }}>{s}</span>
                                             ))}
                                         </div>
                                     )}
@@ -2763,8 +3010,8 @@ export function ProfileIntelligenceSettings({
                                     )}
                                     {techs.length > 0 && (
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 2 }}>
-                                            {techs.map(t => (
-                                                <span key={t} style={{ fontSize: 10, padding: '2px 7px', borderRadius: 'var(--pi-r-pill)', background: 'var(--pi-btn-bg)', border: '1px solid var(--pi-btn-border)', color: 'var(--pi-secondary)' }}>{t}</span>
+                                            {techs.map((t, idx) => (
+                                                <span key={`${t}-${idx}`} style={{ fontSize: 10, padding: '2px 7px', borderRadius: 'var(--pi-r-pill)', background: 'var(--pi-btn-bg)', border: '1px solid var(--pi-btn-border)', color: 'var(--pi-secondary)' }}>{t}</span>
                                             ))}
                                         </div>
                                     )}
@@ -2991,17 +3238,17 @@ export function ProfileIntelligenceSettings({
                                 </div>
                                 {hasCategorizedSkills ? (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                        {skillCategories.map(({ name, items }) => {
+                                        {skillCategories.map(({ name, items }, nameIdx) => {
                                             if (chipsUsed >= SKILL_CAP) return null;
                                             const remaining = SKILL_CAP - chipsUsed;
                                             const shown = items.slice(0, remaining);
                                             chipsUsed += shown.length;
                                             return (
-                                                <div key={name}>
+                                                <div key={`${name}-${nameIdx}`}>
                                                     <div style={{ ...categoryLabel, marginBottom: 7 }}>{name}</div>
                                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                                                        {shown.map(s => (
-                                                            <span key={s} className="pi-chip">{s}</span>
+                                                        {shown.map((s, sIdx) => (
+                                                            <span key={`${s}-${sIdx}`} className="pi-chip">{s}</span>
                                                         ))}
                                                     </div>
                                                 </div>
@@ -3014,8 +3261,8 @@ export function ProfileIntelligenceSettings({
                                 ) : (
                                     <>
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                                            {skillsFlat.slice(0, SKILL_CAP).map(s => (
-                                                <span key={s} className="pi-chip">{s}</span>
+                                            {skillsFlat.slice(0, SKILL_CAP).map((s, idx) => (
+                                                <span key={`${s}-${idx}`} className="pi-chip">{s}</span>
                                             ))}
                                         </div>
                                         {skillsFlat.length > SKILL_CAP && (

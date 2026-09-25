@@ -11657,7 +11657,7 @@ export function initializeIpcHandlers(appState: AppState): void {
         } else if (provider === 'sarvam') {
           const form = new FormData();
           form.append('file', testWav, { filename: 'test.wav', contentType: 'audio/wav' });
-          form.append('model', 'saarika:v2');
+          form.append('model', 'saaras:v3');
 
           await axios.post('https://api.sarvam.ai/speech-to-text', form, {
             headers: {
@@ -12774,9 +12774,9 @@ export function initializeIpcHandlers(appState: AppState): void {
     }
   });
 
-  safeHandle('end-meeting', async () => {
+  safeHandle('end-meeting', async (_event, payload?: { transcript?: Array<{ speaker: string; text: string; timestamp?: number }> }) => {
     try {
-      await appState.endMeeting();
+      await appState.endMeeting(payload);
       return { success: true };
     } catch (error: any) {
       console.error('Error ending meeting:', error);
@@ -14567,7 +14567,7 @@ export function initializeIpcHandlers(appState: AppState): void {
     return key;
   };
 
-  safeHandle('profile:upload-resume', async (_, filePath: string) => {
+  safeHandle('profile:upload-resume', async (_, filePath: string, title?: string) => {
     try {
       // Premium gate: require active license or free trial for profile features
       if (!isProOrTrialActive()) {
@@ -14582,7 +14582,7 @@ export function initializeIpcHandlers(appState: AppState): void {
         console.warn('[IPC] profile:upload-resume rejected: path was not produced by profile:select-file or has expired.');
         return { success: false, error: 'Please re-select the resume file.' };
       }
-      console.log(`[IPC] profile:upload-resume called with: ${resolvedPath}`);
+      console.log(`[IPC] profile:upload-resume called with: ${resolvedPath}, title: ${title || '(default)'}`);
       const orchestrator = appState.getKnowledgeOrchestrator();
       if (!orchestrator) {
         return {
@@ -14591,7 +14591,7 @@ export function initializeIpcHandlers(appState: AppState): void {
         };
       }
       const { DocType } = require('../premium/electron/knowledge/types');
-      const result = await orchestrator.ingestDocument(resolvedPath, DocType.RESUME);
+      const result = await orchestrator.ingestDocument(resolvedPath, DocType.RESUME, title);
       if (!result?.success && path.extname(resolvedPath).toLowerCase() === '.doc') {
         return { success: false, error: 'Legacy Word .doc files are not supported. Save the file as .docx and upload it again.' };
       }
@@ -14626,6 +14626,72 @@ export function initializeIpcHandlers(appState: AppState): void {
       return result;
     } catch (error: any) {
       console.error('[IPC] profile:upload-resume error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  safeHandle('profile:list-resumes', async () => {
+    try {
+      const orchestrator = appState.getKnowledgeOrchestrator();
+      if (!orchestrator) return [];
+      return orchestrator.listResumes?.() || [];
+    } catch (error: any) {
+      console.error('[IPC] profile:list-resumes error:', error);
+      return [];
+    }
+  });
+
+  safeHandle('profile:set-active-resume', async (_, resumeId: string) => {
+    try {
+      if (!isProOrTrialActive()) {
+        return {
+          success: false,
+          error: 'Pro license required. Please activate a license key to use Profile Intelligence features.',
+        };
+      }
+      const orchestrator = appState.getKnowledgeOrchestrator();
+      if (!orchestrator) {
+        return { success: false, error: 'Knowledge engine not initialized.' };
+      }
+      const result = orchestrator.setActiveResume?.(resumeId);
+      if (result?.success) {
+        try {
+          orchestrator.setKnowledgeMode(true);
+          const { SettingsManager } = require('./services/SettingsManager');
+          SettingsManager.getInstance().set('knowledgeMode', true);
+        } catch (e) {
+          console.warn('[IPC] profile:set-active-resume: failed to auto-enable knowledge mode', e);
+        }
+      }
+      return result || { success: true };
+    } catch (error: any) {
+      console.error('[IPC] profile:set-active-resume error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  safeHandle('profile:delete-resume', async (_, resumeId: string) => {
+    try {
+      const orchestrator = appState.getKnowledgeOrchestrator();
+      if (!orchestrator) {
+        return { success: false, error: 'Knowledge engine not initialized.' };
+      }
+      return orchestrator.deleteResume?.(resumeId) || { success: true };
+    } catch (error: any) {
+      console.error('[IPC] profile:delete-resume error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  safeHandle('profile:rename-resume', async (_, resumeId: string, title: string) => {
+    try {
+      const orchestrator = appState.getKnowledgeOrchestrator();
+      if (!orchestrator) {
+        return { success: false, error: 'Knowledge engine not initialized.' };
+      }
+      return orchestrator.renameResume?.(resumeId, title) || { success: true };
+    } catch (error: any) {
+      console.error('[IPC] profile:rename-resume error:', error);
       return { success: false, error: error.message };
     }
   });
@@ -14812,7 +14878,8 @@ export function initializeIpcHandlers(appState: AppState): void {
       const result: any = await dialog.showOpenDialog({
         properties: ['openFile'],
         filters: [
-          { name: 'Resume & JD Documents', extensions },
+          { name: 'Text & Markdown Resumes (*.txt, *.md)', extensions: ['txt', 'md'] },
+          { name: 'All Supported Documents (*.txt, *.md, *.pdf, *.docx)', extensions },
           { name: 'All Files', extensions: ['*'] },
         ],
       });
@@ -16087,6 +16154,11 @@ export function initializeIpcHandlers(appState: AppState): void {
           } catch { /* non-fatal */ }
         })();
       }
+      try {
+        BrowserWindow.getAllWindows().forEach((win) => {
+          if (!win.isDestroyed()) win.webContents.send('mode-changed', activeMode);
+        });
+      } catch (_) {}
       return { success: true };
     } catch (e: any) {
       console.error('[IPC] modes:set-active error:', e);

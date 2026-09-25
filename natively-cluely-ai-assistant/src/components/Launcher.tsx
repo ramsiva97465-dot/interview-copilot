@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useT } from '../i18n';
-import { ToggleLeft, ToggleRight, Search, Calendar, ArrowRight, ArrowLeft, MoreHorizontal, Globe, Clock, ChevronRight, Settings, LayoutGrid, RefreshCw, Eye, EyeOff, Ghost, Plus, Mail, Link as LinkIcon, ChevronDown, Trash2, Bell, Download, DownloadCloud, CheckCircle, AlertCircle, User, UserSearch, Sparkles, ArrowUpRight } from 'lucide-react';
+import { ToggleLeft, ToggleRight, Search, Calendar, ArrowRight, ArrowLeft, MoreHorizontal, Globe, Clock, ChevronRight, Settings, LayoutGrid, RefreshCw, Eye, EyeOff, Ghost, Plus, Mail, Link as LinkIcon, ChevronDown, Trash2, Bell, Download, DownloadCloud, CheckCircle, AlertCircle, User, UserSearch, Sparkles, ArrowUpRight, Code2, FileText } from 'lucide-react';
 import { generateMeetingPDF } from '../utils/pdfGenerator';
 import icon from "./icon.png";
 import mainui from "../UI_comp/mainui.png";
@@ -21,7 +21,7 @@ import { APP_FEATURE_VERSION } from '../utils/appVersion';
 import WindowControls from './WindowControls';
 import { LiquidGlassBadge } from '../ui-components/LiquidGlassBadge';
 import { emitOrchestratorEvent, setUserState as setOrchestratorUserState } from './onboarding/OrchestratedToasterHost';
-import { fetchUserProfile } from '../lib/userUsageService';
+import { fetchUserProfile, getStoredSummarizeDailyRemaining, getStoredSummarizeDailyLimit } from '../lib/userUsageService';
 
 interface Meeting {
     id: string;
@@ -122,13 +122,30 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
         }
         return '';
     });
+    const [summarizeDailyRemaining, setSummarizeDailyRemaining] = useState<number>(() => {
+        return getStoredSummarizeDailyRemaining();
+    });
+    const [summarizeDailyLimit, setSummarizeDailyLimit] = useState<number>(() => {
+        return getStoredSummarizeDailyLimit();
+    });
     // StrictMode-safe guard for mount-only side-effects: the dev build
     // intentionally double-invokes effects to surface this class of bug.
     const mountedOnceRef = useRef<boolean>(false);
 
     const fetchMeetings = () => {
         if (window.electronAPI && window.electronAPI.getRecentMeetings) {
-            window.electronAPI.getRecentMeetings().then(setMeetings).catch(err => console.error("Failed to fetch meetings:", err));
+            window.electronAPI.getRecentMeetings().then(data => {
+                if (Array.isArray(data)) {
+                    const seen = new Set<string>();
+                    const deduped = data.filter(m => {
+                        if (!m?.id) return true;
+                        if (seen.has(m.id)) return false;
+                        seen.add(m.id);
+                        return true;
+                    });
+                    setMeetings(deduped);
+                }
+            }).catch(err => console.error("Failed to fetch meetings:", err));
         }
     };
 
@@ -145,6 +162,12 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
             if (user) {
                 setUserCredits(user.credits);
                 setUserPlan(user.plan);
+                if (user.summarize_daily_remaining !== undefined) {
+                    setSummarizeDailyRemaining(user.summarize_daily_remaining);
+                }
+                if (user.summarize_daily_limit !== undefined) {
+                    setSummarizeDailyLimit(user.summarize_daily_limit);
+                }
             }
         }).catch(() => {});
         try {
@@ -236,6 +259,9 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
             removeMeetingStateListener = window.electronAPI.onMeetingStateChanged(({ isActive }) => {
                 setIsMeetingActive(isActive);
                 emitOrchestratorEvent({ type: 'meeting:state', isActive });
+                if (!isActive) {
+                    fetchMeetings();
+                }
             });
         }
 
@@ -249,6 +275,8 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
             if (typeof localStorage !== 'undefined') {
                 setUserCredits(parseInt(localStorage.getItem('meetfloo_user_credits') || '0', 10));
                 setUserPlan(localStorage.getItem('meetfloo_user_plan') || '');
+                setSummarizeDailyRemaining(getStoredSummarizeDailyRemaining());
+                setSummarizeDailyLimit(getStoredSummarizeDailyLimit());
             }
         };
 
@@ -257,6 +285,12 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
             if (mounted && user) {
                 setUserCredits(user.credits);
                 setUserPlan(user.plan);
+                if (user.summarize_daily_remaining !== undefined) {
+                    setSummarizeDailyRemaining(user.summarize_daily_remaining);
+                }
+                if (user.summarize_daily_limit !== undefined) {
+                    setSummarizeDailyLimit(user.summarize_daily_limit);
+                }
             }
         }).catch(() => {});
 
@@ -266,6 +300,12 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
             }
             if (e.detail?.plan) {
                 setUserPlan(e.detail.plan);
+            }
+            if (e.detail?.summarize_daily_remaining !== undefined) {
+                setSummarizeDailyRemaining(e.detail.summarize_daily_remaining);
+            }
+            if (e.detail?.summarize_daily_limit !== undefined) {
+                setSummarizeDailyLimit(e.detail.summarize_daily_limit);
             }
         };
 
@@ -280,6 +320,12 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
                 if (mounted && user) {
                     setUserCredits(user.credits);
                     setUserPlan(user.plan);
+                    if (user.summarize_daily_remaining !== undefined) {
+                        setSummarizeDailyRemaining(user.summarize_daily_remaining);
+                    }
+                    if (user.summarize_daily_limit !== undefined) {
+                        setSummarizeDailyLimit(user.summarize_daily_limit);
+                    }
                 }
             }).catch(() => {});
         };
@@ -1026,22 +1072,38 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
                                                 </button>
                                             </div>
 
-                                            {/* User Credits / Remaining Minutes Pill */}
+                                            {/* Interview Copilot Credits Pill */}
                                             <button
                                                 onClick={() => onOpenSettings('account')}
                                                 className={`flex items-center gap-1.5 border rounded-full px-3 py-1.5 transition-all duration-200 cursor-pointer active:scale-95 text-xs font-medium shrink-0 select-none ${
                                                     userCredits <= 15
                                                         ? 'bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400'
                                                         : isLight
-                                                        ? 'bg-blue-50 hover:bg-blue-100/70 border-blue-200 text-blue-700 shadow-sm'
-                                                        : 'bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20 text-blue-400'
+                                                        ? 'bg-purple-50 hover:bg-purple-100/70 border-purple-200 text-purple-700 shadow-sm'
+                                                        : 'bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/20 text-purple-300'
                                                 }`}
-                                                title={t("Remaining Meeting Credits (Click to view account)")}
+                                                title={t("Interview Copilot Credits (Click to view account)")}
                                             >
-                                                <Clock size={13} className={userCredits <= 15 ? 'text-rose-400' : 'text-blue-400'} />
-                                                <span className="font-semibold">{userCredits}</span>
-                                                <span className="text-[11px] opacity-80">{t('mins')}</span>
+                                                <Code2 size={13} className={userCredits <= 15 ? 'text-rose-400' : 'text-purple-400'} />
+                                                <span className="font-semibold">{userCredits}m</span>
+                                                <span className="text-[10px] opacity-80">{t('Interview')}</span>
                                             </button>
+
+                                            {/* Summarize Meeting Daily Free Allowance Pill */}
+                                            <div
+                                                className={`flex items-center gap-1.5 border rounded-full px-3 py-1.5 transition-all duration-200 text-xs font-medium shrink-0 select-none ${
+                                                    summarizeDailyRemaining <= 0
+                                                        ? 'bg-zinc-500/10 border-zinc-500/30 text-zinc-400'
+                                                        : isLight
+                                                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm'
+                                                        : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                                                }`}
+                                                title={t("Summarize Meeting: 10 minutes free daily allowance (Resets every day)")}
+                                            >
+                                                <FileText size={13} className={summarizeDailyRemaining <= 0 ? 'text-zinc-400' : 'text-emerald-400'} />
+                                                <span className="font-semibold">{summarizeDailyRemaining}m</span>
+                                                <span className="text-[10px] opacity-80">{t('Free Today')}</span>
+                                            </div>
 
                                             {/* What's New Pill */}
                                             {launchCount < 10 && (
@@ -1193,10 +1255,24 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
                                         <div className="md:col-span-2 h-full">
                                             <ModeSelectionCards
                                                 isLight={isLight}
+                                                summarizeDailyRemaining={summarizeDailyRemaining}
                                                 onSelectMode={async (modeKey) => {
                                                     if (modeKey === 'general') {
                                                         setIsCustomModalOpen(true);
                                                         return;
+                                                    }
+                                                    if (modeKey === 'team-meet') {
+                                                        const remaining = getStoredSummarizeDailyRemaining();
+                                                        if (remaining <= 0) {
+                                                            alert(t("Today's 10-minute free Summarize Meeting allowance is exhausted. It resets tomorrow!"));
+                                                            return;
+                                                        }
+                                                    } else if (modeKey === 'technical-interview') {
+                                                        const userEmail = localStorage.getItem('meetfloo_user_email');
+                                                        if (userEmail && userCredits <= 0) {
+                                                            onOpenSettings('account');
+                                                            return;
+                                                        }
                                                     }
                                                     try {
                                                         const modes = await (window.electronAPI as any)?.modesGetAll?.();
@@ -1230,14 +1306,20 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
                                     <div className="max-w-4xl mx-auto space-y-8">
 
                                         {/* Iterating Date Groups */}
-                                        {sortedGroups.map((label) => (
-                                            <section key={label}>
+                                        {sortedGroups.map((label, gIdx) => (
+                                            <section key={`${label}-${gIdx}`}>
                                                 <h3 className="text-[13px] font-medium text-text-secondary mb-3 pl-1">{label}</h3>
                                                 <div className="space-y-1">
-                                                    {groupedMeetings[label].map((m) => (
+                                                    {groupedMeetings[label].map((m, mIdx) => {
+                                                        // Use m.id when available (stable DB id). Fall back to a
+                                                        // composite that includes the group label so two
+                                                        // "Processing..." items in the same group never share a key.
+                                                        const itemKey = m.id ? `${m.id}-${gIdx}-${mIdx}` : `fb-${label}-${mIdx}-${m.title || ''}`;
+                                                        const itemLayoutId = m.id ? `meeting-${m.id}-${gIdx}-${mIdx}` : `meeting-fb-${label}-${mIdx}`;
+                                                        return (
                                                         <motion.div
-                                                            key={m.id}
-                                                            layoutId={`meeting-${m.id}`}
+                                                            key={itemKey}
+                                                            layoutId={itemLayoutId}
                                                             className="group relative flex items-center justify-between px-3 py-2 rounded-lg bg-transparent hover:bg-bg-elevated transition-colors"
                                                             onClick={() => handleOpenMeeting(m)}
                                                         >
@@ -1344,7 +1426,8 @@ const Launcher: React.FC<LauncherProps> = ({ onStartMeeting, onOpenSettings, onO
                                                                 )}
                                                             </AnimatePresence>
                                                         </motion.div>
-                                                    ))}
+                                                        );
+                                                    })}
                                                 </div>
                                             </section>
                                         ))}

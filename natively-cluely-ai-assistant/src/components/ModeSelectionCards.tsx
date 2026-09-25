@@ -6,9 +6,14 @@ import { useT } from '../i18n';
 interface ModeSelectionCardsProps {
     onSelectMode: (modeKey: string) => void;
     isLight?: boolean;
+    summarizeDailyRemaining?: number;
 }
 
-export const ModeSelectionCards: React.FC<ModeSelectionCardsProps> = ({ onSelectMode, isLight = false }) => {
+export const ModeSelectionCards: React.FC<ModeSelectionCardsProps> = ({
+    onSelectMode,
+    isLight = false,
+    summarizeDailyRemaining,
+}) => {
     const t = useT();
 
     const MODES = [
@@ -17,7 +22,7 @@ export const ModeSelectionCards: React.FC<ModeSelectionCardsProps> = ({ onSelect
             title: 'Interview Copilot',
             desc: 'Live Coding, DSA, System Design & STAR behavioral answers.',
             icon: Code2,
-            badge: 'Popular',
+            badge: 'Copilot',
             badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
             bgGradient: isLight 
                 ? 'from-purple-50 via-white to-purple-50/30 border-purple-200/80 hover:border-purple-400' 
@@ -28,10 +33,10 @@ export const ModeSelectionCards: React.FC<ModeSelectionCardsProps> = ({ onSelect
         {
             id: 'team-meet',
             title: 'Summarize Meeting',
-            desc: 'Real-time notes, key takeaways & automated action items.',
+            desc: 'Real-time notes, speaker-wise transcript & automated action items.',
             icon: FileText,
-            badge: 'Audio STT',
-            badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+            badge: summarizeDailyRemaining !== undefined ? `${summarizeDailyRemaining}m Free Today` : '10m Free Daily',
+            badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-semibold',
             bgGradient: isLight 
                 ? 'from-emerald-50 via-white to-emerald-50/30 border-emerald-200/80 hover:border-emerald-400' 
                 : 'from-emerald-950/40 via-emerald-900/20 to-black/40 border-emerald-500/20 hover:border-emerald-400/50',

@@ -731,6 +731,21 @@ export const isBareFollowUp = (raw: string): boolean => {
   return FOLLOW_UP_RE.test(q) && q.split(/\s+/).filter(Boolean).length <= FOLLOW_UP_MAX_WORDS;
 };
 
+/**
+ * Short listening signals, acknowledgments, greetings, and conversational transitions.
+ * An utterance like "ok", "okay", "got it", "cool", "sounds good", "thanks", "hello"
+ * is a conversational backchannel — never a document lookup, nor a personal
+ * employment history inquiry.
+ */
+export const CONVERSATIONAL_BACKCHANNEL_RE =
+  /^(?:(?:yeah|yes|yep|yup|ya|mm-?hm+|mhm+|uh-?huh|ok(?:ay)?|right|sure|cool|got it|i see|nice|great|perfect|exactly|interesting|makes sense|sounds good|true|correct|wow|oh|ah|hm+|haha+|alright|all right|of course|fair enough|no problem|totally|absolutely|definitely|indeed|good|fine|thanks?|thank you|thank you so much|thank you very much|thank you for your time|that'?s all|that is all|that'?s all for now|that'?s all from my side|hello|hi|hey|good (?:morning|afternoon|evening)|nice meeting you|good luck|take care|done)[\s,.!?-]*)+$/i;
+
+export const isConversationalBackchannel = (raw: string): boolean => {
+  const trimmed = String(raw ?? '').trim();
+  if (!trimmed) return false;
+  return CONVERSATIONAL_BACKCHANNEL_RE.test(trimmed);
+};
+
 /** Exported for the conversation-state resolver (Defect D, 2026-08-01): the
  *  rephrase class needs DIFFERENT resolution (embed the previous question, not
  *  a bare referent), so detection and resolution must share one definition —
@@ -751,6 +766,10 @@ const splitClauses = (q: string): string[] =>
   q.split(/\band\b|\balso\b|[;.]/).map((c) => c.trim()).filter(Boolean);
 
 function detectTypes(q: string, input: ClassificationInput): { types: QuestionType[]; claims: ClaimType[]; clauses: Partial<Record<ClaimType, string>>; exhaustive: boolean } {
+  if (isConversationalBackchannel(q)) {
+    return { types: ['AMBIGUOUS'], claims: [], clauses: {}, exhaustive: false };
+  }
+
   const types = new Set<QuestionType>();
   const claims = new Set<ClaimType>();
   const clauses: Partial<Record<ClaimType, string>> = {};
@@ -1754,6 +1773,7 @@ export function classifyTurn(input: ClassificationInput): Classification {
   let reason: string;
 
   const metaRequest = types.includes('META_REQUEST');
+  const backchannel = isConversationalBackchannel(q);
 
   if (metaRequest) {
     // Refused before retrieval, and BEFORE the strict branch — a strict
@@ -1763,6 +1783,9 @@ export function classifyTurn(input: ClassificationInput): Classification {
     // found inside the uploaded thesis.
     path = 'FAST'; shouldRetrieve = false;
     reason = 'instruction-extraction or override request — refused at the policy layer';
+  } else if (backchannel) {
+    path = 'FAST'; shouldRetrieve = false;
+    reason = 'conversational acknowledgment, greeting, or backchannel — fast path, general response';
   } else if (strict) {
     path = 'VERIFICATION'; shouldRetrieve = true;
     reason = 'strict-source-only mode always verifies';

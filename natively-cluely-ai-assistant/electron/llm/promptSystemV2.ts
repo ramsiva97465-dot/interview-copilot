@@ -253,9 +253,13 @@ RIGHT: "The list price is $412 a seat. What number does this need to hit on your
 </confidentiality>
 
 <human_voice>
-Speak and write naturally like a real human in an authentic conversation, NOT like a résumé, bullet list, article, coach, or AI bot.
+CRITICAL CONTEXT: The user is in a real live interview. The answer you generate is read aloud word-for-word by the user directly to the interviewer in real time. Every sentence you output must be the exact words coming naturally out of the candidate's mouth — NOT an essay, coaching advice, textbook, or third-party analysis.
 
 Start with the answer. Always speak in complete first-person sentences ("I've worked on...", "I recently built..."). NEVER drop the subject pronoun into resume-bullet shorthand like "Have worked on..." or "Led the migration...". A real person says "I've worked on..." or "In my recent experience, I led...".
+
+When asked if you have worked with a specific skill, tool, or framework that is not in your background (e.g. "Have you worked with X?"):
+- Answer naturally in first person: "No, I haven't worked with X directly yet, but I've built extensive experience with [related technology]..."
+- NEVER say "the résumé doesn't mention...", "my resume doesn't state...", or "this is not in the uploaded profile". In a real interview, you are the candidate speaking, not a third party reviewing a piece of paper!
 
 Sound conversational, authentic, and grounded. Use contractions ("I've", "we'd", "it's", "didn't"), plain verbs, and natural spoken transitions (e.g. "Yeah, absolutely", "In my recent work, I...", "For instance, I built..."). Speak with the natural confidence and warmth of an experienced engineer in a friendly technical discussion. Do not force canned enthusiasm or corporate buzzwords.
 
@@ -676,8 +680,9 @@ Shape for explanatory, factual, and technical answers:
 1. Open with one plain sentence that directly answers the question. No preamble.
 2. Break the substance into short labeled sections: a bold label ending with a colon (**Example:**, **Why people like it:**, **Core concepts:**), each followed by a compact hyphen-bullet list or a tiny code block. One fact per line. Choose labels that fit the question; never force a fixed set.
 3. Show instead of narrating: a two-line code sample beats a paragraph describing one. Keep code minimal and runnable.
-4. When the question is one an interviewer could plausibly ask, close with the label **Good interview answer:** followed by exactly one quotable sentence in quotation marks, phrased the way a person would actually say it. That sentence follows the spoken rules: no em dashes, no semicolons.
+4. For questions asking about your experience or skills, answer directly and authentically in first person as the candidate. Do not add coaching labels ("Good interview answer:") or wrap the answer in quotation marks.
 5. Stay compact: normally under 120 words of prose outside code and lists. No introductions, no closing offers, no restating the question.
+6. Never output [[GIST]] in the middle of the response. If an answer includes [[GIST]], it must be the absolute final line of the entire output.
 
 Exceptions, in precedence order: the coding contract owns full coding answers when attached. A request for the exact words to say (or a live role mode producing speech) keeps the spoken shape. An explicit user format request overrides everything.
 </chat_layout>`;
@@ -685,7 +690,7 @@ Exceptions, in precedence order: the coding contract owns full coding answers wh
 // Local tier gets the same surface semantics compressed — the tiny models
 // follow one short paragraph better than five numbered laws.
 const CHAT_LAYOUT_TINY = `<chat_layout>
-Typed chat panel — the user reads this, nobody speaks it, so lists and labels are allowed here. Open with one sentence that answers directly, then short bold-labeled sections (**Example:**, **Key points:**) with compact bullets or a tiny code block. For interview-style questions end with **Good interview answer:** and one quotable sentence in quotation marks. Keep prose under 120 words outside code and lists. The coding contract, exact-words requests, and explicit format requests override this layout.
+Typed chat panel — the user reads this, nobody speaks it, so lists and labels are allowed here. Open with one sentence that answers directly, then short bold-labeled sections (**Example:**, **Key points:**) with compact bullets or a tiny code block. For interview questions, answer directly in first person as the candidate without coaching wrappers ("Good interview answer:") or quotes. Keep prose under 120 words outside code and lists. Any [[GIST]] line must only be at the absolute end. The coding contract, exact-words requests, and explicit format requests override this layout.
 </chat_layout>`;
 
 function chatLayoutBlock(input: BuildSystemPromptV2Input, tier: PromptTierV2): string {
@@ -941,7 +946,26 @@ export function stripReasoningArtifacts(text: string): string {
         .replace(/\/?assistant><\/think>/gi, '')
         .replace(/\/assistant>/gi, '')
         .replace(/<\/?(?:output|answer|task|response|prompt)(?:\s+[^>]*)?>+>?/gi, '')
+        .replace(/^\s*(?:Transcript|TRANSCRIPT):\s*/gm, '')
+        .replace(/\b(?:According to the transcript|Based on the transcript)[^.!?\n]*[.,!?:;]?\s*/gi, '')
+        .replace(/\b(?:The uploaded document does not contain|The uploaded document doesn'?t mention|The uploaded document doesn'?t contain)[^.!?\n]*[.,!?:;]?\s*/gi, '')
+        .replace(/\b(?:This information is not present in the resume|This information is not available in the resume|This is not mentioned in the resume|This is not present in the uploaded document)[^.!?\n]*[.,!?:;]?\s*/gi, '')
+        .replace(/\b(?:The retrieved excerpts do not state|The retrieved excerpts don'?t state)[^.!?\n]*[.,!?:;]?\s*/gi, '')
+        .replace(/\b(?:As not directly mentioned in the uploaded material|Not directly mentioned in the uploaded material)[^.!?\n]*[.,!?:;]?\s*/gi, '')
+        .replace(/\b(?:That|This|The)\s+(?:specific\s+)?detail\s+is(?:n't| not)\s+on\s+file[,.]?\s*/gi, '')
+        .replace(/\b(?:we were|I was)\s+a\s+team\s+of\s+X[,.]?\s*(?:and\s+I\s+owned\s+Y)?\.?\s*/gi, '')
+        .replace(/[,;]?\s*(?:but\s+)?(?:the|my|this)\s+(?:r[ée]sum[ée]|profile|cv|document|uploaded\s+material)\s+(?:doesn'?t|does\s+not)\s+(?:mention|list|contain|state|have|show)[^.!?\n]*([.,!?:;])?/gi, (_m, p) => p || '.')
+        .replace(/\b(?:as\s+)?(?:is\s+)?not\s+(?:directly\s+)?mentioned\s+in\s+(?:the|my)\s+(?:r[ée]sum[ée]|profile|cv|document)[^.!?\n]*([.,!?:;])?/gi, (_m, p) => p || '.')
+        .replace(/\.{2,}/g, '.')
+        .replace(/^\s*(?:\*\*)?(?:Good|Best|Suggested|Sample)?\s*interview\s+answer:?(?:\*\*)?\s*["'“]?/gim, '')
         .trim();
+
+    // Clean up unbalanced trailing quote left by stripped coaching wrapper
+    const quoteCount = (text.match(/"/g) || []).length;
+    if (quoteCount % 2 !== 0 && /["'”]\s*$/.test(text)) {
+        text = text.replace(/["'”]\s*$/, '');
+    }
+    return text.trim();
 }
 
 export function splitGistLine(text: string): { body: string; gist: string | null; recovered?: boolean } {
@@ -960,17 +984,25 @@ export function splitGistLine(text: string): { body: string; gist: string | null
     if (beforeMarker !== '' && !bulletPrefixed) {
         // GLUED marker (live session E press 26: "…required length of 2n.
         // [[GIST]] Use backtracking…" — no newline before the marker).
-        // Recover ONLY when the prose before it ends a sentence AND the tail
-        // runs to end-of-text at gist size — a mid-SENTENCE marker ("You sort
-        // them [[GIST]] first, then subtract.") still stays visible so real
-        // prose is never eaten.
+        // Recover when the prose before it ends a sentence AND the first line of the tail
+        // is at gist size — a mid-SENTENCE marker ("You sort them [[GIST]] first, then subtract.")
+        // still stays visible so real prose is never eaten.
         const rawTailToEnd = t.slice(idx + GIST_MARKER.length);
         const tailToEnd = stripReasoningArtifacts(rawTailToEnd);
-        const gluedRecoverable = /[.!?…:]$/.test(beforeMarker)
-            && !tailToEnd.includes('\n')
-            && tailToEnd.trim().split(/\s+/).filter(Boolean).length <= GIST_RECOVERY_MAX_WORDS;
-        if (!gluedRecoverable) return { body: t, gist: null };
-        return { body: t.slice(0, idx).replace(/\s+$/, ''), gist: tailToEnd.trim() || null, recovered: true };
+        const firstLine = tailToEnd.split('\n')[0].trim();
+        const firstLineWords = firstLine.split(/\s+/).filter(Boolean).length;
+        const isGluedGist = /[.!?…:]$/.test(beforeMarker)
+            && firstLineWords > 0
+            && firstLineWords <= GIST_RECOVERY_MAX_WORDS;
+        if (isGluedGist) {
+            const hasMore = tailToEnd.includes('\n');
+            const rest = hasMore ? tailToEnd.slice(tailToEnd.indexOf('\n') + 1).trim() : '';
+            const body = rest
+                ? `${t.slice(0, idx).replace(/\s+$/, '')}\n\n${rest}`
+                : t.slice(0, idx).replace(/\s+$/, '');
+            return { body, gist: firstLine || null, recovered: true };
+        }
+        return { body: t, gist: null };
     }
     const body = t.slice(0, lineStart < 0 ? 0 : lineStart).replace(/\s+$/, '');
     const tail = t.slice(idx + GIST_MARKER.length);
@@ -997,7 +1029,7 @@ export interface SpokenFormatViolation {
     excerpt: string;
 }
 
-const COACHING_WRAPPER_RE = /^\s*(?:say this|you could (?:say|answer)|here(?:'|’)s what (?:to|you could) say|here is what (?:to|you could) say|you (?:can|should|might) say)\b[:,]?/i;
+const COACHING_WRAPPER_RE = /^\s*(?:say this|you could (?:say|answer)|here(?:'|’)s what (?:to|you could) say|here is what (?:to|you could) say|you (?:can|should|might) say|(?:good|best|suggested|sample)?\s*interview\s+answer)\b[:,]?/i;
 const TRAILING_OFFER_RE = /\b(?:let me know if you (?:want|need|would like)|happy to (?:elaborate|expand|go deeper)|want me to (?:expand|elaborate|go on)|if you(?:'|’)d like more)\b[^.!?]*[.!?]?\s*$/i;
 
 /** Strip regions that spoken-prose rules must never apply to: fenced code,

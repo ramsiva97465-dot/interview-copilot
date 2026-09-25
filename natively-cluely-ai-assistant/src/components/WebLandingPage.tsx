@@ -416,7 +416,7 @@ export const WebLandingPage: React.FC = () => {
                     <div className="flex items-center gap-3">
                         <img src={logoFullDark} alt="MeetFloo" className="h-6 w-auto object-contain opacity-90" />
                         <span>•</span>
-                        <span>© 2026 SnapServe-AI. All rights reserved.</span>
+                        <span>© 2024 Meetfloo-AI. All rights reserved.</span>
                     </div>
 
                     <div className="flex items-center gap-6">

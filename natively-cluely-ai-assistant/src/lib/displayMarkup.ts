@@ -59,10 +59,22 @@ export function stripReasoningArtifacts(text: string): string {
              .replace(/\b(?:This information is not present in the resume|This information is not available in the resume|This is not mentioned in the resume|This is not present in the uploaded document)[^.!?\n]*[.,!?:;]?\s*/gi, '')
              .replace(/\b(?:The retrieved excerpts do not state|The retrieved excerpts don'?t state)[^.!?\n]*[.,!?:;]?\s*/gi, '')
              .replace(/\b(?:As not directly mentioned in the uploaded material|Not directly mentioned in the uploaded material)[^.!?\n]*[.,!?:;]?\s*/gi, '')
+             .replace(/\b(?:That|This|The)\s+(?:specific\s+)?detail\s+is(?:n't| not)\s+on\s+file[,.]?\s*/gi, '')
+             .replace(/\b(?:we were|I was)\s+a\s+team\s+of\s+X[,.]?\s*(?:and\s+I\s+owned\s+Y)?\.?\s*/gi, '')
+             .replace(/[,;]?\s*(?:but\s+)?(?:the|my|this)\s+(?:r[ée]sum[ée]|profile|cv|document|uploaded\s+material)\s+(?:doesn'?t|does\s+not)\s+(?:mention|list|contain|state|have|show)[^.!?\n]*([.,!?:;])?/gi, (_m, p) => p || '.')
+             .replace(/\b(?:as\s+)?(?:is\s+)?not\s+(?:directly\s+)?mentioned\s+in\s+(?:the|my)\s+(?:r[ée]sum[ée]|profile|cv|document)[^.!?\n]*([.,!?:;])?/gi, (_m, p) => p || '.')
+             .replace(/\.{2,}/g, '.')
              .replace(/^(?:Here is the (?:code|program|python program|solution|query|sql query|answer)):?\s*/gim, '');
 
-  // Strip artificial section headers
-  text = text.replace(/^\s*(?:\*\*)?(?:Direct Answer|Strong Example \/ STAR|Best \/ Relevant Project|What I Built|Tech Stack|My Role|Impact \/ Why It Matters|Speakable Final Answer|Short Fit Summary|Matching Experience & Projects|Matching Experience|Matching Skills\/Projects|Where I'm Strongest For This JD|The Honest Gap|Why It's Manageable|How I'd Close It|Why This Role|Polite Opening|Flexible Range \/ Expectation|Justification|Clarify Requirements|High-Level Design|Core Components|Data Flow|Scaling \/ Reliability|Tradeoffs|Follow-up Points|Likely Cause|How I Would Investigate|Fix)(?:\*\*)?:?\s*$/gim, '');
+  // Strip artificial section headers and coaching wrappers
+  text = text.replace(/^\s*(?:\*\*)?(?:Direct Answer|Strong Example \/ STAR|Best \/ Relevant Project|What I Built|Tech Stack|My Role|Impact \/ Why It Matters|Speakable Final Answer|Short Fit Summary|Matching Experience & Projects|Matching Experience|Matching Skills\/Projects|Where I'm Strongest For This JD|The Honest Gap|Why It's Manageable|How I'd Close It|Why This Role|Polite Opening|Flexible Range \/ Expectation|Justification|Clarify Requirements|High-Level Design|Core Components|Data Flow|Scaling \/ Reliability|Tradeoffs|Follow-up Points|Likely Cause|How I Would Investigate|Fix)(?:\*\*)?:?\s*$/gim, '')
+             .replace(/^\s*(?:\*\*)?(?:Good|Best|Suggested|Sample)?\s*interview\s+answer:?(?:\*\*)?\s*["'“]?/gim, '');
+
+  // Clean up unbalanced trailing quote left by stripped coaching wrapper
+  const quoteCount = (text.match(/"/g) || []).length;
+  if (quoteCount % 2 !== 0 && /["'”]\s*$/.test(text)) {
+    text = text.replace(/["'”]\s*$/, '');
+  }
 
   return text.trim();
 }
@@ -82,18 +94,26 @@ export function splitGistLine(text: string): GistSplit {
   const bulletPrefixed = beforeMarker !== '' && /^[-*•–—>]+$/.test(beforeMarker);
   if (beforeMarker !== '' && !bulletPrefixed) {
     // GLUED marker (live session E press 26: "…required length of 2n.
-    // [[GIST]] Use backtracking…" — the model omitted the newline). Recover
-    // ONLY when the prose before the marker ends a sentence AND the tail runs
-    // to end-of-text at gist size — that separates a glued gist from a
-    // mid-SENTENCE contamination ("You sort them [[GIST]] first, then
-    // subtract."), which still stays visible so real prose is never eaten.
+    // [[GIST]] Use backtracking…" — the model omitted the newline).
+    // Recover when the prose before it ends a sentence AND the first line of the tail
+    // is at gist size — a mid-SENTENCE marker ("You sort them [[GIST]] first, then subtract.")
+    // still stays visible so real prose is never eaten.
     const rawTailToEnd = t.slice(idx + GIST_MARKER.length);
     const tailToEnd = stripReasoningArtifacts(rawTailToEnd);
-    const gluedRecoverable = /[.!?…:]$/.test(beforeMarker)
-      && !tailToEnd.includes('\n')
-      && tailToEnd.trim().split(/\s+/).filter(Boolean).length <= RECOVERY_MAX_WORDS;
-    if (!gluedRecoverable) return { body: t, gist: null };
-    return { body: t.slice(0, idx).replace(/\s+$/, ''), gist: tailToEnd.trim() || null, recovered: true };
+    const firstLine = tailToEnd.split('\n')[0].trim();
+    const firstLineWords = firstLine.split(/\s+/).filter(Boolean).length;
+    const isGluedGist = /[.!?…:]$/.test(beforeMarker)
+      && firstLineWords > 0
+      && firstLineWords <= RECOVERY_MAX_WORDS;
+    if (isGluedGist) {
+      const hasMore = tailToEnd.includes('\n');
+      const rest = hasMore ? tailToEnd.slice(tailToEnd.indexOf('\n') + 1).trim() : '';
+      const body = rest
+        ? `${t.slice(0, idx).replace(/\s+$/, '')}\n\n${rest}`
+        : t.slice(0, idx).replace(/\s+$/, '');
+      return { body, gist: firstLine || null, recovered: true };
+    }
+    return { body: t, gist: null };
   }
   const body = t.slice(0, lineStart < 0 ? 0 : lineStart).replace(/\s+$/, '');
   const tail = t.slice(idx + GIST_MARKER.length);

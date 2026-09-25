@@ -253,31 +253,37 @@ export class EmbeddingPipeline {
             // already equal the active space but rows still hold the old space —
             // is still detected and resumed.
             const activeSpace = this.provider.space;
-            const stateRow = this.db.prepare("SELECT value FROM app_state WHERE key = 'last_embedding_space'").get() as any;
-            const lastSpace = stateRow?.value;
+            try {
+                if (this.db) {
+                    const stateRow = this.db.prepare("SELECT value FROM app_state WHERE key = 'last_embedding_space'").get() as any;
+                    const lastSpace = stateRow?.value;
 
-            const incompatibleCount = this.vectorStore.getIncompatibleSpaceCount(activeSpace);
-            if (incompatibleCount > 0) {
-                // RAGManager.scheduleAutoReindex() handles the user-facing notification
-                // and the actual re-embedding. Here we only log — emitting a warning IPC
-                // too would double-notify.
-                // Report the ROW count as the trigger, and say so when the state
-                // row already matches. Printing "last: X, active: X" for an
-                // equal pair reads as a false positive — it is actually the
-                // resume path for a re-index that was interrupted after the
-                // marker was written but before every meeting was re-embedded.
-                const resumed = lastSpace === activeSpace;
-                console.log(
-                    `[EmbeddingPipeline] ${incompatibleCount} meeting(s) still hold vectors from another embedding space; active is ${activeSpace}`
-                    + (resumed
-                        ? ' (marker already updated — resuming an interrupted re-index).'
-                        : ` (previous space: ${lastSpace ?? 'unknown'}).`)
-                    + ' Auto-reindex will handle them.'
-                );
+                    const incompatibleCount = this.vectorStore?.getIncompatibleSpaceCount ? this.vectorStore.getIncompatibleSpaceCount(activeSpace) : 0;
+                    if (incompatibleCount > 0) {
+                        // RAGManager.scheduleAutoReindex() handles the user-facing notification
+                        // and the actual re-embedding. Here we only log — emitting a warning IPC
+                        // too would double-notify.
+                        // Report the ROW count as the trigger, and say so when the state
+                        // row already matches. Printing "last: X, active: X" for an
+                        // equal pair reads as a false positive — it is actually the
+                        // resume path for a re-index that was interrupted after the
+                        // marker was written but before every meeting was re-embedded.
+                        const resumed = lastSpace === activeSpace;
+                        console.log(
+                            `[EmbeddingPipeline] ${incompatibleCount} meeting(s) still hold vectors from another embedding space; active is ${activeSpace}`
+                            + (resumed
+                                ? ' (marker already updated — resuming an interrupted re-index).'
+                                : ` (previous space: ${lastSpace ?? 'unknown'}).`)
+                            + ' Auto-reindex will handle them.'
+                        );
+                    }
+
+                    // Save active space
+                    this.db.prepare("INSERT OR REPLACE INTO app_state (key, value) VALUES ('last_embedding_space', ?)").run(activeSpace);
+                }
+            } catch (dbErr) {
+                console.warn('[EmbeddingPipeline] Failed to read/write last_embedding_space in app_state (non-fatal):', dbErr);
             }
-
-            // Save active space
-            this.db.prepare("INSERT OR REPLACE INTO app_state (key, value) VALUES ('last_embedding_space', ?)").run(activeSpace);
 
         } catch (err) {
             console.error('[EmbeddingPipeline] Failed to initialize primary provider:', err);

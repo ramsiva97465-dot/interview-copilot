@@ -66,9 +66,18 @@ export class LocalEmbeddingProvider implements IEmbeddingProvider {
   private nonRecoverableLoadError: Error | null = null;
   private modelPath: string;
 
+  private static readonly KNOWN_DIMS: Record<string, number> = {
+    'Xenova/all-MiniLM-L6-v2': 384,
+    'Xenova/bge-large-en-v1.5': 1024,
+    'Xenova/bge-base-en-v1.5': 768,
+    'Xenova/bge-small-en-v1.5': 384,
+    'nomic-ai/nomic-embed-text-v1': 768,
+    'Xenova/all-mpnet-base-v2': 768,
+  };
+
   constructor(modelId?: string, dimensions?: number) {
     this.model = modelId || 'Xenova/all-MiniLM-L6-v2';
-    this.dimensions = dimensions || (this.model === 'Xenova/all-MiniLM-L6-v2' ? 384 : 384);
+    this.dimensions = dimensions || LocalEmbeddingProvider.KNOWN_DIMS[this.model] || 384;
     this.space = embeddingSpaceKey({ name: this.name, model: this.model, dimensions: this.dimensions });
     // Point to the bundled model or downloaded user model.
     this.modelPath = LocalEmbeddingProvider.resolveModelPath(this.model);

@@ -499,7 +499,7 @@ interface ElectronAPI {
 
   // Meeting Lifecycle
   startMeeting: (metadata?: any) => Promise<{ success: boolean; error?: string }>;
-  endMeeting: () => Promise<{ success: boolean; error?: string }>;
+  endMeeting: (payload?: { transcript?: Array<{ speaker: string; text: string; timestamp?: number }> }) => Promise<{ success: boolean; error?: string }>;
   /** Test-only (deep-run 2 issue 10): inject transcript segments with origin
    *  'test'. No-ops unless NATIVELY_TEST_TRANSCRIPT_INJECTION=1 AND the build
    *  is unpackaged — the gate lives in the main-process handler. */
@@ -922,7 +922,11 @@ interface ElectronAPI {
   setDonationComplete: () => Promise<{ success: boolean }>;
 
   // Profile Engine API
-  profileUploadResume: (filePath: string) => Promise<{ success: boolean; error?: string }>;
+  profileUploadResume: (filePath: string, title?: string) => Promise<{ success: boolean; resume?: any; error?: string }>;
+  profileListResumes: () => Promise<any[]>;
+  profileSetActiveResume: (resumeId: string) => Promise<{ success: boolean; activeResume?: any; error?: string }>;
+  profileDeleteResume: (resumeId: string) => Promise<{ success: boolean; activeResume?: any; error?: string }>;
+  profileRenameResume: (resumeId: string, title: string) => Promise<{ success: boolean; error?: string }>;
   profileSaveSupplementaryText: (text: string) => Promise<{ success: boolean; error?: string }>;
   profileGetSupplementaryText: () => Promise<string>;
   profileGetStatus: () => Promise<{
@@ -1855,6 +1859,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.removeListener('native-audio-transcript', subscription);
     };
   },
+  onActiveModeChanged: (callback: (mode: any) => void) => {
+    const subscription = (_: any, data: any) => callback(data);
+    ipcRenderer.on('mode-changed', subscription);
+    return () => {
+      ipcRenderer.removeListener('mode-changed', subscription);
+    };
+  },
+  onSummarizeDailyAllowanceExhausted: (callback: (data: any) => void) => {
+    const subscription = (_: any, data: any) => callback(data);
+    ipcRenderer.on('summarize-daily-allowance-exhausted', subscription);
+    return () => {
+      ipcRenderer.removeListener('summarize-daily-allowance-exhausted', subscription);
+    };
+  },
+
   onNativeAudioSuggestion: (
     callback: (suggestion: { context: string; lastQuestion: string; confidence: number }) => void,
   ) => {
@@ -2044,7 +2063,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Meeting Lifecycle
   startMeeting: (metadata?: any) => ipcRenderer.invoke('start-meeting', metadata),
-  endMeeting: () => ipcRenderer.invoke('end-meeting'),
+  endMeeting: (payload?: { transcript?: Array<{ speaker: string; text: string; timestamp?: number }> }) => ipcRenderer.invoke('end-meeting', payload),
   debugInjectTranscript: (segments: Array<{ speaker?: string; text: string; timestamp?: number; confidence?: number }>) =>
     ipcRenderer.invoke('debug-inject-transcript', segments),
   finalizeMicSTT: () => ipcRenderer.invoke('finalize-mic-stt'),
@@ -2800,7 +2819,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setDonationComplete: () => ipcRenderer.invoke('set-donation-complete'),
 
   // Profile Engine API
-  profileUploadResume: (filePath: string) => ipcRenderer.invoke('profile:upload-resume', filePath),
+  profileUploadResume: (filePath: string, title?: string) => ipcRenderer.invoke('profile:upload-resume', filePath, title),
+  profileListResumes: () => ipcRenderer.invoke('profile:list-resumes'),
+  profileSetActiveResume: (resumeId: string) => ipcRenderer.invoke('profile:set-active-resume', resumeId),
+  profileDeleteResume: (resumeId: string) => ipcRenderer.invoke('profile:delete-resume', resumeId),
+  profileRenameResume: (resumeId: string, title: string) => ipcRenderer.invoke('profile:rename-resume', resumeId, title),
   profileSaveSupplementaryText: (text: string) => ipcRenderer.invoke('profile:save-supplementary-text', text),
   profileGetSupplementaryText: () => ipcRenderer.invoke('profile:get-supplementary-text'),
   profileGetStatus: () => ipcRenderer.invoke('profile:get-status'),
