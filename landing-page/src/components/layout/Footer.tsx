@@ -19,6 +19,7 @@ export const Footer: React.FC = () => {
           <div className="link-col">
             <h4>Product</h4>
             <a href="#features">Features</a>
+            <a href="#events">Events & Hackathons</a>
             <a href="#pricing">Pricing</a>
             <a href="#download">Download</a>
           </div>

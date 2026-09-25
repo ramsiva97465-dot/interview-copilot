@@ -14,6 +14,7 @@ export const Navbar: React.FC = () => {
 
         <div className="nav-links">
           <a href="#features">Features</a>
+          <a href="#events">Events</a>
           <a href="#pricing">Pricing</a>
           <a href="#download" className="nav-btn-download">
             <Download size={16} />
