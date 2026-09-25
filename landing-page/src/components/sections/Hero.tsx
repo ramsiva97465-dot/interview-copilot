@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, Sparkles } from 'lucide-react';
+import { Download, Sparkles, Bot, CheckCircle2 } from 'lucide-react';
 import { DOWNLOAD_URLS } from '../../constants';
 
 export const Hero: React.FC = () => {
@@ -8,24 +8,36 @@ export const Hero: React.FC = () => {
       <div className="hero-container">
         <div className="hero-badge">
           <Sparkles size={14} />
-          <span>MeetFloo AI Co-Pilot v2.9.2</span>
+          <span>Meet ARIA: Your AI Sales Manager</span>
         </div>
 
         <h1 className="hero-title">
-          Your Invisible <span className="text-gradient">AI Co-Pilot</span> for Every Meeting & Interview
+          Empower Your Sales Team in Every Customer Call <br />
+          <span className="text-gradient">With ARIA AI Sales Manager</span>
         </h1>
 
         <p className="hero-subtitle">
-          Real-time speech-to-text transcription, context-aware AI answers, automatic meeting notes, and stealth overlay modes designed to help you ace your calls.
+          ARIA equips your sales team with live objection battlecards, real-time guidance during customer calls, and automated CRM follow-ups.
         </p>
+
+        <div className="hero-highlights" style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '640px', margin: '0 auto 24px', textAlign: 'left', fontSize: '13px', color: '#cbd5e1' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CheckCircle2 size={16} color="#c084fc" />
+            <span><strong>Live In-Call Guidance:</strong> Sub-400ms battlecards for competitor &amp; pricing objections.</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CheckCircle2 size={16} color="#818cf8" />
+            <span><strong>Automated CRM Sync:</strong> Auto-logs notes &amp; drafts follow-up emails into your CRM.</span>
+          </div>
+        </div>
 
         <div className="hero-actions">
           <a href={DOWNLOAD_URLS.WINDOWS} className="btn-hero-primary">
             <Download size={18} />
-            <span>Download for Windows</span>
+            <span>Download for Windows (.exe)</span>
           </a>
           <a href="#features" className="btn-hero-secondary">
-            <span>Explore Features</span>
+            <span>Explore Platform</span>
           </a>
         </div>
 
@@ -37,16 +49,16 @@ export const Hero: React.FC = () => {
                 <span className="dot yellow"></span>
                 <span className="dot green"></span>
               </div>
-              <span className="preview-title">MeetFloo Desktop Assistant</span>
+              <span className="preview-title">MeetFloo — ARIA AI Sales Manager</span>
             </div>
             <div className="preview-body">
               <div className="mock-chat">
                 <div className="chat-bubble user">
-                  <strong>Interviewer:</strong> Can you explain how you handle database locks in high-throughput applications?
+                  <strong>Prospect:</strong> "How does Meetfloo compare against other sales recording and CRM tools?"
                 </div>
                 <div className="chat-bubble ai">
-                  <div className="ai-tag"><Sparkles size={12} /> AI Answer (Instant)</div>
-                  <p>In high-throughput environments, I prefer optimistic locking with version columns for low contention. For heavy writes, row-level pessimistic locks (`SELECT ... FOR UPDATE`) prevent race conditions...</p>
+                  <div className="ai-tag"><Bot size={12} /> ARIA Live Battlecard (Real-Time)</div>
+                  <p>Highlight 3x faster deal conversion, sub-400ms real-time conversational guidance, and zero-effort automated CRM sync that fits right into existing workflows...</p>
                 </div>
               </div>
             </div>

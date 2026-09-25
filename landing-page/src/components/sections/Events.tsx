@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Calendar,
   Clock,
   Video,
-  Play,
-  ChevronLeft,
-  X,
-  Volume2
+  ChevronLeft
 } from 'lucide-react';
 
 interface Judge {
@@ -20,8 +17,11 @@ interface Judge {
   linkedin?: string;
 }
 
-export const Events: React.FC = () => {
-  const [isPlayingRecap, setIsPlayingRecap] = useState(false);
+interface EventsProps {
+  onBack?: () => void;
+}
+
+export const Events: React.FC<EventsProps> = ({ onBack }) => {
 
   const judges: Judge[] = [
     {
@@ -76,10 +76,15 @@ export const Events: React.FC = () => {
       <div className="sarvam-event-container">
         {/* Navigation Breadcrumb */}
         <div className="event-breadcrumb">
-          <a href="#features" className="back-link">
+          <button
+            type="button"
+            className="back-link"
+            style={{ background: 'none', border: 'none', color: 'inherit', font: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+            onClick={() => onBack ? onBack() : window.location.hash = ''}
+          >
             <ChevronLeft size={16} />
             <span>All events</span>
-          </a>
+          </button>
         </div>
 
         {/* Top Hero: Poster Card (Left) + Event Meta (Right) */}
@@ -88,16 +93,19 @@ export const Events: React.FC = () => {
           <div className="event-poster-card">
             <div className="poster-top-brand">
               <span className="brand-lowercase">meetfloo</span>
+              <span style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#bfdbfe', marginTop: '4px' }}>
+                BUILDER HACKATHON 2024
+              </span>
             </div>
 
             <div className="poster-title-wrap">
               <h2 className="poster-event-title">
-                Build Voice Agents that<br />scale with MeetFloo
+                Real-Time AI Copilot &amp;<br />Stealth Assistant Hackathon
               </h2>
 
               <div className="poster-badge-row">
-                <span className="poster-pill">Thursday, 20 August, 2024</span>
-                <span className="poster-pill">4 PM IST</span>
+                <span className="poster-pill">48-Hour Global Sprint</span>
+                <span className="poster-pill">04 April 2025</span>
               </div>
             </div>
 
@@ -122,110 +130,71 @@ export const Events: React.FC = () => {
           {/* Right Column: Title, Description, Meta & View Recap Button */}
           <div className="event-overview-details">
             <div className="event-session-pill">
-              MEETFLOO IN SESSION
+              MEETFLOO PRODUCT HACKATHON 2025
             </div>
 
             <h1 className="event-main-headline">
-              Build Voice Agents that scale with MeetFloo
+              MeetFloo Global AI Copilot &amp; Real-Time Assistant Hackathon
             </h1>
 
             <p className="event-main-lead">
-              Join us for a live walkthrough of how to build and run voice agents for real customer conversations,
-              from shaping an agent around a use case to launching calls and improving performance over time.
+              Over 450+ developers and AI engineers competed in a high-intensity 48-hour hackathon to build next-generation real-time voice assistants, sub-400ms audio loopback transcription pipelines, screen-invisible HUDs, and autonomous sales intelligence agents powered by MeetFloo.
             </p>
 
             <div className="event-meta-list">
               <div className="event-meta-row">
                 <Calendar size={18} className="meta-icon-blue" />
-                <span>Thursday, 20 August, 2024</span>
+                <span>04 April 2025 (48-Hour Virtual Hackathon)</span>
               </div>
               <div className="event-meta-row">
                 <Clock size={18} className="meta-icon-blue" />
-                <span>4:00 PM IST</span>
+                <span>Grand Finale Demo Day • 4:00 PM IST</span>
               </div>
               <div className="event-meta-row">
                 <Video size={18} className="meta-icon-blue" />
-                <span>Zoom (Concluded & Recorded)</span>
+                <span>Virtual Pitch Showcase &amp; Winner Awards (Concluded)</span>
               </div>
-            </div>
-
-            <div className="event-cta-wrap">
-              <button
-                type="button"
-                className="btn-view-recap"
-                onClick={() => setIsPlayingRecap(true)}
-              >
-                <Play size={16} fill="currentColor" />
-                <span>View recap</span>
-              </button>
             </div>
           </div>
         </div>
 
-        {/* Section: Event Content */}
+        {/* Section: Hackathon Tracks & Challenges */}
         <div className="event-content-section">
-          <h3 className="section-title-clean">Event content</h3>
+          <h3 className="section-title-clean">Hackathon Tracks &amp; Challenges</h3>
 
           <p className="content-paragraph">
-            The session will cover the decisions behind agents that need to keep working across real conversations:
-            the call flow, the customer information they need, the systems they connect to, and what to change when calls do not go as planned.
+            Teams were challenged to build high-performance AI tools that operate reliably during live enterprise conversations—pushing the boundaries of real-time audio streaming, LLM routing, and low-latency client architecture.
           </p>
 
           <p className="content-paragraph">
-            By the end, you should have a clear view of how to build, launch, and operate voice agents on MeetFloo from start to finish.
+            Builders competed across core tracks designed around MeetFloo's stealth engine and real-time inference pipeline:
           </p>
 
           <div className="what-you-learn-block">
-            <h4 className="subheading-bold">What you'll learn</h4>
+            <h4 className="subheading-bold">Key Submission Focus Areas</h4>
             <ul className="learn-bullet-list">
-              <li>Set up and configure a voice agent around a real use case</li>
-              <li>Define the right goals, behaviour, and conversation flow</li>
-              <li>Write and improve prompts for live customer calls</li>
-              <li>Test the paths that matter before going live</li>
-              <li>Connect customer data, APIs, and knowledge bases</li>
-              <li>Rent a phone number and launch live calls</li>
-              <li>Track campaign outcomes and conversation drop-offs</li>
-              <li>Learn from real calls and improve agent performance over time</li>
+              <li><strong>Sub-400ms Audio STT:</strong> Direct system audio loopback capture with zero echo or microphone bleed during multi-speaker client calls.</li>
+              <li><strong>100% Invisible Stealth Overlay:</strong> Transparent HUDs engineered to remain completely excluded from Zoom, Meet, Teams, and desktop screen-shares.</li>
+              <li><strong>Live Objection &amp; Battlecard Synthesis:</strong> Instant retrieval and streaming of competitive counter-points, pricing metrics, and ROI calculation in real-time.</li>
+              <li><strong>Enterprise Solution Architecture Synthesis:</strong> Generating real-time technical integration trade-offs, security compliance answers, and API workflows live during calls.</li>
+              <li><strong>Multi-LLM Dynamic Routing:</strong> Smart dispatching across DeepSeek R1, Claude 3.5 Sonnet, and Gemini 2.5 Flash for optimal response speed.</li>
+              <li><strong>Autonomous Meeting Intelligence:</strong> Automated action-item extraction, executive summaries, and CRM sync generated mid-conversation.</li>
+              <li><strong>Zero-Cloud On-Device Security:</strong> End-to-end client encryption ensuring zero transcript logs or enterprise session data leakage.</li>
             </ul>
           </div>
 
           <p className="event-format-note">
-            <strong>Format:</strong> Live platform demo + Q&amp;A
+            <strong>Hackathon Format:</strong> 48-Hour Rapid Build • 120+ Submissions • Live Pitch Day &amp; Jury Q&amp;A
           </p>
-        </div>
-
-        {/* Section: Recording Player Card */}
-        <div className="event-recording-section">
-          <h3 className="section-title-clean">Recording</h3>
-
-          <div className="recording-player-card">
-            <div className="recording-thumbnail">
-              <div className="recording-overlay">
-                <button
-                  type="button"
-                  className="recording-play-btn"
-                  onClick={() => setIsPlayingRecap(true)}
-                  aria-label="Play recording"
-                >
-                  <Play size={28} fill="white" className="play-icon-offset" />
-                </button>
-                <span className="recording-duration">54:12 • Full Session</span>
-              </div>
-              <div className="recording-info-strip">
-                <div className="strip-title">Build Voice Agents that scale with MeetFloo (Live Recording)</div>
-                <div className="strip-sub">Hosted on Zoom • Recorded August 20, 2024</div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Section: Judges Panel */}
         <div className="event-judges-section">
           <div className="judges-section-head">
             <div className="judges-pill">EVALUATION PANEL</div>
-            <h3 className="section-title-clean">Event Judges &amp; Industry Experts</h3>
+            <h3 className="section-title-clean">Hackathon Judges &amp; Industry Experts</h3>
             <p className="judges-sub">
-              Our live agent demonstrations, voice latency benchmarks, and scenario test paths were reviewed by leading AI and systems leaders.
+              Hackathon finalist projects, latency benchmarks, and code accuracy were scrutinized and scored by leading AI researchers and systems architects.
             </p>
           </div>
 
@@ -247,7 +216,7 @@ export const Events: React.FC = () => {
                 </div>
 
                 <div className="judge-focus-box">
-                  <span className="focus-label">Focus Area</span>
+                  <span className="focus-label">Evaluation Focus</span>
                   <span className="focus-val">{j.expertise}</span>
                 </div>
 
@@ -274,58 +243,6 @@ export const Events: React.FC = () => {
             ))}
           </div>
         </div>
-
-        {/* Modal: Interactive Video Recap Player */}
-        {isPlayingRecap && (
-          <div className="recap-modal-backdrop" onClick={() => setIsPlayingRecap(false)}>
-            <div className="recap-modal-window" onClick={(e) => e.stopPropagation()}>
-              <div className="recap-modal-header">
-                <div className="flex-center gap-2">
-                  <Volume2 size={18} className="text-primary" />
-                  <span className="font-bold">Session Recording: Build Voice Agents with MeetFloo</span>
-                </div>
-                <button
-                  type="button"
-                  className="modal-close-btn"
-                  onClick={() => setIsPlayingRecap(false)}
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="recap-video-mock">
-                <div className="mock-video-screen">
-                  <div className="poster-top-brand mb-4">
-                    <span className="brand-lowercase" style={{ fontSize: '1.25rem' }}>meetfloo</span>
-                  </div>
-                  <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#fff', marginBottom: '0.5rem' }}>
-                    Live Walkthrough: Scaling Voice Agents
-                  </h3>
-                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', maxWidth: '480px', margin: '0 auto 1.5rem' }}>
-                    Stream audio recorded from live session • August 20, 2024
-                  </p>
-                  <div className="mock-audio-bars">
-                    <span className="bar animate-bar-1"></span>
-                    <span className="bar animate-bar-2"></span>
-                    <span className="bar animate-bar-3"></span>
-                    <span className="bar animate-bar-4"></span>
-                    <span className="bar animate-bar-5"></span>
-                  </div>
-                </div>
-
-                <div className="mock-video-controls">
-                  <div className="timeline-bar">
-                    <div className="timeline-progress" style={{ width: '42%' }}></div>
-                  </div>
-                  <div className="controls-row">
-                    <span>22:45 / 54:12</span>
-                    <span className="quality-pill">1080p HD</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );

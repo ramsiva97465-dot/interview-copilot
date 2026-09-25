@@ -1,7 +1,12 @@
 import React from 'react';
 import { Bot } from 'lucide-react';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  currentView?: 'home' | 'events';
+  onNavigate?: (view: 'home' | 'events', hash?: string) => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
     <footer className="footer">
       <div className="footer-container">
@@ -18,9 +23,39 @@ export const Footer: React.FC = () => {
         <div className="footer-links">
           <div className="link-col">
             <h4>Product</h4>
-            <a href="#features">Features</a>
-            <a href="#events">Events & Hackathons</a>
-            <a href="#pricing">Pricing</a>
+            <a
+              href="#features"
+              onClick={(e) => {
+                if (onNavigate) {
+                  e.preventDefault();
+                  onNavigate('home', '#features');
+                }
+              }}
+            >
+              Features
+            </a>
+            <a
+              href="#events"
+              onClick={(e) => {
+                if (onNavigate) {
+                  e.preventDefault();
+                  onNavigate('events');
+                }
+              }}
+            >
+              Events & Hackathons
+            </a>
+            <a
+              href="#pricing"
+              onClick={(e) => {
+                if (onNavigate) {
+                  e.preventDefault();
+                  onNavigate('home', '#pricing');
+                }
+              }}
+            >
+              Pricing
+            </a>
             <a href="#download">Download</a>
           </div>
           <div className="link-col">

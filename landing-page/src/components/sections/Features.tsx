@@ -1,45 +1,45 @@
 import React from 'react';
-import { Headphones, EyeOff, Cpu, Zap, Code, Shield } from 'lucide-react';
+import { Headphones, EyeOff, Cpu, Zap, Bot, Shield } from 'lucide-react';
 
 export const Features: React.FC = () => {
   const featureList = [
     {
-      icon: Headphones,
-      title: 'Real-Time Audio STT',
-      description: 'Ultra-low latency speech transcription using local Whisper models and high-precision cloud fallback engines.'
-    },
-    {
-      icon: EyeOff,
-      title: 'Stealth Overlay Window',
-      description: 'Stays completely invisible to screen sharing during Zoom, Teams, Google Meet, and coding assessments.'
-    },
-    {
-      icon: Cpu,
-      title: 'Multi-LLM Intelligence',
-      description: 'Switch seamlessly between DeepSeek R1, Claude 3.5 Sonnet, GPT-4o, and local ONNX models for rapid answers.'
+      icon: Bot,
+      title: 'ARIA: Your AI Sales Manager',
+      description: 'Works alongside reps before, during, and after every meeting to prepare context, guide live conversations, and handle follow-ups.'
     },
     {
       icon: Zap,
-      title: 'Automated Meeting Summaries',
-      description: 'Generates structured meeting notes, action items, key decisions, and follow-up email drafts instantly.'
+      title: 'Real-Time Objection Handling',
+      description: 'Streams winning battlecards in under 400ms when buyers ask about pricing, competitor comparisons, or contract terms.'
     },
     {
-      icon: Code,
-      title: 'Coding Task Assistant',
-      description: 'Understands screen context, extracts code problems, and provides step-by-step algorithms and solutions.'
+      icon: Cpu,
+      title: 'Continuous Team Learning',
+      description: 'Analyzes winning conversations across your sales org so every rep adopts what drives closed-won deals.'
+    },
+    {
+      icon: EyeOff,
+      title: '100% Invisible Stealth Overlay',
+      description: 'Transparent desktop HUD that stays on your screen, completely hidden from Zoom, Google Meet, Teams, or client screen shares.'
+    },
+    {
+      icon: Headphones,
+      title: 'Direct System Audio STT',
+      description: 'Ultra-crisp voice transcription capturing prospect speech directly via internal audio loopback with zero microphone lag.'
     },
     {
       icon: Shield,
-      title: 'Privacy-First Architecture',
-      description: 'Your meeting data remains local and encrypted. No training on your private conversation data.'
+      title: 'CRM & Enterprise Privacy',
+      description: 'Bi-directional sync with Salesforce and HubSpot. End-to-end encryption ensures zero private customer conversation leakage.'
     }
   ];
 
   return (
     <section id="features" className="features-section">
       <div className="section-header">
-        <h2>Engineered for High-Stakes Meetings</h2>
-        <p>Everything you need to perform with confidence during interviews, sales calls, and technical meetings.</p>
+        <h2>Built for High-Growth Sales Teams</h2>
+        <p>Everything your revenue team needs to close deals faster and eliminate manual administrative overhead.</p>
       </div>
 
       <div className="features-grid">
