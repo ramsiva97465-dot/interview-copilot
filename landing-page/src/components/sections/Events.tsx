@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import {
   Calendar,
-  MapPin,
-  Trophy,
-  Users,
-  CheckCircle2,
-  Award,
-  Sparkles,
-  ChevronDown,
-  ChevronUp,
-  Quote
+  Clock,
+  Video,
+  Play,
+  ChevronLeft,
+  X,
+  Volume2
 } from 'lucide-react';
 
 interface Judge {
@@ -17,15 +14,14 @@ interface Judge {
   role: string;
   company: string;
   avatarText: string;
-  avatarGradient: string;
+  avatarColor: string;
   expertise: string;
   quote: string;
   linkedin?: string;
-  github?: string;
 }
 
 export const Events: React.FC = () => {
-  const [showRecap, setShowRecap] = useState(false);
+  const [isPlayingRecap, setIsPlayingRecap] = useState(false);
 
   const judges: Judge[] = [
     {
@@ -33,31 +29,29 @@ export const Events: React.FC = () => {
       role: 'Principal AI Research Scientist',
       company: 'DeepCognition Labs',
       avatarText: 'ER',
-      avatarGradient: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-      expertise: 'Neural Speech & Ultra-Low STT Latency',
-      quote: 'I evaluated entries on real-time stream stability, whisper acoustic quantization, and sub-400ms inference pipelines under jitter.',
-      linkedin: 'https://linkedin.com',
-      github: 'https://github.com'
+      avatarColor: '#4338ca',
+      expertise: 'Voice Agents & Low-Latency Neural STT',
+      quote: 'Evaluated teams on real-time acoustic transcription stability, noise handling, and conversational voice responsiveness.',
+      linkedin: 'https://linkedin.com'
     },
     {
       name: 'Marcus Vance',
       role: 'VP of Engineering',
       company: 'ScaleCloud Systems',
       avatarText: 'MV',
-      avatarGradient: 'linear-gradient(135deg, #3b82f6 0%, #2dd4bf 100%)',
-      expertise: 'Stealth Architecture & Native Memory Footprint',
-      quote: 'My focus was on zero-detection desktop compositing hooks and minimizing CPU load while screen-share layers were running.',
-      linkedin: 'https://linkedin.com',
-      github: 'https://github.com'
+      avatarColor: '#1d4ed8',
+      expertise: 'Telecom Infrastructure & Voice Streaming Pipelines',
+      quote: 'Scored architectures on SIP trunking latency, packet loss resilience, and scalable multi-agent concurrency.',
+      linkedin: 'https://linkedin.com'
     },
     {
       name: 'Sarah Lin',
       role: 'General Partner',
       company: 'Horizon AI Ventures',
       avatarText: 'SL',
-      avatarGradient: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
-      expertise: 'Product-Market Fit & Stealth Ergonomics',
-      quote: 'We looked for seamless developer assistance that blends naturally into high-stakes interviews without cognitive overload.',
+      avatarColor: '#7c3aed',
+      expertise: 'Enterprise Voice Workflows & Product Market Fit',
+      quote: 'Looked for voice agent experiences that solve high-friction enterprise customer journeys seamlessly.',
       linkedin: 'https://linkedin.com'
     },
     {
@@ -65,232 +59,273 @@ export const Events: React.FC = () => {
       role: 'Principal Systems Architect',
       company: 'HyperScale Labs (ex-FAANG Bar Raiser)',
       avatarText: 'DP',
-      avatarGradient: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
-      expertise: 'DSA Solvers & Multi-Turn Context',
-      quote: 'Scored projects on algorithmic accuracy, time/space optimality proofs, and instant code refactoring reliability.',
-      linkedin: 'https://linkedin.com',
-      github: 'https://github.com'
+      avatarColor: '#0f766e',
+      expertise: 'Real-Time Prompt Engineering & Fallback Systems',
+      quote: 'Assessed prompt reliability, edge-case recovery when callers deviate from scripts, and knowledge base lookups.',
+      linkedin: 'https://linkedin.com'
     }
   ];
 
-  const winners = [
-    {
-      place: '1st Place • Grand Prize ($12,000)',
-      team: 'Team NeuroStealth',
-      project: 'Zero-Lag Adaptive Whisper Hook',
-      description: 'Engineered an in-memory ring buffer that achieves 290ms audio-to-text token latency with zero disk writes.'
-    },
-    {
-      place: '2nd Place • Runner-Up ($8,000)',
-      team: 'Team Algorhythm',
-      project: 'Instant Graph & DP Solver Engine',
-      description: 'A contextual code parser providing optimal dynamic programming space transitions in under 350ms.'
-    },
-    {
-      place: '3rd Place • Innovation Prize ($5,000)',
-      team: 'Team GlassHUD',
-      project: 'DirectX Hardware Invisible Compositor',
-      description: 'A custom native driver shim bypassing OS capture pipelines across all modern virtual conference apps.'
-    }
+  // Soundwave dot columns generator for the blue poster
+  const waveColumns = [
+    4, 6, 8, 12, 16, 20, 14, 18, 22, 16, 11, 8, 12, 17, 21, 24, 18, 13, 9, 6, 10, 15, 19, 14, 8, 5
   ];
 
   return (
-    <section id="events" className="events-section">
-      <div className="section-header">
-        <div className="event-badge-concluded">
-          <CheckCircle2 size={16} className="text-emerald-400" />
-          <span>Official Event • Concluded</span>
-        </div>
-        <h2>MeetFloo AI Events & Hackathons</h2>
-        <p>
-          Showcasing groundbreaking community innovations in real-time desktop AI, speech recognition, and stealth engineering.
-        </p>
-      </div>
-
-      {/* Main Finished Event Invitation Card */}
-      <div className="event-invitation-card">
-        {/* Hologram Ribbon */}
-        <div className="event-card-header">
-          <div className="event-status-pill">
-            <span className="pulse-dot"></span>
-            <span>Concluded • November 15–17, 2024</span>
-          </div>
-          <div className="ticket-number">INVITATION #MFL-2024-HACK-GLOBAL</div>
+    <section id="events" className="sarvam-event-wrapper">
+      <div className="sarvam-event-container">
+        {/* Navigation Breadcrumb */}
+        <div className="event-breadcrumb">
+          <a href="#features" className="back-link">
+            <ChevronLeft size={16} />
+            <span>All events</span>
+          </a>
         </div>
 
-        <div className="event-invitation-body">
-          <div className="event-info-main">
-            <span className="event-category">48-Hour Virtual Hackathon & Demo Day</span>
-            <h3 className="event-title">MeetFloo AI Global Copilot Hackathon 2024</h3>
-            <p className="event-description">
-              The premier global challenge for AI developers and systems engineers. Participants competed to design,
-              test, and deploy high-performance real-time meeting intelligence algorithms and invisible desktop workflows.
-            </p>
+        {/* Top Hero: Poster Card (Left) + Event Meta (Right) */}
+        <div className="event-hero-grid">
+          {/* Blue Event Poster Card */}
+          <div className="event-poster-card">
+            <div className="poster-top-brand">
+              <span className="brand-lowercase">meetfloo</span>
+            </div>
 
-            <div className="event-meta-grid">
-              <div className="event-meta-item">
-                <Calendar size={18} className="meta-icon" />
-                <div>
-                  <span className="meta-label">Event Date</span>
-                  <span className="meta-value">Nov 15–17, 2024</span>
-                </div>
-              </div>
+            <div className="poster-title-wrap">
+              <h2 className="poster-event-title">
+                Build Voice Agents that<br />scale with MeetFloo
+              </h2>
 
-              <div className="event-meta-item">
-                <MapPin size={18} className="meta-icon" />
-                <div>
-                  <span className="meta-label">Venue</span>
-                  <span className="meta-value">Global Discord & Virtual Stage</span>
-                </div>
-              </div>
-
-              <div className="event-meta-item">
-                <Trophy size={18} className="meta-icon" />
-                <div>
-                  <span className="meta-label">Total Prize Pool</span>
-                  <span className="meta-value">$25,000 USD Awarded</span>
-                </div>
-              </div>
-
-              <div className="event-meta-item">
-                <Users size={18} className="meta-icon" />
-                <div>
-                  <span className="meta-label">Turnout</span>
-                  <span className="meta-value">1,280+ Builders (340 Teams)</span>
-                </div>
+              <div className="poster-badge-row">
+                <span className="poster-pill">Thursday, 20 August, 2024</span>
+                <span className="poster-pill">4 PM IST</span>
               </div>
             </div>
 
-            <div className="event-actions">
-              <button
-                type="button"
-                className="btn-event-recap"
-                onClick={() => setShowRecap(!showRecap)}
-                aria-expanded={showRecap}
-              >
-                <Award size={18} />
-                <span>{showRecap ? 'Hide Winning Projects' : 'View Winning Projects & Highlights'}</span>
-                {showRecap ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              </button>
-              <div className="invitation-tag">
-                <Sparkles size={14} className="text-primary" />
-                <span>Event Concluded • Winning Projects Deployed</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Ticket Stub Graphic */}
-          <div className="event-ticket-stub">
-            <div className="stub-notch-top"></div>
-            <div className="stub-content">
-              <div className="stub-badge">OFFICIAL PASS</div>
-              <div className="stub-logo">MeetFloo</div>
-              <div className="stub-name">Global AI Hackathon 2024</div>
-              <div className="stub-dates">NOV 15 - 17, 2024</div>
-              <div className="stub-divider"></div>
-              <div className="stub-status">
-                <CheckCircle2 size={16} className="text-emerald-400" />
-                <span>ARCHIVED & VERIFIED</span>
-              </div>
-              <div className="barcode-mock">
-                <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-              </div>
-            </div>
-            <div className="stub-notch-bottom"></div>
-          </div>
-        </div>
-
-        {/* Collapsible Winners Showcase */}
-        {showRecap && (
-          <div className="event-winners-drawer">
-            <div className="winners-header">
-              <Trophy size={20} className="text-yellow-400" />
-              <h4>2024 Hackathon Award Recipients</h4>
-            </div>
-            <div className="winners-grid">
-              {winners.map((w, idx) => (
-                <div key={idx} className="winner-card">
-                  <div className="winner-place">{w.place}</div>
-                  <h5 className="winner-team">{w.team}</h5>
-                  <div className="winner-project">{w.project}</div>
-                  <p className="winner-desc">{w.description}</p>
+            {/* Dotted Soundwave Graphic */}
+            <div className="poster-soundwave" aria-hidden="true">
+              {waveColumns.map((dotCount, colIdx) => (
+                <div key={colIdx} className="wave-col">
+                  {Array.from({ length: dotCount }).map((_, dotIdx) => (
+                    <span
+                      key={dotIdx}
+                      className="wave-dot"
+                      style={{
+                        opacity: 0.35 + (dotIdx / dotCount) * 0.65
+                      }}
+                    />
+                  ))}
                 </div>
               ))}
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Judges Section */}
-      <div className="judges-container">
-        <div className="judges-header">
-          <div className="judges-badge">Distinguished Panel</div>
-          <h3>Meet the Hackathon Judges</h3>
-          <p>
-            Our submissions were scrutinized by industry leaders in AI systems, speech science, venture capital, and engineering leadership.
+          {/* Right Column: Title, Description, Meta & View Recap Button */}
+          <div className="event-overview-details">
+            <div className="event-session-pill">
+              MEETFLOO IN SESSION
+            </div>
+
+            <h1 className="event-main-headline">
+              Build Voice Agents that scale with MeetFloo
+            </h1>
+
+            <p className="event-main-lead">
+              Join us for a live walkthrough of how to build and run voice agents for real customer conversations,
+              from shaping an agent around a use case to launching calls and improving performance over time.
+            </p>
+
+            <div className="event-meta-list">
+              <div className="event-meta-row">
+                <Calendar size={18} className="meta-icon-blue" />
+                <span>Thursday, 20 August, 2024</span>
+              </div>
+              <div className="event-meta-row">
+                <Clock size={18} className="meta-icon-blue" />
+                <span>4:00 PM IST</span>
+              </div>
+              <div className="event-meta-row">
+                <Video size={18} className="meta-icon-blue" />
+                <span>Zoom (Concluded & Recorded)</span>
+              </div>
+            </div>
+
+            <div className="event-cta-wrap">
+              <button
+                type="button"
+                className="btn-view-recap"
+                onClick={() => setIsPlayingRecap(true)}
+              >
+                <Play size={16} fill="currentColor" />
+                <span>View recap</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Section: Event Content */}
+        <div className="event-content-section">
+          <h3 className="section-title-clean">Event content</h3>
+
+          <p className="content-paragraph">
+            The session will cover the decisions behind agents that need to keep working across real conversations:
+            the call flow, the customer information they need, the systems they connect to, and what to change when calls do not go as planned.
+          </p>
+
+          <p className="content-paragraph">
+            By the end, you should have a clear view of how to build, launch, and operate voice agents on MeetFloo from start to finish.
+          </p>
+
+          <div className="what-you-learn-block">
+            <h4 className="subheading-bold">What you'll learn</h4>
+            <ul className="learn-bullet-list">
+              <li>Set up and configure a voice agent around a real use case</li>
+              <li>Define the right goals, behaviour, and conversation flow</li>
+              <li>Write and improve prompts for live customer calls</li>
+              <li>Test the paths that matter before going live</li>
+              <li>Connect customer data, APIs, and knowledge bases</li>
+              <li>Rent a phone number and launch live calls</li>
+              <li>Track campaign outcomes and conversation drop-offs</li>
+              <li>Learn from real calls and improve agent performance over time</li>
+            </ul>
+          </div>
+
+          <p className="event-format-note">
+            <strong>Format:</strong> Live platform demo + Q&amp;A
           </p>
         </div>
 
-        <div className="judges-grid">
-          {judges.map((j, i) => (
-            <div key={i} className="judge-card">
-              <div className="judge-card-top">
-                <div
-                  className="judge-avatar"
-                  style={{ background: j.avatarGradient }}
+        {/* Section: Recording Player Card */}
+        <div className="event-recording-section">
+          <h3 className="section-title-clean">Recording</h3>
+
+          <div className="recording-player-card">
+            <div className="recording-thumbnail">
+              <div className="recording-overlay">
+                <button
+                  type="button"
+                  className="recording-play-btn"
+                  onClick={() => setIsPlayingRecap(true)}
+                  aria-label="Play recording"
                 >
-                  <span>{j.avatarText}</span>
-                </div>
-                <div className="judge-info">
-                  <h4 className="judge-name">{j.name}</h4>
-                  <div className="judge-role">{j.role}</div>
-                  <div className="judge-company">{j.company}</div>
-                </div>
+                  <Play size={28} fill="white" className="play-icon-offset" />
+                </button>
+                <span className="recording-duration">54:12 • Full Session</span>
               </div>
-
-              <div className="judge-expertise">
-                <span className="expertise-label">Judging Focus:</span>
-                <span className="expertise-tag">{j.expertise}</span>
-              </div>
-
-              <div className="judge-quote">
-                <Quote size={14} className="quote-icon" />
-                <p>"{j.quote}"</p>
-              </div>
-
-              <div className="judge-links">
-                {j.linkedin && (
-                  <a
-                    href={j.linkedin}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="judge-social-link"
-                    title={`Connect with ${j.name} on LinkedIn`}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9h2.77v8.37H6.46v-8.37M7.85 6.46a1.62 1.62 0 1 0 0 3.24 1.62 1.62 0 0 0 0-3.24z" />
-                    </svg>
-                    <span>LinkedIn</span>
-                  </a>
-                )}
-                {j.github && (
-                  <a
-                    href={j.github}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="judge-social-link"
-                    title={`View ${j.name}'s GitHub`}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z" />
-                    </svg>
-                    <span>GitHub</span>
-                  </a>
-                )}
+              <div className="recording-info-strip">
+                <div className="strip-title">Build Voice Agents that scale with MeetFloo (Live Recording)</div>
+                <div className="strip-sub">Hosted on Zoom • Recorded August 20, 2024</div>
               </div>
             </div>
-          ))}
+          </div>
         </div>
+
+        {/* Section: Judges Panel */}
+        <div className="event-judges-section">
+          <div className="judges-section-head">
+            <div className="judges-pill">EVALUATION PANEL</div>
+            <h3 className="section-title-clean">Event Judges &amp; Industry Experts</h3>
+            <p className="judges-sub">
+              Our live agent demonstrations, voice latency benchmarks, and scenario test paths were reviewed by leading AI and systems leaders.
+            </p>
+          </div>
+
+          <div className="sarvam-judges-grid">
+            {judges.map((j, idx) => (
+              <div key={idx} className="sarvam-judge-card">
+                <div className="judge-top-bar">
+                  <div
+                    className="judge-circle-avatar"
+                    style={{ backgroundColor: j.avatarColor }}
+                  >
+                    <span>{j.avatarText}</span>
+                  </div>
+                  <div>
+                    <h4 className="judge-person-name">{j.name}</h4>
+                    <div className="judge-person-role">{j.role}</div>
+                    <div className="judge-person-company">{j.company}</div>
+                  </div>
+                </div>
+
+                <div className="judge-focus-box">
+                  <span className="focus-label">Focus Area</span>
+                  <span className="focus-val">{j.expertise}</span>
+                </div>
+
+                <p className="judge-quote-text">
+                  "{j.quote}"
+                </p>
+
+                {j.linkedin && (
+                  <div className="judge-footer-link">
+                    <a
+                      href={j.linkedin}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="linkedin-link"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9h2.77v8.37H6.46v-8.37M7.85 6.46a1.62 1.62 0 1 0 0 3.24 1.62 1.62 0 0 0 0-3.24z" />
+                      </svg>
+                      <span>LinkedIn Profile</span>
+                    </a>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Modal: Interactive Video Recap Player */}
+        {isPlayingRecap && (
+          <div className="recap-modal-backdrop" onClick={() => setIsPlayingRecap(false)}>
+            <div className="recap-modal-window" onClick={(e) => e.stopPropagation()}>
+              <div className="recap-modal-header">
+                <div className="flex-center gap-2">
+                  <Volume2 size={18} className="text-primary" />
+                  <span className="font-bold">Session Recording: Build Voice Agents with MeetFloo</span>
+                </div>
+                <button
+                  type="button"
+                  className="modal-close-btn"
+                  onClick={() => setIsPlayingRecap(false)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="recap-video-mock">
+                <div className="mock-video-screen">
+                  <div className="poster-top-brand mb-4">
+                    <span className="brand-lowercase" style={{ fontSize: '1.25rem' }}>meetfloo</span>
+                  </div>
+                  <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#fff', marginBottom: '0.5rem' }}>
+                    Live Walkthrough: Scaling Voice Agents
+                  </h3>
+                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', maxWidth: '480px', margin: '0 auto 1.5rem' }}>
+                    Stream audio recorded from live session • August 20, 2024
+                  </p>
+                  <div className="mock-audio-bars">
+                    <span className="bar animate-bar-1"></span>
+                    <span className="bar animate-bar-2"></span>
+                    <span className="bar animate-bar-3"></span>
+                    <span className="bar animate-bar-4"></span>
+                    <span className="bar animate-bar-5"></span>
+                  </div>
+                </div>
+
+                <div className="mock-video-controls">
+                  <div className="timeline-bar">
+                    <div className="timeline-progress" style={{ width: '42%' }}></div>
+                  </div>
+                  <div className="controls-row">
+                    <span>22:45 / 54:12</span>
+                    <span className="quality-pill">1080p HD</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
